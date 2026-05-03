@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sutura Admin | Designer Portfolio Review</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg: #09090B;
+      --card: #121217;
+      --card-2: #17171e;
+      --accent: #A855F7; /* Purple for Designers */
+      --accent-muted: rgba(168, 85, 247, 0.1);
+      --success: #059669; /* Emerald */
+      --warning: #d97706; /* Amber */
+      --danger: #e11d48; /* Rose */
+      --text: #FAFAFA;
+      --text-dim: #A1A1AA;
+      --border: #27272A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; letter-spacing: -0.02em; }
+    
+    .validation-container {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      height: 100vh;
+    }
+
+    /* Left Side: Portfolio View */
+    .portfolio-viewer {
+      padding: 20px 24px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      background: rgba(255,255,255,0.005);
+      height: 100vh;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .viewer-header {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dim);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+    .back-btn:hover { color: white; }
+
+    .viewer-title { font-size: 24px; font-weight: 800; margin-top: 12px; }
+
+    .section-label { font-size: 11px; font-weight: 900; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; display: block; }
+
+    /* Portfolio Grid */
+    .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+    .portfolio-card {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      aspect-ratio: 1/1;
+      background: #000;
+      position: relative;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .portfolio-card:hover { border-color: var(--accent); transform: scale(1.02); }
+    .portfolio-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.4s ease; }
+    .portfolio-card:hover img { opacity: 1; }
+    
+    /* Audit States for Portfolio */
+    .portfolio-card.verified { border-color: var(--success); }
+    .portfolio-card.verified::after {
+      content: '\2713';
+      position: absolute; top: 12px; right: 12px;
+      width: 24px; height: 24px; background: var(--success);
+      color: white; border-radius: 50%; display: grid; place-items: center;
+      font-weight: 900; font-size: 14px; z-index: 10;
+    }
+
+    .portfolio-card.flagged { border-color: var(--danger); }
+    .portfolio-card.flagged::after {
+      content: '!';
+      position: absolute; top: 12px; right: 12px;
+      width: 24px; height: 24px; background: var(--danger);
+      color: white; border-radius: 50%; display: grid; place-items: center;
+      font-weight: 900; font-size: 14px; z-index: 10;
+    }
+
+    .portfolio-tag { position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 5px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); z-index: 5; }
+
+    /* Skills Audit */
+    .skills-audit { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 40px; }
+    .skill-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .skill-pill:hover { border-color: var(--accent); transform: translateY(-2px); }
+    
+    /* Verified Skill */
+    .skill-pill.verified { border-color: var(--success); background: rgba(5, 150, 105, 0.04); }
+    .skill-pill.verified .skill-icon { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); }
+    
+    /* Questionable Skill */
+    .skill-pill.flagged { border-color: var(--danger); background: rgba(225, 29, 72, 0.04); }
+    .skill-pill.flagged .skill-icon { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2); }
+    .skill-icon { width: 32px; height: 32px; background: var(--accent-muted); color: var(--accent); border-radius: 8px; display: grid; place-items: center; }
+    .skill-info .name { font-weight: 700; font-size: 13px; display: block; }
+    .skill-info .level { font-size: 11px; color: var(--text-dim); }
+
+    /* Right Side: Sidebar */
+    .applicant-sidebar {
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      background: var(--card);
+    }
+
+    .profile-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .profile-avatar { width: 64px; height: 64px; background: var(--accent-muted); color: var(--accent); border-radius: 20px; display: grid; place-items: center; font-size: 24px; font-weight: 800; margin-bottom: 16px; }
+    .profile-name { font-size: 18px; font-weight: 800; }
+    .profile-tier { font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--accent); background: var(--accent-muted); padding: 4px 12px; border-radius: 999px; margin-top: 8px; }
+
+    .brand-vision {
+      background: rgba(168, 85, 247, 0.03);
+      border: 1px solid rgba(168, 85, 247, 0.1);
+      padding: 20px;
+      border-radius: 18px;
+      font-style: italic;
+      color: #e4e4e7;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .info-list { display: flex; flex-direction: column; gap: 20px; }
+    .info-item label { display: block; font-size: 10px; font-weight: 900; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .info-item span { font-size: 14px; font-weight: 600; display: block; }
+
+    .action-panel { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+    .btn-verify { 
+      background: var(--accent); color: white; border: none; 
+      padding: 14px; border-radius: 12px; font-weight: 700; font-size: 14px; 
+      cursor: pointer; transition: 0.2s; 
+    }
+    .btn-verify:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    
+    .btn-reject { 
+      background: rgba(239,68,68,0.1); color: var(--danger); 
+      border: 1px solid rgba(239,68,68,0.2); padding: 14px; 
+      border-radius: 12px; font-weight: 700; font-size: 14px; 
+      cursor: pointer; transition: 0.2s; 
+    }
+    .btn-reject:hover { background: rgba(239,68,68,0.15); }
+
+    .btn-chat { 
+      background: var(--card-2); color: white; 
+      border: 1px solid var(--border); padding: 14px; 
+      border-radius: 12px; font-weight: 700; font-size: 14px;
+      display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; 
+    }
+
+    /* Lightbox System */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      cursor: zoom-out;
+      padding: 40px;
+    }
+    .lightbox-overlay.show { display: flex; }
+    .lightbox-image {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      box-shadow: 0 0 100px rgba(0,0,0,0.5);
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body style="overflow: hidden;">
+  <div class="validation-container">
+    <!-- Left: Content Viewer -->
+    <main class="portfolio-viewer">
+      <div class="viewer-header">
+        <div>
+          <a href="02-registrations.html" class="back-btn"><i data-lucide="arrow-left" style="width:16px;"></i> Back to Validation Queue</a>
+          <h1 class="viewer-title">Marc J. (Professional)</h1>
+        </div>
+        <div style="text-align: right;">
+          <span class="section-label" style="margin-bottom: 8px;">Portfolio Submission</span>
+          <div style="font-weight: 700; font-size: 15px;">Oct 30, 2026 • 2:50 PM</div>
+        </div>
+      </div>
+
+      <span class="section-label">Technical Skills Audit</span>
+      <div class="skills-audit">
+        <div class="skill-pill">
+          <div class="skill-icon"><i data-lucide="scissors"></i></div>
+          <div class="skill-info">
+            <span class="name">Pattern Making & Draping</span>
+            <span class="level">Expert Level</span>
+          </div>
+        </div>
+        <div class="skill-pill">
+          <div class="skill-icon"><i data-lucide="layout"></i></div>
+          <div class="skill-info">
+            <span class="name">Tech Pack Creation</span>
+            <span class="level">Advanced Proficiency</span>
+          </div>
+        </div>
+        <div class="skill-pill">
+          <div class="skill-icon"><i data-lucide="droplets"></i></div>
+          <div class="skill-info">
+            <span class="name">Textile Behavior Knowledge</span>
+            <span class="level">Intermediate</span>
+          </div>
+        </div>
+        <div class="skill-pill">
+          <div class="skill-icon"><i data-lucide="pencil"></i></div>
+          <div class="skill-info">
+            <span class="name">Fashion Illustration</span>
+            <span class="level">Mastery</span>
+          </div>
+        </div>
+      </div>
+
+      <span class="section-label">Creative Portfolio Evidence</span>
+      <div class="portfolio-grid">
+        <div class="portfolio-card">
+          <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=1200" alt="Sketch 1" />
+          <div class="portfolio-tag">Original Sketches</div>
+        </div>
+        <div class="portfolio-card">
+          <img src="https://images.unsplash.com/photo-1558603668-6570496b66f8?auto=format&fit=crop&q=80&w=1200" alt="Tech Pack" />
+          <div class="portfolio-tag">Technical Specs</div>
+        </div>
+        <div class="portfolio-card">
+          <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200" alt="Finished Work" />
+          <div class="portfolio-tag">Finished Garment</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Lightbox Overlay -->
+    <div class="lightbox-overlay" id="lightbox">
+      <img src="" class="lightbox-image" id="lightboxImg">
+    </div>
+
+    <!-- Right: Designer Info -->
+    <aside class="applicant-sidebar">
+      <div class="profile-card">
+        <div class="profile-avatar">MJ</div>
+        <div class="profile-name">Marc J.</div>
+        <div class="profile-tier">Professional Designer</div>
+      </div>
+
+      <div class="info-list">
+        <div class="info-item">
+          <label>Brand Identity Statement</label>
+          <div class="brand-vision">
+            “Focusing on minimalist avant-garde silhouettes and sustainable materials for urban professionals who value form and function.”
+          </div>
+        </div>
+        <div class="info-item">
+          <label>Location</label>
+          <span>Makati City, Metro Manila, PH</span>
+        </div>
+        <div class="info-item">
+          <label>Contact Email</label>
+          <span>marcj.design@email.com</span>
+        </div>
+        <div class="info-item">
+          <label>Identity Status</label>
+          <span style="color: var(--warning); display: flex; align-items: center; gap: 6px;"><i data-lucide="clock" style="width:14px;"></i> Awaiting Identity Proof</span>
+        </div>
+      </div>
+
+      <div class="action-panel">
+        <button class="btn-chat"><i data-lucide="message-square" style="width:18px;"></i> Open Direct Message</button>
+        <button class="btn-reject" onclick="confirm('Are you sure you want to reject this portfolio? Feedback will be sent to the designer.')">Reject Portfolio</button>
+        <button class="btn-verify" onclick="alert('Designer Portfolio Validated! The account is now active.'); location.href='02-registrations.html'">Validate Full Portfolio</button>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+
+      const pills = document.querySelectorAll('.skill-pill');
+      
+      pills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          const levelEl = pill.querySelector('.level');
+          const iconContainer = pill.querySelector('.skill-icon');
+          
+          if (!pill.classList.contains('verified') && !pill.classList.contains('flagged')) {
+            pill.classList.add('verified');
+            levelEl.innerText = 'Skill Verified';
+          } else if (pill.classList.contains('verified')) {
+            pill.classList.remove('verified');
+            pill.classList.add('flagged');
+            levelEl.innerText = 'Skill Questionable';
+          } else {
+            pill.classList.remove('flagged');
+            // Restore original level (simplified)
+            levelEl.innerText = 'Pending Review';
+          }
+          
+          lucide.createIcons();
+        });
+      });
+
+      // Lightbox Logic
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightboxImg');
+      const portfolioCards = document.querySelectorAll('.portfolio-card');
+
+      portfolioCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          if (x > rect.width - 50 && y < 50) {
+            // Toggle Status Logic for Portfolio
+            if (!card.classList.contains('verified') && !card.classList.contains('flagged')) {
+              card.classList.add('verified');
+            } else if (card.classList.contains('verified')) {
+              card.classList.remove('verified');
+              card.classList.add('flagged');
+            } else {
+              card.classList.remove('flagged');
+            }
+          } else {
+            const img = card.querySelector('img');
+            lightboxImg.src = img.src;
+            lightbox.classList.add('show');
+          }
+        });
+      });
+
+      lightbox.addEventListener('click', () => {
+        lightbox.classList.remove('show');
+      });
+    });
+  </script>
+</body>
+</html>

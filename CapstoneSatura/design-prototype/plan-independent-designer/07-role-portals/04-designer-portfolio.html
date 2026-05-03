@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Designer Portfolio</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #2C6BED;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; }
+    .nav-item.active { background: var(--primary); color: white; }
+
+    /* Main */
+    .main { flex-grow: 1; display: flex; flex-direction: column; }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+    .header-title { font-size: 20px; font-weight: 700; }
+    
+    .content { padding: 40px; display: flex; flex-direction: column; gap: 32px; }
+
+    /* Profile Header */
+    .profile-card { background: var(--bg); border: 1px solid var(--border); border-radius: 24px; padding: 40px; display: flex; gap: 40px; align-items: center; }
+    .profile-photo { width: 140px; height: 140px; border-radius: 50%; background: #eee; object-fit: cover; border: 4px solid var(--bg); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .profile-info { flex-grow: 1; }
+    .profile-info h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    .profile-info p { font-size: 16px; color: var(--text-muted); max-width: 600px; line-height: 1.6; }
+    .profile-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .btn { padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; font-family: 'Outfit'; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-main); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 32px; border-bottom: 1.5px solid var(--border); }
+    .tab { padding-bottom: 16px; font-weight: 600; color: var(--text-muted); cursor: pointer; position: relative; border-bottom: 2px solid transparent; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* Grid */
+    .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+    .item-card { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; transition: transform 0.2s; }
+    .item-card:hover { transform: translateY(-4px); }
+    .item-img { width: 100%; height: 240px; background: #f0f0f0; object-fit: cover; }
+    .item-body { padding: 20px; }
+    .item-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .item-price { font-size: 16px; font-weight: 600; color: var(--accent); }
+    .item-desc { font-size: 14px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+      <div class="logo-text">Sutura</div>
+    </div>
+    <nav class="nav-list">
+      <a href="#" class="nav-item"><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="#" class="nav-item active"><i data-lucide="palette" style="width: 20px;"></i> Portfolio</a>
+      <a href="#" class="nav-item"><i data-lucide="shopping-bag" style="width: 20px;"></i> Shop Orders</a>
+      <a href="#" class="nav-item"><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Designer Portfolio</div>
+      <div class="btn-primary btn" style="height: 40px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+        <i data-lucide="plus" style="width: 18px;"></i> New Listing
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="profile-card">
+        <div class="profile-photo" style="background-image: url('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&h=400&fit=crop'); background-size: cover;"></div>
+        <div class="profile-info">
+          <h1>Alexander McQueen</h1>
+          <p>Bespoke tailor and fashion designer specializing in avant-garde formal wear and traditional Piña silk barongs. Crafting stories through fabric for over 15 years.</p>
+          <div class="profile-actions">
+            <button class="btn btn-primary">Edit Profile</button>
+            <button class="btn btn-outline">View Public Shop</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active">Products (8)</div>
+        <div class="tab">Posts (24)</div>
+        <div class="tab">Reviews</div>
+      </div>
+
+      <div class="portfolio-grid">
+        <div class="item-card">
+          <div class="item-img" style="background-image: url('https://images.unsplash.com/photo-1594932224828-b4b057b69b3f?w=600&h=400&fit=crop'); background-size: cover;"></div>
+          <div class="item-body">
+            <div class="item-title">Classic Silk Barong</div>
+            <div class="item-price">₱12,500</div>
+            <p class="item-desc">Hand-embroidered Piña-Silk Barong Tagalog with traditional patterns.</p>
+          </div>
+        </div>
+        <div class="item-card">
+          <div class="item-img" style="background-image: url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&h=400&fit=crop'); background-size: cover;"></div>
+          <div class="item-body">
+            <div class="item-title">Charcoal 3-Piece Suit</div>
+            <div class="item-price">₱24,000</div>
+            <p class="item-desc">Super 120s Italian wool suit, custom tailored to your measurements.</p>
+          </div>
+        </div>
+        <div class="item-card">
+          <div class="item-img" style="background-image: url('https://images.unsplash.com/photo-1598554747436-c9293d6a588f?w=600&h=400&fit=crop'); background-size: cover;"></div>
+          <div class="item-body">
+            <div class="item-title">Evening Cocktail Dress</div>
+            <div class="item-price">₱8,500</div>
+            <p class="item-desc">Elegant silk cocktail dress with asymmetrical hemline.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

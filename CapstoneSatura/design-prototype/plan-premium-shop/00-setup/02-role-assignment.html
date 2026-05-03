@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sutura - Setup Your Team</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #111111;
+      --bg: #FFFFFF;
+      --surface: #F8FAFC;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --accent: #3B82F6;
+      --accent-soft: #EFF6FF;
+      --success: #10B981;
+      --success-soft: #ECFDF5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #F1F5F9;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 60px 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Redesigned Add Staff Card */
+    .add-staff-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+    }
+
+    .add-staff-card h3 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-wrap label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .input-styled {
+      height: 56px;
+      padding: 0 20px;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 16px;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+
+    .input-styled:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+    }
+
+    .btn-add-wrap {
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+    }
+
+    .btn-add {
+      height: 60px;
+      padding: 0 40px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-add:hover {
+      background: #222;
+      transform: translateY(-4px);
+      box-shadow: 0 15px 30px -10px rgba(0,0,0,0.3);
+    }
+
+    /* Staff List Table */
+    .staff-list-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+    }
+
+    .list-header {
+      padding: 24px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+    }
+
+    .list-header h3 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .matrix-table th {
+      padding: 20px 40px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .matrix-table td {
+      padding: 24px 40px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .staff-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--primary);
+      color: white;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .role-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .role-toggle:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .role-toggle.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .btn-action {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      border: none;
+      border-radius: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .btn-action.remove:hover {
+      background: #FEE2E2;
+      color: #EF4444;
+    }
+
+    .footer {
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 32px 40px;
+      background: var(--bg);
+      border-radius: 32px;
+      border: 1px solid var(--border);
+    }
+
+    .btn-finalize {
+      height: 64px;
+      padding: 0 48px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-finalize:disabled {
+      background: var(--border);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .btn-finalize:not(:disabled):hover {
+      transform: scale(1.05);
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2);
+    }
+
+    .empty-list { padding: 80px; text-align: center; color: var(--text-muted); }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--bg);
+      width: 100%;
+      max-width: 520px;
+      border-radius: 32px;
+      padding: 40px;
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Setup Your Team</h1>
+      <p>Create staff accounts and assign roles. These credentials will allow your team to log in.</p>
+    </div>
+
+    <!-- Redesigned Add Staff Form -->
+    <div class="add-staff-card">
+      <h3><i data-lucide="user-plus" style="width: 24px;"></i> Create Staff Account</h3>
+      
+      <div class="form-grid">
+        <div class="input-wrap">
+          <label>Full Name</label>
+          <input type="text" id="staffName" class="input-styled" placeholder="e.g. Maria Clara">
+        </div>
+        <div class="input-wrap">
+          <label>Email Address</label>
+          <input type="email" id="staffEmail" class="input-styled" placeholder="e.g. maria@boutique.com">
+        </div>
+        <div class="input-wrap">
+          <label>Temporary Password</label>
+          <input type="password" id="staffPassword" class="input-styled" placeholder="Set password">
+        </div>
+        <div class="input-wrap">
+          <label>Contact Number <span style="font-size: 11px; opacity: 0.6; font-weight: 500;">(Optional)</span></label>
+          <input type="text" id="staffContact" class="input-styled" placeholder="e.g. 0912 345 6789">
+        </div>
+      </div>
+
+      <div class="btn-add-wrap">
+        <button class="btn-add" onclick="addToList()">
+          Create Staff Account
+          <i data-lucide="plus" style="width: 20px;"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Staff List & Roles -->
+    <div class="staff-list-card">
+      <div class="list-header">
+        <h3>Staff Accounts & Roles</h3>
+        <div id="staffCount" style="font-size: 15px; color: var(--text-muted); font-weight: 700;">0 members</div>
+      </div>
+      
+      <div id="listTableContainer">
+        <div class="empty-list">
+          <i data-lucide="users" style="width: 56px; height: 56px; margin-bottom: 20px; opacity: 0.2;"></i>
+          <p>No staff added yet. Create your first staff account above.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div id="completionInfo" style="font-size: 15px; color: var(--text-muted); font-weight: 600;">
+        <i data-lucide="info" style="width: 20px; vertical-align: middle; margin-right: 10px; color: var(--accent);"></i>
+        At least 1 Manager and 1 Sastre are required to proceed.
+      </div>
+      <button class="btn-finalize" id="finalizeBtn" disabled onclick="finalizeTeam()">
+        Finalize Team
+        <i data-lucide="sparkles" style="width: 20px;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModalOverlay">
+    <div class="modal">
+      <h3 style="font-size: 24px; font-weight: 800; margin-bottom: 32px; letter-spacing: -0.5px;">Edit Staff Account</h3>
+      <input type="hidden" id="editStaffId">
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="input-wrap">
+          <label>Full Name</label>
+          <input type="text" id="editStaffName" class="input-styled" placeholder="e.g. Maria Clara">
+        </div>
+        <div class="input-wrap">
+          <label>Email Address</label>
+          <input type="email" id="editStaffEmail" class="input-styled" placeholder="e.g. maria@boutique.com">
+        </div>
+        <div class="input-wrap">
+          <label>Contact Number</label>
+          <input type="text" id="editStaffContact" class="input-styled" placeholder="e.g. 0912 345 6789">
+        </div>
+      </div>
+      <div style="display: flex; gap: 16px; margin-top: 40px;">
+        <button class="btn-finalize" style="flex: 1; justify-content: center; background: none; border: 2px solid var(--border); color: var(--text-main); height: 56px;" onclick="closeEditModal()">Cancel</button>
+        <button class="btn-finalize" style="flex: 1; justify-content: center; height: 56px;" onclick="updateStaff()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    
+    let staffList = [
+      { id: 101, name: "Maria Clara", email: "maria@boutique.com", contact: "0912 345 6789", initials: "MC", isManager: true, isSastre: false },
+      { id: 102, name: "Juan Luna", email: "juan@boutique.com", contact: "0917 111 2222", initials: "JL", isManager: false, isSastre: true },
+      { id: 103, name: "Jose Rizal", email: "jose@boutique.com", contact: "0918 333 4444", initials: "JR", isManager: false, isSastre: true },
+      { id: 104, name: "Andres Bonifacio", email: "andres@boutique.com", contact: "0919 555 6666", initials: "AB", isManager: false, isSastre: true },
+      { id: 105, name: "Emilio Aguinaldo", email: "emilio@boutique.com", contact: "0920 777 8888", initials: "EA", isManager: false, isSastre: true },
+      { id: 106, name: "Melchora Aquino", email: "melchora@boutique.com", contact: "0921 999 0000", initials: "MA", isManager: false, isSastre: true }
+    ];
+
+    const saved = localStorage.getItem('sutura_staff_full');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.length > 0) staffList = parsed;
+    }
+    renderList();
+
+    function addToList() {
+      const name = document.getElementById('staffName').value;
+      const email = document.getElementById('staffEmail').value;
+      const password = document.getElementById('staffPassword').value;
+      const contact = document.getElementById('staffContact').value;
+      
+      if (!name || !email || !password) return alert('Name, Email, and Password are required.');
+      
+      const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+      
+      staffList.push({
+        id: Date.now(),
+        name,
+        email,
+        password,
+        contact: contact || 'No contact provided',
+        initials,
+        isManager: false,
+        isSastre: false
+      });
+      
+      document.getElementById('staffName').value = '';
+      document.getElementById('staffEmail').value = '';
+      document.getElementById('staffPassword').value = '';
+      document.getElementById('staffContact').value = '';
+      
+      renderList();
+      saveData();
+    }
+
+    function toggleRole(id, role) {
+      const index = staffList.findIndex(s => s.id === id);
+      if (index === -1) return;
+      staffList[index][role === 'manager' ? 'isManager' : 'isSastre'] = !staffList[index][role === 'manager' ? 'isManager' : 'isSastre'];
+      renderList();
+      saveData();
+    }
+
+    function openEditModal(id) {
+      const staff = staffList.find(s => s.id === id);
+      if (!staff) return;
+      document.getElementById('editStaffId').value = staff.id;
+      document.getElementById('editStaffName').value = staff.name;
+      document.getElementById('editStaffEmail').value = staff.email;
+      document.getElementById('editStaffContact').value = staff.contact === 'No contact provided' ? '' : staff.contact;
+      document.getElementById('editModalOverlay').style.display = 'flex';
+    }
+
+    function closeEditModal() { document.getElementById('editModalOverlay').style.display = 'none'; }
+
+    function updateStaff() {
+      const id = parseInt(document.getElementById('editStaffId').value);
+      const name = document.getElementById('editStaffName').value;
+      const email = document.getElementById('editStaffEmail').value;
+      const contact = document.getElementById('editStaffContact').value;
+      
+      if (!name || !email) return alert('Name and Email are required.');
+      
+      const index = staffList.findIndex(s => s.id === id);
+      if (index !== -1) {
+        staffList[index].name = name;
+        staffList[index].email = email;
+        staffList[index].contact = contact || 'No contact provided';
+        staffList[index].initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+        renderList();
+        saveData();
+        closeEditModal();
+      }
+    }
+
+    function removeStaff(id) {
+      staffList = staffList.filter(s => s.id !== id);
+      renderList();
+      saveData();
+    }
+
+    function renderList() {
+      const container = document.getElementById('listTableContainer');
+      const countEl = document.getElementById('staffCount');
+      countEl.textContent = `${staffList.length} member${staffList.length === 1 ? '' : 's'}`;
+      
+      if (staffList.length === 0) {
+        container.innerHTML = `<div class="empty-list"><i data-lucide="users" style="width: 56px; height: 56px; margin-bottom: 20px; opacity: 0.2;"></i><p>No staff added yet.</p></div>`;
+        lucide.createIcons();
+        checkCompletion();
+        return;
+      }
+
+      let html = `<table class="matrix-table"><thead><tr><th>Staff Account</th><th>Shop Manager</th><th>Head Sastre</th><th>Actions</th></tr></thead><tbody>`;
+      staffList.forEach(staff => {
+        html += `
+          <tr>
+            <td>
+              <div class="staff-info">
+                <div class="avatar">${staff.initials}</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 16px;">${staff.name}</div>
+                  <div style="font-size: 13px; color: var(--accent); font-weight: 700; margin-top: 2px;">${staff.email}</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-top: 1px;">${staff.contact}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="role-toggle ${staff.isManager ? 'active' : ''}" onclick="toggleRole(${staff.id}, 'manager')">
+                <i data-lucide="${staff.isManager ? 'check-circle-2' : 'circle'}" style="width: 18px;"></i>
+                Manager
+              </div>
+            </td>
+            <td>
+              <div class="role-toggle ${staff.isSastre ? 'active' : ''}" onclick="toggleRole(${staff.id}, 'sastre')">
+                <i data-lucide="${staff.isSastre ? 'check-circle-2' : 'circle'}" style="width: 18px;"></i>
+                Sastre
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-action" onclick="openEditModal(${staff.id})"><i data-lucide="edit-3" style="width: 18px;"></i></button>
+                <button class="btn-action remove" onclick="removeStaff(${staff.id})"><i data-lucide="trash-2" style="width: 18px;"></i></button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+      lucide.createIcons();
+      checkCompletion();
+    }
+
+    function checkCompletion() {
+      const btn = document.getElementById('finalizeBtn');
+      const hasManager = staffList.some(s => s.isManager);
+      const hasSastre = staffList.some(s => s.isSastre);
+      const allHaveRoles = staffList.length > 0 && staffList.every(s => s.isManager || s.isSastre);
+      const infoText = document.getElementById('completionInfo');
+      if (staffList.length > 0 && !allHaveRoles) {
+        infoText.innerHTML = '<i data-lucide="alert-circle" style="width: 20px; vertical-align: middle; margin-right: 10px; color: #EF4444;"></i> <span style="color: #EF4444;">Each staff member must be assigned at least one role.</span>';
+      } else {
+        infoText.innerHTML = '<i data-lucide="info" style="width: 20px; vertical-align: middle; margin-right: 10px; color: var(--accent);"></i> At least 1 Manager and 1 Sastre are required.';
+      }
+      lucide.createIcons();
+      btn.disabled = !(hasManager && hasSastre && allHaveRoles);
+    }
+
+    function saveData() {
+      localStorage.setItem('sutura_staff_full', JSON.stringify(staffList));
+      localStorage.setItem('sutura_assignments', JSON.stringify({
+        manager: staffList.filter(s => s.isManager),
+        sastre: staffList.filter(s => s.isSastre)
+      }));
+    }
+
+    function finalizeTeam() {
+      saveData();
+      const btn = document.getElementById('finalizeBtn');
+      btn.innerHTML = '<i data-lucide="loader-2" class="animate-spin"></i> Finalizing Team...';
+      lucide.createIcons();
+      setTimeout(() => { window.location.href = '../01-dashboard.html?setup=complete'; }, 1500);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura - Community Explore</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #111827; 
+      --bg: #FAFAFA; 
+      --surface: #FFFFFF;
+      --text-main: #1F2937; 
+      --text-muted: #6B7280; 
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+
+    /* ── Minimalist Sidebar ── */
+    .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+    .brand { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 48px; letter-spacing: -0.5px; }
+    .nav-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; margin-top: 32px; }
+    .nav-list { display: flex; flex-direction: column; gap: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-main); text-decoration: none; transition: all 0.2s; }
+    .nav-item i { width: 18px; color: var(--text-muted); transition: color 0.2s; }
+    .nav-item:hover { background: #F3F4F6; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-item.active i { color: white; }
+
+    /* ── Main Content ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; }
+    .header { height: 90px; display: flex; align-items: center; justify-content: flex-end; padding: 0 48px; background: rgba(250, 250, 250, 0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); }
+    .user-profile { display: flex; align-items: center; gap: 16px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+    .user-name { font-weight: 600; font-size: 14px; }
+
+    .content { padding: 48px; max-width: 1400px; width: 100%; margin: 0 auto; }
+
+    .explore-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+    .page-desc { font-size: 15px; color: var(--text-muted); }
+    
+    .filters { display: flex; gap: 12px; }
+    .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { border-color: var(--primary); }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* Masonry Layout */
+    .masonry-grid { column-count: 4; column-gap: 24px; }
+    @media (max-width: 1200px) { .masonry-grid { column-count: 3; } }
+    @media (max-width: 900px) { .masonry-grid { column-count: 2; } }
+
+    .masonry-item { break-inside: avoid; margin-bottom: 24px; background: var(--surface); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; }
+    .masonry-item:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+    
+    .item-image { width: 100%; display: block; object-fit: cover; }
+    
+    .item-info { padding: 16px; }
+    .item-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+    
+    .item-author { display: flex; align-items: center; justify-content: space-between; }
+    .author-profile { display: flex; align-items: center; gap: 8px; }
+    .author-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+    .author-name { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    
+    .item-actions { display: flex; gap: 8px; }
+    .action-icon { color: var(--text-muted); transition: color 0.2s; }
+    .action-icon:hover { color: var(--primary); }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">Sutura Studio</div>
+    
+    <div class="nav-label">Community</div>
+    <nav class="nav-list">
+      <a href="06-explore-feed.html" class="nav-item active"><i data-lucide="compass"></i> Explore Designs</a>
+    </nav>
+
+    <div class="nav-label">Workspace</div>
+    <nav class="nav-list">
+      <a href="01-designer-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="03-design-post-creator.html" class="nav-item"><i data-lucide="pen-tool"></i> Create Post</a>
+      <a href="04-product-publisher.html" class="nav-item"><i data-lucide="send"></i> Publish to Shop</a>
+    </nav>
+
+    <div class="nav-label">Identity</div>
+    <nav class="nav-list">
+      <a href="05-portfolio-gallery.html" class="nav-item"><i data-lucide="image"></i> View Portfolio</a>
+      <a href="02-profile-manager.html" class="nav-item"><i data-lucide="user"></i> Profile Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <header class="header">
+      <div class="user-profile">
+        <span class="user-name">Elena Rossi</span>
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" alt="Avatar" class="user-avatar">
+      </div>
+    </header>
+
+    <div class="content">
+      
+      <div class="explore-header">
+        <div>
+          <h1 class="page-title">Community Explore</h1>
+          <p class="page-desc">Discover inspiring designs and concepts from freelance designers across the Sutura platform.</p>
+        </div>
+        <div class="filters">
+          <button class="filter-btn active">All Designs</button>
+          <button class="filter-btn">Evening Wear</button>
+          <button class="filter-btn">Streetwear</button>
+          <button class="filter-btn">Bridal</button>
+        </div>
+      </div>
+
+      <!-- Masonry Grid -->
+      <div class="masonry-grid">
+        
+        <!-- Post 1 -->
+        <div class="masonry-item">
+          <img src="https://images.unsplash.com/photo-1539109132314-3477524c8959?auto=format&fit=crop&q=80&w=600" class="item-image">
+          <div class="item-info">
+            <h3 class="item-title">Midnight Silk Gala</h3>
+            <div class="item-author">
+              <div class="author-profile">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100" class="author-avatar">
+                <span class="author-name">Elena Rossi</span>
+              </div>
+              <div class="item-actions">
+                <i data-lucide="heart" class="action-icon" style="width: 16px;"></i>
+                <i data-lucide="bookmark" class="action-icon" style="width: 16px;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post 2 -->
+        <div class="masonry-item">
+          <img src="https://images.unsplash.com/photo-1556905055-8f358a7a4bbd?auto=format&fit=crop&q=80&w=600" class="item-image">
+          <div class="item-info">
+            <h3 class="item-title">Linen Measurement Study</h3>
+            <div class="item-author">
+              <div class="author-profile">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100" class="author-avatar">
+                <span class="author-name">Marco Castelli</span>
+              </div>
+              <div class="item-actions">
+                <i data-lucide="heart" class="action-icon" style="width: 16px;"></i>
+                <i data-lucide="bookmark" class="action-icon" style="width: 16px;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post 3 -->
+        <div class="masonry-item">
+          <img src="https://images.unsplash.com/photo-1445205170230-053b830c6050?auto=format&fit=crop&q=80&w=600" class="item-image">
+          <div class="item-info">
+            <h3 class="item-title">Petal Train Prototype</h3>
+            <div class="item-author">
+              <div class="author-profile">
+                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100" class="author-avatar">
+                <span class="author-name">Sofie Amore</span>
+              </div>
+              <div class="item-actions">
+                <i data-lucide="heart" class="action-icon" style="width: 16px; fill: var(--primary);"></i>
+                <i data-lucide="bookmark" class="action-icon" style="width: 16px;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post 4 -->
+        <div class="masonry-item">
+          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=600" class="item-image">
+          <div class="item-info">
+            <h3 class="item-title">Urban Chic Lookbook</h3>
+            <div class="item-author">
+              <div class="author-profile">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100" class="author-avatar">
+                <span class="author-name">Elena Rossi</span>
+              </div>
+              <div class="item-actions">
+                <i data-lucide="heart" class="action-icon" style="width: 16px;"></i>
+                <i data-lucide="bookmark" class="action-icon" style="width: 16px; fill: var(--primary);"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post 5 -->
+        <div class="masonry-item">
+          <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=600" class="item-image">
+          <div class="item-info">
+            <h3 class="item-title">Workshop Drafts</h3>
+            <div class="item-author">
+              <div class="author-profile">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100" class="author-avatar">
+                <span class="author-name">Marco Castelli</span>
+              </div>
+              <div class="item-actions">
+                <i data-lucide="heart" class="action-icon" style="width: 16px;"></i>
+                <i data-lucide="bookmark" class="action-icon" style="width: 16px;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

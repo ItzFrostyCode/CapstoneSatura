@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Appointment Reminder - Sutura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;min-height:100vh;backdrop-filter:blur(4px);padding:24px;}
+    .modal{background:var(--bg);width:720px;border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,0.25);overflow:hidden;animation:slideUp 0.25s ease-out;}
+    @keyframes slideUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+    .modal-header{padding:28px 36px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+    .modal-badge{display:inline-flex;align-items:center;gap:6px;background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;text-transform:uppercase;white-space:nowrap;}
+    .modal-title{font-size:20px;font-weight:800;letter-spacing:-0.3px;}
+    .modal-sub{font-size:13px;color:var(--text-muted);margin-top:4px;}
+    .close-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;flex-shrink:0;}
+    .close-btn:hover{background:var(--surface);color:var(--primary);}
+
+    .modal-body{padding:28px 36px;}
+
+    /* Appointment info */
+    .appt-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 22px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;}
+    .info-item .i-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+    .info-item .i-value{font-size:14px;font-weight:700;color:var(--text-main);}
+
+    .section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
+
+    /* Channel selector */
+    .channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+    .channel-card{border:2px solid var(--border);border-radius:14px;padding:16px 20px;cursor:pointer;transition:all 0.2s;position:relative;}
+    .channel-card:hover{border-color:#9CA3AF;}
+    .channel-card.selected{border-color:var(--primary);background:#F8FAFC;}
+    .channel-card.selected .channel-check{opacity:1;}
+    .channel-top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+    .channel-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .channel-icon.sms{background:#F0FDF4;color:#16A34A;}
+    .channel-icon.email{background:#EFF6FF;color:#2563EB;}
+    .channel-name{font-size:14px;font-weight:700;color:var(--text-main);}
+    .channel-dest{font-size:12px;color:var(--text-muted);}
+    .channel-check{position:absolute;top:14px;right:14px;width:20px;height:20px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
+    .channel-desc{font-size:12px;color:var(--text-muted);line-height:1.5;}
+
+    /* Message preview */
+    .msg-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+    .msg-header{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .msg-label{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;}
+    .msg-edit-btn{font-size:12px;font-weight:700;color:var(--primary);background:none;border:none;cursor:pointer;font-family:'Outfit';display:flex;align-items:center;gap:4px;}
+    .msg-body{padding:18px;}
+    .sms-bubble{background:#E8F5E9;border-radius:0 14px 14px 14px;padding:14px 18px;font-size:13px;color:var(--text-main);line-height:1.6;max-width:480px;border:1px solid #C8E6C9;}
+    .sms-highlight{font-weight:700;color:#1A1A1A;}
+    .sms-meta{font-size:11px;color:var(--text-muted);margin-top:8px;}
+
+    /* Schedule row */
+    .schedule-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+    .form-group label{font-size:13px;font-weight:700;color:var(--text-main);display:block;margin-bottom:8px;}
+    .form-select,.form-input{width:100%;height:42px;border:1px solid var(--border);border-radius:10px;padding:0 14px;font-family:'Outfit';font-size:14px;color:var(--text-main);background:var(--bg);outline:none;transition:all 0.2s;}
+    .form-select:focus,.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,0,0,0.05);}
+
+    /* Automation toggle */
+    .auto-row{display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;border:1px solid #DBEAFE;border-radius:12px;padding:14px 18px;margin-bottom:4px;}
+    .auto-text .auto-title{font-size:14px;font-weight:700;color:#1D4ED8;}
+    .auto-text .auto-sub{font-size:12px;color:#3B82F6;margin-top:2px;}
+    .toggle-wrap{display:flex;align-items:center;gap:10px;}
+    .toggle{width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;transition:background 0.3s;background:#2563EB;flex-shrink:0;}
+    .toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:3px;left:23px;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+    .toggle-label{font-size:13px;font-weight:700;color:#1D4ED8;}
+
+    .modal-footer{padding:22px 36px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:var(--surface);}
+    .btn-cancel{background:none;color:var(--text-muted);border:1px solid var(--border);font-size:14px;font-weight:600;padding:0 20px;height:44px;border-radius:12px;cursor:pointer;font-family:'Outfit';}
+    .btn-cancel:hover{background:#fff;}
+    .btn-preview{background:var(--surface);color:var(--primary);border:1px solid var(--border);font-size:14px;font-weight:700;padding:0 22px;height:44px;border-radius:12px;cursor:pointer;font-family:'Outfit';display:flex;align-items:center;gap:8px;white-space:nowrap;}
+    .btn-preview:hover{border-color:var(--primary);}
+    .btn-send{background:#1A1A1A;color:white;border:none;font-size:14px;font-weight:700;padding:0 28px;height:44px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:'Outfit';white-space:nowrap;}
+    .btn-send:hover{background:#333;transform:translateY(-1px);}
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-badge"><i data-lucide="bell" style="width:11px;"></i> Automated Reminder</div>
+        <div class="modal-title">Send Appointment Reminder</div>
+        <div class="modal-sub">Notify the customer of their upcoming appointment via SMS or Email</div>
+      </div>
+      <a href="../01-clients-crm/08-appointments-tab.html"><button class="close-btn"><i data-lucide="x" style="width:15px;"></i></button></a>
+    </div>
+
+    <div class="modal-body">
+      <!-- Appointment details -->
+      <div class="appt-card">
+        <div class="info-item">
+          <div class="i-label">Customer</div>
+          <div class="i-value">Ms. Ana Santos</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Date & Time</div>
+          <div class="i-value">Apr 27, 2026 · 10:00 AM</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Purpose</div>
+          <div class="i-value">Final Fitting</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Contact</div>
+          <div class="i-value">+63 917 555 1234</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Email</div>
+          <div class="i-value">ana.santos@email.com</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Related Order</div>
+          <div class="i-value" style="color:#2563EB;">ORD-1004</div>
+        </div>
+      </div>
+
+      <!-- Channel selector -->
+      <div class="section-label">Notification Channel</div>
+      <div class="channel-grid">
+        <div class="channel-card selected">
+          <div class="channel-top">
+            <div class="channel-icon sms"><i data-lucide="message-square" style="width:18px;"></i></div>
+            <div>
+              <div class="channel-name">SMS</div>
+              <div class="channel-dest">+63 917 555 1234</div>
+            </div>
+          </div>
+          <div class="channel-desc">Short text message delivered directly to the customer's mobile phone.</div>
+          <div class="channel-check"><i data-lucide="check" style="width:12px;color:white;"></i></div>
+        </div>
+        <div class="channel-card">
+          <div class="channel-top">
+            <div class="channel-icon email"><i data-lucide="mail" style="width:18px;"></i></div>
+            <div>
+              <div class="channel-name">Email</div>
+              <div class="channel-dest">ana.santos@email.com</div>
+            </div>
+          </div>
+          <div class="channel-desc">Detailed email with appointment info, attached invoice if available.</div>
+          <div class="channel-check"><i data-lucide="check" style="width:12px;color:white;"></i></div>
+        </div>
+      </div>
+
+      <!-- Message preview -->
+      <div class="section-label">Message Preview</div>
+      <div class="msg-wrap">
+        <div class="msg-header">
+          <div class="msg-label">SMS Preview</div>
+          <button class="msg-edit-btn"><i data-lucide="edit-2" style="width:12px;"></i> Edit Message</button>
+        </div>
+        <div class="msg-body">
+          <div class="sms-bubble">
+            Hi <span class="sms-highlight">Ms. Santos</span>! This is a reminder from <span class="sms-highlight">Sutura Tailoring</span>. You have a <span class="sms-highlight">Final Fitting</span> scheduled on <span class="sms-highlight">April 27, 2026 at 10:00 AM</span>. Please reply CONFIRM to acknowledge. For inquiries, call us at +63 912 345 6789.
+          </div>
+          <div class="sms-meta">132 characters · Standard SMS</div>
+        </div>
+      </div>
+
+      <!-- Schedule -->
+      <div class="section-label">When to Send</div>
+      <div class="schedule-row">
+        <div class="form-group">
+          <label>Send Reminder</label>
+          <select class="form-select">
+            <option>1 day before (Apr 26)</option>
+            <option>2 days before (Apr 25)</option>
+            <option>3 days before (Apr 24)</option>
+            <option>Send immediately</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Send At (Time)</label>
+          <input type="time" class="form-input" value="09:00"/>
+        </div>
+      </div>
+
+      <!-- Auto-reminder toggle -->
+      <div class="auto-row">
+        <div class="auto-text">
+          <div class="auto-title">Auto-Reminder Enabled</div>
+          <div class="auto-sub">System will automatically send 1-day reminders for all future appointments</div>
+        </div>
+        <div class="toggle-wrap">
+          <button class="toggle"></button>
+          <span class="toggle-label">On</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="../01-clients-crm/08-appointments-tab.html"><button class="btn-cancel">Cancel</button></a>
+      <button class="btn-preview"><i data-lucide="eye" style="width:15px;"></i> Preview Full Message</button>
+      <button class="btn-send"><i data-lucide="send" style="width:15px;"></i> Send Reminder Now</button>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

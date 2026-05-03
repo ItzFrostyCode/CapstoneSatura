@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Staff — My Production Queue | Sutura</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --indigo: #4F46E5; --indigo-bg: #EEF2FF; --indigo-border: #C7D2FE;
+      --success: #10B981; --warning: #F59E0B; --danger: #EF4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background: var(--indigo); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .role-tag { font-size: 10px; font-weight: 700; background: var(--indigo-bg); color: var(--indigo); padding: 2px 8px; border-radius: 6px; margin-left: 4px; }
+    
+    .nav-list { padding: 20px 16px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background: var(--surface); color: var(--primary); }
+    .nav-item.active { background: var(--indigo); color: white; }
+    
+    .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--indigo-bg); border: 1px solid var(--indigo-border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: var(--indigo); }
+    .user-info .name { font-size: 14px; font-weight: 600; }
+    .user-info .role { font-size: 12px; color: var(--text-muted); }
+
+    /* Main Content */
+    .main { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; position: sticky; top: 0; z-index: 100; }
+    .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .btn-view-manager { font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); transition: all 0.2s; }
+    .btn-view-manager:hover { border-color: var(--primary); color: var(--primary); }
+
+    .content { padding: 32px 40px; flex-grow: 1; overflow-y: auto; }
+
+    /* Performance Banner */
+    .banner { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); border-radius: 16px; padding: 24px 32px; color: white; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+    .banner-content { position: relative; z-index: 2; }
+    .banner-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .banner-sub { font-size: 14px; opacity: 0.9; font-weight: 500; }
+    .banner-stats { display: flex; gap: 40px; position: relative; z-index: 2; }
+    .b-stat { text-align: right; }
+    .b-stat-val { font-size: 28px; font-weight: 800; }
+    .b-stat-label { font-size: 12px; opacity: 0.8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Filters/Tabs */
+    .tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .tab { padding-bottom: 12px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .tab.active { color: var(--indigo); border-color: var(--indigo); }
+    .tab span { background: #E5E7EB; color: #4B5563; font-size: 11px; padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
+    .tab.active span { background: var(--indigo-bg); color: var(--indigo); }
+
+    /* Task Grid */
+    .task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+    .task-card { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 16px; transition: all 0.2s; position: relative; }
+    .task-card:hover { border-color: var(--indigo); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+    
+    .priority-strip { position: absolute; left: 0; top: 20px; bottom: 20px; width: 4px; border-radius: 0 4px 4px 0; }
+    .p-high { background: var(--danger); }
+    .p-medium { background: var(--warning); }
+    .p-low { background: var(--indigo); }
+
+    .card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+    .order-id { font-family: monospace; font-size: 12px; font-weight: 700; color: var(--text-muted); background: var(--surface); padding: 4px 8px; border-radius: 6px; }
+    .due-tag { font-size: 12px; font-weight: 700; color: var(--danger); display: flex; align-items: center; gap: 4px; }
+
+    .client-info .name { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+    .client-info .item { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+
+    .progress-section { background: var(--surface); padding: 14px; border-radius: 12px; }
+    .prog-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+    .prog-bar { height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--indigo); border-radius: 4px; transition: width 0.3s; }
+
+    .tech-notes-preview { font-size: 13px; color: var(--text-muted); line-height: 1.5; padding: 10px 0; border-top: 1px dashed var(--border); }
+    
+    .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+    .btn-action { height: 38px; border-radius: 10px; font-size: 13px; font-weight: 700; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Outfit'; }
+    .btn-action:hover { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-bg); }
+    .btn-primary-action { background: var(--indigo); color: white; border: none; }
+    .btn-primary-action:hover { background: #4338CA; transform: translateY(-1px); }
+
+    /* Badge styles */
+    .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; }
+    .b-bulk { background: #EEF2FF; color: #4F46E5; }
+    .b-rush { background: #FEF2F2; color: #EF4444; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+      <div class="logo-text">Sutura <span class="role-tag">Staff</span></div>
+    </div>
+    <nav class="nav-list">
+      <a href="13-seamstress-portal.html" class="nav-item active"><i data-lucide="list-checks" style="width:18px;"></i> My Queue</a>
+      <a href="#" class="nav-item"><i data-lucide="check-circle-2" style="width:18px;"></i> Completed Work</a>
+      <a href="javascript:void(0)" onclick="openTechGuide()" class="nav-item"><i data-lucide="file-text" style="width:18px;"></i> Technical Guide</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">E</div>
+      <div class="user-info">
+        <div class="name">Elena Cruz</div>
+        <div class="role">Head Seamstress</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">My Production Queue</div>
+      <div class="header-actions">
+        <a href="01-job-orders-tab.html" class="btn-view-manager"><i data-lucide="arrow-left" style="width:14px;margin-right:4px;"></i> Shop View</a>
+        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+      
+      <!-- Performance Summary -->
+      <div class="banner">
+        <div class="banner-content">
+          <div class="banner-title">Good Morning, Elena!</div>
+          <div class="banner-sub">You have 4 tasks scheduled for today. Focus on the rush orders first.</div>
+        </div>
+        <div class="banner-stats">
+          <div class="b-stat">
+            <div class="b-stat-val">4</div>
+            <div class="b-stat-label">Active</div>
+          </div>
+          <div class="b-stat">
+            <div class="b-stat-val">12</div>
+            <div class="b-stat-label">Done (Week)</div>
+          </div>
+          <div class="b-stat">
+            <div class="b-stat-val">98%</div>
+            <div class="b-stat-label">QC Pass</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Queue Tabs -->
+      <div class="tabs">
+        <div class="tab active">To Do <span>4</span></div>
+        <div class="tab">In Progress <span>2</span></div>
+        <div class="tab">Awaiting QC <span>1</span></div>
+      </div>
+
+      <!-- Task Cards Grid -->
+      <div class="task-grid">
+        
+        <!-- Task: REWORK (FAILED QC) -->
+        <div class="task-card" style="border: 2px solid #EF4444; background: #FFF1F2;">
+          <div class="priority-strip" style="background: #EF4444;"></div>
+          <div class="card-head">
+            <span class="order-id" style="color: #B91C1C;">ORD-0995</span>
+            <span class="badge" style="background: #EF4444; color: white;">⚡ REWORK REQUIRED</span>
+          </div>
+          <div class="client-info">
+            <div class="name">Maria Santos</div>
+            <div class="item">Silk Cocktail Dress</div>
+          </div>
+          <div style="background: white; border: 1px solid #FCA5A5; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #B91C1C; margin: 12px 0; display: flex; align-items: flex-start; gap: 8px;">
+            <i data-lucide="rotate-ccw" style="width: 16px; margin-top: 2px;"></i>
+            <div>
+              QC Rejection: Hemline uneven on left side.
+              <div style="font-weight: 500; font-size: 11px; opacity: 0.8; margin-top: 2px;">Assigned by: Admin (QC Inspector)</div>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-action" style="border-color: #FCA5A5; color: #B91C1C;"><i data-lucide="edit-3" style="width:14px;"></i> View Specs</button>
+            <button class="btn-action btn-primary-action" style="background: #DC2626;"><i data-lucide="check" style="width:14px;"></i> Mark as Fixed</button>
+          </div>
+        </div>
+
+        <!-- Task 1: Priority -->
+        <div class="task-card">
+          <div class="priority-strip p-high"></div>
+          <div class="card-head">
+            <span class="order-id">ORD-1002</span>
+            <span class="due-tag"><i data-lucide="clock" style="width:13px;"></i> DUE TODAY</span>
+          </div>
+          <div class="client-info">
+            <div class="name">Alexander McQueen</div>
+            <div class="item">15x Staff Polo Shirts <span class="badge b-bulk">Bulk</span></div>
+          </div>
+          <div class="progress-section">
+            <div class="prog-label"><span>Sewing Progress</span><span>8 / 15 pcs</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width: 53%;"></div></div>
+          </div>
+          <div class="tech-notes-preview">
+            <strong>Notes:</strong> Double-stitch on collar seams. Use reinforced thread for pocket attachment...
+          </div>
+          <div class="card-actions">
+            <button class="btn-action" onclick="alert('Updating progress for ORD-1002...')"><i data-lucide="plus" style="width:14px;"></i> Update</button>
+            <button class="btn-action btn-primary-action"><i data-lucide="check" style="width:14px;"></i> Send to QC</button>
+          </div>
+        </div>
+
+        <!-- Task 2: Priority Rush -->
+        <div class="task-card">
+          <div class="priority-strip p-high"></div>
+          <div class="card-head">
+            <span class="order-id">ORD-1001</span>
+            <span class="badge b-rush">⚡ RUSH</span>
+          </div>
+          <div class="client-info">
+            <div class="name">Juan Dela Cruz</div>
+            <div class="item">3-Piece Bespoke Suit</div>
+          </div>
+          <div class="progress-section">
+            <div class="prog-label"><span>Status</span><span>Lining Stage</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width: 75%;"></div></div>
+          </div>
+          <div class="tech-notes-preview">
+            <strong>Notes:</strong> Italian cut. Silk lining as specified by Designer Carlos. Check vest alignment...
+          </div>
+          <div class="card-actions">
+            <button class="btn-action"><i data-lucide="edit-3" style="width:14px;"></i> Edit Log</button>
+            <button class="btn-action btn-primary-action"><i data-lucide="check" style="width:14px;"></i> Send to QC</button>
+          </div>
+        </div>
+
+        <!-- Task 3: Normal -->
+        <div class="task-card">
+          <div class="priority-strip p-low"></div>
+          <div class="card-head">
+            <span class="order-id">ORD-1005</span>
+            <span class="due-tag" style="color:var(--indigo);"><i data-lucide="calendar" style="width:13px;"></i> MAY 05</span>
+          </div>
+          <div class="client-info">
+            <div class="name">Liza Soberano</div>
+            <div class="item">Red Carpet Gown</div>
+          </div>
+          <div class="progress-section">
+            <div class="prog-label"><span>Status</span><span>Beading & Finish</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width: 30%;"></div></div>
+          </div>
+          <div class="tech-notes-preview">
+            <strong>Notes:</strong> Delicate sequins on the train. Hand-sewn only. Do not use machine for the hem...
+          </div>
+          <div class="card-actions">
+            <button class="btn-action"><i data-lucide="eye" style="width:14px;"></i> View Full Notes</button>
+            <button class="btn-action btn-primary-action"><i data-lucide="play" style="width:14px;"></i> Start Work</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Technical Guide Modal -->
+  <div id="techGuideModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+    <div style="background:white; width:800px; max-height:90vh; border-radius:24px; overflow:hidden; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); display:flex; flex-direction:column;">
+      <div style="padding:24px 32px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:#4F46E5; color:white;">
+        <h2 style="font-size:20px; font-weight:700; display:flex; align-items:center; gap:10px;">
+          <i data-lucide="book-open" style="width:24px;"></i> Sutura Production Technical Guide
+        </h2>
+        <button onclick="closeTechGuide()" style="background:none; border:none; color:white; cursor:pointer;"><i data-lucide="x" style="width:24px;"></i></button>
+      </div>
+      <div style="padding:32px; overflow-y:auto; flex-grow:1;">
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:32px;">
+          <div style="background:#F9FAFB; padding:20px; border-radius:16px; border:1px solid var(--border);">
+            <h4 style="font-size:14px; font-weight:700; color:#4F46E5; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="scissors" style="width:16px;"></i> Stitching Standards
+            </h4>
+            <ul style="font-size:13px; color:var(--text-muted); list-style:none; line-height:1.8;">
+              <li style="display:flex; justify-content:space-between;"><span>Formal Suits</span> <strong>12-14 SPI</strong></li>
+              <li style="display:flex; justify-content:space-between;"><span>Silk / Satin</span> <strong>16-18 SPI</strong></li>
+              <li style="display:flex; justify-content:space-between;"><span>Denim / Twill</span> <strong>8-10 SPI</strong></li>
+              <li style="display:flex; justify-content:space-between; margin-top:8px; border-top:1px dashed #DDD; padding-top:8px;"><span>Seam Allowance</span> <strong>3/8 inch</strong></li>
+            </ul>
+          </div>
+          <div style="background:#F9FAFB; padding:20px; border-radius:16px; border:1px solid var(--border);">
+            <h4 style="font-size:14px; font-weight:700; color:#4F46E5; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="layers" style="width:16px;"></i> Needle Selection
+            </h4>
+            <ul style="font-size:13px; color:var(--text-muted); list-style:none; line-height:1.8;">
+              <li style="display:flex; justify-content:space-between;"><span>Fine Silk</span> <strong>60/8 or 70/10</strong></li>
+              <li style="display:flex; justify-content:space-between;"><span>Mid-weight Wool</span> <strong>80/12 or 90/14</strong></li>
+              <li style="display:flex; justify-content:space-between;"><span>Heavy Coating</span> <strong>100/16</strong></li>
+              <li style="display:flex; justify-content:space-between; margin-top:8px; border-top:1px dashed #DDD; padding-top:8px;"><span>Thread Type</span> <strong>Polyester Core</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <h4 style="font-size:15px; font-weight:700; margin-bottom:16px; color:var(--text-main);">Material Handling Guidelines</h4>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="border-left:4px solid #F59E0B; padding:12px 16px; background:#FFFBEB; border-radius:0 12px 12px 0;">
+            <div style="font-weight:700; font-size:13px; color:#B45309;">Silk & Delicate Fabrics</div>
+            <div style="font-size:12px; color:#92400E; margin-top:2px;">Always test tension on a scrap piece. Use fresh needles to avoid snags. Never pin in the main body area.</div>
+          </div>
+          <div style="border-left:4px solid #10B981; padding:12px 16px; background:#F0FDF4; border-radius:0 12px 12px 0;">
+            <div style="font-weight:700; font-size:13px; color:#15803D;">Bespoke Canvas & Interlining</div>
+            <div style="font-size:12px; color:#166534; margin-top:2px;">Pad stitching should be invisible from the right side. Ensure hair canvas is pre-shrunk before attachment.</div>
+          </div>
+        </div>
+
+      </div>
+      <div style="padding:24px 32px; border-top:1px solid var(--border); background:var(--surface); display:flex; justify-content:flex-end;">
+        <button onclick="closeTechGuide()" class="btn-action btn-primary-action" style="padding:0 24px; width:auto;">Got it, Elena</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    
+    function openTechGuide() {
+      document.getElementById('techGuideModal').style.display = 'flex';
+    }
+    
+    function closeTechGuide() {
+      document.getElementById('techGuideModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

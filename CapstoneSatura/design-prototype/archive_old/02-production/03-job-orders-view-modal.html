@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Order Details (Clean)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #0F172A; --primary-hover: #1E293B; --bg: #F8FAFC; --surface: #FFFFFF;
+      --text-main: #1E293B; --text-muted: #64748B; --border: #F1F5F9;
+      --accent: #2563EB; --accent-light: #EFF6FF;
+      --success: #10B981; --success-light: #ECFDF5;
+      --danger: #EF4444; --danger-light: #FEF2F2;
+      --warning: #F59E0B; --warning-light: #FFFBEB;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--bg); color: var(--text-main); width: 100%; min-height: 100vh; overflow-x: hidden; display: flex; position: relative; }
+
+    /* Modal Overlay */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    
+    .modal { background: var(--surface); width: 1000px; height: 920px; border-radius: 24px; box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.25); display: flex; flex-direction: column; overflow: hidden; animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes modalSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    /* Header */
+    .modal-header { padding: 32px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .order-tag { font-size: 12px; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 6px 12px; border-radius: 8px; font-family: monospace; }
+    .modal-title { font-size: 24px; font-weight: 700; letter-spacing: -0.03em; }
+    
+    .status-pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 600; background: var(--success-light); color: var(--success); }
+    .status-pill.ready-to-release { background: var(--success-light); color: var(--success); }
+    .status-pill.outstanding { background: var(--danger-light); color: var(--danger); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+
+    .close-btn { width: 44px; height: 44px; border-radius: 12px; border: none; background: var(--bg); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .close-btn:hover { background: var(--danger-light); color: var(--danger); }
+
+    /* Body */
+    .modal-body { display: grid; grid-template-columns: 340px 1fr; flex: 1; overflow: hidden; }
+    
+    /* Sidebar */
+    .modal-sidebar { padding: 40px; border-right: 1px solid var(--border); background: #FCFDFF; display: flex; flex-direction: column; gap: 40px; }
+    
+    .customer-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .avatar { width: 100px; height: 100px; border-radius: 32px; background: white; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 700; color: var(--primary); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; }
+    .avatar-badge { position: absolute; bottom: -5px; right: -5px; background: var(--accent); color: white; padding: 4px 10px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 3px solid white; }
+    
+    .cust-name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .cust-id { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+    .contact-actions { display: flex; gap: 12px; justify-content: center; }
+    .action-icon { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: white; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+    .action-icon:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    .info-list { display: flex; flex-direction: column; gap: 24px; }
+    .info-block { display: flex; flex-direction: column; gap: 6px; }
+    .info-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .info-value { font-size: 15px; font-weight: 500; }
+
+    /* Payment Alert Widget */
+    .payment-widget { background: var(--danger-light); border-radius: 20px; padding: 24px; border: 1px solid #FEE2E2; }
+    .payment-widget.settled { background: var(--success-light); border: 1px solid #D1FAE5; }
+    .widget-title { font-size: 11px; font-weight: 700; color: #991B1B; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .payment-widget.settled .widget-title { color: #065F46; }
+    .balance-amount { font-size: 24px; font-weight: 800; color: #991B1B; letter-spacing: -0.03em; margin-bottom: 4px; }
+    .payment-widget.settled .balance-amount { color: #065F46; }
+    .balance-desc { font-size: 12px; color: #B91C1C; opacity: 0.8; margin-bottom: 16px; }
+    .payment-widget.settled .balance-desc { color: #059669; }
+    .settle-btn { width: 100%; height: 44px; border-radius: 12px; border: none; background: #991B1B; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(153, 27, 27, 0.2); }
+    .payment-widget.settled .settle-btn { background: #059669; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); }
+
+    /* Content Area */
+    .modal-content { padding: 40px; overflow-y: auto; }
+    .content-section { margin-bottom: 48px; }
+    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .section-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--bg); color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+    .section-title { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+
+    .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+
+    /* Clean Alert Banner */
+    .alert-banner { background: var(--accent-light); border-radius: 16px; padding: 20px 24px; display: flex; align-items: center; gap: 20px; margin-bottom: 40px; border: 1px solid #DBEAFE; }
+    .alert-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .alert-body { flex: 1; }
+    .alert-h { font-size: 15px; font-weight: 700; color: var(--accent); }
+    .alert-p { font-size: 13px; color: #1E40AF; margin-top: 2px; opacity: 0.8; }
+    .alert-btn { background: white; color: var(--accent); border: 1px solid #BFDBFE; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .alert-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* Timeline */
+    .timeline { padding-left: 20px; border-left: 2px solid var(--border); display: flex; flex-direction: column; gap: 32px; position: relative; }
+    .timeline-item { position: relative; }
+    .timeline-dot { position: absolute; left: -29px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: white; border: 3px solid var(--border); }
+    .timeline-dot.active { border-color: var(--success); background: var(--success); box-shadow: 0 0 0 4px var(--success-light); }
+    .tl-header { font-size: 15px; font-weight: 600; color: var(--primary); margin-bottom: 4px; }
+    .tl-meta { font-size: 12px; color: var(--text-muted); }
+
+    /* Footer */
+    .modal-footer { padding: 24px 40px; border-top: 1px solid var(--border); background: var(--surface); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+    .footer-left { display: flex; gap: 12px; }
+    
+    .btn { height: 52px; padding: 0 28px; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s; font-family: 'Outfit'; }
+    .btn-secondary { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); text-decoration: none; }
+    .btn-secondary:hover { background: #EDF2F7; border-color: #E2E8F0; }
+    
+    .btn-primary { background: var(--primary); color: white; border: none; text-decoration: none; box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.2); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(15, 23, 42, 0.3); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; background: var(--text-muted); }
+
+    .lock-hint { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--danger); font-weight: 600; }
+
+  </style>
+</head>
+<body>
+
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="order-tag">#ORD-1001</span>
+          <h2 class="modal-title">Job Order Details</h2>
+          <!-- If balance > 0, show Outstanding, if 0 show Ready to Release -->
+          <div class="status-pill outstanding">
+            <span class="status-dot"></span>
+            Outstanding Balance
+          </div>
+        </div>
+        <a href="01-job-orders-tab.html" class="close-btn"><i data-lucide="x" style="width:24px;"></i></a>
+      </div>
+
+      <div class="modal-body">
+        <aside class="modal-sidebar">
+          <div class="customer-card">
+            <h3 class="cust-name">Juan Dela Cruz</h3>
+            <p class="cust-id">CUST-0002 · VIP Client</p>
+            <div class="contact-actions">
+              <button class="action-icon" title="Call"><i data-lucide="phone" style="width:18px;"></i></button>
+              <button class="action-icon" title="SMS"><i data-lucide="message-square" style="width:18px;"></i></button>
+              <button class="action-icon" title="Email"><i data-lucide="mail" style="width:18px;"></i></button>
+            </div>
+          </div>
+
+          <div class="info-list">
+            <div class="info-block">
+              <span class="info-label">Primary Contact</span>
+              <span class="info-value">juan@email.com</span>
+              <span class="info-value" style="color:var(--text-muted); font-size:13px;">09171112222</span>
+            </div>
+
+            <!-- PAYMENT WIDGET: Outstanding Version -->
+            <div class="payment-widget">
+              <div class="widget-title"><i data-lucide="alert-circle" style="width:12px;"></i> Action Required</div>
+              <div class="balance-amount">₱7,500.00</div>
+              <p class="balance-desc">Total: ₱12,500 | Paid: ₱5,000</p>
+              <button class="settle-btn">Record Final Payment</button>
+            </div>
+          </div>
+        </aside>
+
+        <div class="modal-content">
+          <!-- TIMELINE AT THE TOP -->
+          <div class="content-section">
+            <div class="section-header">
+              <div class="section-icon"><i data-lucide="history" style="width:18px;"></i></div>
+              <h4 class="section-title">Production Timeline</h4>
+            </div>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-dot active"></div>
+                <div class="tl-header" style="color:var(--success);">Marked as Ready</div>
+                <div class="tl-meta">Today, 10:45 AM · by Ricardo Dalisay</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="tl-header">Moved to Quality Control</div>
+                <div class="tl-meta">Yesterday, 03:20 PM · by Carla Abellana</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="tl-header">In Progress (Sewing Stage)</div>
+                <div class="tl-meta">Apr 22, 2026 · 09:00 AM</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="tl-header">Pattern & Cutting Completed</div>
+                <div class="tl-meta">Apr 21, 2026 · 11:15 AM</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert-banner">
+            <div class="alert-icon"><i data-lucide="send" style="width:24px;"></i></div>
+            <div class="alert-body">
+              <h4 class="alert-h">Customer not yet notified</h4>
+              <p class="alert-p">This order has been ready for 4 hours. Send a pickup reminder?</p>
+            </div>
+            <button class="alert-btn">Send SMS Alert</button>
+          </div>
+
+          <div class="content-section">
+            <div class="section-header">
+              <div class="section-icon"><i data-lucide="package" style="width:18px;"></i></div>
+              <h4 class="section-title">Order Specifications</h4>
+            </div>
+            <div class="specs-grid">
+              <div class="info-block">
+                <span class="info-label">Garment Type</span>
+                <span class="info-value">3-Piece Charcoal Suit</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">Fabric & Texture</span>
+                <span class="info-value">Italian Wool (Charcoal)</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">Tailor Assigned</span>
+                <span class="info-value">Ricardo Dalisay (Lead Tailor)</span>
+              </div>
+              <div class="info-block">
+                <span class="info-label">Deadline</span>
+                <span class="info-value" style="display:flex; align-items:center; gap:10px;">
+                  May 10, 2026 · 17 Days Left
+                  <button style="background:var(--warning-light); color:#B45309; border:1px solid #FDE68A; border-radius:6px; padding:4px 8px; font-size:10px; font-weight:700; cursor:pointer; font-family:'Outfit';">Report Delay</button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-left">
+          <button class="btn btn-secondary"><i data-lucide="printer" style="width:18px;"></i> Print Slip</button>
+          <a href="../03-supply-chain/11-material-allocation-modal.html" class="btn btn-secondary"><i data-lucide="box" style="width:18px;"></i> Allocate Materials</a>
+          <a href="07-job-orders-edit-modal.html" class="btn btn-secondary"><i data-lucide="edit-3" style="width:18px;"></i> Edit Job</a>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+          <button class="btn btn-primary" disabled><i data-lucide="package-check" style="width:18px;"></i> Release to Customer</button>
+          <div class="lock-hint"><i data-lucide="lock" style="width:12px;"></i> Settle ₱7,500 balance to enable release</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

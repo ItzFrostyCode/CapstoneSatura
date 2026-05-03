@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Record Stock Delivery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333;
+      --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #10B981; /* Green for Delivery/Success */
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: rgba(0,0,0,0.5); height: 100vh; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+
+    .modal { background: white; width: 600px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; }
+    .modal-header { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+    
+    .modal-body { padding: 32px; }
+    .form-group { margin-bottom: 24px; }
+    label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    select, input { width: 100%; height: 48px; border: 1.5px solid var(--border); border-radius: 12px; padding: 0 16px; font-family: 'Outfit'; font-size: 15px; outline: none; background: var(--surface); }
+
+    .delivery-check { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 16px; padding: 16px; margin-bottom: 24px; }
+    .check-item { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px dashed #BBF7D0; }
+    .check-item:last-child { border: none; }
+
+    .modal-footer { padding: 24px 32px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+    .btn-secondary { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+    .btn-primary { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="truck"></i> Record Stock Delivery</div>
+      <a href="01-inventory-tab.html" style="color: var(--text-muted);"><i data-lucide="x"></i></a>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Select Pending Purchase Order (PO)</label>
+        <select>
+          <option>PO-2026-0045 (Premium Textiles Inc.)</option>
+          <option>PO-2026-0046 (Lumban Weavers)</option>
+        </select>
+      </div>
+
+      <div class="delivery-check">
+        <div style="font-size: 11px; font-weight: 800; color: #166534; text-transform: uppercase; margin-bottom: 12px;">Items to Verify:</div>
+        <div class="check-item">
+          <span>Charcoal Wool Tweed</span>
+          <strong>15.00 Meters</strong>
+        </div>
+        <div class="check-item">
+          <span>Silk Lining (Black)</span>
+          <strong>10.00 Meters</strong>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="form-group">
+          <label>Actual Quantity Received</label>
+          <input type="text" value="15.00" />
+        </div>
+        <div class="form-group">
+          <label>Delivery Receipt (DR) #</label>
+          <input type="text" placeholder="e.g. DR-8821" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Condition Note</label>
+        <select>
+          <option>Perfect Condition</option>
+          <option>Minor Damage (Logged as Waste)</option>
+          <option>Incomplete Delivery</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="01-inventory-tab.html" class="btn-secondary">Cancel</a>
+      <button class="btn-primary" onclick="alert('Inventory Updated! Stock successfully recorded.'); window.location.href='01-inventory-tab.html'">Confirm & Update Stock</button>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

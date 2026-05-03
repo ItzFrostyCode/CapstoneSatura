@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Quality Inspection</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #0F172A; --primary-hover: #1E293B; --bg: #F8FAFC; --surface: #FFFFFF;
+      --text-main: #1E293B; --text-muted: #64748B; --border: #F1F5F9;
+      --accent: #2563EB; --accent-light: #EFF6FF;
+      --success: #10B981; --success-light: #ECFDF5;
+      --danger: #EF4444; --danger-light: #FEF2F2;
+      --warning: #F59E0B; --warning-light: #FFFBEB;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--bg); color: var(--text-main); display: flex; position: relative; min-height: 100vh;}
+
+    /* Modal Overlay */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    
+    .modal { background: var(--surface); width: 800px; border-radius: 24px; box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.25); display: flex; flex-direction: column; overflow: hidden; animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes modalSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    /* Header */
+    .modal-header { padding: 32px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--primary); color: white; }
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .order-tag { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 8px; font-family: monospace; }
+    .modal-title { font-size: 24px; font-weight: 700; letter-spacing: -0.03em; }
+
+    .close-btn { width: 44px; height: 44px; border-radius: 12px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .close-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* Content Area */
+    .modal-content { padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 32px;}
+
+    .info-card { display: flex; justify-content: space-between; background: var(--bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
+    .info-col { display: flex; flex-direction: column; gap: 6px; }
+    .info-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .info-val { font-size: 15px; font-weight: 600; }
+
+    /* Checklist */
+    .checklist-section { display: flex; flex-direction: column; gap: 16px; }
+    .section-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+    
+    .checklist-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: 1px solid var(--border); border-radius: 12px; transition: 0.2s; cursor: pointer;}
+    .checklist-item:hover { border-color: var(--accent); background: var(--accent-light); }
+    .chk-left { display: flex; align-items: center; gap: 16px; }
+    .chk-box { width: 24px; height: 24px; border: 2px solid var(--text-muted); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; transition: 0.2s; }
+    .checklist-item.checked .chk-box { background: var(--success); border-color: var(--success); }
+    .chk-text { font-size: 15px; font-weight: 500; }
+    .chk-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Notes */
+    .notes-area { width: 100%; height: 100px; border: 1px solid var(--border); border-radius: 12px; padding: 16px; font-family: 'Outfit'; font-size: 14px; resize: none; background: var(--bg); }
+    .notes-area:focus { outline: none; border-color: var(--accent); background: white; }
+
+    /* Actions */
+    .action-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    
+    .action-card { border: 2px solid var(--border); border-radius: 16px; padding: 24px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .action-card .icon-wrap { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+    .action-card h3 { font-size: 18px; font-weight: 700; }
+    .action-card p { font-size: 13px; color: var(--text-muted); }
+
+    .ac-pass:hover { border-color: var(--success); background: var(--success-light); }
+    .ac-pass .icon-wrap { background: var(--success-light); color: var(--success); }
+    .ac-pass.selected { border-color: var(--success); background: var(--success-light); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
+    
+    .ac-fail:hover { border-color: var(--warning); background: var(--warning-light); }
+    .ac-fail .icon-wrap { background: var(--warning-light); color: var(--warning); }
+    .ac-fail.selected { border-color: var(--warning); background: var(--warning-light); box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1); }
+
+    /* Footer */
+    .modal-footer { padding: 24px 40px; border-top: 1px solid var(--border); background: var(--surface); display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
+    
+    .btn { height: 48px; padding: 0 24px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s; font-family: 'Outfit'; border: none; text-decoration: none;}
+    .btn-secondary { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #EDF2F7; }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+  </style>
+</head>
+<body>
+
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="header-left">
+          <span class="order-tag">#ORD-1001</span>
+          <h2 class="modal-title">Quality Assurance Inspection</h2>
+        </div>
+        <a href="06-kanban-board.html" class="close-btn"><i data-lucide="x" style="width:24px;"></i></a>
+      </div>
+
+      <div class="modal-content">
+        <div class="info-card">
+          <div class="info-col">
+            <span class="info-label">Customer</span>
+            <span class="info-val">Juan Dela Cruz</span>
+          </div>
+          <div class="info-col">
+            <span class="info-label">Garment Type</span>
+            <span class="info-val">3-Piece Charcoal Suit</span>
+          </div>
+          <div class="info-col">
+            <span class="info-label">Tailor</span>
+            <span class="info-val">Ricardo Dalisay</span>
+          </div>
+        </div>
+
+        <div class="checklist-section">
+          <h3 class="section-title"><i data-lucide="list-checks" style="width:20px;"></i> Inspection Checklist</h3>
+          
+          <div class="checklist-item checked" onclick="this.classList.toggle('checked')">
+            <div class="chk-left">
+              <div class="chk-box"><i data-lucide="check" style="width:16px;"></i></div>
+              <div>
+                <div class="chk-text">Measurements Verification</div>
+                <div class="chk-desc">Garment dimensions match the customer's recorded pattern.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="checklist-item checked" onclick="this.classList.toggle('checked')">
+            <div class="chk-left">
+              <div class="chk-box"><i data-lucide="check" style="width:16px;"></i></div>
+              <div>
+                <div class="chk-text">Fabric & Seam Integrity</div>
+                <div class="chk-desc">No loose threads, uneven stitching, or fabric damages.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="checklist-item" onclick="this.classList.toggle('checked')">
+            <div class="chk-left">
+              <div class="chk-box"><i data-lucide="check" style="width:16px;"></i></div>
+              <div>
+                <div class="chk-text">Ironing & Presentation</div>
+                <div class="chk-desc">Garment is properly pressed, steamed, and free of wrinkles.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checklist-section">
+          <h3 class="section-title">Inspector Notes</h3>
+          <textarea class="notes-area" placeholder="Add any comments or alteration requests here..."></textarea>
+        </div>
+
+        <div class="action-cards">
+          <div class="action-card ac-pass selected" onclick="document.querySelectorAll('.action-card').forEach(c=>c.classList.remove('selected')); this.classList.add('selected');">
+            <div class="icon-wrap"><i data-lucide="badge-check" style="width:32px; height:32px;"></i></div>
+            <h3>Pass Inspection</h3>
+            <p>Garment is perfect. Move to "Ready for Fitting".</p>
+          </div>
+          <div class="action-card ac-fail" onclick="document.querySelectorAll('.action-card').forEach(c=>c.classList.remove('selected')); this.classList.add('selected');">
+            <div class="icon-wrap"><i data-lucide="scissors" style="width:32px; height:32px;"></i></div>
+            <h3>Return for Alterations</h3>
+            <p>Fails QA. Send back to tailor for fixes.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <a href="06-kanban-board.html" class="btn btn-secondary">Cancel</a>
+        <a href="06-kanban-board.html" class="btn btn-primary">Confirm Inspection</a>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

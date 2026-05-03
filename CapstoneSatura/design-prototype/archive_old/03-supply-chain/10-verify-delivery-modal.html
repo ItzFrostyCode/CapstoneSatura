@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Verify Delivery - Sutura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;min-height:100vh;backdrop-filter:blur(4px);padding:24px;}
+    .modal{background:var(--bg);width:820px;border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,0.25);overflow:hidden;animation:slideUp 0.25s ease-out;}
+    @keyframes slideUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+    .modal-header{padding:28px 36px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+    .modal-badge{display:inline-flex;align-items:center;gap:6px;background:#EFF6FF;color:#2563EB;border:1px solid #DBEAFE;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;text-transform:uppercase;white-space:nowrap;}
+    .modal-title{font-size:20px;font-weight:800;letter-spacing:-0.3px;}
+    .modal-sub{font-size:13px;color:var(--text-muted);margin-top:4px;}
+    .close-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;flex-shrink:0;}
+    .close-btn:hover{background:var(--surface);color:var(--primary);}
+
+    .modal-body{padding:28px 36px;}
+
+    .delivery-info{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 22px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px;}
+    .info-item .i-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+    .info-item .i-value{font-size:14px;font-weight:700;color:var(--text-main);}
+
+    .section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+
+    .verify-table-wrap{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    th{padding:11px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;background:#F8FAFC;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+    td{padding:14px 16px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .item-name{font-weight:600;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .item-sku{font-size:11px;color:var(--text-muted);font-family:monospace;margin-top:2px;}
+
+    /* Fixed column widths — prevents wrapping */
+    .col-mat{width:34%;}
+    .col-exp{width:14%;}
+    .col-rcv{width:16%;}
+    .col-def{width:16%;}
+    .col-unit{width:20%;}
+
+    .qty-input{width:76px;height:36px;border:1px solid var(--border);border-radius:9px;padding:0 10px;font-family:'Outfit';font-weight:600;text-align:center;font-size:14px;outline:none;transition:all 0.2s;background:var(--bg);}
+    .qty-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,0,0,0.06);}
+
+    .defect-input{width:76px;height:36px;border:1px solid #FCA5A5;border-radius:9px;padding:0 10px;font-family:'Outfit';font-weight:700;text-align:center;font-size:14px;outline:none;background:#FEF2F2;color:#DC2626;transition:all 0.2s;}
+    .defect-input:focus{border-color:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,0.08);}
+
+    /* Defective section */
+    .defect-section{background:#FEF2F2;border:1px solid #FCA5A5;border-radius:14px;padding:18px 22px;margin-bottom:20px;}
+    .defect-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+    .defect-title{font-size:14px;font-weight:700;color:#DC2626;}
+    .defect-sub{margin-left:auto;font-size:12px;font-weight:600;color:#DC2626;opacity:0.75;white-space:nowrap;}
+
+    .defect-row{display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:center;margin-bottom:10px;}
+    .defect-row:last-of-type{margin-bottom:0;}
+    .defect-item-label{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .defect-item-name{font-size:13px;font-weight:700;color:#DC2626;white-space:nowrap;}
+    .return-badge{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap;}
+    .defect-reason-input{width:100%;height:36px;border:1px solid #FCA5A5;border-radius:9px;padding:0 14px;font-family:'Outfit';font-size:13px;background:#fff;outline:none;color:var(--text-main);transition:all 0.2s;}
+    .defect-reason-input::placeholder{color:#FCA5A5;}
+    .defect-reason-input:focus{border-color:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,0.08);}
+    .defect-note{display:flex;align-items:center;gap:6px;font-size:12px;color:#DC2626;font-weight:600;margin-top:12px;}
+
+    .status-preview{display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:12px;background:#FFFBEB;border:1px solid #FEF3C7;color:#D97706;font-size:13px;font-weight:600;}
+
+    .modal-footer{padding:22px 36px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:var(--surface);}
+    .btn-cancel{background:none;color:var(--text-muted);border:1px solid var(--border);font-size:14px;font-weight:600;padding:0 20px;height:44px;border-radius:12px;cursor:pointer;transition:all 0.2s;font-family:'Outfit';}
+    .btn-cancel:hover{background:#fff;}
+    .btn-confirm{background:#1A1A1A;color:white;border:none;font-size:14px;font-weight:700;padding:0 28px;height:44px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:'Outfit';white-space:nowrap;}
+    .btn-confirm:hover{background:#333;transform:translateY(-1px);}
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-badge"><i data-lucide="truck" style="width:11px;"></i> In Transit → Verifying</div>
+        <div class="modal-title">Verify Delivered Items</div>
+        <div class="modal-sub">PO-2023-094 — Premium Fabrics Inc. · Delivered Apr 25, 2026</div>
+      </div>
+      <a href="02-procurement-tab.html"><button class="close-btn"><i data-lucide="x" style="width:15px;"></i></button></a>
+    </div>
+
+    <div class="modal-body">
+      <div class="delivery-info">
+        <div class="info-item"><div class="i-label">Supplier</div><div class="i-value">Premium Fabrics Inc.</div></div>
+        <div class="info-item"><div class="i-label">PO Number</div><div class="i-value">PO-2023-094</div></div>
+        <div class="info-item"><div class="i-label">Expected Date</div><div class="i-value">Apr 28, 2026</div></div>
+        <div class="info-item"><div class="i-label">Received By</div><div class="i-value">Admin User</div></div>
+      </div>
+
+      <div class="section-label">Item Verification — Enter actual quantities received</div>
+      <div class="verify-table-wrap">
+        <table>
+          <colgroup>
+            <col class="col-mat"/><col class="col-exp"/><col class="col-rcv"/><col class="col-def"/><col class="col-unit"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Expected</th>
+              <th>Received OK</th>
+              <th>Defective</th>
+              <th>Unit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="item-name">Denim Fabric Roll</div>
+                <div class="item-sku">SKU: FAB-DEN-001</div>
+              </td>
+              <td style="font-weight:700;">50</td>
+              <td><input type="number" class="qty-input" value="48" min="0"/></td>
+              <td><input type="number" class="defect-input" value="2" min="0"/></td>
+              <td style="color:var(--text-muted);font-weight:500;">yards</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="item-name">Industrial Needles</div>
+                <div class="item-sku">SKU: ACC-NEE-055</div>
+              </td>
+              <td style="font-weight:700;">10</td>
+              <td><input type="number" class="qty-input" value="10" min="0"/></td>
+              <td><input type="number" class="defect-input" value="0" min="0"/></td>
+              <td style="color:var(--text-muted);font-weight:500;">packs</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="item-name">Charcoal Wool Tweed</div>
+                <div class="item-sku">SKU: FAB-WOL-044</div>
+              </td>
+              <td style="font-weight:700;">30</td>
+              <td><input type="number" class="qty-input" value="30" min="0"/></td>
+              <td><input type="number" class="defect-input" value="0" min="0"/></td>
+              <td style="color:var(--text-muted);font-weight:500;">meters</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Defective / Return section -->
+      <div class="defect-section">
+        <div class="defect-header">
+          <i data-lucide="alert-triangle" style="width:18px;color:#DC2626;flex-shrink:0;"></i>
+          <div class="defect-title">Defective / Return Items</div>
+          <span class="defect-sub">2 defective units flagged</span>
+        </div>
+
+        <div class="defect-row">
+          <div class="defect-item-label">
+            <span class="defect-item-name">Denim Fabric Roll</span>
+            <span class="return-badge">×2 yards</span>
+          </div>
+          <input type="text" class="defect-reason-input" placeholder="Reason — e.g. torn edges, staining, wrong color..." value="Torn edges — fabric damaged during shipping"/>
+        </div>
+
+        <div class="defect-note">
+          <i data-lucide="info" style="width:14px;flex-shrink:0;"></i>
+          Defective items will be rejected. Only accepted quantities will be added to inventory.
+        </div>
+        
+        <label style="display:flex; align-items:center; gap:8px; margin-top:16px; font-size:13px; font-weight:600; cursor:pointer;">
+          <input type="checkbox" checked style="width:16px; height:16px; accent-color:#DC2626; cursor:pointer;">
+          Notify supplier about the defect and automatically adjust the payable amount.
+        </label>
+      </div>
+
+      <div class="status-preview">
+        <i data-lucide="check-circle" style="width:18px;flex-shrink:0; color:#10B981;"></i>
+        <div style="color:var(--text-main);">PO will be marked as <strong style="color:#10B981;">Completed (Short Received)</strong>. Payable amount will be adjusted to only include the 48 accepted yards.</div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="02-procurement-tab.html"><button class="btn-cancel">Cancel</button></a>
+      <button class="btn-confirm"><i data-lucide="check" style="width:16px;"></i> Confirm & Update Inventory</button>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sutura Admin | Account Details (Clean Security)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg: #09090B;
+      --card: #121217;
+      --card-2: #17171e;
+      --accent: #3B82F6;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #e11d48;
+      --text: #FAFAFA;
+      --text-dim: #A1A1AA;
+      --border: #27272A;
+      --skeleton: #1e1e26;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; letter-spacing: -0.02em; }
+    
+    .validation-container {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      height: 100vh;
+    }
+
+    /* Left Side: Document View */
+    .doc-viewer {
+      padding: 16px 20px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      background: rgba(255,255,255,0.002);
+      height: 100vh;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .viewer-header {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center; gap: 6px;
+      color: var(--text-dim); font-size: 13px; font-weight: 600;
+      text-decoration: none; transition: 0.2s;
+    }
+    .back-btn:hover { color: white; }
+    .viewer-title { font-size: 20px; font-weight: 800; margin-top: 8px; }
+
+    .section-label { font-size: 10px; font-weight: 900; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; display: block; }
+    
+    /* Doc Grid */
+    .doc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+    .doc-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px; cursor: pointer; transition: all 0.2s;
+      display: flex; flex-direction: column; gap: 6px; position: relative;
+    }
+    .doc-card:hover { border-color: var(--accent); background: rgba(255,255,255,0.02); }
+    .doc-card.verified { border-color: var(--success); background: rgba(5, 150, 105, 0.04); }
+    .doc-card.verified .doc-icon { background: var(--success); color: white; }
+    .doc-card.flagged { border-color: var(--danger); background: rgba(225, 29, 72, 0.04); }
+    .doc-card.flagged .doc-icon { background: var(--danger); color: white; }
+    .doc-icon { width: 24px; height: 24px; background: rgba(255,255,255,0.04); border-radius: 5px; display: grid; place-items: center; color: var(--accent); }
+    .doc-icon i, .doc-icon svg { width: 12px; height: 12px; }
+    .doc-name { font-weight: 700; font-size: 11px; }
+    .doc-status { font-size: 9px; color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
+
+    /* Media Grid */
+    .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+    .media-card {
+      border-radius: 10px; overflow: hidden; border: 1px solid var(--border);
+      aspect-ratio: 16/10; background: #000; position: relative; cursor: pointer; transition: 0.2s;
+    }
+    .media-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .media-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+    
+    .media-tag { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 4px; font-size: 8px; font-weight: 800; text-transform: uppercase; }
+
+    /* Sidebar */
+    .applicant-sidebar {
+      padding: 24px 20px; display: flex; flex-direction: column; gap: 24px;
+      background: var(--card); overflow-y: auto;
+    }
+
+    .profile-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .profile-avatar { width: 56px; height: 56px; background: var(--accent-muted); color: var(--accent); border-radius: 16px; display: grid; place-items: center; font-size: 20px; font-weight: 800; margin-bottom: 12px; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .profile-name { font-size: 16px; font-weight: 800; }
+    .profile-tier { font-size: 9px; font-weight: 900; text-transform: uppercase; color: var(--accent); background: rgba(59,130,246,0.1); padding: 3px 10px; border-radius: 999px; margin-top: 6px; }
+
+    .info-list { display: flex; flex-direction: column; gap: 16px; }
+    .info-item label { display: block; font-size: 9px; font-weight: 900; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .info-item span { font-size: 13px; font-weight: 600; }
+
+    /* --- CLEAN SHOP STORAGE UI --- */
+    .storage-meter-card {
+      background: linear-gradient(145deg, var(--card-2), var(--card));
+      border-radius: 16px; padding: 18px; border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .storage-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
+    .storage-value { font-size: 20px; font-weight: 800; color: white; line-height: 1; }
+    .storage-limit { font-size: 11px; color: var(--text-dim); font-weight: 500; }
+    
+    .storage-bar-container { height: 8px; background: rgba(255,255,255,0.05); border-radius: 20px; margin-bottom: 12px; position: relative; overflow: hidden; }
+    .storage-bar-fill {
+      height: 100%; border-radius: 20px;
+      background: linear-gradient(90deg, #3B82F6, #60A5FA);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+      width: 0%; transition: 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .storage-footer { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; color: var(--text-dim); }
+    .storage-percent { color: var(--accent); }
+
+    /* Action Buttons */
+    .action-panel { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+    .btn { padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-outline { background: var(--card-2); color: white; border: 1px solid var(--border); }
+    .btn-danger { background: rgba(225, 29, 72, 0.1); color: var(--danger); border: 1px solid rgba(225, 29, 72, 0.2); }
+
+    /* Skeleton Loading */
+    .skeleton { position: relative; overflow: hidden; background: var(--skeleton) !important; border-color: transparent !important; color: transparent !important; pointer-events: none; }
+    .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent); animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+    /* Lightbox */
+    .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 10000; cursor: zoom-out; }
+    .lightbox-overlay.show { display: flex; }
+    .lightbox-image { max-width: 90%; max-height: 90%; border-radius: 8px; }
+
+    /* Password Reveal Section */
+    .password-reveal {
+      background: var(--card-2); border: 1px dashed var(--accent);
+      border-radius: 12px; padding: 12px; margin-top: 12px;
+      display: none; flex-direction: column; gap: 8px;
+    }
+    .password-reveal.show { display: flex; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .password-text { font-family: monospace; font-size: 14px; color: var(--accent); font-weight: 800; background: rgba(59, 130, 246, 0.05); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid rgba(59, 130, 246, 0.1); }
+
+    .danger-zone-compact { border: 1px solid rgba(225, 29, 72, 0.15); background: rgba(225, 29, 72, 0.02); border-radius: 12px; padding: 16px; }
+  </style>
+</head>
+<body>
+  <div class="validation-container">
+    <main class="doc-viewer">
+      <div class="viewer-header">
+        <div>
+          <a href="03-shops.html" class="back-btn"><i data-lucide="arrow-left" style="width:14px;"></i> Back to Shops</a>
+          <h1 class="viewer-title" id="shopTitle">Loading...</h1>
+        </div>
+        <div style="text-align: right;">
+          <span class="section-label" style="margin-bottom: 4px;">Registered Since</span>
+          <div style="font-weight: 700; font-size: 13px;" id="regDate">--- --, ----</div>
+        </div>
+      </div>
+
+      <span class="section-label">Verified Document Stack</span>
+      <div class="doc-grid" id="docGrid">
+        <div class="doc-card skeleton"><div class="doc-name">...</div></div>
+        <div class="doc-card skeleton"><div class="doc-name">...</div></div>
+        <div class="doc-card skeleton"><div class="doc-name">...</div></div>
+      </div>
+
+      <span class="section-label">Evidence Gallery</span>
+      <div class="media-grid" id="mediaGrid">
+        <div class="media-card skeleton"></div>
+        <div class="media-card skeleton"></div>
+        <div class="media-card skeleton"></div>
+      </div>
+
+      <div class="danger-zone-compact">
+        <span class="section-label" style="color: var(--danger); margin-bottom: 6px;">Sensitive Actions</span>
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button class="btn btn-outline" style="flex: 1; padding: 10px; font-size: 12px;"><i data-lucide="pause-circle" style="width:14px;"></i> Suspend Account</button>
+          <button class="btn btn-danger" style="flex: 1; padding: 10px; font-size: 12px;"><i data-lucide="trash-2" style="width:14px;"></i> Terminate Shop</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="applicant-sidebar">
+      <div class="profile-card">
+        <div class="profile-avatar" id="avatar">...</div>
+        <div class="profile-name" id="shopName">Loading...</div>
+        <div class="profile-tier" id="shopTier">...</div>
+      </div>
+
+      <div class="info-list">
+        <div class="info-item"><label>Shop Owner</label><span id="ownerName">...</span></div>
+        <div class="info-item"><label>Email Address</label><span id="email">...</span></div>
+        <div class="info-item"><label>Location</label><span id="location">...</span></div>
+      </div>
+
+      <!-- CLEAN SHOP STORAGE UI -->
+      <div class="storage-meter-card">
+        <span class="section-label" style="margin-bottom: 10px;">Storage Utilization</span>
+        <div class="storage-header">
+           <div class="storage-value"><span id="usedStorage">5</span> <small style="font-size: 12px; font-weight: 500;">MB</small></div>
+           <div class="storage-limit">of 500 MB Limit</div>
+        </div>
+        <div class="storage-bar-container">
+           <div class="storage-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="storage-footer">
+           <span class="storage-percent" id="storagePercent">1% Used</span>
+           <span id="remainingStorage">495 MB Left</span>
+        </div>
+      </div>
+
+      <div class="action-panel">
+        <button class="btn btn-primary" onclick="refreshData()"><i data-lucide="refresh-cw" style="width:16px;"></i> Refresh Status</button>
+        <button class="btn btn-outline" id="resetPassBtn" onclick="handlePasswordReset()"><i data-lucide="key" style="width:18px;"></i> Reset & Generate Password</button>
+        
+        <div class="password-reveal" id="passReveal">
+          <label class="section-label" style="margin-bottom: 4px; color: var(--accent);">Temporary Password</label>
+          <div class="password-text" id="newPassword">SATURA-XXXX-XXXX</div>
+          <button class="btn btn-primary" style="padding: 8px; font-size: 11px;" onclick="copyPassword()"><i data-lucide="copy" style="width:12px;"></i> Copy & Close</button>
+        </div>
+
+        <button class="btn btn-outline"><i data-lucide="message-square" style="width:18px;"></i> Message Owner</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="lightbox-overlay" id="lightbox">
+    <img src="" class="lightbox-image" id="lightboxImg">
+  </div>
+
+  <script>
+    const accountData = {
+      shopName: "La Belle Couture",
+      owner: "Antonio Luna",
+      email: "antonio@labelle.ph",
+      location: "Davao City",
+      regDate: "Mar 12, 2024",
+      tier: "Premium Plan",
+      avatar: "LB",
+      shopUsage: 5,
+      shopLimit: 500,
+      docs: [
+        { name: "DTI Certificate", icon: "file-text", status: "Verified" },
+        { name: "BIR Form 2303", icon: "hash", status: "Verified" },
+        { name: "Mayor's Permit", icon: "building", status: "Verified" },
+        { name: "Brgy Clearance", icon: "map-pin", status: "Verified" },
+        { name: "Shop Signage", icon: "image", status: "Verified" },
+        { name: "Equipment Proof", icon: "wrench", status: "Verified" }
+      ],
+      media: [
+        { tag: "DTI Cert", url: "https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&q=80&w=600" },
+        { tag: "BIR Form", url: "https://images.unsplash.com/photo-1554224155-1696413565d3?auto=format&fit=crop&q=80&w=600" },
+        { tag: "Mayor Permit", url: "https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=600" },
+        { tag: "Brgy Clear", url: "https://images.unsplash.com/photo-1621252179027-94459d278660?auto=format&fit=crop&q=80&w=600" },
+        { tag: "Signage", url: "https://images.unsplash.com/photo-1520004434532-668416a08753?auto=format&fit=crop&q=80&w=600" },
+        { tag: "Workstation", url: "https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?auto=format&fit=crop&q=80&w=600" }
+      ]
+    };
+
+    function initData() {
+      document.querySelectorAll('.profile-name, .profile-avatar, .profile-tier, .info-item span, .viewer-title, .doc-grid, .media-grid').forEach(el => el.classList.add('skeleton'));
+      setTimeout(() => { populateUI(accountData); }, 800);
+    }
+
+    function refreshData() {
+      const btn = event.currentTarget;
+      btn.innerHTML = '<i data-lucide="loader" class="spin" style="width:16px;"></i> Refreshing...';
+      lucide.createIcons();
+      setTimeout(() => {
+        populateUI(accountData);
+        btn.innerHTML = '<i data-lucide="refresh-cw" style="width:16px;"></i> Refresh Status';
+        lucide.createIcons();
+      }, 500);
+    }
+
+    function handlePasswordReset() {
+      if (confirm("Reset and generate a new temporary password?")) {
+        const generatedPass = "SATURA-" + Math.random().toString(36).substr(2, 4).toUpperCase() + "-" + Math.random().toString(36).substr(2, 4).toUpperCase();
+        document.getElementById('newPassword').innerText = generatedPass;
+        document.getElementById('passReveal').classList.add('show');
+        document.getElementById('resetPassBtn').style.display = 'none';
+      }
+    }
+
+    function copyPassword() {
+      const pass = document.getElementById('newPassword').innerText;
+      navigator.clipboard.writeText(pass).then(() => {
+        alert("Password copied!");
+        document.getElementById('passReveal').classList.remove('show');
+        document.getElementById('resetPassBtn').style.display = 'flex';
+      });
+    }
+
+    function populateUI(data) {
+      document.getElementById('shopTitle').innerText = data.shopName;
+      document.getElementById('shopName').innerText = data.shopName;
+      document.getElementById('ownerName').innerText = data.owner;
+      document.getElementById('email').innerText = data.email;
+      document.getElementById('location').innerText = data.location;
+      document.getElementById('regDate').innerText = data.regDate;
+      document.getElementById('shopTier').innerText = data.tier;
+      document.getElementById('avatar').innerText = data.avatar;
+      document.getElementById('usedStorage').innerText = data.shopUsage;
+      
+      const progressFill = document.getElementById('progressFill');
+      const percentage = (data.shopUsage / data.shopLimit) * 100;
+      progressFill.style.width = percentage + '%';
+      document.getElementById('storagePercent').innerText = percentage + "% Used";
+      document.getElementById('remainingStorage').innerText = (data.shopLimit - data.shopUsage) + " MB Left";
+
+      const docGrid = document.getElementById('docGrid'); docGrid.innerHTML = '';
+      data.docs.forEach(doc => {
+        const card = document.createElement('div');
+        card.className = 'doc-card verified';
+        card.innerHTML = `
+          <div class="doc-icon"><i data-lucide="${doc.icon}"></i></div>
+          <div class="doc-name">${doc.name}</div>
+          <div class="doc-status"><i data-lucide="check-circle" style="width:12px;"></i> ${doc.status}</div>
+        `;
+        docGrid.appendChild(card);
+      });
+
+      const mediaGrid = document.getElementById('mediaGrid'); mediaGrid.innerHTML = '';
+      data.media.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'media-card';
+        card.innerHTML = `<img src="${item.url}" alt="${item.tag}"><div class="media-tag">${item.tag}</div>`;
+        mediaGrid.appendChild(card);
+      });
+
+      document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+      lucide.createIcons();
+      attachInteractions();
+    }
+
+    function attachInteractions() {
+      document.querySelectorAll('.doc-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const statusEl = card.querySelector('.doc-status');
+          const iconContainer = card.querySelector('.doc-icon');
+          if (!card.classList.contains('verified') && !card.classList.contains('flagged')) {
+            card.classList.add('verified');
+            statusEl.innerHTML = '<i data-lucide="check-circle" style="width:12px;"></i> Verified';
+            iconContainer.innerHTML = '<i data-lucide="check"></i>';
+          } else if (card.classList.contains('verified')) {
+            card.classList.remove('verified'); card.classList.add('flagged');
+            statusEl.innerHTML = '<i data-lucide="alert-circle" style="width:12px;"></i> Flagged';
+            iconContainer.innerHTML = '<i data-lucide="alert-triangle"></i>';
+          } else {
+            card.classList.remove('flagged');
+            statusEl.innerHTML = '<i data-lucide="clock" style="width:12px;"></i> Pending';
+            const docName = card.querySelector('.doc-name').innerText;
+            let icon = 'file-text';
+            if (docName.includes('BIR')) icon = 'hash';
+            if (docName.includes('Mayor')) icon = 'building';
+            if (docName.includes('Brgy')) icon = 'map-pin';
+            if (docName.includes('Signage')) icon = 'image';
+            if (docName.includes('Equipment')) icon = 'wrench';
+            iconContainer.innerHTML = `<i data-lucide="${icon}"></i>`;
+          }
+          lucide.createIcons();
+        });
+      });
+
+      document.querySelectorAll('.media-card img').forEach(img => {
+        img.addEventListener('click', () => {
+          document.getElementById('lightboxImg').src = img.src;
+          document.getElementById('lightbox').classList.add('show');
+        });
+      });
+    }
+
+    document.getElementById('lightbox').addEventListener('click', () => {
+      document.getElementById('lightbox').classList.remove('show');
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      initData();
+    });
+  </script>
+  <style>
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

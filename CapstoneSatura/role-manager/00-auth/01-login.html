@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Login</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A;
+      --primary-hover: #333333;
+      --bg: #FFFFFF;
+      --surface: #F9FAFB;
+      --text-main: #111827;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --accent: #2C6BED;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .split-layout {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Left Side - Image Carousel */
+    .hero-section {
+      width: 50%;
+      position: relative;
+      overflow: hidden;
+      background-color: var(--primary);
+    }
+
+    .hero-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('../../../image.png');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 60px;
+      color: white;
+    }
+
+    .hero-text h1 {
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      letter-spacing: -1.5px;
+    }
+
+    .hero-text p {
+      font-size: 18px;
+      font-weight: 300;
+      opacity: 0.9;
+      max-width: 500px;
+      line-height: 1.5;
+    }
+
+    /* Right Side - Form */
+    .form-section {
+      width: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg);
+      padding: 40px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .logo-icon {
+      background-color: var(--primary);
+      color: white;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .logo-text { font-size: 28px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+    
+    .form-header h2 { font-size: 36px; font-weight: 600; margin-bottom: 8px; letter-spacing: -1px; }
+    .form-header p { font-size: 16px; color: var(--text-muted); margin-bottom: 40px; }
+
+    .form-group { margin-bottom: 24px; position: relative; }
+    label { display: block; font-size: 14px; font-weight: 500; color: var(--text-main); margin-bottom: 8px; }
+    
+    input[type="email"], input[type="password"] {
+      width: 100%; height: 52px; padding: 0 16px; border: 1.5px solid var(--border); border-radius: 12px;
+      font-family: 'Outfit', sans-serif; font-size: 16px; color: var(--text-main); outline: none; transition: all 0.2s; background: var(--surface);
+    }
+    input:focus { border-color: var(--primary); background: var(--bg); box-shadow: 0 0 0 4px rgba(26, 26, 26, 0.05); }
+
+    .input-icon {
+      position: absolute;
+      right: 16px;
+      top: 38px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .forgot-password {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: -8px;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+    
+    .forgot-password label { margin: 0; font-weight: 400; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-muted); }
+    .forgot-password input[type="checkbox"] { width: 16px; height: 16px; border-radius: 4px; accent-color: var(--primary); cursor: pointer; }
+    .forgot-password a { color: var(--text-main); text-decoration: none; font-weight: 500; }
+    .forgot-password a:hover { text-decoration: underline; }
+
+    button.btn-primary {
+      width: 100%; height: 52px; background-color: var(--primary); color: white; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    button.btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+
+    .switch-mode {
+      display: block; text-align: center; font-size: 15px; font-weight: 500; color: var(--text-main); text-decoration: none; margin-top: 32px;
+    }
+    .switch-mode span { color: var(--text-muted); }
+    .switch-mode:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="split-layout">
+    <div class="hero-section">
+      <div class="hero-image"></div>
+      <div class="hero-overlay">
+        <div class="hero-text">
+          <h1>Crafted with Precision.</h1>
+          <p>Elevate your tailoring business with a platform designed for the perfect fit. Manage customers, orders, and your team seamlessly.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="login-container">
+        <div class="logo">
+          <div class="logo-icon"><i data-lucide="scissors" style="width: 24px; height: 24px;"></i></div>
+          <div class="logo-text">Sutura</div>
+        </div>
+        
+        <div class="form-header">
+          <h2>Welcome back</h2>
+          <p>Please enter your details to sign in.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Email address</label>
+          <input type="email" value="admin@tailorshop.com" />
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" value="password123" />
+          <i data-lucide="eye" class="input-icon" style="width: 20px;"></i>
+        </div>
+
+        <div class="forgot-password">
+          <label><input type="checkbox" checked /> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <button class="btn-primary" onclick="window.location.href='../00-dashboard/01-dashboard.html'">Sign In</button>
+
+        <a href="02-register.html" class="switch-mode"><span>Don't have an account?</span> Sign up</a>
+
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

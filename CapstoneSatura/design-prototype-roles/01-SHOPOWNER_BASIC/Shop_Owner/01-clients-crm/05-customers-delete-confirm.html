@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Delete Customer</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --danger: #EF4444; --danger-hover: #DC2626; --danger-bg: #FEF2F2;
+      --overlay: rgba(0, 0, 0, 0.6);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 1440px; height: 100vh; overflow: hidden; }
+
+    /* Blurred background layout */
+    .sidebar { width: 260px; background-color: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background-color: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none;}
+    .nav-item.active { background-color: var(--primary); color: white; }
+    
+    .main { flex-grow: 1; display: flex; flex-direction: column; filter: blur(3px); background: var(--surface); }
+    .header { height: 72px; background-color: var(--bg); border-bottom: 1px solid var(--border); }
+
+    /* Modal Overlay */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--overlay); display: flex; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(2px); }
+    
+    .modal { background-color: var(--bg); width: 440px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); overflow: hidden; display: flex; flex-direction: column; text-align: center; }
+    
+    .modal-body { padding: 40px 32px 32px; }
+    
+    .alert-icon { width: 64px; height: 64px; background-color: var(--danger-bg); color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    
+    .modal-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .modal-text { font-size: 15px; color: var(--text-muted); line-height: 1.5; }
+    
+    .customer-name { font-weight: 600; color: var(--text-main); }
+
+    .modal-footer { padding: 20px 32px; border-top: 1px solid var(--border); display: flex; gap: 12px; background-color: var(--surface); }
+    .btn-secondary { flex: 1; background-color: var(--bg); border: 1px solid var(--border); color: var(--text-main); height: 44px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { background-color: #E5E7EB; }
+    .btn-danger { flex: 1; background-color: var(--danger); color: white; border: none; height: 44px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(239,68,68,0.2); }
+    .btn-danger:hover { background-color: var(--danger-hover); transform: translateY(-1px); }
+
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div><div class="logo-text">Sutura</div></div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item active"><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item "><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      
+      <a href="../05-settings/01-settings-tab.html" class="nav-item "><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+  </aside>
+  <main class="main"><header class="header"></header></main>
+
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-body">
+        <div class="alert-icon">
+          <i data-lucide="trash-2" style="width: 32px; height: 32px;"></i>
+        </div>
+        <div class="modal-title">Delete Customer</div>
+        <div class="modal-text">
+          Are you sure you want to delete <span class="customer-name">Alexander McQueen</span>? All their associated measurements, active job orders, and appointment history will be permanently erased.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary">Cancel</button>
+        <button class="btn-danger">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

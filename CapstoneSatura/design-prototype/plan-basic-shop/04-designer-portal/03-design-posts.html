@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura - Portfolio Studio</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #000000; --bg: #FFFFFF; --surface: #F8F9FA;
+      --text-main: #000000; --text-muted: #737373; --border: #E5E5E5;
+      --accent: #000000; --accent-light: #F5F5F5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; }
+
+    /* ── Sidebar (Consistent) ── */
+    .sidebar { width: 80px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 32px 0; flex-shrink: 0; position: sticky; top: 0; height: 100vh; transition: width 0.3s; overflow: hidden; }
+    .sidebar:hover { width: 240px; }
+    .logo-icon { width: 44px; height: 44px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin-bottom: 48px; }
+    .nav-list { display: flex; flex-direction: column; gap: 12px; width: 100%; padding: 0 12px; }
+    .nav-item { display: flex; align-items: center; gap: 16px; padding: 14px; border-radius: 14px; color: var(--text-muted); text-decoration: none; transition: all 0.2s; white-space: nowrap; }
+    .nav-item:hover, .nav-item.active { background: var(--surface); color: var(--primary); }
+    .nav-item.active { background: var(--accent-light); }
+
+    /* ── Main ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: white; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .header-title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+
+    /* ── Portfolio Grid ── */
+    .content { padding: 48px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    
+    /* Profile Summary */
+    .profile-summary { margin-bottom: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .profile-details { display: flex; align-items: center; gap: 32px; }
+    .profile-avatar { width: 100px; height: 100px; border-radius: 32px; background: var(--accent-light); overflow: hidden; }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+    .profile-info p { font-size: 15px; color: var(--text-muted); margin-top: 4px; }
+    
+    .profile-stats { display: flex; gap: 40px; }
+    .stat-box { text-align: center; }
+    .stat-num { font-size: 24px; font-weight: 800; display: block; }
+    .stat-tag { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Masonry-style Grid */
+    .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .portfolio-item { border-radius: 32px; overflow: hidden; background: var(--surface); position: relative; cursor: pointer; transition: transform 0.4s; }
+    .portfolio-item:hover { transform: translateY(-8px); }
+    .portfolio-item img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+    
+    .item-meta { position: absolute; bottom: 0; left: 0; right: 0; padding: 32px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); color: white; opacity: 0; transition: opacity 0.3s; }
+    .portfolio-item:hover .item-meta { opacity: 1; }
+    .item-title { font-size: 18px; font-weight: 700; }
+    .item-cat { font-size: 12px; font-weight: 600; opacity: 0.8; }
+
+    .btn-publish { background: var(--primary); color: white; border: none; padding: 0 24px; height: 48px; border-radius: 24px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-icon"><i data-lucide="scissors"></i></div>
+    <nav class="nav-list">
+      <a href="01-designer-dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i><span>Studio</span></a>
+      <a href="03-design-posts.html" class="nav-item active"><i data-lucide="image"></i><span>Portfolio</span></a>
+      <a href="04-publish-product.html" class="nav-item"><i data-lucide="shopping-bag"></i><span>Catalog</span></a>
+      <a href="02-profile-settings.html" class="nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+      <a href="#" class="nav-item"><i data-lucide="bell"></i><span>Activity</span></a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">My Portfolio</div>
+      <button class="btn-publish"><i data-lucide="plus"></i> New Project</button>
+    </header>
+
+    <div class="content">
+      
+      <!-- Profile Header -->
+      <div class="profile-summary">
+        <div class="profile-details">
+          <div class="profile-avatar">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400">
+          </div>
+          <div class="profile-info">
+            <h1>Elena Rossi</h1>
+            <p>Senior Fashion Designer @ La Belle Couture</p>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="stat-box"><span class="stat-num">42</span><span class="stat-tag">Projects</span></div>
+          <div class="stat-box"><span class="stat-num">1.2k</span><span class="stat-tag">Reach</span></div>
+          <div class="stat-box"><span class="stat-num">12</span><span class="stat-tag">Catalog</span></div>
+        </div>
+      </div>
+
+      <!-- Portfolio Grid -->
+      <div class="portfolio-grid">
+        <div class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1539109132314-3477524c8959?auto=format&fit=crop&q=80">
+          <div class="item-meta">
+            <div class="item-cat">Evening Wear</div>
+            <div class="item-title">Midnight Silk Gala</div>
+          </div>
+        </div>
+        <div class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80">
+          <div class="item-meta">
+            <div class="item-cat">Streetwear</div>
+            <div class="item-title">Urban Chic Concept</div>
+          </div>
+        </div>
+        <div class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1445205170230-053b830c6050?auto=format&fit=crop&q=80">
+          <div class="item-meta">
+            <div class="item-cat">Bridal</div>
+            <div class="item-title">Petal Train Prototype</div>
+          </div>
+        </div>
+        <div class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600">
+          <div class="item-meta">
+            <div class="item-cat">Outerwear</div>
+            <div class="item-title">Minimalist Overcoat</div>
+          </div>
+        </div>
+        <div class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600">
+          <div class="item-meta">
+            <div class="item-cat">Casual Wear</div>
+            <div class="item-title">Summer Linen Blazer</div>
+          </div>
+        </div>
+        <div class="portfolio-item">
+          <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600">
+          <div class="item-meta">
+            <div class="item-cat">Collection</div>
+            <div class="item-title">Spring/Summer 2026</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

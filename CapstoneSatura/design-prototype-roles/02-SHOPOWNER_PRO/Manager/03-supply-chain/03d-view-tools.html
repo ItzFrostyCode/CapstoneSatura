@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>View Tool | Sutura Management</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #F97316; --accent-light: #FFF7ED;
+      --success: #10B981; --success-light: #ECFDF5;
+      --warning: #F59E0B; --warning-light: #FFFBEB;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+
+    .modal { 
+      background: var(--bg); 
+      width: 900px; 
+      max-height: 90vh; 
+      border-radius: 32px; 
+      box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.3); 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+      animation: modalFadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalFadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    .modal-header { padding: 32px 40px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .item-header-info { display: flex; align-items: center; gap: 20px; }
+    .item-icon-box { width: 56px; height: 56px; border-radius: 16px; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+    .item-title-group h2 { font-size: 24px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+    .item-sku-pill { display: inline-block; padding: 4px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-top: 4px; }
+
+    .modal-body { padding: 40px; overflow-y: auto; flex-grow: 1; display: grid; grid-template-columns: 1.5fr 1fr; gap: 32px; }
+
+    .view-section { display: flex; flex-direction: column; gap: 20px; }
+    .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 24px; }
+    .card-title { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    
+    .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.03); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+    .detail-value { font-size: 14px; color: var(--text-main); font-weight: 700; }
+
+    .stock-highlight { text-align: center; padding: 32px; border-radius: 24px; background: white; border: 1px solid var(--border); margin-bottom: 24px; }
+    .stock-count { font-size: 48px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .stock-unit { font-size: 14px; color: var(--text-muted); font-weight: 600; margin-top: 8px; }
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-top: 16px; }
+    .status-badge.low-stock { background: var(--warning-light); color: var(--warning); }
+
+    .modal-footer { padding: 24px 40px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
+    .btn { height: 48px; padding: 0 24px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; border: none; font-family: inherit; }
+    .btn-secondary { background: var(--surface); color: var(--text-main); }
+    .btn-primary { background: var(--primary); color: white; }
+  </style>
+</head>
+<body>
+
+  <div class="modal">
+    <div class="modal-header">
+      <div class="item-header-info">
+        <div class="item-icon-box"><i data-lucide="wrench" style="width: 28px; height: 28px;"></i></div>
+        <div class="item-title-group">
+          <h2>Industrial Sewing Machine</h2>
+          <span class="item-sku-pill">SKU-MCH-001</span>
+        </div>
+      </div>
+      <button onclick="window.location.href='01-inventory-tab.html'" style="background: none; border: none; color: var(--text-muted); cursor: pointer;"><i data-lucide="x"></i></button>
+    </div>
+
+    <div class="modal-body">
+      
+      <div class="view-section">
+        <div class="section-card">
+          <div class="card-title"><i data-lucide="settings" style="width: 14px;"></i> Equipment Specifications</div>
+          <div class="detail-row">
+            <span class="detail-label">Type</span>
+            <span class="detail-value">Machines</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Brand</span>
+            <span class="detail-value">Juki</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Model Number</span>
+            <span class="detail-value">DCL-8700</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Condition</span>
+            <span class="detail-value">New / Professional</span>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="card-title"><i data-lucide="dollar-sign" style="width: 14px;"></i> Asset Value</div>
+          <div class="detail-row">
+            <span class="detail-label">Unit Cost</span>
+            <span class="detail-value">₱25,000.00</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Total Asset Value</span>
+            <span class="detail-value">₱125,000.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="view-section">
+        <div class="stock-highlight">
+          <div class="stock-count">5</div>
+          <div class="stock-unit">UNITS IN OPERATION</div>
+          <div class="status-badge low-stock"><i data-lucide="alert-triangle" style="width: 14px;"></i> Low Stock Level</div>
+        </div>
+
+        <div class="section-card">
+          <div class="card-title"><i data-lucide="truck" style="width: 14px;"></i> Service & Support</div>
+          <div class="detail-row">
+            <span class="detail-label">Supplier</span>
+            <span class="detail-value">Juki Manila Center</span>
+          </div>
+          <div class="detail-row" style="margin-top: 12px;">
+            <span class="detail-label">Last Maintenance</span>
+            <span class="detail-value">Sept 20, 2023</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.location.href='01-inventory-tab.html'">Close View</button>
+      <button class="btn btn-primary" onclick="window.location.href='02d-add-tools.html'"><i data-lucide="edit-3"></i> Edit Equipment</button>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

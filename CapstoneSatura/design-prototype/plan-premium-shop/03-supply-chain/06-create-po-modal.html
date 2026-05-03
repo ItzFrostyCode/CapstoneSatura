@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Create Purchase Order</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333;
+      --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #2C6BED;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: rgba(0,0,0,0.5); height: 100vh; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+
+    .modal { background: white; width: 800px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
+    .modal-header { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 20px; font-weight: 700; }
+    
+    .modal-body { padding: 32px; overflow-y: auto; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+    label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    select, input, textarea { width: 100%; height: 48px; border: 1.5px solid var(--border); border-radius: 12px; padding: 0 16px; font-family: 'Outfit'; font-size: 15px; outline: none; background: var(--surface); }
+    textarea { height: 80px; padding: 12px 16px; }
+
+    /* Item List */
+    .po-items { margin-top: 32px; }
+    .po-table { width: 100%; border-collapse: collapse; }
+    .po-table th { text-align: left; font-size: 12px; font-weight: 700; color: var(--text-muted); padding: 12px 16px; border-bottom: 2px solid var(--border); }
+    .po-table td { padding: 16px; border-bottom: 1px solid var(--border); }
+    
+    .total-section { margin-top: 24px; padding: 24px; background: var(--surface); border-radius: 16px; display: flex; justify-content: flex-end; }
+    .total-box { text-align: right; }
+    .total-label { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+    .total-value { font-size: 24px; font-weight: 800; color: var(--primary); margin-top: 4px; }
+
+    .modal-footer { padding: 24px 32px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+    .btn-secondary { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Generate New Purchase Order</div>
+      <a href="01-inventory-tab.html" style="color: var(--text-muted);"><i data-lucide="x"></i></a>
+    </div>
+    
+    <div class="modal-body">
+      <div class="grid">
+        <div>
+          <label>Select Supplier</label>
+          <select>
+            <option>Premium Textiles Inc.</option>
+            <option>Divisoria Wholesale Hub</option>
+            <option>Tailor's Choice Accessories</option>
+          </select>
+        </div>
+        <div>
+          <label>Expected Delivery Date</label>
+          <input type="date" value="2026-05-15" />
+        </div>
+      </div>
+
+      <div class="po-items">
+        <label>Order Items</label>
+        <table class="po-table">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th width="120">Quantity</th>
+              <th width="150">Unit Cost</th>
+              <th width="150">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="font-weight: 700;">Charcoal Charmeuse Lining</div>
+                <div style="font-size: 12px; color: var(--text-muted);">SKU: INV-FAB-0102</div>
+              </td>
+              <td><input type="number" value="50" style="height: 36px; padding: 0 8px;" /></td>
+              <td><div style="font-weight: 600;">₱180.00</div></td>
+              <td><div style="font-weight: 800;">₱9,000.00</div></td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 700;">English Wool (Natural)</div>
+                <div style="font-size: 12px; color: var(--text-muted);">SKU: INV-FAB-0105</div>
+              </td>
+              <td><input type="number" value="20" style="height: 36px; padding: 0 8px;" /></td>
+              <td><div style="font-weight: 600;">₱2,400.00</div></td>
+              <td><div style="font-weight: 800;">₱48,000.00</div></td>
+            </tr>
+          </tbody>
+        </table>
+        <button style="margin-top: 16px; background: none; border: 1.5px dashed var(--border); color: var(--text-muted); width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i data-lucide="plus-circle" style="width: 16px;"></i> Add another item from catalog
+        </button>
+      </div>
+
+      <div class="total-section">
+        <div class="total-box">
+          <div class="total-label">Total Order Value</div>
+          <div class="total-value">₱57,000.00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="01-inventory-tab.html" class="btn-secondary">Cancel</a>
+      <button class="btn-primary" onclick="alert('PO-2026-001 Generated and sent to Supplier!'); window.location.href='01-inventory-tab.html'">
+        <i data-lucide="send" style="width: 18px;"></i> Generate & Send PO
+      </button>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

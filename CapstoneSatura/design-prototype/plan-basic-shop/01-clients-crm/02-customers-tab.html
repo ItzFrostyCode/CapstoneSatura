@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Customers Tab</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333;
+      --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --success: #059669; --warning: #D97706; --danger: #DC2626; --info: #2563EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+    .sidebar-header { padding: 32px 24px; display: flex; flex-direction: column; gap: 4px; }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .logo-icon { background: var(--primary); color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+    .logo-text { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .nav-list { padding: 0 16px; display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background: var(--surface); color: var(--primary); }
+    .nav-item.active { background: var(--primary); color: white; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .sidebar-footer { padding: 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: #F3E8FF; color: #9333EA; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid white; box-shadow: 0 0 0 1px var(--border); }
+
+    /* ── Main ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { height: 80px; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; flex-direction: column; }
+    .header-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--primary); }
+    .header-date { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+    
+    .header-actions { display: flex; align-items: center; gap: 16px; }
+
+    /* ── Subnav ── */
+    .subnav { height: 64px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 48px; gap: 8px; flex-shrink: 0; position: sticky; top: 80px; z-index: 90; justify-content: space-between; }
+    .subnav-tabs { display: flex; gap: 32px; height: 100%; align-items: center; }
+    .subnav-tab { text-decoration: none; font-size: 14px; font-weight: 700; color: var(--text-muted); height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; white-space: nowrap; }
+    .subnav-tab:hover { color: var(--primary); }
+    .subnav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .subnav-actions { display: flex; align-items: center; gap: 16px; }
+    .btn-primary-sm { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-primary-sm:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+
+    /* ── Content Area ── */
+    .content { padding: 40px 48px; flex-grow: 1; overflow-y: auto; }
+
+    /* ── Stats Grid ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 32px; }
+    .stat-card { background: white; border: 1px solid var(--border); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .stat-label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+
+    /* ── Page Actions ── */
+    .page-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .search-box { display: flex; align-items: center; border: 1px solid var(--border); background: white; border-radius: 12px; padding: 0 16px; height: 48px; width: 340px; transition: all 0.2s; }
+    .search-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0,0,0,0.03); }
+    .search-box input { border: none; outline: none; margin-left: 10px; font-family: 'Outfit'; font-size: 14px; width: 100%; color: var(--text-main); background: transparent; }
+
+    /* ── Table ── */
+    .table-container { background: white; border-radius: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: #F8FAFC; padding: 16px 32px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+    td { padding: 20px 32px; border-bottom: 1px solid #F3F4F6; vertical-align: middle; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #F8FAFC; }
+    .customer-cell { display: flex; align-items: center; gap: 16px; }
+    .customer-info .name { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
+    .badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.02em; }
+    .badge.designer { background: #EEF2FF; color: #4338ca; border-color: #C7D2FE; }
+    .badge.regular { background: #F0FDF4; color: #15803d; border-color: #BBF7D0; }
+    .badge.vip { background: #FFFBEB; color: #B45309; border-color: #FDE68A; }
+    .small-text { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    .actions { display: flex; gap: 8px; }
+    .action-btn { height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted); transition: all 0.2s; cursor: pointer; padding: 0 12px; font-size: 12px; font-weight: 700; gap: 8px; font-family: 'Outfit'; }
+    .action-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--surface); }
+    .action-btn.history { border-color: var(--primary); color: var(--primary); }
+    .action-btn.history:hover { background-color: var(--primary); color: white; }
+  </style>
+
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-wrap">
+        <div class="logo-icon"><i data-lucide="scissors" style="width:22px;"></i></div>
+        <div class="logo-text">Sutura</div>
+      </div>
+      <div style="background: #F3F4F6; padding: 10px 16px; border-radius: 12px; display: flex; align-items: center; gap: 10px;">
+        <i data-lucide="building-2" style="width:16px; color: var(--text-muted);"></i>
+        <div style="font-size: 13px; font-weight: 700;">La Belle Couture</div>
+      </div>
+    </div>
+    
+    <nav class="nav-list">
+      <a href="../01-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="02-customers-tab.html" class="nav-item active"><i data-lucide="users"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item"><i data-lucide="briefcase"></i> Job Orders</a>
+      <a href="../05-settings/01-settings-tab.html" class="nav-item"><i data-lucide="settings"></i> Settings</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">JA</div>
+      <div class="user-info">
+        <div class="name" style="font-size:14px; font-weight:700;">Joshua Arabejo</div>
+        <div class="role" style="font-size:12px; color:var(--text-muted); font-weight:500;">Shop Owner</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-left">
+        <h1 class="header-title">Customers</h1>
+        <p class="header-date">Manage your client directory and measurements</p>
+      </div>
+      
+    </header>
+
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="02-customers-tab.html" class="subnav-tab active">Client Directory</a>
+        <a href="06-measurements-tab.html" class="subnav-tab">Measurements</a>
+        <a href="08-appointments-tab.html" class="subnav-tab">Appointments</a>
+      </div>
+      <div class="subnav-actions">
+        <a href="03-customers-add-modal.html" class="btn-primary-sm"><i data-lucide="user-plus" style="width: 18px;"></i> Add Customer</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Clients</div>
+          <div class="stat-value">142</div>
+          <div style="font-size: 11px; font-weight: 700; color: #16A34A; margin-top: 4px;">↑ 8 new this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Designers</div>
+          <div class="stat-value">12</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Boutique Partners</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Retention Rate</div>
+          <div class="stat-value">84%</div>
+          <div style="font-size: 11px; font-weight: 700; color: #4F46E5; margin-top: 4px;">Premium Tier Service</div>
+        </div>
+      </div>
+
+      <div class="page-actions">
+        <div class="search-box">
+          <i data-lucide="search" style="width: 18px; color: var(--text-muted);"></i>
+          <input type="text" placeholder="Search by name or phone..." />
+        </div>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>TYPE</th>
+              <th>NAME</th>
+              <th>EMAIL</th>
+              <th>PHONE</th>
+              <th>REGISTERED</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge designer">Designer</span></td>
+              <td><div class="customer-info"><div class="name">Alexander McQueen</div></div></td>
+              <td class="small-text">alexander@example.com</td>
+              <td class="small-text">0917 123 4567</td>
+              <td class="small-text">Oct 24, 2023</td>
+              <td>
+                <div class="actions">
+                  <a href="06-customer-history-modal.html" style="text-decoration: none;"><button class="action-btn history"><i data-lucide="file-text" style="width: 14px;"></i> History</button></a>
+                  <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+                  <button class="action-btn"><i data-lucide="trash-2" style="width: 14px;"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge regular">Regular</span></td>
+              <td><div class="customer-info"><div class="name">Maria Santos</div></div></td>
+              <td class="small-text">maria.santos@email.ph</td>
+              <td class="small-text">0918 234 5678</td>
+              <td class="small-text">Oct 25, 2023</td>
+              <td>
+                <div class="actions">
+                  <a href="06d-maria-history-modal.html" style="text-decoration: none;"><button class="action-btn history"><i data-lucide="file-text" style="width: 14px;"></i> History</button></a>
+                  <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+                  <button class="action-btn"><i data-lucide="trash-2" style="width: 14px;"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge regular">Regular</span></td>
+              <td><div class="customer-info"><div class="name">John Doe</div></div></td>
+              <td class="small-text">john.doe@email.com</td>
+              <td class="small-text">0919 345 6789</td>
+              <td class="small-text">Oct 26, 2023</td>
+              <td>
+                <div class="actions">
+                  <a href="06-customer-history-modal.html" style="text-decoration: none;"><button class="action-btn history"><i data-lucide="file-text" style="width: 14px;"></i> History</button></a>
+                  <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+                  <button class="action-btn"><i data-lucide="trash-2" style="width: 14px;"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge designer">Designer</span></td>
+              <td><div class="customer-info"><div class="name">Sofia Anderson</div></div></td>
+              <td class="small-text">sofia.anderson@email.com</td>
+              <td class="small-text">0920 456 7890</td>
+              <td class="small-text">Oct 27, 2023</td>
+              <td>
+                <div class="actions">
+                  <a href="06-customer-history-modal.html" style="text-decoration: none;"><button class="action-btn history"><i data-lucide="file-text" style="width: 14px;"></i> History</button></a>
+                  <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+                  <button class="action-btn"><i data-lucide="trash-2" style="width: 14px;"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge regular">Regular</span></td>
+              <td><div class="customer-info"><div class="name">Miguel Reyes</div></div></td>
+              <td class="small-text">miguel.reyes@email.ph</td>
+              <td class="small-text">0921 567 8901</td>
+              <td class="small-text">Oct 28, 2023</td>
+              <td>
+                <div class="actions">
+                  <a href="06-customer-history-modal.html" style="text-decoration: none;"><button class="action-btn history"><i data-lucide="file-text" style="width: 14px;"></i> History</button></a>
+                  <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+                  <button class="action-btn"><i data-lucide="trash-2" style="width: 14px;"></i></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

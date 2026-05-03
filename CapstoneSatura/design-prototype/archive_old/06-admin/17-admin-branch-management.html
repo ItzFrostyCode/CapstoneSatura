@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura Admin | Branch Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --accent: #2C6BED; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: #F3F4F6; color: var(--text-main); display: flex; }
+
+    /* Sidebar (Reused) */
+    .sidebar { width: 280px; height: 100vh; background: white; border-right: 1.5px solid var(--border); padding: 32px; position: sticky; top: 0; }
+    .nav-list { list-style: none; margin-top: 40px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; margin-bottom: 8px; transition: all 0.2s; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-item:hover:not(.active) { background: var(--surface); color: var(--text-main); }
+
+    /* Main Content */
+    .main-content { flex: 1; padding: 40px 60px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+    .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+
+    /* Branch Cards */
+    .branch-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .branch-card { background: white; padding: 32px; border-radius: 24px; border: 1.5px solid var(--border); transition: all 0.2s; }
+    .branch-card:hover { border-color: var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    .branch-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 16px; padding: 4px 10px; border-radius: 6px; background: #ECFDF5; color: #059669; }
+
+    .btn-add { padding: 14px 24px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div style="font-size: 24px; font-weight: 800;">Sutura Admin</div>
+    <nav class="nav-list">
+      <a href="01-admin-dashboard.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i> Dashboard
+      </a>
+      <a href="17-admin-branch-management.html" class="nav-item active">
+        <i data-lucide="map-pin"></i> Branch Management
+      </a>
+      <a href="01-staff-management-tab.html" class="nav-item">
+        <i data-lucide="users"></i> Staff Management
+      </a>
+      <a href="16-admin-audit-logs.html" class="nav-item">
+        <i data-lucide="history"></i> Audit Logs
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div>
+        <h1>Branch Management</h1>
+        <p style="color: var(--text-muted);">Manage your multi-shop business operations.</p>
+      </div>
+      <button class="btn-add">
+        <i data-lucide="plus"></i> Add New Branch
+      </button>
+    </header>
+
+    <div class="branch-grid">
+      <div class="branch-card">
+        <div class="branch-status">Active — Main Hub</div>
+        <h2 style="font-size: 24px; margin-bottom: 8px;">Davao Main Branch</h2>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">San Pedro St., Davao City, 8000</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; padding: 16px; background: var(--surface); border-radius: 12px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Staff Count</div>
+            <div style="font-size: 18px; font-weight: 800;">12 Professionals</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Active Orders</div>
+            <div style="font-size: 18px; font-weight: 800;">45 Orders</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px;">
+          <button style="flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-weight: 700; cursor: pointer;">Settings</button>
+          <button style="flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid var(--primary); background: var(--primary); color: white; font-weight: 700; cursor: pointer;">View Dashboard</button>
+        </div>
+      </div>
+
+      <div class="branch-card">
+        <div class="branch-status" style="background: #EFF6FF; color: var(--accent);">Active — Secondary</div>
+        <h2 style="font-size: 24px; margin-bottom: 8px;">Tagum Branch</h2>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">National Highway, Tagum City, 8100</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; padding: 16px; background: var(--surface); border-radius: 12px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Staff Count</div>
+            <div style="font-size: 18px; font-weight: 800;">5 Professionals</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Active Orders</div>
+            <div style="font-size: 18px; font-weight: 800;">12 Orders</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px;">
+          <button style="flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-weight: 700; cursor: pointer;">Settings</button>
+          <button style="flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid var(--primary); background: var(--primary); color: white; font-weight: 700; cursor: pointer;">View Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

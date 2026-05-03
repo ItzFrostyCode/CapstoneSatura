@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura | The Complete Operating System for Tailors & Designers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --accent: #2C6BED; --accent-light: #EEF4FF;
+      --text-main: #111827; --text-muted: #6B7280; --bg: #FFFFFF;
+      --surface: #F9FAFB; --border: #E5E7EB; --success: #10B981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior: smooth; }
+    body { font-family: 'Outfit', sans-serif; color: var(--text-main); line-height: 1.6; background: var(--bg); overflow-x: hidden; }
+    
+    /* 14. Visual Flow & 15. Clean Design */
+    .container { width: 1440px; margin: 0 auto; padding: 0 80px; position: relative; }
+    section { padding: 120px 0; border-bottom: 1px solid var(--border); position: relative; }
+    .section-header { text-align: center; max-width: 800px; margin: 0 auto 80px; }
+    .section-header h2 { font-size: 56px; font-weight: 900; letter-spacing: -2.5px; margin-bottom: 20px; line-height: 1.1; }
+    .section-header p { font-size: 20px; color: var(--text-muted); }
+
+
+
+    /* Buttons */
+    .btn { padding: 18px 36px; border-radius: 14px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 12px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border: none; font-size: 16px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
+    .btn-accent { background: var(--accent); color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-main); }
+
+    /* 1. HERO (ABOVE THE FOLD) */
+    .hero { padding-top: 180px; padding-bottom: 120px; background: radial-gradient(circle at top right, #F0F7FF 0%, #FFFFFF 60%); }
+    .hero-content { display: flex; align-items: center; gap: 80px; }
+    .hero-text { flex: 1; }
+    .hero-tag { background: var(--accent-light); color: var(--accent); padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 32px; display: inline-flex; align-items: center; gap: 8px; }
+    .hero-text h1 { font-size: 80px; font-weight: 950; line-height: 1.0; letter-spacing: -4px; margin-bottom: 24px; color: var(--primary); }
+    .hero-text p { font-size: 22px; color: var(--text-muted); margin-bottom: 48px; max-width: 550px; }
+    .hero-image { flex: 1.2; position: relative; }
+    .hero-img-box { 
+      width: 100%; 
+      border-radius: 32px; 
+      overflow: hidden; 
+      box-shadow: 0 40px 80px rgba(0,0,0,0.12); 
+      border: 10px solid white; 
+      transition: transform 0.3s ease; 
+    }
+    .hero-img-box:hover { transform: translateY(-10px); }
+    .hero-img-box img { width: 100%; display: block; height: auto; }
+    
+    /* 6. SOCIAL PROOF (MULTI-TYPE) */
+    .trust-strip { 
+      margin-top: 60px; 
+      padding-top: 32px; 
+      border-top: 1px solid var(--border); 
+      display: flex; 
+      gap: 48px; 
+      align-items: center; 
+      flex-wrap: nowrap;
+      width: 100%;
+    }
+    .trust-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      font-weight: 700; 
+      color: var(--text-muted); 
+      font-size: 14px; 
+      white-space: nowrap;
+    }
+
+    /* 3. PAS (PROBLEM-AGITATE-SOLUTION) */
+    .pas { background: var(--primary); color: white; overflow: hidden; }
+    .pas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center; }
+    .pas-content h3 { font-size: 40px; margin-bottom: 24px; font-weight: 800; color: #F87171; }
+    .pas-solution h3 { color: var(--success); }
+    .pas-card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); }
+
+    /* 5. USE CASES / SCENARIOS */
+    .use-cases { background: var(--surface); }
+    .case-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .case-card { background: white; padding: 48px; border-radius: 28px; border: 1px solid var(--border); transition: all 0.3s; position: relative; overflow: hidden; }
+    .case-card:hover { transform: translateY(-10px); border-color: var(--accent); }
+    .case-label { font-size: 12px; font-weight: 900; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; display: block; }
+
+    /* 8. HOW IT WORKS (REDUCED FRICTION) */
+    .flow-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 60px; text-align: center; }
+    .flow-line { position: absolute; top: 120px; left: 20%; right: 20%; height: 2px; background: var(--border); z-index: 0; }
+    .step-box { position: relative; z-index: 1; }
+    .step-icon { width: 80px; height: 80px; background: white; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; font-size: 24px; font-weight: 900; transition: 0.3s; }
+    .step-box:hover .step-icon { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* 10. OBJECTION HANDLING */
+    .objections { background: #111827; color: white; }
+    .obj-card { padding: 40px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 40px; align-items: flex-start; }
+    .obj-q { font-size: 24px; font-weight: 800; flex: 1; }
+    .obj-a { flex: 1.5; color: rgba(255,255,255,0.6); font-size: 18px; }
+
+    /* 12. MINIMAL FORM */
+    .quick-start { max-width: 600px; margin: 0 auto; background: white; padding: 48px; border-radius: 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.1); text-align: center; }
+    .input-group { margin-bottom: 24px; }
+    .input-group input { width: 100%; padding: 18px; border-radius: 14px; border: 2px solid var(--border); font-family: inherit; font-size: 16px; }
+
+    /* 14. VISUAL FLOW (Arrows) */
+    .scroll-down { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); animation: bounce 2s infinite; color: var(--text-muted); }
+    @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translate(-50%, 0);} 40% {transform: translate(-50%, -10px);} 60% {transform: translate(-50%, -5px);} }
+
+    /* 22. STICKY HEADER */
+    nav { 
+      height: 80px; 
+      display: flex; 
+      align-items: center; 
+      background: rgba(255,255,255,0.8); 
+      backdrop-filter: blur(10px); 
+      position: fixed; 
+      top: 0; 
+      width: 100%; 
+      z-index: 2000; 
+      border-bottom: 1px solid var(--border); 
+    }
+    .nav-content { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      width: 100%; 
+    }
+    .logo { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      font-size: 24px; 
+      font-weight: 800; 
+      color: var(--primary); 
+      text-decoration: none; 
+    }
+    .nav-links { 
+      display: flex; 
+      gap: 32px; 
+      list-style: none; 
+    }
+    .nav-links a { 
+      text-decoration: none; 
+      color: var(--text-main); 
+      font-weight: 600; 
+      font-size: 15px; 
+    }
+    .nav-btns { 
+      display: flex; 
+      gap: 12px; 
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="container">
+      <div class="nav-content">
+        <a href="#" class="logo">
+          <i data-lucide="scissors" style="color: var(--accent);"></i>
+          Sutura
+        </a>
+        <ul class="nav-links">
+          <li><a href="#vp">Value</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how-it-works">Process</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+        <div class="nav-btns">
+          <a href="00-customer-portal.html" style="color: var(--text-main); text-decoration: none; font-size: 14px; font-weight: 700; margin-right: 12px;">Customer Portal</a>
+          <a href="00-core/00-auth/00-login-gateway.html" class="btn btn-primary" style="padding: 10px 24px; font-size: 14px;">Log In</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 1. HERO (ABOVE THE FOLD) -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="hero-tag">
+            <i data-lucide="shield-check" style="width: 14px;"></i>
+            Enterprise-Grade Precision v1.0
+          </div>
+          <h1>Precision in Every Stitch. Mastery in Every Shop.</h1>
+          <p>Digitize measurements, automate production, and grow your tailoring business with 100% verified accuracy.</p>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 20px;">
+              <a href="00-core/00-auth/00-register-gateway.html" class="btn btn-primary">Get Started Free</a>
+              <a href="#demo" class="btn btn-outline">Watch Full Demo</a>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 0;">* Mandatory verification for all Shop Owners & Designers</p>
+          </div>
+          
+          <!-- 6. TRUST INDICATORS -->
+          <div class="trust-strip">
+            <div class="trust-item"><i data-lucide="star"></i> 4.9/5 Average Rating</div>
+            <div class="trust-item"><i data-lucide="users"></i> 50+ Local Shops</div>
+            <div class="trust-item"><i data-lucide="check-circle"></i> Verified Profiles</div>
+          </div>
+        </div>
+        <div class="hero-image">
+          <div class="hero-img-box">
+            <img src="https://images.unsplash.com/photo-1558603668-6570496b66f8?auto=format&fit=crop&q=80&w=800" alt="Product Action">
+          </div>
+        </div>
+      </div>
+      <div class="scroll-down"><i data-lucide="chevron-down" size="32"></i></div>
+    </div>
+  </header>
+
+  <!-- 2. VALUE PROPOSITION BLOCK -->
+  <section id="vp">
+    <div class="container">
+      <div class="section-header">
+        <span class="case-label">Why Choose Sutura?</span>
+        <h2>The Operating System for Modern Fashion Creators.</h2>
+        <p>We solve the chaos of manual tailoring with a unified digital ecosystem built for scale.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px;">
+        <div class="pas-card" style="background: var(--surface); color: var(--text-main);">
+          <i data-lucide="cpu" style="color: var(--accent); margin-bottom: 20px;"></i>
+          <h3>Smart Workflow</h3>
+          <p>Automate everything from client intake to final fitting alerts.</p>
+        </div>
+        <div class="pas-card" style="background: var(--surface); color: var(--text-main);">
+          <i data-lucide="database" style="color: var(--accent); margin-bottom: 20px;"></i>
+          <h3>Secure Data</h3>
+          <p>Your measurements and client history are encrypted and always available.</p>
+        </div>
+        <div class="pas-card" style="background: var(--surface); color: var(--text-main);">
+          <i data-lucide="network" style="color: var(--accent); margin-bottom: 20px;"></i>
+          <h3>Designer Network</h3>
+          <p>Connect shops with verified designers for a seamless supply chain.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. PROBLEM–AGITATE–SOLUTION (PAS) -->
+  <section class="pas">
+    <div class="container">
+      <div class="pas-grid">
+        <div class="pas-content">
+          <h3>Lost notebooks are costing you thousands.</h3>
+          <p style="font-size: 20px; opacity: 0.7;">Every missing measurement, every delayed fitting, and every material miscalculation is a leak in your profit. Manual shops struggle to scale beyond a single branch.</p>
+        </div>
+        <div class="pas-solution">
+          <div class="pas-card">
+            <h3 style="color: var(--success);">The Sutura Advantage</h3>
+            <p style="font-size: 18px; margin-bottom: 24px;">Our cloud-based system ensures that every detail—from the neck width to the delivery date—is tracked, verified, and accessible to your whole team instantly.</p>
+            <ul style="list-style: none;">
+              <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i data-lucide="check" color="var(--success)"></i> 100% Digital Logs</li>
+              <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i data-lucide="check" color="var(--success)"></i> Automated SMS Fitting Alerts</li>
+              <li style="margin-bottom: 12px; display: flex; gap: 10px;"><i data-lucide="check" color="var(--success)"></i> Real-time Inventory Audit</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. FEATURES → BENEFITS -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>Features built for outcomes.</h2>
+        <p>We don't just give you tools; we give you results.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 80px; align-items: center;">
+        <div>
+          <div style="margin-bottom: 48px;">
+            <h4 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">❌ Stop Fabric Waste</h4>
+            <p style="color: var(--text-muted);">Our material estimator calculates the exact yardage needed, saving you an average of 15% on fabric costs.</p>
+          </div>
+          <div style="margin-bottom: 48px;">
+            <h4 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">❌ End Fitting No-Shows</h4>
+            <p style="color: var(--text-muted);">Automated reminders ensure clients show up for measurements, reducing idle staff time by 30%.</p>
+          </div>
+          <div>
+            <h4 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">❌ Eliminate Design Errors</h4>
+            <p style="color: var(--text-muted);">Visual technical specs are shared instantly between designers and tailors to ensure the first cut is the right cut.</p>
+          </div>
+        </div>
+        <div class="hero-img-box" style="transform: rotate(3deg);">
+          <img src="https://images.unsplash.com/photo-1598257006458-087169a1f08d?auto=format&fit=crop&q=80&w=800" alt="Features">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. USE CASES / SCENARIOS -->
+  <section class="use-cases">
+    <div class="container">
+      <div class="section-header"><h2>Real-world applications.</h2></div>
+      <div class="case-grid">
+        <div class="case-card">
+          <span class="case-label">Shop Owners</span>
+          <h3>Manage 10 branches from 1 screen.</h3>
+          <p style="color: var(--text-muted); margin-top: 16px;">Track sales, monitor staff productivity, and approve inventory requests from anywhere in the world.</p>
+        </div>
+        <div class="case-card">
+          <span class="case-label">Production Staff</span>
+          <h3>Zero confusion, total speed.</h3>
+          <p style="color: var(--text-muted); margin-top: 16px;">Access digital measurement charts and technical drawings instantly on the shop floor.</p>
+        </div>
+        <div class="case-card">
+          <span class="case-label">Fashion Designers</span>
+          <h3>Global reach, local production.</h3>
+          <p style="color: var(--text-muted); margin-top: 16px;">Publish your portfolio to verified shops and manage custom orders with built-in measurement tools.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. HOW IT WORKS (FLOW SIMPLIFICATION) -->
+  <section id="how-it-works">
+    <div class="container">
+      <div class="section-header"><h2>3 Steps to Digital Mastery.</h2></div>
+      <div class="flow-line"></div>
+      <div class="flow-steps">
+        <div class="step-box">
+          <div class="step-icon">1</div>
+          <h3>Register & Apply</h3>
+          <p style="color: var(--text-muted);">Submit your shop or designer credentials for our security audit.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-icon">2</div>
+          <h3>Get Verified</h3>
+          <p style="color: var(--text-muted);">Our team validates your profile to ensure the network stays premium.</p>
+        </div>
+        <div class="step-box">
+          <div class="step-icon">3</div>
+          <h3>Scale Business</h3>
+          <p style="color: var(--text-muted);">Access your dashboard and start taking digital-first orders.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. PRICING / PLAN PREVIEW -->
+  <section id="pricing">
+    <div class="container">
+      <div class="section-header"><h2>Transparent pricing for professionals.</h2></div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;">
+        <!-- Basic Shop -->
+        <div class="case-card">
+          <h4 style="font-size: 18px;">Basic Shop</h4>
+          <div style="font-size: 32px; font-weight: 950; margin: 16px 0;">₱149<span style="font-size: 14px; opacity: 0.6;">/mo</span></div>
+          <ul style="list-style: none; text-align: left; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+            <li><i data-lucide="check" style="width: 14px; color: var(--success); margin-right: 8px;"></i> Customer Profiles</li>
+            <li><i data-lucide="check" style="width: 14px; color: var(--success); margin-right: 8px;"></i> Manual Job Tracking</li>
+            <li><i data-lucide="check" style="width: 14px; color: var(--success); margin-right: 8px;"></i> Physical Receipt Printing</li>
+          </ul>
+          <a href="00-core/00-auth/02-register.html?plan=basic" class="btn btn-outline" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px;">Choose Basic</a>
+        </div>
+
+        <!-- Pro Shop -->
+        <div class="case-card" style="border-color: var(--accent); box-shadow: 0 20px 40px rgba(44,107,237,0.1);">
+          <div class="hero-tag" style="margin-bottom: 12px; padding: 4px 10px; font-size: 10px;">Most Popular</div>
+          <h4 style="font-size: 18px;">Pro Shop</h4>
+          <div style="font-size: 32px; font-weight: 950; margin: 16px 0;">₱299<span style="font-size: 14px; opacity: 0.6;">/mo</span></div>
+          <ul style="list-style: none; text-align: left; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+            <li><i data-lucide="check" style="width: 14px; color: var(--accent); margin-right: 8px;"></i> Inventory & Suppliers</li>
+            <li><i data-lucide="check" style="width: 14px; color: var(--accent); margin-right: 8px;"></i> Automated Notifications</li>
+            <li><i data-lucide="check" style="width: 14px; color: var(--accent); margin-right: 8px;"></i> Smart Material Estimator</li>
+          </ul>
+          <a href="00-core/00-auth/02-register.html?plan=pro" class="btn btn-accent" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px;">Choose Pro</a>
+        </div>
+
+        <!-- Premium Shop -->
+        <div class="case-card">
+          <h4 style="font-size: 18px;">Premium Shop</h4>
+          <div style="font-size: 32px; font-weight: 950; margin: 16px 0;">₱499<span style="font-size: 14px; opacity: 0.6;">/mo</span></div>
+          <ul style="list-style: none; text-align: left; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+            <li><i data-lucide="check" style="width: 14px; color: var(--success); margin-right: 8px;"></i> Multi-branch Support</li>
+            <li><i data-lucide="check" style="width: 14px; color: var(--success); margin-right: 8px;"></i> Administrative Audit Logs</li>
+            <li><i data-lucide="check" style="width: 14px; color: var(--success); margin-right: 8px;"></i> Marketplace Visibility</li>
+          </ul>
+          <a href="00-core/00-auth/02-register.html?plan=premium" class="btn btn-outline" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px;">Choose Premium</a>
+        </div>
+
+        <!-- Designer -->
+        <div class="case-card">
+          <h4 style="font-size: 18px;">Independent Designer</h4>
+          <div style="font-size: 32px; font-weight: 950; margin: 16px 0;">₱99<span style="font-size: 14px; opacity: 0.6;">/mo</span></div>
+          <ul style="list-style: none; text-align: left; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+            <li><i data-lucide="check" style="width: 14px; color: var(--accent); margin-right: 8px;"></i> Portfolio Showcase</li>
+            <li><i data-lucide="check" style="width: 14px; color: var(--accent); margin-right: 8px;"></i> Shop Collaboration</li>
+            <li><i data-lucide="check" style="width: 14px; color: var(--accent); margin-right: 8px;"></i> Custom Design Orders</li>
+          </ul>
+          <a href="00-core/00-auth/05-designer-register.html" class="btn btn-outline" style="width: 100%; justify-content: center; padding: 12px; font-size: 14px;">Join Network</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. OBJECTION HANDLING (ADVANCED) -->
+  <section class="objections">
+    <div class="container">
+      <div class="section-header"><h2 style="color: white;">We handle your hesitations.</h2></div>
+      <div class="obj-card">
+        <div class="obj-q">"Is it hard to use for my older staff?"</div>
+        <div class="obj-a">No. We designed Sutura with high-contrast icons and large text. If they can use Facebook, they can use Sutura.</div>
+      </div>
+      <div class="obj-card">
+        <div class="obj-q">"Do I need to be online 24/7?"</div>
+        <div class="obj-a">Sutura is optimized for low-bandwidth connections. You only need data for the initial order sync and fitting alerts.</div>
+      </div>
+      <div class="obj-card">
+        <div class="obj-q">"Is my customer data safe?"</div>
+        <div class="obj-a">Every measurement is encrypted. We perform daily automated backups to ensure your business history is never lost.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. FAQ -->
+  <section id="faq">
+    <div class="container">
+      <div class="section-header"><h2>Frequently Asked Questions</h2></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px;">
+        <div>
+          <h4 style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Can I cancel my subscription?</h4>
+          <p style="color: var(--text-muted);">Yes, you can cancel at any time. Your data will be kept for 30 days for retrieval.</p>
+        </div>
+        <div>
+          <h4 style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Does it work on Tablets?</h4>
+          <p style="color: var(--text-muted);">Sutura is fully optimized for iPad, Android tablets, and all smartphones.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. MINIMAL FORM / 13. REPEATED CTA -->
+  <section style="background: var(--surface); text-align: center;">
+    <div class="container">
+      <div class="quick-start">
+        <h2 style="font-size: 32px; font-weight: 900; margin-bottom: 16px;">Start Your Verification</h2>
+        <p style="color: var(--text-muted); margin-bottom: 32px;">Join the network of elite tailoring professionals today.</p>
+        <div class="input-group">
+          <input type="email" placeholder="Enter your business email">
+        </div>
+        <a href="00-core/00-auth/00-register-gateway.html" class="btn btn-primary" style="width: 100%; justify-content: center;">Apply for Account</a>
+      </div>
+    </div>
+  </section>
+
+  <footer style="padding: 80px 0; background: var(--primary); color: white;">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 40px;">
+        <div style="font-size: 32px; font-weight: 900;">Sutura</div>
+        <div style="display: flex; gap: 32px; font-weight: 700; opacity: 0.7;">
+          <a href="#" style="color: white; text-decoration: none;">Privacy</a>
+          <a href="#" style="color: white; text-decoration: none;">Terms</a>
+          <a href="#" style="color: white; text-decoration: none;">Support</a>
+        </div>
+      </div>
+      <p style="margin-top: 40px; text-align: center; opacity: 0.5; font-size: 14px;">&copy; 2026 Sutura Tailoring Management Systems. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

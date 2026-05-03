@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Sutura Admin - Shop Accounts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--primary-hover:#333;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    .sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-header{height:72px;display:flex;align-items:center;padding:0 24px;gap:12px;border-bottom:1px solid var(--border);}
+    .logo-icon{background:var(--primary);color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;flex-shrink:0;}
+    .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .logo-badge{font-size:10px;font-weight:700;background:#EF4444;color:white;padding:2px 7px;border-radius:6px;margin-left:4px;}
+    .nav-list{padding:24px 16px;display:flex;flex-direction:column;gap:4px;flex-grow:1;}
+    .nav-section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;padding:8px 16px 4px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}
+    .nav-item:hover{background:var(--surface);color:var(--primary);}
+    .nav-item.active{background:var(--primary);color:white;}
+    .nav-item .badge-count{margin-left:auto;background:#EF4444;color:white;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:#1A1A1A;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+    .user-info .name{font-size:14px;font-weight:600;}
+    .user-info .role{font-size:12px;color:var(--text-muted);}
+    .main{flex-grow:1;display:flex;flex-direction:column;min-width:0;}
+    .header{height:72px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 40px;flex-shrink:0;position:sticky;top:0;z-index:100;}
+    .header-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .header-sub{font-size:13px;color:var(--text-muted);}
+    .icon-btn{color:var(--text-muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:background 0.2s;}
+    .icon-btn:hover{background:var(--surface);color:var(--primary);}
+    .content{padding:36px 40px;flex-grow:1;overflow-y:auto;}
+    .page-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+    .search-box{display:flex;align-items:center;border:1px solid var(--border);background:var(--bg);border-radius:10px;padding:0 16px;height:42px;width:320px;transition:border-color 0.2s;}
+    .search-box:focus-within{border-color:var(--primary);}
+    .search-box input{border:none;outline:none;margin-left:8px;font-family:'Outfit';font-size:14px;width:100%;background:transparent;}
+    .filter-tabs{display:flex;gap:8px;}
+    .filter-tab{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);transition:all 0.2s;text-decoration:none;}
+    .filter-tab:hover{background:var(--surface);color:var(--primary);}
+    .filter-tab.active{background:var(--primary);color:white;border-color:var(--primary);}
+    .table-container{background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.03);}
+    table{width:100%;border-collapse:collapse;}
+    th{padding:14px 28px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);background:#F8FAFC;text-align:left;}
+    td{padding:18px 28px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#F8FAFC;}
+    .shop-cell{display:flex;align-items:center;gap:12px;}
+    .shop-avatar{width:38px;height:38px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--primary);flex-shrink:0;}
+    .shop-info .name{font-weight:600;color:var(--text-main);}
+    .shop-info .email{font-size:12px;color:var(--text-muted);margin-top:2px;}
+    .badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;text-transform:uppercase;letter-spacing:0.03em;white-space:nowrap;}
+    .badge-green{background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;}
+    .badge-red{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5;}
+    .badge-gray{background:var(--surface);color:var(--text-muted);border:1px solid var(--border);}
+    .toggle-wrap{display:flex;align-items:center;gap:10px;}
+    .toggle{width:42px;height:24px;border-radius:12px;position:relative;cursor:pointer;border:none;transition:background 0.3s;flex-shrink:0;}
+    .toggle.on{background:#16A34A;}
+    .toggle.off{background:#D1D5DB;}
+    .toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:3px;transition:left 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+    .toggle.on::after{left:21px;}
+    .toggle.off::after{left:3px;}
+    .toggle-label{font-size:13px;font-weight:600;}
+    .toggle-label.on{color:#15803D;}
+    .toggle-label.off{color:var(--text-muted);}
+    .actions{display:flex;gap:8px;}
+    .action-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+    .action-btn:hover{border-color:var(--primary);color:var(--primary);}
+  
+    /* Advanced Account Modal Styles */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px);
+      z-index: 100; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .account-modal {
+      background: var(--bg); width: 100%; max-width: 1000px;
+      border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; overflow: hidden; max-height: 90vh;
+    }
+    .account-header {
+      padding: 24px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .shop-title-area { display: flex; align-items: center; gap: 16px; }
+    .shop-logo-large { width: 64px; height: 64px; background: #F3F4F6; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #9CA3AF; }
+    
+    .account-body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+    .account-main { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; }
+    .account-sidebar { width: 300px; background: var(--surface); border-left: 1px solid var(--border); padding: 24px; overflow-y: auto; }
+
+    .data-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .data-card-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Mini Audit Timeline */
+    .audit-timeline { position: relative; padding-left: 20px; border-left: 2px solid #E5E7EB; margin-left: 8px; }
+    .audit-event { position: relative; margin-bottom: 20px; }
+    .audit-event::before { content: ''; position: absolute; left: -25px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--border); border: 2px solid white; box-shadow: 0 0 0 1px #E5E7EB; }
+    .audit-event.critical::before { background: #EF4444; box-shadow: 0 0 0 1px #FCA5A5; }
+    .audit-event.success::before { background: #10B981; box-shadow: 0 0 0 1px #6EE7B7; }
+    .audit-title { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .audit-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Danger Zone */
+    .danger-zone { border: 1px solid #FECACA; background: #FEF2F2; border-radius: 12px; overflow: hidden; }
+    .danger-header { padding: 12px 16px; border-bottom: 1px solid #FECACA; font-weight: 700; color: #B91C1C; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .danger-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #FECACA; }
+    .danger-item:last-child { border-bottom: none; }
+    .danger-text strong { display: block; font-size: 14px; color: #991B1B; margin-bottom: 4px; }
+    .danger-text span { font-size: 12px; color: #B91C1C; }
+    .btn-danger { background: white; color: #DC2626; border: 1px solid #FCA5A5; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-danger:hover { background: #FEF2F2; border-color: #EF4444; }
+    .btn-danger.solid { background: #EF4444; color: white; border-color: #EF4444; }
+    .btn-danger.solid:hover { background: #DC2626; }
+
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="shield" style="width:18px;"></i></div>
+      <div class="logo-text">Sutura <span class="logo-badge">ADMIN</span></div>
+    </div>
+    <nav class="nav-list">
+      <div class="nav-section-label">Overview</div>
+      <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard" style="width:18px;"></i> Dashboard</a>
+      <a href="04-platform-revenue.html" class="nav-item"><i data-lucide="dollar-sign" style="width:18px;"></i> Platform Revenue</a>
+      
+      <div class="nav-section-label">Management</div>
+      <a href="02-registrations.html" class="nav-item"><i data-lucide="clipboard-list" style="width:18px;"></i> Registrations <span class="badge-count">3</span></a>
+      <a href="03-accounts.html" class="nav-item active"><i data-lucide="store" style="width:18px;"></i> Shop Accounts</a>
+      <a href="05-subscription-plans.html" class="nav-item"><i data-lucide="credit-card" style="width:18px;"></i> Subscription Plans</a>
+      <a href="07-support-tickets.html" class="nav-item"><i data-lucide="life-buoy" style="width:18px;"></i> Support Tickets</a>
+      
+      <div class="nav-section-label">System</div>
+      <a href="06-system-monitor.html" class="nav-item"><i data-lucide="activity" style="width:18px;"></i> System Monitor</a>
+      <a href="08-platform-settings.html" class="nav-item"><i data-lucide="settings" style="width:18px;"></i> Platform Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">SA</div>
+      <div class="user-info"><div class="name">Super Admin</div><div class="role">Administrator</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div>
+        <div class="header-title">Shop Accounts</div>
+        <div class="header-sub">Manage tailoring shop accounts — activate or deactivate access</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-actions">
+        <div class="search-box">
+          <i data-lucide="search" style="width:16px;color:var(--text-muted);"></i>
+          <input type="text" placeholder="Search by shop or owner name..."/>
+        </div>
+        <div class="filter-tabs">
+          <a href="#" class="filter-tab active">All (14)</a>
+          <a href="#" class="filter-tab">Active (12)</a>
+          <a href="#" class="filter-tab">Inactive (2)</a>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Shop</th><th>Owner</th><th>Plan</th><th>Joined</th><th>Last Login</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="shop-cell"><div class="shop-avatar">ST</div><div class="shop-info"><div class="name">Sutura Tailoring</div><div class="email">contact@suturatailoring.com</div></div></div></td>
+              <td style="font-weight:600;">Admin User</td>
+              <td><span class="badge badge-green">Basic</span></td>
+              <td style="font-size:13px;color:var(--text-muted);">Oct 24, 2023</td>
+              <td style="font-size:13px;color:var(--text-muted);">Apr 25, 2026</td>
+              <td><div class="toggle-wrap"><button class="toggle on"></button><span class="toggle-label on">Active</span></div></td>
+              <td><div class="actions"><a href="#" class="action-btn" title="View"><i data-lucide="eye" style="width:15px;"></i></a><a href="#" class="action-btn" title="Edit"><i data-lucide="edit-2" style="width:15px;"></i></a></div></td>
+            </tr>
+            <tr>
+              <td><div class="shop-cell"><div class="shop-avatar">LC</div><div class="shop-info"><div class="name">La Belle Couture</div><div class="email">labelle@example.com</div></div></div></td>
+              <td style="font-weight:600;">Isabella Cruz</td>
+              <td><span class="badge badge-green">Basic</span></td>
+              <td style="font-size:13px;color:var(--text-muted);">Apr 24, 2026</td>
+              <td style="font-size:13px;color:var(--text-muted);">Apr 24, 2026</td>
+              <td><div class="toggle-wrap"><button class="toggle on"></button><span class="toggle-label on">Active</span></div></td>
+              <td><div class="actions"><a href="#" class="action-btn"><i data-lucide="eye" style="width:15px;"></i></a><a href="#" class="action-btn"><i data-lucide="edit-2" style="width:15px;"></i></a></div></td>
+            </tr>
+            <tr>
+              <td><div class="shop-cell"><div class="shop-avatar">RT</div><div class="shop-info"><div class="name">Ruiz Tailoring Co.</div><div class="email">ruiz.tailor@email.ph</div></div></div></td>
+              <td style="font-weight:600;">Carlos Ruiz</td>
+              <td><span class="badge badge-green">Basic</span></td>
+              <td style="font-size:13px;color:var(--text-muted);">Apr 23, 2026</td>
+              <td style="font-size:13px;color:var(--text-muted);">Apr 23, 2026</td>
+              <td><div class="toggle-wrap"><button class="toggle on"></button><span class="toggle-label on">Active</span></div></td>
+              <td><div class="actions"><a href="#" class="action-btn"><i data-lucide="eye" style="width:15px;"></i></a><a href="#" class="action-btn"><i data-lucide="edit-2" style="width:15px;"></i></a></div></td>
+            </tr>
+            <tr>
+              <td><div class="shop-cell"><div class="shop-avatar">MT</div><div class="shop-info"><div class="name">Maison Threads</div><div class="email">maison@threads.ph</div></div></div></td>
+              <td style="font-weight:600;">Renée Mercado</td>
+              <td><span class="badge badge-green">Basic</span></td>
+              <td style="font-size:13px;color:var(--text-muted);">Mar 10, 2026</td>
+              <td style="font-size:13px;color:var(--text-muted);">Mar 20, 2026</td>
+              <td><div class="toggle-wrap"><button class="toggle off"></button><span class="toggle-label off">Inactive</span></div></td>
+              <td><div class="actions"><a href="#" class="action-btn"><i data-lucide="eye" style="width:15px;"></i></a><a href="#" class="action-btn"><i data-lucide="edit-2" style="width:15px;"></i></a></div></td>
+            </tr>
+            <tr>
+              <td><div class="shop-cell"><div class="shop-avatar">ES</div><div class="shop-info"><div class="name">Eleganza Bespoke</div><div class="email">eleganza@shop.ph</div></div></div></td>
+              <td style="font-weight:600;">Marco Dela Torre</td>
+              <td><span class="badge badge-green">Basic</span></td>
+              <td style="font-size:13px;color:var(--text-muted);">Feb 14, 2026</td>
+              <td style="font-size:13px;color:var(--text-muted);">Feb 20, 2026</td>
+              <td><div class="toggle-wrap"><button class="toggle off"></button><span class="toggle-label off">Inactive</span></div></td>
+              <td><div class="actions"><a href="#" class="action-btn"><i data-lucide="eye" style="width:15px;"></i></a><a href="#" class="action-btn"><i data-lucide="edit-2" style="width:15px;"></i></a></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+  <!-- ACCOUNT DETAILS MODAL OVERLAY -->
+  <div class="modal-backdrop">
+    <div class="account-modal">
+      
+      <div class="account-header">
+        <div class="shop-title-area">
+          <div class="shop-logo-large">LC</div>
+          <div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+              <h2 style="font-size:20px;font-weight:800;color:var(--text-main);">La Belle Couture</h2>
+              <span class="badge badge-green">Active Tenant</span>
+            </div>
+            <div style="font-size:13px;color:var(--text-muted);display:flex;gap:16px;">
+              <span><i data-lucide="map-pin" style="width:12px;display:inline-block;vertical-align:-2px;"></i> Makati, PH</span>
+              <span><i data-lucide="calendar" style="width:12px;display:inline-block;vertical-align:-2px;"></i> Joined Mar 2024</span>
+              <span><i data-lucide="hash" style="width:12px;display:inline-block;vertical-align:-2px;"></i> ORG-10294</span>
+            </div>
+          </div>
+        </div>
+        <a href="03-accounts.html" style="color:var(--text-muted);"><i data-lucide="x" style="width:24px;"></i></a>
+      </div>
+
+      <div class="account-body">
+        
+        <!-- Left Sidebar Data -->
+        <div class="account-sidebar">
+          <div style="margin-bottom:24px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Owner Contact</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-main);">Isabella Cruz</div>
+            <div style="font-size:13px;color:var(--accent);margin-top:2px;">labelle@example.com</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">+63 917 123 4567</div>
+          </div>
+
+          <div style="margin-bottom:24px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Current Plan</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;">
+              <div>
+                <div style="font-weight:700;color:#D97706;">Premium Tier</div>
+                <div style="font-size:12px;color:#B45309;margin-top:2px;">₱149.00 / month</div>
+              </div>
+              <i data-lucide="star" style="width:20px;color:#D97706;"></i>
+            </div>
+          </div>
+
+          <div style="margin-bottom:24px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:12px;">Usage Limits</div>
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;font-weight:600;"><span>Branches</span> <span>2 / 5</span></div>
+              <div style="width:100%;height:6px;background:#E5E7EB;border-radius:4px;"><div style="width:40%;height:100%;background:var(--accent);border-radius:4px;"></div></div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;font-weight:600;"><span>Staff Accounts</span> <span>18 / Unlimited</span></div>
+              <div style="width:100%;height:6px;background:#E5E7EB;border-radius:4px;"><div style="width:20%;height:100%;background:#10B981;border-radius:4px;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;font-weight:600;"><span>Storage</span> <span>4.2 GB / 20 GB</span></div>
+              <div style="width:100%;height:6px;background:#E5E7EB;border-radius:4px;"><div style="width:21%;height:100%;background:var(--accent);border-radius:4px;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Data -->
+        <div class="account-main">
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <!-- Billing History -->
+            <div class="data-card">
+              <div class="data-card-title">Recent Billing <a href="#" style="font-size:12px;color:var(--accent);text-decoration:none;">View All</a></div>
+              <table style="width:100%;text-align:left;border-collapse:collapse;font-size:13px;">
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:8px 0;color:var(--text-muted);">Apr 25, 2026</td>
+                  <td style="padding:8px 0;font-weight:600;">₱149.00</td>
+                  <td style="padding:8px 0;text-align:right;"><span class="badge badge-green" style="font-size:10px;">Paid</span></td>
+                </tr>
+                <tr style="border-bottom:1px solid var(--border);">
+                  <td style="padding:8px 0;color:var(--text-muted);">Mar 25, 2026</td>
+                  <td style="padding:8px 0;font-weight:600;">₱149.00</td>
+                  <td style="padding:8px 0;text-align:right;"><span class="badge badge-green" style="font-size:10px;">Paid</span></td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:var(--text-muted);">Feb 25, 2026</td>
+                  <td style="padding:8px 0;font-weight:600;">₱149.00</td>
+                  <td style="padding:8px 0;text-align:right;"><span class="badge badge-red" style="font-size:10px;">Failed</span></td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Mini Audit Log -->
+            <div class="data-card">
+              <div class="data-card-title">Security & Audit Log</div>
+              <div class="audit-timeline">
+                <div class="audit-event">
+                  <div class="audit-title">Branch Added (BGC)</div>
+                  <div class="audit-meta">By Josh Wayman • Today, 10:14 AM</div>
+                </div>
+                <div class="audit-event critical">
+                  <div class="audit-title" style="color:#DC2626;">Failed Login Attempt</div>
+                  <div class="audit-meta">IP: 192.168.1.45 • Yesterday, 11:20 PM</div>
+                </div>
+                <div class="audit-event success">
+                  <div class="audit-title">Subscription Upgraded</div>
+                  <div class="audit-meta">Basic to Premium • Mar 01, 2026</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="danger-zone">
+            <div class="danger-header">Danger Zone (Admin Actions)</div>
+            
+            <div class="danger-item">
+              <div class="danger-text">
+                <strong>Force Password Reset</strong>
+                <span>Logs out all active sessions and emails a password reset link to the owner.</span>
+              </div>
+              <button class="btn-danger" onclick="document.getElementById('confirmModal').style.display='flex'">Send Reset Link</button>
+            </div>
+            
+            <div class="danger-item">
+              <div class="danger-text">
+                <strong>Suspend Shop Account</strong>
+                <span>Immediately blocks access to the software for the owner and all their staff. Requires a suspension reason.</span>
+              </div>
+              <button class="btn-danger">Suspend Account</button>
+            </div>
+            
+            <div class="danger-item">
+              <div class="danger-text">
+                <strong>Delete Shop Data</strong>
+                <span>Permanently purges all database records for this tenant. Cannot be undone.</span>
+              </div>
+              <button class="btn-danger solid">Delete Data</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERIC CONFIRMATION PATTERN -->
+  <div id="confirmModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+    <div style="background:white;width:400px;border-radius:16px;padding:24px;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#FEF2F2;color:#EF4444;display:flex;align-items:center;justify-content:center;"><i data-lucide="alert-triangle"></i></div>
+        <h3 style="font-size:16px;font-weight:700;">Confirm Action</h3>
+      </div>
+      <p style="font-size:14px;color:#4B5563;margin-bottom:24px;">Are you sure you want to force a password reset for <strong>Manila Bespoke Tailors</strong>? This will instantly terminate all their active sessions.</p>
+      <div style="display:flex;justify-content:flex-end;gap:12px;">
+        <button class="btn-sm badge-gray" style="background:white;border:1px solid #E5E7EB;" onclick="document.getElementById('confirmModal').style.display='none'">Cancel</button>
+        <button class="btn-sm" style="background:#EF4444;color:white;border:none;" onclick="alert('Password reset link sent to shop owner.'); document.getElementById('confirmModal').style.display='none'">Confirm Reset</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Branch Analytics | Sutura Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    .sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-header{height:72px;display:flex;align-items:center;padding:0 24px;gap:12px;border-bottom:1px solid var(--border);}
+    .logo-icon{background:var(--primary);color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;}
+    .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .plan-badge{font-size:10px;font-weight:700;background:#FAF5FF;color:#8B5CF6;border:1px solid #DDD6FE;padding:2px 8px;border-radius:6px;margin-left:2px;}
+    .nav-list{padding:20px 16px;display:flex;flex-direction:column;gap:6px;flex-grow:1;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}
+    .nav-item:hover{background:var(--surface);color:var(--primary);}
+    .nav-item.active{background:var(--primary);color:white;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;}
+    .user-info .name{font-size:14px;font-weight:600;}
+    .user-info .role{font-size:12px;color:var(--text-muted);}
+    .main{flex-grow:1;display:flex;flex-direction:column;min-width:0;}
+    .header{height:72px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 40px;flex-shrink:0;position:sticky;top:0;z-index:100;}
+    .header-left .title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .header-left .sub{font-size:13px;color:var(--text-muted);}
+    .header-actions{display:flex;align-items:center;gap:10px;}
+    .btn-outline{display:inline-flex;align-items:center;gap:8px;background:var(--bg);color:var(--primary);border:1px solid var(--border);border-radius:12px;padding:0 18px;height:40px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';transition:all 0.2s;text-decoration:none;white-space:nowrap;}
+    .btn-outline:hover{border-color:var(--primary);}
+    .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;border:none;border-radius:12px;padding:0 20px;height:40px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';transition:all 0.2s;text-decoration:none;white-space:nowrap;}
+    .btn-primary:hover{background:#333;}
+    .icon-btn{color:var(--text-muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:background 0.2s;}
+    .icon-btn:hover{background:var(--surface);}
+    .content{padding:36px 40px;flex-grow:1;overflow-y:auto;}
+    .page-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+    .period-select{height:40px;border:1px solid var(--border);border-radius:10px;padding:0 14px;font-family:'Outfit';font-size:14px;font-weight:600;color:var(--text-main);background:var(--bg);outline:none;}
+
+    /* KPI row */
+    .kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:24px;}
+    .kpi-card{background:var(--bg);border:1px solid var(--border);border-radius:18px;padding:22px 24px;box-shadow:0 2px 6px rgba(0,0,0,0.03);}
+    .kpi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+    .kpi-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;}
+    .kpi-icon.black{background:#F1F5F9;color:#1A1A1A;}
+    .kpi-icon.blue{background:#EFF6FF;color:#2563EB;}
+    .kpi-icon.green{background:#F0FDF4;color:#16A34A;}
+    .kpi-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;}
+    .kpi-value{font-size:28px;font-weight:800;letter-spacing:-0.5px;}
+    .branch-breakdown{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+    .bb-row{display:flex;align-items:center;gap:8px;}
+    .bb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .bb-label{font-size:12px;color:var(--text-muted);font-weight:500;flex:1;}
+    .bb-value{font-size:12px;font-weight:700;color:var(--text-main);}
+    .bb-bar-wrap{width:70px;height:4px;background:var(--surface);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+    .bb-bar{height:100%;border-radius:99px;}
+
+    /* Comparison table */
+    .comparison-card{background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.03);margin-bottom:20px;}
+    .comp-header{padding:20px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .comp-title{font-size:15px;font-weight:700;}
+    table{width:100%;border-collapse:collapse;}
+    th{padding:12px 20px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;background:#F8FAFC;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+    td{padding:16px 20px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .branch-name-cell{display:flex;align-items:center;gap:10px;}
+    .branch-color{width:10px;height:10px;border-radius:50%;}
+    .branch-nm{font-weight:700;color:var(--text-main);}
+    .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;white-space:nowrap;}
+    .badge-green{background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;}
+    .badge-blue{background:#EFF6FF;color:#2563EB;border:1px solid #DBEAFE;}
+    .badge-amber{background:#FFFBEB;color:#D97706;border:1px solid #FEF3C7;}
+    .rank-1{background:#FFFBEB;color:#92400E;border:1px solid #FEF3C7;font-size:11px;font-weight:800;padding:3px 10px;border-radius:7px;}
+    .growth-up{color:#16A34A;font-weight:700;}
+    .growth-dn{color:#DC2626;font-weight:700;}
+
+    /* Charts side by side */
+    .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    .chart-card{background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.03);}
+    .chart-header{padding:18px 24px;border-bottom:1px solid var(--border);}
+    .chart-title{font-size:14px;font-weight:700;}
+    .chart-body{padding:20px 24px;}
+    /* Horizontal bar chart */
+    .hbar-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+    .hbar-row:last-child{margin-bottom:0;}
+    .hbar-label{font-size:13px;font-weight:600;color:var(--text-main);width:110px;flex-shrink:0;}
+    .hbar-wrap{flex-grow:1;height:10px;background:#F3F4F6;border-radius:99px;overflow:hidden;}
+    .hbar-fill{height:100%;border-radius:99px;}
+    .hbar-value{font-size:13px;font-weight:700;color:var(--text-main);width:70px;text-align:right;flex-shrink:0;}
+    /* Donut placeholder */
+    .donut-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:10px 0;}
+    .donut-svg{width:120px;height:120px;}
+    .donut-legend{display:flex;flex-direction:column;gap:8px;width:100%;}
+    .dl-row{display:flex;align-items:center;gap:8px;}
+    .dl-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+    .dl-label{font-size:13px;font-weight:600;color:var(--text-main);flex:1;}
+    .dl-val{font-size:13px;font-weight:700;color:var(--text-main);}
+    .dl-pct{font-size:12px;color:var(--text-muted);}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:18px;"></i></div>
+      <div class="logo-text">Sutura <span class="plan-badge" style="background:#EFF6FF; color:#2563EB; border-color:#DBEAFE;">Pro</span></div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      
+      
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      
+      
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info"><div class="name">Admin User</div><div class="role">Shop Owner</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-left">
+        <div class="title">Branch Analytics</div>
+        <div class="sub">Cross-branch performance comparison — April 2026</div>
+      </div>
+      <div class="header-actions">
+        
+        <button class="btn-primary"><i data-lucide="download" style="width:14px;"></i> Export Report</button>
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-toolbar">
+        <select class="period-select">
+          <option>April 2026</option>
+          <option>March 2026</option>
+          <option>Q1 2026</option>
+          <option>2025 Full Year</option>
+        </select>
+      </div>
+
+      <!-- KPIs with branch breakdown -->
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon black"><i data-lucide="trending-up" style="width:18px;"></i></div>
+          </div>
+          <div class="kpi-label">Combined Revenue</div>
+          <div class="kpi-value">₱184,500</div>
+          <div class="branch-breakdown">
+            <div class="bb-row">
+              <div class="bb-dot" style="background:#1A1A1A;"></div>
+              <span class="bb-label">Makati HQ</span>
+              <div class="bb-bar-wrap"><div class="bb-bar" style="width:46%;background:#1A1A1A;"></div></div>
+              <span class="bb-value">₱84,500</span>
+            </div>
+            <div class="bb-row">
+              <div class="bb-dot" style="background:#2563EB;"></div>
+              <span class="bb-label">Cebu</span>
+              <div class="bb-bar-wrap"><div class="bb-bar" style="width:34%;background:#2563EB;"></div></div>
+              <span class="bb-value">₱62,300</span>
+            </div>
+            <div class="bb-row">
+              <div class="bb-dot" style="background:#059669;"></div>
+              <span class="bb-label">Davao</span>
+              <div class="bb-bar-wrap"><div class="bb-bar" style="width:20%;background:#059669;"></div></div>
+              <span class="bb-value">₱37,700</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon blue"><i data-lucide="briefcase" style="width:18px;"></i></div>
+          </div>
+          <div class="kpi-label">Total Active Orders</div>
+          <div class="kpi-value">34</div>
+          <div class="branch-breakdown">
+            <div class="bb-row"><div class="bb-dot" style="background:#1A1A1A;"></div><span class="bb-label">Makati HQ</span><div class="bb-bar-wrap"><div class="bb-bar" style="width:53%;background:#1A1A1A;"></div></div><span class="bb-value">18</span></div>
+            <div class="bb-row"><div class="bb-dot" style="background:#2563EB;"></div><span class="bb-label">Cebu</span><div class="bb-bar-wrap"><div class="bb-bar" style="width:29%;background:#2563EB;"></div></div><span class="bb-value">10</span></div>
+            <div class="bb-row"><div class="bb-dot" style="background:#059669;"></div><span class="bb-label">Davao</span><div class="bb-bar-wrap"><div class="bb-bar" style="width:18%;background:#059669;"></div></div><span class="bb-value">6</span></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon green"><i data-lucide="users" style="width:18px;"></i></div>
+          </div>
+          <div class="kpi-label">Staff Utilization</div>
+          <div class="kpi-value">82%</div>
+          <div class="branch-breakdown">
+            <div class="bb-row"><div class="bb-dot" style="background:#1A1A1A;"></div><span class="bb-label">Makati HQ</span><div class="bb-bar-wrap"><div class="bb-bar" style="width:90%;background:#1A1A1A;"></div></div><span class="bb-value">90%</span></div>
+            <div class="bb-row"><div class="bb-dot" style="background:#2563EB;"></div><span class="bb-label">Cebu</span><div class="bb-bar-wrap"><div class="bb-bar" style="width:85%;background:#2563EB;"></div></div><span class="bb-value">85%</span></div>
+            <div class="bb-row"><div class="bb-dot" style="background:#059669;"></div><span class="bb-label">Davao</span><div class="bb-bar-wrap"><div class="bb-bar" style="width:70%;background:#059669;"></div></div><span class="bb-value">70%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cross-branch comparison table -->
+      <div class="comparison-card">
+        <div class="comp-header">
+          <div class="comp-title">Cross-Branch Sales Comparison</div>
+          <span style="font-size:12px;color:var(--text-muted);">Performed by: Shop Owner / Manager</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Branch</th><th>Revenue</th><th>Orders Completed</th><th>Avg. Order Value</th><th>MoM Growth</th><th>Top Category</th><th>Ranking</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="branch-name-cell"><div class="branch-color" style="background:#1A1A1A;"></div><div class="branch-nm">Makati HQ</div></div></td>
+              <td style="font-weight:700;">₱84,500</td>
+              <td>22</td>
+              <td>₱3,841</td>
+              <td class="growth-up">↑ 22%</td>
+              <td><span class="badge badge-blue">Bespoke Suits</span></td>
+              <td><span class="rank-1">🥇 #1</span></td>
+            </tr>
+            <tr>
+              <td><div class="branch-name-cell"><div class="branch-color" style="background:#2563EB;"></div><div class="branch-nm">Cebu City</div></div></td>
+              <td style="font-weight:700;">₱62,300</td>
+              <td>15</td>
+              <td>₱4,153</td>
+              <td class="growth-up">↑ 15%</td>
+              <td><span class="badge badge-green">Gowns</span></td>
+              <td><span class="badge">🥈 #2</span></td>
+            </tr>
+            <tr>
+              <td><div class="branch-name-cell"><div class="branch-color" style="background:#059669;"></div><div class="branch-nm">Davao City</div></div></td>
+              <td style="font-weight:700;">₱37,700</td>
+              <td>9</td>
+              <td>₱4,189</td>
+              <td class="growth-dn">↓ 3%</td>
+              <td><span class="badge badge-amber">Uniforms</span></td>
+              <td><span class="badge">🥉 #3</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Revenue by Branch — April 2026</div></div>
+          <div class="chart-body">
+            <div class="hbar-row">
+              <div class="hbar-label">Makati HQ</div>
+              <div class="hbar-wrap"><div class="hbar-fill" style="width:100%;background:#1A1A1A;"></div></div>
+              <div class="hbar-value">₱84,500</div>
+            </div>
+            <div class="hbar-row">
+              <div class="hbar-label">Cebu City</div>
+              <div class="hbar-wrap"><div class="hbar-fill" style="width:74%;background:#2563EB;"></div></div>
+              <div class="hbar-value">₱62,300</div>
+            </div>
+            <div class="hbar-row">
+              <div class="hbar-label">Davao City</div>
+              <div class="hbar-wrap"><div class="hbar-fill" style="width:45%;background:#059669;"></div></div>
+              <div class="hbar-value">₱37,700</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header"><div class="chart-title">Revenue Share Distribution</div></div>
+          <div class="chart-body">
+            <div class="donut-wrap">
+              <svg class="donut-svg" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#E5E7EB" stroke-width="16"/>
+                <!-- Makati 46% -->
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#1A1A1A" stroke-width="16" stroke-dasharray="138 163" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+                <!-- Cebu 34% -->
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#2563EB" stroke-width="16" stroke-dasharray="102 199" stroke-dashoffset="-138" transform="rotate(-90 60 60)"/>
+                <!-- Davao 20% -->
+                <circle cx="60" cy="60" r="48" fill="none" stroke="#059669" stroke-width="16" stroke-dasharray="60 241" stroke-dashoffset="-240" transform="rotate(-90 60 60)"/>
+                <text x="60" y="55" text-anchor="middle" font-size="13" font-weight="800" font-family="Outfit" fill="#111827">46%</text>
+                <text x="60" y="68" text-anchor="middle" font-size="10" font-family="Outfit" fill="#6B7280">Makati</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="dl-row"><div class="dl-dot" style="background:#1A1A1A;"></div><span class="dl-label">Makati HQ</span><span class="dl-val">₱84,500</span><span class="dl-pct">46%</span></div>
+                <div class="dl-row"><div class="dl-dot" style="background:#2563EB;"></div><span class="dl-label">Cebu City</span><span class="dl-val">₱62,300</span><span class="dl-pct">34%</span></div>
+                <div class="dl-row"><div class="dl-dot" style="background:#059669;"></div><span class="dl-label">Davao City</span><span class="dl-val">₱37,700</span><span class="dl-pct">20%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

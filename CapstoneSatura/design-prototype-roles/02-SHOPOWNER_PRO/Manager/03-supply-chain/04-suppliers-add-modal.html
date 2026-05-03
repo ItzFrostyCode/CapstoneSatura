@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>Sutura - Add Supplier</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="suppliers-data.js"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #000000; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --overlay: rgba(0, 0, 0, 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow-x: hidden; position: relative; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    /* ... sidebar styles same as before ... */
+
+    /* ── Blurred Background ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; filter: blur(8px); pointer-events: none; }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; }
+    .content { padding: 32px; flex-grow: 1; }
+
+    /* ── Modal Overlay ── */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--overlay); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    
+    .modal { 
+      background: var(--bg); width: 640px; border-radius: 32px; 
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
+      display: flex; flex-direction: column; overflow: hidden; animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .modal-header { padding: 32px 40px; display: flex; align-items: center; justify-content: space-between; }
+    .modal-title-group { display: flex; align-items: center; gap: 20px; }
+    .modal-icon { width: 56px; height: 56px; border-radius: 14px; background: #F8FAFC; display: flex; align-items: center; justify-content: center; color: #1A1A1A; }
+    .modal-title { font-size: 32px; font-weight: 800; letter-spacing: -1px; color: #111827; }
+    
+    .modal-close { background: #F8FAFC; border: none; color: #9CA3AF; cursor: pointer; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .modal-close:hover { color: var(--primary); background: #F1F5F9; }
+
+    .modal-body { padding: 0 40px 40px 40px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 32px; }
+
+    .form-section-title { font-size: 13px; font-weight: 800; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; position: relative; }
+    .form-group.full { grid-column: span 2; }
+
+    .select-wrapper { position: relative; width: 100%; }
+    .select-wrapper select { appearance: none; cursor: pointer; padding-right: 44px; }
+    .select-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); }
+
+    /* ── Input with icon inside ── */
+    .input-wrapper { position: relative; width: 100%; }
+    .input-wrapper .field-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+    .input-wrapper input { padding-left: 48px; }
+
+    label { font-size: 14px; font-weight: 700; color: #1F2937; margin-bottom: 2px; }
+    input, select, textarea { 
+      height: 56px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; 
+      padding: 0 20px; font-family: 'Outfit'; font-size: 15px; color: var(--text-main); outline: none; transition: all 0.2s; 
+      width: 100%;
+    }
+    input::placeholder { color: #9CA3AF; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(0,0,0,0.03); }
+
+    .btn { height: 56px; padding: 0 32px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-secondary { background: #F8FAFC; border: 1px solid #F1F5F9; color: #111827; min-width: 140px; }
+    .btn-secondary:hover { background: #F1F5F9; }
+    .btn-primary { background: #1A1A1A; color: white; border: none; min-width: 220px; }
+    .btn-primary:hover { background: #000000; transform: translateY(-1px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+
+    .modal-footer { padding: 32px 40px; display: flex; justify-content: flex-end; gap: 16px; background: var(--bg); border-top: 1px solid var(--border); }
+
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+      <div class="logo-text">Sutura</div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item active"><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      
+      <a href="../05-settings/01-settings-tab.html" class="nav-item "><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header"><div class="header-title" style="font-size:20px; font-weight:600;">Supply Chain</div></header>
+    <div class="content"></div>
+  </main>
+
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon"><i data-lucide="truck" style="width: 24px;"></i></div>
+          <div class="modal-title">Add New Supplier</div>
+        </div>
+        <button class="modal-close"><i data-lucide="x" style="width: 20px;"></i></button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div class="form-section">
+          <div class="form-section-title">Company Information</div>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Company Name</label>
+              <div class="input-wrapper">
+                <i data-lucide="building" class="field-icon" style="width: 18px;"></i>
+                <input type="text" id="companyName" placeholder="e.g. Italian Fabrics Co." />
+              </div>
+            </div>
+            <div class="form-group full">
+              <label>Office Address</label>
+              <div class="input-wrapper">
+                <i data-lucide="map-pin" class="field-icon" style="width: 18px;"></i>
+                <input type="text" id="officeAddress" placeholder="123 Textile Ave, Manila" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">Primary Contact</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Contact Name</label>
+              <div class="input-wrapper">
+                <i data-lucide="user" class="field-icon" style="width: 18px;"></i>
+                <input type="text" id="contactName" placeholder="Juan Dela Cruz" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <div class="input-wrapper">
+                <i data-lucide="phone" class="field-icon" style="width: 18px;"></i>
+                <input type="text" id="phoneNumber" placeholder="+63 917 555 0000" />
+              </div>
+            </div>
+            <div class="form-group full">
+              <label>Email Address</label>
+              <div class="input-wrapper">
+                <i data-lucide="mail" class="field-icon" style="width: 18px;"></i>
+                <input type="email" id="emailAddress" placeholder="orders@supplier.com" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">Partnership Details</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Category</label>
+              <div class="select-wrapper">
+                <select id="category">
+                  <option>Premium Fabrics</option>
+                  <option>General Fabrics</option>
+                  <option>Accessories</option>
+                  <option>Tools & Equipment</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-icon" style="width: 18px;"></i>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Initial Rating</label>
+              <div class="select-wrapper">
+                <select id="rating">
+                  <option value="5.0">⭐ 5.0 — Excellent</option>
+                  <option value="4.9">⭐ 4.9 — Outstanding</option>
+                  <option value="4.8">⭐ 4.8 — Outstanding</option>
+                  <option value="4.7">⭐ 4.7 — Very Good</option>
+                  <option value="4.6">⭐ 4.6 — Very Good</option>
+                  <option value="4.5" selected>⭐ 4.5 — Good</option>
+                  <option value="4.0">⭐ 4.0 — Good</option>
+                  <option value="3.5">⭐ 3.5 — Average</option>
+                  <option value="3.0">⭐ 3.0 — Average</option>
+                  <option value="2.5">⭐ 2.5 — Below Average</option>
+                  <option value="2.0">⭐ 2.0 — Poor</option>
+                  <option value="1.0">⭐ 1.0 — Very Poor</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-icon" style="width: 18px;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.location.href='03-suppliers-tab.html'">Cancel</button>
+        <button class="btn btn-primary" id="saveSupplierBtn">Register Supplier</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    document.getElementById('saveSupplierBtn').addEventListener('click', function() {
+      const supplier = {
+        name: document.getElementById('companyName').value,
+        address: document.getElementById('officeAddress').value,
+        contactPerson: document.getElementById('contactName').value,
+        phone: document.getElementById('phoneNumber').value,
+        email: document.getElementById('emailAddress').value,
+        category: document.getElementById('category').value,
+        rating: parseFloat(document.getElementById('rating').value)
+      };
+
+      if (!supplier.name || !supplier.email) {
+        alert('Please fill in at least the Company Name and Email Address.');
+        return;
+      }
+
+      saveSupplier(supplier);
+      window.location.href = '03-suppliers-tab.html';
+    });
+
+    document.querySelector('.modal-close').addEventListener('click', function() {
+      window.location.href = '03-suppliers-tab.html';
+    });
+  </script>
+
+</body>
+</html>

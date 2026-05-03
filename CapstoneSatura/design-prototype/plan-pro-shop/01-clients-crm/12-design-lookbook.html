@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Design Lookbook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333;
+      --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); min-height: 100vh; }
+
+    .header { padding: 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .title h1 { font-size: 36px; font-weight: 800; letter-spacing: -1.5px; }
+    
+    .filter-bar { padding: 24px 40px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; overflow-x: auto; }
+    .filter-chip { padding: 10px 20px; border-radius: 30px; border: 1px solid var(--border); font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+    .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .grid { padding: 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+    .design-card { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); transition: all 0.3s ease; cursor: pointer; position: relative; }
+    .design-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    
+    .design-img { aspect-ratio: 3/4; background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--text-muted); position: relative; }
+    .design-badge { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    
+    .design-info { padding: 20px; }
+    .design-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .design-meta { font-size: 13px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+
+    .btn-create { background: var(--primary); color: white; border: none; padding: 14px 28px; border-radius: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="title">
+      <h1>Design Lookbook</h1>
+      <p style="color: var(--text-muted);">Showcase your shop's masterpiece collection to clients.</p>
+    </div>
+    <div style="display: flex; gap: 16px;">
+      <a href="02-customers-tab.html" style="text-decoration: none; color: var(--text-muted); font-weight: 600; padding: 14px;">Back to CRM</a>
+      <button class="btn-create"><i data-lucide="plus"></i> Add New Masterpiece</button>
+    </div>
+  </header>
+
+  <div class="filter-bar">
+    <div class="filter-chip active">All Designs</div>
+    <div class="filter-chip">Men's Suits</div>
+    <div class="filter-chip">Women's Gowns</div>
+    <div class="filter-chip">Barong Tagalog</div>
+    <div class="filter-chip">Corporate Uniforms</div>
+    <div class="filter-chip">Traditional Wear</div>
+  </div>
+
+  <div class="grid">
+    <div class="design-card">
+      <div class="design-img">
+        <i data-lucide="image" style="width: 48px; opacity: 0.2;"></i>
+        <span class="design-badge" style="color: #4F46E5;">Trending</span>
+      </div>
+      <div class="design-info">
+        <div class="design-name">Modern Slim-Fit Tuxedo</div>
+        <div class="design-meta">
+          <span>Midnight Blue</span>
+          <span style="font-weight: 700; color: var(--primary);">₱15,000+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-card">
+      <div class="design-img">
+        <i data-lucide="image" style="width: 48px; opacity: 0.2;"></i>
+        <span class="design-badge" style="color: #9333EA;">Hand-made</span>
+      </div>
+      <div class="design-info">
+        <div class="design-name">Classic Piña Barong</div>
+        <div class="design-meta">
+          <span>Natural Fiber</span>
+          <span style="font-weight: 700; color: var(--primary);">₱8,500+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-card">
+      <div class="design-img">
+        <i data-lucide="image" style="width: 48px; opacity: 0.2;"></i>
+        <span class="design-badge" style="color: #DB2777;">Premium</span>
+      </div>
+      <div class="design-info">
+        <div class="design-name">Silk Evening Gown</div>
+        <div class="design-meta">
+          <span>Emerald Green</span>
+          <span style="font-weight: 700; color: var(--primary);">₱12,000+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-card" style="border: 2.5px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface);">
+      <div style="background: white; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <i data-lucide="upload-cloud" style="color: var(--text-muted);"></i>
+      </div>
+      <div style="font-weight: 700; color: var(--text-muted);">Upload Design</div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

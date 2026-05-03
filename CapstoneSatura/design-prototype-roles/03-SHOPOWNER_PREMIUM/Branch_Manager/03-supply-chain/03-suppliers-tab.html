@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>Sutura - Supplier Management</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="suppliers-data.js"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #2C6BED;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow-x: hidden; }
+
+    /* ── Sidebar ─────────────────────────────── */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background: var(--surface); color: var(--primary); }
+    .nav-item.active { background: var(--primary); color: white; }
+    .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .user-info .name { font-size: 14px; font-weight: 600; }
+    .user-info .role { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Main Layout ─────────────────────────── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; width: calc(100vw - 260px); }
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .header-title { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { color: var(--text-muted); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; }
+    .icon-btn:hover { background: var(--surface); color: var(--primary); }
+
+    /* ── Sub-nav bar ─────────────────────────── */
+    .subnav { height: 64px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 32px; gap: 8px; flex-shrink: 0; justify-content: space-between; position: sticky; top: 72px; z-index: 90; width: calc(100vw - 260px); }
+    .subnav-tabs { display: flex; gap: 32px; height: 100%; align-items: center; }
+    .subnav-tab { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--text-muted); height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; }
+    .subnav-tab:hover { color: var(--primary); }
+    .subnav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+    
+    .subnav-actions { display: flex; align-items: center; gap: 16px; }
+    .btn-primary-sm { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-primary-sm:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+
+    /* ── Content ─────────────────────────────── */
+    .content { padding: 32px; overflow-y: auto; flex-grow: 1; }
+
+    /* ── Partnership Summary ──────────────────── */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg); padding: 24px; border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-info .label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    .stat-info .value { font-size: 24px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+
+    .bg-blue { background: #EFF6FF; color: #3B82F6; }
+    .bg-purple { background: #FAF5FF; color: #A855F7; }
+    .bg-indigo { background: #EEF2FF; color: #6366F1; }
+    .bg-teal { background: #F0FDFA; color: #14B8A6; }
+
+    /* ── Suppliers Table ─────────────────────── */
+    .table-container { background: var(--bg); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .table-header { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .table-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    
+    .search-box { position: relative; width: 320px; }
+    .search-box input { width: 100%; height: 40px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0 16px 0 40px; font-family: 'Outfit'; font-size: 14px; outline: none; transition: all 0.2s; }
+    .search-box input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(0,0,0,0.03); }
+    .search-box i, .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #F8FAFC; padding: 16px 32px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 20px 32px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #F9FAFB; }
+
+    .supplier-cell { display: flex; align-items: center; gap: 16px; }
+    .supplier-logo { width: 44px; height: 44px; border-radius: 10px; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; border: 1px solid var(--border); }
+    .supplier-info .name { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
+    .supplier-info .email { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+    .contact-info { display: flex; flex-direction: column; gap: 2px; }
+    .contact-person { font-size: 14px; font-weight: 700; color: var(--text-main); }
+    .contact-phone { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+    .cat-badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); padding: 4px 10px; border-radius: 8px; }
+    
+    .rating-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: #F59E0B; }
+
+    .actions { display: flex; gap: 8px; }
+    .action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #F3F4F6; border-radius: 10px; cursor: pointer; color: #9CA3AF; transition: all 0.2s; }
+    .action-btn:hover { border-color: var(--primary); color: var(--primary); background: #F9FAFB; }
+
+  </style>
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+      <div class="logo-text">Sutura</div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item active"><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      
+      <a href="../05-settings/01-settings-tab.html" class="nav-item "><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="name">Admin User</div><div class="role">Administrator</div></div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <header class="header">
+      <div class="header-left">
+        <div class="header-title">Supply Chain</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <!-- Sub-nav tabs -->
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="01-inventory-tab.html" class="subnav-tab">Inventory</a>
+        <a href="02-procurement-tab.html" class="subnav-tab">Procurement</a>
+        <a href="03-suppliers-tab.html" class="subnav-tab active">Suppliers</a>
+      </div>
+      <div class="subnav-actions">
+        <a href="04-suppliers-add-modal.html" class="btn-primary-sm">
+          <i data-lucide="plus" style="width: 20px;"></i> Add New Supplier
+        </a>
+      </div>
+    </div>
+
+    <div class="content">
+      
+      <!-- Partnership Summary -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon bg-blue"><i data-lucide="truck" style="width:24px;"></i></div>
+          <div class="stat-info">
+            <div class="label">Total Partners</div>
+            <div class="value">12</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-purple"><i data-lucide="shield-check" style="width:24px;"></i></div>
+          <div class="stat-info">
+            <div class="label">Preferred Suppliers</div>
+            <div class="value">4</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-indigo"><i data-lucide="shopping-bag" style="width:24px;"></i></div>
+          <div class="stat-info">
+            <div class="label">Current Orders</div>
+            <div class="value">2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suppliers Table -->
+      <div class="table-container">
+        <div class="table-header">
+          <div class="table-title">Partner Directory</div>
+          <div class="search-box">
+            <i data-lucide="search" style="width: 18px;"></i>
+            <input type="text" placeholder="Search by name, contact, or category...">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Supplier & Email</th>
+              <th>Primary Contact</th>
+              <th>Category</th>
+              <th>Rating</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Dynamic content will be injected here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script>
+    function renderSuppliers() {
+      const suppliers = getSuppliers();
+      const tbody = document.querySelector('tbody');
+      tbody.innerHTML = '';
+
+      suppliers.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="supplier-cell">
+              <div class="supplier-info">
+                <div class="name">${s.name}</div>
+                <div class="email">${s.email}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="contact-info">
+              <div class="contact-person">${s.contactPerson}</div>
+              <div class="contact-phone">${s.phone}</div>
+            </div>
+          </td>
+          <td><span class="cat-badge">${s.category}</span></td>
+          <td>
+            <div class="rating-pill">
+              <i data-lucide="star" style="width: 14px; fill: currentColor;"></i> ${s.rating}
+            </div>
+          </td>
+          <td>
+            <div class="actions">
+              <button class="action-btn" onclick="editSupplier(${s.id})"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+              <button class="action-btn" onclick="handleDelete(${s.id})"><i data-lucide="trash-2" style="width: 14px;"></i></button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      lucide.createIcons();
+    }
+
+    function handleDelete(id) {
+      if (confirm('Are you sure you want to delete this supplier?')) {
+        deleteSupplier(id);
+        renderSuppliers();
+      }
+    }
+
+    function editSupplier(id) {
+      // For now, just a placeholder or could redirect to edit page
+      alert('Edit functionality for ID ' + id + ' would go here.');
+    }
+
+    // Initial render
+    renderSuppliers();
+  </script>
+
+</body>
+</html>

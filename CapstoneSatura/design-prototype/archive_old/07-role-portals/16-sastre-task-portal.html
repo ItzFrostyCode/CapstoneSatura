@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sastre Portal - Sutura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --sastre-accent: #10B981; /* Green for Production */
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--text-main); }
+
+    .mobile-container { max-width: 480px; margin: 0 auto; background: white; min-height: 100vh; padding-bottom: 80px; }
+    
+    .header { padding: 24px; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .user-tag { background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+
+    .tab-bar { display: flex; padding: 12px 24px; gap: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; background: white; }
+    .tab { font-size: 13px; font-weight: 800; color: var(--text-muted); cursor: pointer; white-space: nowrap; padding-bottom: 8px; border-bottom: 2px solid transparent; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .task-card { margin: 16px; border: 1.5px solid var(--border); border-radius: 20px; overflow: hidden; }
+    .task-header { padding: 16px; background: #F8FAFC; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .task-body { padding: 16px; }
+    
+    .priority-high { color: #DC2626; font-size: 11px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
+    
+    .designer-notes { background: #F5F3FF; border-radius: 12px; padding: 12px; margin-top: 12px; border-left: 4px solid #8B5CF6; }
+    
+    .btn-update { width: 100%; padding: 14px; border-radius: 12px; border: none; font-family: 'Outfit'; font-weight: 800; cursor: pointer; margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-done { background: var(--sastre-accent); color: white; }
+    
+    .nav-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 72px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; max-width: 480px; margin: 0 auto; }
+    .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); text-decoration: none; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .nav-btn.active { color: var(--primary); }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-container">
+    <header class="header">
+      <div>
+        <div class="user-tag">Role: Sastre</div>
+        <h1 style="font-size: 18px; font-weight: 800;">My Daily Tasks</h1>
+      </div>
+      <div style="width: 40px; height: 40px; border-radius: 12px; background: #333; display: flex; align-items: center; justify-content: center;"><i data-lucide="user" style="width:20px;"></i></div>
+    </header>
+
+    <div class="tab-bar">
+      <div class="tab active">In Progress (3)</div>
+      <div class="tab">Completed</div>
+      <div class="tab">Urgent / Rush</div>
+    </div>
+
+    <!-- Task Item 1 -->
+    <div class="task-card">
+      <div class="task-header">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">ORDER #ORD-2024-8821</div>
+          <div style="font-size: 16px; font-weight: 800;">3-Piece Suit (Premium)</div>
+        </div>
+        <div class="priority-high"><i data-lucide="zap" style="width:14px;"></i> RUSH</div>
+      </div>
+      <div class="task-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Customer</div>
+            <div style="font-size: 14px; font-weight: 700;">Alex McQueen</div>
+          </div>
+          <div>
+            <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Due Date</div>
+            <div style="font-size: 14px; font-weight: 700; color: #DC2626;">Today, 5:00 PM</div>
+          </div>
+        </div>
+
+        <div class="designer-notes">
+          <div style="font-size: 11px; font-weight: 800; color: #7C3AED; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="info" style="width:14px;"></i> DESIGNER NOTES
+          </div>
+          <div style="font-size: 12px; color: #4C1D95; line-height: 1.4;">
+            "Use double-canvas for the lapels. Ensure high-armhole for slim-fit silhouette as per client's request."
+          </div>
+        </div>
+
+        <button class="btn-update btn-done" onclick="alert('Order Status Updated! Customer Notified.');">
+          <i data-lucide="check-circle"></i> Mark as Done
+        </button>
+      </div>
+    </div>
+
+    <!-- Task Item 2 -->
+    <div class="task-card" style="opacity: 0.8;">
+      <div class="task-header">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">ORDER #ORD-2024-8822</div>
+          <div style="font-size: 16px; font-weight: 800;">Barong Tagalog (Pina)</div>
+        </div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted);">NORMAL</div>
+      </div>
+      <div class="task-body">
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Waiting for Fabric Delivery (PO-2026-0045)</div>
+        <button class="btn-update" style="background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border);" disabled>
+          <i data-lucide="clock"></i> Waiting for Materials
+        </button>
+      </div>
+    </div>
+
+    <nav class="nav-bottom">
+      <a href="#" class="nav-btn active"><i data-lucide="list"></i> Tasks</a>
+      <a href="#" class="nav-btn"><i data-lucide="scissors"></i> Fittings</a>
+      <a href="#" class="nav-btn"><i data-lucide="bell"></i> Alerts</a>
+      <a href="#" class="nav-btn"><i data-lucide="settings"></i> Profile</a>
+    </nav>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

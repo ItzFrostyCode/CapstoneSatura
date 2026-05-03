@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Manage Branch | Sutura Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    .sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-header{height:72px;display:flex;align-items:center;padding:0 24px;gap:12px;border-bottom:1px solid var(--border);}
+    .logo-icon{background:var(--primary);color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;}
+    .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .plan-badge{font-size:10px;font-weight:700;background:#FAF5FF;color:#8B5CF6;border:1px solid #DDD6FE;padding:2px 8px;border-radius:6px;margin-left:2px;}
+    .nav-list{padding:20px 16px;display:flex;flex-direction:column;gap:6px;flex-grow:1;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}
+    .nav-item:hover{background:var(--surface);color:var(--primary);}
+    .nav-item.active{background:var(--primary);color:white;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;}
+    .user-info .name{font-size:14px;font-weight:600;}
+    .user-info .role{font-size:12px;color:var(--text-muted);}
+    .main{flex-grow:1;display:flex;flex-direction:column;min-width:0;filter:blur(2px);pointer-events:none;}
+    .header{height:72px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px;}
+    .header-title{font-size:20px;font-weight:700;}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(17,24,39,0.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:999;padding:24px;}
+    .modal-card{background:var(--bg);width:100%;max-width:560px;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;display:flex;flex-direction:column;max-height:90vh;}
+    .modal-header{padding:22px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .modal-title{display:flex;align-items:center;gap:12px;}
+    .branch-icon{width:40px;height:40px;background:linear-gradient(135deg,#2563EB,#1D4ED8);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;}
+    .branch-name{font-size:16px;font-weight:700;}
+    .branch-addr{font-size:12px;color:var(--text-muted);}
+    .btn-close{background:none;border:none;color:var(--text-muted);cursor:pointer;display:flex;padding:4px;border-radius:8px;transition:all 0.2s;}
+    .btn-close:hover{color:var(--text-main);background:var(--surface);}
+
+    /* Tabs */
+    .modal-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 28px;flex-shrink:0;}
+    .modal-tab{font-size:13px;font-weight:600;color:var(--text-muted);padding:14px 0;margin-right:24px;border-bottom:2px solid transparent;cursor:pointer;transition:all 0.2s;margin-bottom:-1px;white-space:nowrap;}
+    .modal-tab:hover{color:var(--primary);}
+    .modal-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+
+    .modal-body{padding:28px;overflow-y:auto;display:flex;flex-direction:column;gap:20px;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:flex;flex-direction:column;gap:20px;}
+
+    /* Shared form */
+    .section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;}
+    .form-row{display:flex;gap:14px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;flex:1;}
+    .form-group label{font-size:13px;font-weight:600;color:var(--text-main);}
+    .form-group input,.form-group select{height:42px;padding:0 14px;border:1px solid var(--border);border-radius:10px;font-family:'Outfit';font-size:14px;outline:none;transition:border-color 0.2s;background:var(--surface);width:100%;}
+    .form-group input:focus,.form-group select:focus{border-color:#8B5CF6;background:white;}
+    .form-group input[readonly]{color:var(--text-muted);cursor:default;}
+
+    /* Manager card */
+    .manager-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;}
+    .mgr-avatar{width:44px;height:44px;border-radius:50%;background:#1A1A1A;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+    .mgr-name{font-size:15px;font-weight:700;}
+    .mgr-meta{font-size:12px;color:var(--text-muted);margin-top:2px;}
+    .mgr-actions{margin-left:auto;display:flex;gap:8px;}
+    .btn-tiny{font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:white;color:var(--text-muted);transition:all 0.2s;font-family:'Outfit';}
+    .btn-tiny:hover{border-color:var(--primary);color:var(--primary);}
+
+    /* Account info row */
+    .info-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+    .info-row:last-child{border-bottom:none;}
+    .info-label{font-size:13px;color:var(--text-muted);font-weight:500;}
+    .info-value{font-size:13px;font-weight:700;color:var(--text-main);}
+    .badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;}
+    .badge-green{background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;}
+    .badge-amber{background:#FFFBEB;color:#D97706;border:1px solid #FEF3C7;}
+
+    /* Reset password box */
+    .reset-box{background:#EFF6FF;border:1px solid #DBEAFE;border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+    .reset-box-text{font-size:13px;color:#1D4ED8;line-height:1.5;}
+    .btn-reset{background:#2563EB;color:white;border:none;border-radius:10px;padding:0 18px;height:36px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';white-space:nowrap;transition:all 0.2s;}
+    .btn-reset:hover{background:#1D4ED8;}
+
+    /* Suspend box */
+    .suspend-box{background:#FFFBEB;border:1px solid #FEF3C7;border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+    .suspend-box-text{font-size:13px;color:#92400E;line-height:1.5;}
+    .btn-suspend{background:#D97706;color:white;border:none;border-radius:10px;padding:0 18px;height:36px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';white-space:nowrap;transition:all 0.2s;}
+    .btn-suspend:hover{background:#B45309;}
+
+    /* Danger zone */
+    .danger-zone{background:#FEF2F2;border:1px solid #FCA5A5;border-radius:14px;padding:18px 20px;}
+    .danger-title{font-size:13px;font-weight:700;color:#DC2626;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+    .danger-desc{font-size:13px;color:#9B1C1C;line-height:1.6;margin-bottom:14px;}
+    .btn-danger{background:#DC2626;color:white;border:none;border-radius:10px;padding:0 20px;height:36px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';transition:all 0.2s;}
+    .btn-danger:hover{background:#B91C1C;}
+    .btn-danger-outline{background:white;color:#DC2626;border:1px solid #FCA5A5;border-radius:10px;padding:0 20px;height:36px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';transition:all 0.2s;margin-right:8px;}
+    .btn-danger-outline:hover{background:#FEF2F2;}
+
+    .modal-footer{padding:18px 28px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:12px;background:var(--surface);flex-shrink:0;}
+    .btn-cancel{background:white;border:1px solid var(--border);color:var(--text-main);font-weight:600;padding:0 20px;height:40px;border-radius:10px;cursor:pointer;text-decoration:none;display:flex;align-items:center;font-family:'Outfit';font-size:14px;transition:all 0.2s;}
+    .btn-cancel:hover{background:var(--surface);}
+    .btn-save{background:#8B5CF6;color:white;border:none;font-weight:600;padding:0 24px;height:40px;border-radius:10px;cursor:pointer;font-family:'Outfit';font-size:14px;transition:all 0.2s;}
+    .btn-save:hover{background:#7C3AED;}
+  </style>
+</head>
+<body>
+  <!-- Blurred sidebar background -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:18px;"></i></div>
+      <div class="logo-text">Sutura <span class="plan-badge" style="background:#EFF6FF; color:#2563EB; border-color:#DBEAFE;">Pro</span></div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard" style="width:20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item"><i data-lucide="users" style="width:20px;"></i> Customers</a>
+      
+      
+      <a href="../04-finance/01-sales-tab.html" class="nav-item"><i data-lucide="credit-card" style="width:20px;"></i> Finance</a>
+      
+      
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info"><div class="name">Admin User</div><div class="role">Shop Owner</div></div>
+    </div>
+  </aside>
+
+  <!-- Blurred main content -->
+  <main class="main">
+    <div class="header"><div class="header-title">Branch Management</div></div>
+  </main>
+
+  <!-- Manage Branch Modal -->
+  <div class="modal-overlay">
+    <div class="modal-card">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="branch-icon"><i data-lucide="git-branch" style="width:18px;"></i></div>
+          <div>
+            <div class="branch-name">Sutura — Cebu City</div>
+            <div class="branch-addr">Colon St., Cebu City · Branch ID: BRN-002</div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Tabs -->
+      <div class="modal-tabs">
+        <div class="modal-tab active" onclick="switchTab('details')">Branch Details</div>
+        <div class="modal-tab" onclick="switchTab('manager')">Manager Account</div>
+        <div class="modal-tab" onclick="switchTab('danger')">Danger Zone</div>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- TAB 1: Branch Details -->
+        <div class="tab-panel active" id="tab-details">
+          <div>
+            <div class="section-label">Branch Information</div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label>Branch Name</label>
+              <input type="text" value="Sutura — Cebu City">
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label>Complete Address</label>
+              <input type="text" value="Colon St., Cebu City, Cebu">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Contact Number</label>
+                <input type="text" value="+63 932 456 7890">
+              </div>
+              <div class="form-group">
+                <label>Branch Email</label>
+                <input type="email" value="cebu@sutura.ph">
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">System Info (Read-Only)</div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 16px;">
+              <div class="info-row">
+                <span class="info-label">Branch ID</span>
+                <span class="info-value" style="font-family:monospace;">BRN-002</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Date Created</span>
+                <span class="info-value">March 12, 2026</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="badge badge-green">Active</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Active Orders</span>
+                <span class="info-value">10 orders</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Manager Account -->
+        <div class="tab-panel" id="tab-manager">
+          <div>
+            <div class="section-label">Assigned Branch Manager</div>
+            <div class="manager-card">
+              <div class="mgr-avatar">M</div>
+              <div>
+                <div class="mgr-name">Maria Lim</div>
+                <div class="mgr-meta">Username: maria.cebu · cebu@sutura.ph</div>
+              </div>
+              <div class="mgr-actions">
+                <button class="btn-tiny">Change Manager</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-label">Account Credentials</div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 16px;margin-bottom:16px;">
+              <div class="info-row">
+                <span class="info-label">Username</span>
+                <span class="info-value" style="font-family:monospace;">maria.cebu</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Password</span>
+                <span class="info-value">••••••••</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Last Login</span>
+                <span class="info-value">April 25, 2026 · 9:12 AM</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Account Status</span>
+                <span class="badge badge-green">Active</span>
+              </div>
+            </div>
+
+            <div class="reset-box">
+              <div class="reset-box-text"><strong>Reset Password</strong><br>Set a new temporary password for this branch manager. They must change it on next login.</div>
+              <button class="btn-reset">Reset Password</button>
+            </div>
+          </div>
+
+          <div class="suspend-box">
+            <div class="suspend-box-text"><strong>Suspend Account</strong><br>Temporarily blocks Maria from logging in without deleting any data.</div>
+            <button class="btn-suspend">Suspend</button>
+          </div>
+        </div>
+
+        <!-- TAB 3: Danger Zone -->
+        <div class="tab-panel" id="tab-danger">
+          <div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:12px;padding:14px 16px;font-size:13px;color:#1D4ED8;display:flex;gap:10px;">
+            <i data-lucide="info" style="width:16px;flex-shrink:0;margin-top:2px;"></i>
+            <div>All branch data (customers, orders, inventory) is permanently linked to your main account. These actions only affect access — data is never permanently deleted unless you choose to.</div>
+          </div>
+
+          <div class="danger-zone">
+            <div class="danger-title"><i data-lucide="pause-circle" style="width:14px;"></i> Deactivate Branch</div>
+            <div class="danger-desc">Temporarily locks all staff accounts under this branch. The Branch Manager can no longer log in. All existing data (orders, customers, inventory) is preserved and can be reactivated at any time.</div>
+            <button class="btn-danger-outline">Deactivate Branch</button>
+          </div>
+
+          <div class="danger-zone">
+            <div class="danger-title"><i data-lucide="trash-2" style="width:14px;"></i> Delete Branch</div>
+            <div class="danger-desc">Permanently removes this branch from your account. The Branch Manager account will be deleted. <strong>All branch-specific data will be unlinked.</strong> This action cannot be undone.</div>
+            <button class="btn-danger">Permanently Delete</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        
+        <button class="btn-save" onclick="window.location.href='08-branch-management.html'">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function switchTab(tab) {
+      // Update tab buttons
+      document.querySelectorAll('.modal-tab').forEach((t, i) => {
+        t.classList.remove('active');
+        if ((tab === 'details' && i === 0) ||
+            (tab === 'manager' && i === 1) ||
+            (tab === 'danger' && i === 2)) {
+          t.classList.add('active');
+        }
+      });
+      // Update panels
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+  </script>
+
+</body>
+</html>

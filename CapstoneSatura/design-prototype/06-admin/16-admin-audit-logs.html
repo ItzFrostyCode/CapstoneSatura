@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura | Security Logs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { 
+      --bg: #09090B; 
+      --sidebar: rgba(9, 9, 11, 0.96); 
+      --card: #121217;
+      --card-2: #17171e;
+      --card-3: #1f1f29;
+      --accent: #3B82F6; 
+      --accent-muted: rgba(59, 130, 246, 0.12);
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text: #FAFAFA;
+      --text-dim: #A1A1AA;
+      --border: #27272A;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Outfit', sans-serif; 
+      background: 
+        radial-gradient(circle at top, rgba(59,130,246,0.08), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(168,85,247,0.06), transparent 18%),
+        var(--bg); 
+      color: var(--text); 
+      display: flex; 
+      min-height: 100vh; 
+      overflow: hidden; 
+      letter-spacing: -0.02em; 
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar { 
+      background: var(--sidebar); 
+      border-right: 1px solid var(--border);
+      display: flex; 
+      flex-direction: column; 
+      position: sticky; 
+      top: 0; 
+      height: 100vh; 
+      backdrop-filter: blur(12px);
+    }
+    .sidebar-header { padding: 34px 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: white; }
+    .brand-sub { margin-top: 6px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; }
+    
+    .nav { padding: 14px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: auto; list-style: none; }
+    .nav-group-label { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 12px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .nav-item i { width: 18px; height: 18px; }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .nav-item.active { background: var(--accent-muted); color: var(--accent); box-shadow: inset 0 0 0 1px rgba(59,130,246,0.18); }
+
+    .nav-badge { margin-left: auto; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(239,68,68,0.14); color: #fecaca; border: 1px solid rgba(239,68,68,0.18); padding: 3px 7px; border-radius: 999px; }
+    
+    .sidebar-footer { padding: 18px 20px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; background: var(--card-3); border: 1px solid var(--border); border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: white; font-size: 12px; flex: 0 0 auto; }
+    .user-info .name { font-weight: 700; color: white; font-size: 13px; }
+    .user-info .role { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    /* Main Content */
+    .main { flex: 1; padding: 34px 40px 40px; overflow-y: auto; position: relative; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; }
+
+    /* Log Table */
+    .table-card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; }
+    th { text-align: left; padding: 20px 32px; background: rgba(255,255,255,0.02); font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 20px 32px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-dim); }
+    
+    .log-event { font-weight: 600; color: var(--text); }
+    .log-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    
+    .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .status-security { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .status-audit { background: rgba(59, 130, 246, 0.1); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">Sutura Admin</div>
+        <div class="brand-sub">Platform Management</div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group-label">Overview</div>
+        <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Overview</a>
+
+        <div class="nav-group-label">Management</div>
+        <a href="02-registrations.html" class="nav-item"><i data-lucide="clipboard-check"></i> Shop Verifications <span class="nav-badge">3</span></a>
+        <a href="03-shops.html" class="nav-item"><i data-lucide="building"></i> Registered Shops</a>
+        <a href="08-announcements-tab.html" class="nav-item"><i data-lucide="megaphone"></i> Announcements</a>
+        <a href="05-subscription-plans.html" class="nav-item"><i data-lucide="credit-card"></i> Revenue & Plans</a>
+        <a href="07-support-tickets.html" class="nav-item"><i data-lucide="life-buoy"></i> Support Tickets</a>
+
+        <div class="nav-group-label">System</div>
+        <a href="06-system-monitor.html" class="nav-item"><i data-lucide="activity"></i> System Health</a>
+        <a href="16-admin-audit-logs.html" class="nav-item active"><i data-lucide="shield"></i> Security Logs</a>
+        <a href="08-platform-settings.html" class="nav-item"><i data-lucide="settings"></i> Platform Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar">A</div>
+        <div>
+          <div style="font-weight:700;font-size:13px;">Admin-99</div>
+          <div class="muted-11">System Superuser</div>
+        </div>
+      </div>
+    </aside>
+
+  <main class="main">
+
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Event</th>
+            <th>Actor</th>
+            <th>IP Address</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="log-meta">2026-04-30 16:15:02</td>
+            <td class="log-event">Platform Configuration Export</td>
+            <td>Admin-99</td>
+            <td class="log-meta">192.168.1.10</td>
+            <td><span class="status-badge status-audit">Audit</span></td>
+          </tr>
+          <tr>
+            <td class="log-meta">2026-04-30 16:08:12</td>
+            <td class="log-event">Brute Force Mitigation Trigger</td>
+            <td>SYSTEM</td>
+            <td class="log-meta">104.28.12.5</td>
+            <td><span class="status-badge status-security">Security</span></td>
+          </tr>
+          <tr>
+            <td class="log-meta">2026-04-30 15:55:00</td>
+            <td class="log-event">New Admin Seat Provisioned</td>
+            <td>SuperAdmin</td>
+            <td class="log-meta">192.168.1.5</td>
+            <td><span class="status-badge status-audit">Audit</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

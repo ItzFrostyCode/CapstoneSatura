@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Create Job Order (Solo + Priority)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --info-bg: #EFF6FF; --info-text: #2563EB;
+      --purple-bg: #FAF5FF; --purple-text: #9333EA;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow-x: hidden; position: relative; }
+
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; opacity: 0.5; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); }
+    .nav-item.active { background: var(--primary); color: white; }
+
+    .main { flex-grow: 1; display: flex; flex-direction: column; opacity: 0.5; pointer-events: none; }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 40px; }
+    .header-title { font-size: 20px; font-weight: 600; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(17,24,39,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+    .modal { background: var(--bg); border-radius: 16px; width: 740px; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); overflow: hidden; }
+
+    .modal-header { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+    .modal-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+    .modal-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .modal-close { color: var(--text-muted); background: none; border: none; cursor: pointer; display: flex; padding: 4px; border-radius: 6px; }
+
+    /* Body: no overflow-y — must fit without scroll */
+    .modal-body { padding: 16px 28px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+
+    .form-row   { display: grid; grid-template-columns: 1fr 1fr;       gap: 12px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr;   gap: 12px; }
+    .form-row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+      font-family: 'Outfit'; outline: none; background: var(--bg); transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+
+    .select-wrapper { position: relative; }
+    .select-wrapper select { width: 100%; appearance: none; padding-right: 32px; }
+    .select-icon { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+
+    /* Order Type toggle — buttons ARE the navigation */
+    .toggle-group { display: flex; background: var(--surface); padding: 3px; gap: 3px; border: 1px solid var(--border); border-radius: 8px; width: fit-content; }
+    .toggle-btn { padding: 7px 18px; border: none; background: none; font-size: 13px; font-weight: 700; font-family: 'Outfit'; color: var(--text-muted); cursor: pointer; border-radius: 6px; transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; }
+    .toggle-btn.active-solo { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+    /* Smart Fabric Analysis — compact */
+    .smart-panel { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 12px 16px; }
+    .smart-panel-title { font-size: 11px; font-weight: 700; color: var(--info-text); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+    .smart-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: start; }
+    .smart-metric { background: white; border-radius: 7px; padding: 8px 10px; border: 1px solid #DBEAFE; }
+    .smart-metric .ml { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .smart-metric .mv { font-size: 16px; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+    .smart-status-col { display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+    .smart-status { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 7px; padding: 7px 10px; font-size: 12px; font-weight: 600; color: #B45309; }
+    .shortage-box { background: #FEF2F2; border: 1px solid #FECACA; border-radius: 7px; padding: 7px 10px; font-size: 12px; color: #991B1B; }
+    .shortage-box strong { font-weight: 700; display: block; margin-bottom: 2px; font-size: 11px; text-transform: uppercase; }
+
+    /* Priority Panel — compact inline */
+    .priority-panel { border: 1.5px solid #FDE68A; border-radius: 10px; padding: 12px 16px; background: #FFFBEB; }
+    .priority-row { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; margin-bottom: 10px; }
+    .priority-icon { width: 32px; height: 32px; background: #F59E0B; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+    .priority-info .title { font-size: 13px; font-weight: 700; color: #92400E; }
+    .priority-info .desc  { font-size: 11px; color: #B45309; margin-top: 1px; }
+    .switch { width: 38px; height: 22px; appearance: none; background: #D1D5DB; border-radius: 11px; outline: none; cursor: pointer; flex-shrink: 0; position: relative; transition: background 0.2s; }
+    .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: transform 0.2s; }
+    .switch:checked { background: #F59E0B; }
+    .switch:checked::after { transform: translateX(16px); }
+    .priority-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+    .fee-input-group { display: flex; }
+    .fee-unit { background: var(--surface); border: 1px solid var(--border); border-right: none; border-radius: 8px 0 0 8px; padding: 9px 12px; font-size: 13px; font-weight: 700; color: var(--text-muted); }
+    .fee-input { border-radius: 0 8px 8px 0 !important; border-left: none !important; flex: 1; }
+    .price-preview { background: white; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
+    .price-preview .lbl { font-size: 11px; color: #92400E; }
+    .price-preview .val { font-size: 15px; font-weight: 700; color: #92400E; }
+
+    .section-divider { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+    .modal-footer { padding: 12px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: var(--surface); flex-shrink: 0; }
+    .btn-secondary { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 0 18px; height: 40px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; text-decoration: none; font-family: 'Outfit'; }
+    .btn-primary   { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 20px; height: 40px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; text-decoration: none; font-family: 'Outfit'; }
+
+    /* State nav — bottom-right corner */
+    .state-nav { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+    .state-nav .sn-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .state-nav a { display: flex; align-items: center; gap: 6px; background: white; border: 1px solid var(--border); border-radius: 7px; padding: 6px 12px; font-size: 12px; font-weight: 600; text-decoration: none; color: var(--text-main); box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
+    .state-nav a.active { background: var(--primary); color: white; border-color: var(--primary); }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="logo-icon"><i data-lucide="scissors" style="width:18px;"></i></div><div class="logo-text">Sutura</div></div>
+    <nav class="nav-list">
+      
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item active"><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      
+      
+      
+      
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header"><div class="header-title">Production</div></header>
+  </main>
+
+  <div class="modal-overlay">
+    <div class="modal">
+
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Create New Job Order</div>
+          <div class="modal-subtitle">Solo Order · Priority/Rush Active · Fabric Shortage Detected</div>
+        </div>
+        <a href="01-job-orders-tab.html" class="modal-close" style="text-decoration:none;"><i data-lucide="x" style="width:22px;"></i></a>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Row 1: Customer + Garment -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>End Customer *</label>
+            <div class="select-wrapper">
+              <select><option selected>Alexander McQueen</option><option>Maria Santos</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width:14px;"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Garment Type *</label>
+            <div class="select-wrapper">
+              <select><option selected>Polo</option><option>Pants</option><option>Barong</option><option>Dress</option><option>Blazer</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width:14px;"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Type — buttons link directly to states, no extra text -->
+        <div class="form-group">
+          <label>Order Type</label>
+          <div class="toggle-group">
+            <a href="02-job-orders-add-modal.html" class="toggle-btn active-solo">Solo</a>
+            <a href="02b-job-orders-bulk-priority.html" class="toggle-btn">Bulk</a>
+          </div>
+        </div>
+
+        <!-- Smart Fabric Analysis — compact 3-col layout -->
+        <div class="smart-panel">
+          <div class="smart-panel-title"><i data-lucide="zap" style="width:12px;"></i> Smart Fabric Analysis</div>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label style="color:var(--info-text);">Primary Fabric</label>
+            <div class="select-wrapper">
+              <select style="border-color:#BFDBFE;background:white;font-size:13px;padding:7px 12px;">
+                <option selected>Pina Silk (1.50 m in stock)</option>
+                <option>Cotton Blend (125.50 m)</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-icon" style="width:13px;"></i>
+            </div>
+          </div>
+          <div class="smart-row" style="display:flex; gap:16px; align-items:stretch;">
+            <div style="display:flex; flex-direction:column; gap:10px; width:160px;">
+              <div class="smart-metric"><div class="ml">Needed</div><div class="mv">1.50 m</div></div>
+              <div class="smart-metric"><div class="ml">In Stock</div><div class="mv" style="color:#B91C1C;">1.50 m</div></div>
+            </div>
+            <div class="smart-status-col" style="flex:1; display:flex; flex-direction:column; gap:10px;">
+              <div class="smart-status">⚠️ OK now — short for future orders</div>
+              <div class="shortage-box">
+                <strong>Purchase Recommendation</strong>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                  <span>Shortage: 3.00 m · Est. ₱1,560.00</span>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider">Schedule & Pricing</div>
+
+        <!-- Due date + Price + Deposit + Method all in one row -->
+        <div class="form-row-4">
+          <div class="form-group">
+            <label>Due Date *</label>
+            <input type="date" value="2023-11-20" />
+          </div>
+          <div class="form-group">
+            <label>Base Price (₱) *</label>
+            <input type="text" value="4,500.00" />
+          </div>
+          <div class="form-group">
+            <label>Deposit (₱)</label>
+            <input type="text" value="2,000.00" />
+          </div>
+          <div class="form-group">
+            <label>Payment Method</label>
+            <div class="select-wrapper">
+              <select><option>Cash</option><option>GCash</option><option>Card</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width:14px;"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Priority Panel — compact -->
+        <div class="priority-panel">
+          <div class="priority-row">
+            <div class="priority-icon"><i data-lucide="zap" style="width:16px;"></i></div>
+            <div class="priority-info">
+              <div class="title">Priority / Rush Order — ACTIVE</div>
+              <div class="desc">Solo: adds a flat fixed fee (₱) on top of base price.</div>
+            </div>
+            <input type="checkbox" class="switch" checked>
+          </div>
+          <div class="priority-details">
+            <div class="form-group">
+              <label style="color:#B45309;">Fixed Rush Fee (₱)</label>
+              <div class="fee-input-group">
+                <span class="fee-unit">₱</span>
+                <input type="number" class="fee-input" value="500" />
+              </div>
+            </div>
+            <div class="price-preview">
+              <div class="lbl">Total (Base ₱4,500 + Rush ₱500)</div>
+              <div class="val">₱5,000.00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider">Task Assignment</div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>Pattern Maker</label>
+            <div class="select-wrapper">
+              <select><option>John (Pattern Maker)</option><option>Unassigned</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width:14px;"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Cutter</label>
+            <div class="select-wrapper">
+              <select><option>Sarah (Cutter)</option><option>Unassigned</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width:14px;"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Tailor</label>
+            <div class="select-wrapper">
+              <select><option>Mike (Tailor)</option><option>Anna (Tailor)</option><option>Unassigned</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width:14px;"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description & Notes</label>
+          <input type="text" value="Polo with mandarin collar, slim fit, 3-button placket. Client prefers light Pina Silk." />
+        </div>
+
+      </div>
+
+      <div class="modal-footer" style="padding: 24px 28px; background: #FCFDFF; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display:flex; align-items:center; gap:10px; color:#B45309; font-size:12px; font-weight:600; background:#FFFBEB; padding:8px 16px; border-radius:10px; border:1px solid #FDE68A;">
+           <i data-lucide="info" style="width:16px;"></i> Material shortage detected. Order will be queued.
+        </div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <a href="01-job-orders-tab.html" class="btn-secondary" style="height:48px; display:flex; align-items:center; padding:0 24px; border-radius:12px;">Cancel</a>
+          <a href="01-job-orders-tab.html" class="btn-primary" style="background:#F59E0B; color:white; height:48px; display:flex; align-items:center; padding:0 24px; border-radius:12px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);">
+            <i data-lucide="clock" style="width:18px;"></i> Save to Queue (Awaiting PO)
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

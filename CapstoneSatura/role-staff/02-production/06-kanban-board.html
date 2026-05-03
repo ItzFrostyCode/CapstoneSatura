@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>Sutura - Production Kanban</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #2C6BED;
+      --danger: #EF4444; --warning: #F59E0B; --success: #10B981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; }
+
+    /* ── Sidebar ─────────────────────────────── */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background: var(--surface); color: var(--primary); }
+    .nav-item.active { background: var(--primary); color: white; }
+    .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .user-info .name { font-size: 14px; font-weight: 600; }
+    .user-info .role { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Main Layout ─────────────────────────── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; background: var(--surface); }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; width: calc(100vw - 260px); }
+    .header-left { display: flex; align-items: center; gap: 20px; }
+    .header-title { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { color: var(--text-muted); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; }
+    .icon-btn:hover { background: var(--surface); color: var(--primary); }
+    
+    /* ── Sub-nav bar ─────────────────────────── */
+    .subnav { height: 64px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 32px; gap: 8px; flex-shrink: 0; justify-content: space-between; position: sticky; top: 72px; z-index: 90; width: calc(100vw - 260px); }
+    .subnav-tabs { display: flex; gap: 32px; height: 100%; align-items: center; }
+    .subnav-tab { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--text-muted); height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; }
+    .subnav-tab:hover { color: var(--primary); }
+    .subnav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .subnav-actions { display: flex; align-items: center; gap: 16px; }
+    .btn-primary-sm { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-primary-sm:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+
+    /* ── Kanban Board ────────────────────────── */
+    .kanban-board { flex-grow: 1; padding: 32px; display: flex; gap: 24px; align-items: flex-start; overflow-x: auto; width: calc(100vw - 260px); }
+
+    /* ── Column ─────────────────────────────── */
+    .col { flex-shrink: 0; width: 320px; display: flex; flex-direction: column; gap: 20px; }
+    .col-header { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
+    .col-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 10px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.05em; }
+    .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .col-count { font-size: 11px; font-weight: 800; background: #E2E8F0; color: #64748B; padding: 2px 8px; border-radius: 20px; }
+
+    .col-body { display: flex; flex-direction: column; gap: 16px; min-height: 200px; background: rgba(241, 245, 249, 0.4); border-radius: 24px; padding: 16px; }
+
+    /* ── Order Card ──────────────────────────── */
+    .order-card { 
+      background: var(--bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 20px; 
+      display: flex; flex-direction: column; gap: 14px; 
+      box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: grab; position: relative; 
+    }
+    .order-card:hover { 
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); 
+      transform: translateY(-6px); border-color: var(--primary);
+    }
+
+    .card-top { display: flex; justify-content: space-between; align-items: center; }
+    .card-order-id { font-size: 11px; font-weight: 800; color: var(--text-muted); font-family: monospace; letter-spacing: 0.05em; }
+    .badge { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card-priority-badge { background: #FEF2F2; color: #EF4444; border: 1px solid #FEE2E2; }
+    .card-bulk-badge { background: #EFF6FF; color: #3B82F6; border: 1px solid #DBEAFE; }
+
+    .card-customer { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
+    .card-garment { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+    .pay-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; margin-top: 8px; padding: 8px 12px; border-radius: 12px; }
+    .pay-green { background: #F0FDF4; color: #10B981; }
+    .pay-red { background: #FEF2F2; color: #EF4444; }
+
+    .card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding-top: 14px; border-top: 1px solid #F1F5F9; }
+    .card-due { font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .card-due.soon { color: #EF4444; font-weight: 700; }
+    
+    .card-staff { font-size: 11px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+
+    .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    .card-btn { height: 36px; border-radius: 10px; border: 1.5px solid var(--border); background: white; color: var(--text-main); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .card-btn:hover { border-color: var(--primary); background: var(--surface); }
+    .card-btn.advance { background: var(--primary); color: white; border-color: var(--primary); }
+    .card-btn.advance:hover { background: var(--primary-hover); transform: translateX(2px); }
+    .card-btn.release { background: #10B981; color: white; border-color: #10B981; }
+    .card-btn.release:hover { background: #059669; }
+    .card-btn.release:disabled { background: #F1F5F9; color: #94A3B8; border-color: #E2E8F0; cursor: not-allowed; transform: none; }
+
+    /* ── Progress bar (Measured / Cutting) ──── */
+    .progress-wrap { margin-top: 4px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+    .progress-label .prog-stage { color: var(--text-main); }
+    .progress-bar-track { background: #F1F5F9; border-radius: 99px; height: 7px; overflow: hidden; border: 1px solid var(--border); }
+    .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+    .fill-measured { background: #3B82F6; }
+    .fill-cutting  { background: #F59E0B; }
+
+    /* ── QC Modal Overlay ─────────────────── */
+    .qc-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+    .qc-overlay.open { display: flex; }
+    .qc-modal { background: white; border-radius: 24px; width: 480px; box-shadow: 0 32px 80px rgba(0,0,0,0.2); overflow: hidden; animation: slideUp 0.25s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .qc-modal-head { padding: 24px 28px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
+    .qc-modal-title { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+    .qc-modal-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+    .qc-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 8px; transition: background 0.2s; }
+    .qc-close:hover { background: var(--surface); color: var(--text-main); }
+    .qc-modal-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 14px; }
+    .qc-option { display: flex; align-items: flex-start; gap: 14px; border: 2px solid var(--border); border-radius: 16px; padding: 18px; cursor: pointer; transition: all 0.2s; }
+    .qc-option:hover { border-color: var(--primary); background: var(--surface); }
+    .qc-option.selected { border-color: var(--primary); background: #F8FAFF; }
+    .qc-option-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+    .qc-option-icon.pass { background: #ECFDF5; }
+    .qc-option-icon.fail { background: #FEF2F2; }
+    .qc-option-text .title { font-size: 14px; font-weight: 700; color: var(--text-main); }
+    .qc-option-text .sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .qc-fail-details { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: none; flex-direction: column; gap: 12px; }
+    .qc-fail-details.show { display: flex; }
+    .qc-select, .qc-textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 13px; color: var(--text-main); padding: 10px 12px; background: white; transition: border-color 0.2s; }
+    .qc-select:focus, .qc-textarea:focus { outline: none; border-color: var(--primary); }
+    .qc-textarea { resize: none; height: 72px; }
+    .qc-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .qc-modal-foot { padding: 16px 28px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+    .qc-btn-cancel { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+    .qc-btn-cancel:hover { border-color: var(--primary); color: var(--primary); }
+    .qc-btn-confirm { background: var(--primary); color: white; border: none; font-size: 13px; font-weight: 700; padding: 10px 24px; border-radius: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .qc-btn-confirm:hover { background: var(--primary-hover); }
+    .qc-btn-confirm.pass-btn { background: #10B981; }
+    .qc-btn-confirm.pass-btn:hover { background: #059669; }
+    .qc-btn-confirm.fail-btn { background: #EF4444; }
+    .qc-btn-confirm.fail-btn:hover { background: #DC2626; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+      <div class="logo-text">Sutura</div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item active"><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+    </nav>
+        <div class="sidebar-footer">
+      <div class="avatar" style="background:#FFFBEB;color:#D97706;border:1px solid #FEF3C7;">S</div>
+      <div class="user-info">
+        <div class="name">Sarah Staff</div>
+        <div class="role">Store Staff</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <header class="header">
+      <div class="header-left">
+        <div class="header-title">Production</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="01-job-orders-tab.html" class="subnav-tab active">Job Orders</a>
+        <a href="04-portfolio-tab.html" class="subnav-tab">Portfolio Showcase</a>
+      </div>
+      <div class="subnav-actions">
+        <div class="view-switcher" style="display: flex; background: #EEF2F6; padding: 4px; border-radius: 14px; border: 1px solid var(--border); gap: 4px;">
+          <a href="01-job-orders-tab.html" class="view-btn" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #64748B; text-decoration: none; transition: all 0.2s;">
+            <i data-lucide="list" style="width: 18px;"></i>
+          </a>
+          <a href="06-kanban-board.html" class="view-btn active" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.08); color: var(--text-main); border: 1px solid rgba(0,0,0,0.05); text-decoration: none; transition: all 0.2s;">
+            <i data-lucide="columns-3" style="width: 18px;"></i>
+          </a>
+        </div>
+        <a href="02-job-orders-add-modal.html" class="btn-primary-sm"><i data-lucide="plus" style="width: 20px;"></i> Create Job Order</a>
+      </div>
+    </div>
+
+    <div class="kanban-board">
+
+      <!-- COLUMN: Measured -->
+      <div class="col">
+        <div class="col-header">
+          <div class="col-title"><span class="col-dot" style="background: #3B82F6;"></span> Measured</div>
+          <span class="col-count">2</span>
+        </div>
+        <div class="col-body">
+          <div class="order-card">
+            <div class="card-top">
+              <span class="card-order-id">ORD-1004</span>
+              <span class="badge card-bulk-badge">Bulk · 50pcs</span>
+            </div>
+            <div>
+              <div class="card-customer">BGC Tech Solutions</div>
+              <div class="card-garment">Company Uniform Polos</div>
+            </div>
+            <div class="card-meta">
+              <div class="card-due"><i data-lucide="calendar" style="width:11px;"></i> Jun 01</div>
+              <div class="card-staff">Unassigned</div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span class="prog-stage">Measured</span><span>Awaiting cutting</span></div>
+              <div class="progress-bar-track"><div class="progress-bar-fill fill-measured" style="width:100%;"></div></div>
+            </div>
+            <div class="card-actions" style="grid-template-columns:1fr;">
+              <a href="03-job-orders-view-modal.html" class="card-btn"><i data-lucide="eye" style="width:12px;"></i> View Order</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN: Cutting -->
+      <div class="col">
+        <div class="col-header">
+          <div class="col-title"><span class="col-dot" style="background: #F59E0B;"></span> Cutting</div>
+          <span class="col-count">1</span>
+        </div>
+        <div class="col-body">
+          <div class="order-card">
+            <div class="card-top">
+              <span class="card-order-id">ORD-1002</span>
+              <span class="badge card-bulk-badge">Bulk · 15pcs</span>
+            </div>
+            <div>
+              <div class="card-customer">Alexander McQueen</div>
+              <div class="card-garment">Staff Polos</div>
+            </div>
+            <div class="card-meta">
+              <div class="card-due soon"><i data-lucide="calendar" style="width:11px;"></i> May 15</div>
+              <div class="card-staff">Carla, Elena</div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-label"><span class="prog-stage">Cutting</span><span>8 / 15 pcs done</span></div>
+              <div class="progress-bar-track"><div class="progress-bar-fill fill-cutting" style="width:53%;"></div></div>
+            </div>
+            <div class="card-actions" style="grid-template-columns:1fr;">
+              <a href="03-job-orders-view-modal.html" class="card-btn"><i data-lucide="eye" style="width:12px;"></i> View Order</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN: Sewing -->
+      <div class="col">
+        <div class="col-header">
+          <div class="col-title"><span class="col-dot" style="background: #6366F1;"></span> Sewing</div>
+          <span class="col-count">1</span>
+        </div>
+        <div class="col-body">
+          <div class="order-card">
+            <div class="card-top">
+              <span class="card-order-id">ORD-1001</span>
+              <span class="badge card-priority-badge">⚡ Priority</span>
+            </div>
+            <div>
+              <div class="card-customer">Juan Dela Cruz</div>
+              <div class="card-garment">3-Piece Suit</div>
+            </div>
+            <div class="card-meta">
+              <div class="card-due soon"><i data-lucide="calendar" style="width:11px;"></i> May 10</div>
+              <div class="card-staff">Ricardo</div>
+            </div>
+            <div class="card-actions">
+              <a href="03-job-orders-view-modal.html" class="card-btn"><i data-lucide="eye" style="width:12px;"></i> View</a>
+              <a href="#" class="card-btn advance"><i data-lucide="arrow-right" style="width:12px;"></i> To QC</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN: QC -->
+      <div class="col">
+        <div class="col-header">
+          <div class="col-title"><span class="col-dot" style="background: #8B5CF6;"></span> QC Check</div>
+          <span class="col-count">1</span>
+        </div>
+        <div class="col-body">
+          <div class="order-card">
+            <div class="card-top">
+              <span class="card-order-id">ORD-0998</span>
+              <span class="badge card-priority-badge">⚡ Rush</span>
+            </div>
+            <div>
+              <div class="card-customer">Sofia Anderson</div>
+              <div class="card-garment">Evening Gown</div>
+            </div>
+            <div class="card-meta">
+              <div class="card-due"><i data-lucide="calendar" style="width:11px;"></i> May 12</div>
+              <div class="card-staff"><div class="staff-pip">M</div></div>
+            </div>
+            <div class="card-actions">
+              <a href="03-job-orders-view-modal.html" class="card-btn"><i data-lucide="eye" style="width:12px;"></i> View</a>
+              <button class="card-btn advance" onclick="openQCModal()"><i data-lucide="shield-check" style="width:12px;"></i> QC Review</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN: Ready -->
+      <div class="col">
+        <div class="col-header">
+          <div class="col-title"><span class="col-dot" style="background: #10B981;"></span> Ready</div>
+          <span class="col-count">2</span>
+        </div>
+        <div class="col-body">
+          <!-- Maria Santos -->
+          <div class="order-card">
+            <div class="card-top"><span class="card-order-id">ORD-1003</span></div>
+            <div>
+              <div class="card-customer">Maria Santos</div>
+              <div class="card-garment">Silk Cocktail Dress</div>
+              <div class="pay-status pay-green"><i data-lucide="check-circle-2" style="width:12px;"></i> Fully Paid</div>
+            </div>
+            <div class="card-meta">
+              <div class="card-due"><i data-lucide="calendar" style="width:11px;"></i> Apr 28</div>
+              <div class="card-staff">Ricardo</div>
+            </div>
+            <div class="card-actions">
+              <a href="03-job-orders-view-modal.html" class="card-btn"><i data-lucide="eye" style="width:12px;"></i> View</a>
+              <button class="card-btn release"><i data-lucide="package-check" style="width:12px;"></i> Release Now</button>
+            </div>
+          </div>
+          <!-- Juan Dela Cruz Balance -->
+          <div class="order-card">
+            <div class="card-top"><span class="card-order-id">ORD-1006</span></div>
+            <div>
+              <div class="card-customer">Juan Dela Cruz</div>
+              <div class="card-garment">Piña Silk Barong</div>
+              <div class="pay-status pay-red"><i data-lucide="alert-circle" style="width:12px;"></i> ₱4,500.00 Balance</div>
+            </div>
+            <div class="card-meta">
+              <div class="card-due"><i data-lucide="calendar" style="width:11px;"></i> Apr 29</div>
+              <div class="card-staff">Ricardo</div>
+            </div>
+            <div class="card-actions">
+              <a href="03-job-orders-view-modal.html" class="card-btn"><i data-lucide="eye" style="width:12px;"></i> View</a>
+              <button class="card-btn release" disabled title="Settle balance to release"><i data-lucide="lock" style="width:12px;"></i> Pay to Release</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN: Released -->
+      <div class="col" style="width: 400px;">
+        <div class="col-header">
+          <div class="col-title"><span class="col-dot" style="background: #064E3B;"></span> Released</div>
+          <span class="col-count">1</span>
+        </div>
+        <div class="col-body">
+          <div class="order-card" style="opacity: 0.7;">
+            <div class="card-top">
+              <span class="card-order-id">ORD-1005</span>
+              <span class="badge card-priority-badge">⚡ Gala</span>
+            </div>
+            <div>
+              <div class="card-customer">Liza Soberano</div>
+              <div class="card-garment">Red Carpet Gown</div>
+            </div>
+            <div class="card-meta">
+              <div class="card-due"><i data-lucide="calendar" style="width:11px;"></i> May 05</div>
+              <div class="card-staff">Ricardo, Carla</div>
+            </div>
+            <div class="card-actions">
+              <a href="03-job-orders-view-modal.html" class="card-btn" style="grid-column: span 2;"><i data-lucide="file-text" style="width:12px;"></i> View Receipt & History</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── QC Check Modal ── -->
+  <div class="qc-overlay" id="qcOverlay" onclick="handleOverlayClick(event)">
+    <div class="qc-modal">
+      <div class="qc-modal-head">
+        <div>
+          <div class="qc-modal-title">QC Inspection Result</div>
+          <div class="qc-modal-sub">ORD-0998 &mdash; Sofia Anderson &mdash; Evening Gown</div>
+        </div>
+        <button class="qc-close" onclick="closeQCModal()"><i data-lucide="x" style="width:18px;"></i></button>
+      </div>
+      <div class="qc-modal-body">
+        <!-- Pass option -->
+        <div class="qc-option" id="qcPass" onclick="selectQC('pass')">
+          <div class="qc-option-icon pass">✅</div>
+          <div class="qc-option-text">
+            <div class="title">Pass — Mark as Ready</div>
+            <div class="sub">Item has passed all quality checks. Move to Ready for pickup / release.</div>
+          </div>
+        </div>
+        <!-- Fail option -->
+        <div class="qc-option" id="qcFail" onclick="selectQC('fail')">
+          <div class="qc-option-icon fail">🔁</div>
+          <div class="qc-option-text">
+            <div class="title">Fail — Send Back for Rework</div>
+            <div class="sub">Item has a defect. Send back to a previous stage for correction.</div>
+          </div>
+        </div>
+        <!-- Fail details (shown when fail is selected) -->
+        <div class="qc-fail-details" id="qcFailDetails">
+          <div>
+            <div class="qc-label">Send Back To</div>
+            <select class="qc-select" id="qcDestination">
+              <option value="">Choose stage…</option>
+              <option value="sewing">Sewing — Fix stitching / finishing</option>
+              <option value="cutting">Cutting — Re-cut affected parts</option>
+              <option value="measured">Measured (Start Over) — Re-measure and restart</option>
+            </select>
+          </div>
+          <div>
+            <div class="qc-label">Reason for Rejection</div>
+            <textarea class="qc-textarea" id="qcReason" placeholder="e.g. Bad stitching on collar, torn seam on left side, measurements off by 2cm…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qc-modal-foot">
+        <button class="qc-btn-cancel" onclick="closeQCModal()">Cancel</button>
+        <button class="qc-btn-confirm" id="qcConfirmBtn" onclick="confirmQC()">
+          <i data-lucide="check" style="width:14px;"></i> Confirm Result
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    let qcChoice = null;
+
+    function openQCModal() {
+      qcChoice = null;
+      document.getElementById('qcPass').classList.remove('selected');
+      document.getElementById('qcFail').classList.remove('selected');
+      document.getElementById('qcFailDetails').classList.remove('show');
+      document.getElementById('qcDestination').value = '';
+      document.getElementById('qcReason').value = '';
+      const btn = document.getElementById('qcConfirmBtn');
+      btn.className = 'qc-btn-confirm';
+      btn.innerHTML = '<i data-lucide="check" style="width:14px;"></i> Confirm Result';
+      document.getElementById('qcOverlay').classList.add('open');
+      lucide.createIcons();
+    }
+
+    function closeQCModal() {
+      document.getElementById('qcOverlay').classList.remove('open');
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('qcOverlay')) closeQCModal();
+    }
+
+    function selectQC(choice) {
+      qcChoice = choice;
+      document.getElementById('qcPass').classList.toggle('selected', choice === 'pass');
+      document.getElementById('qcFail').classList.toggle('selected', choice === 'fail');
+      const details = document.getElementById('qcFailDetails');
+      details.classList.toggle('show', choice === 'fail');
+      const btn = document.getElementById('qcConfirmBtn');
+      if (choice === 'pass') {
+        btn.className = 'qc-btn-confirm pass-btn';
+        btn.innerHTML = '<i data-lucide="check-circle" style="width:14px;"></i> Mark as Ready';
+      } else {
+        btn.className = 'qc-btn-confirm fail-btn';
+        btn.innerHTML = '<i data-lucide="rotate-ccw" style="width:14px;"></i> Send Back';
+      }
+      lucide.createIcons();
+    }
+
+    function confirmQC() {
+      if (!qcChoice) { alert('Please select Pass or Fail first.'); return; }
+      if (qcChoice === 'fail') {
+        const dest = document.getElementById('qcDestination').value;
+        const reason = document.getElementById('qcReason').value.trim();
+        if (!dest) { alert('Please choose a stage to send back to.'); return; }
+        if (!reason) { alert('Please provide a reason for rejection.'); return; }
+        const destLabel = { sewing: 'Sewing', cutting: 'Cutting', measured: 'Measured (Start Over)' }[dest];
+        alert(`⚠️ QC Failed\n\nORD-0998 sent back to: ${destLabel}\nReason: ${reason}\n\n(In the real system, the card would move back to the ${destLabel} column.)`);
+      } else {
+        alert('✅ QC Passed!\n\nORD-0998 — Sofia Anderson — Evening Gown\nMoved to Ready column.');
+      }
+      closeQCModal();
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Portfolio Showcase</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A;
+      --primary-hover: #333333;
+      --bg: #FFFFFF;
+      --surface: #F9FAFB;
+      --text-main: #111827;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --accent: #2C6BED;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow-x: hidden; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; background-color: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background-color: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background-color: var(--surface); color: var(--primary); }
+    .nav-item.active { background-color: var(--primary); color: white; }
+    .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+    .user-info .name { font-size: 14px; font-weight: 600; }
+    .user-info .role { font-size: 12px; color: var(--text-muted); }
+
+    /* Main Content */
+    .main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--surface); }
+    .header { height: 72px; background-color: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; width: calc(100vw - 260px); }
+    .header-title { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+    .header-actions { display: flex; align-items: center; gap: 16px; }
+    .icon-btn { color: var(--text-muted); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; }
+    .icon-btn:hover { background-color: var(--surface); color: var(--primary); }
+
+    .content { padding: 40px; flex-grow: 1; overflow-y: auto; }
+
+    /* ── Sub-nav bar ─────────────────────────── */
+    .subnav { height: 64px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 40px; gap: 8px; flex-shrink: 0; justify-content: space-between; position: sticky; top: 72px; z-index: 90; width: calc(100vw - 260px); }
+    .subnav-tabs { display: flex; gap: 32px; height: 100%; align-items: center; }
+    .subnav-tab { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--text-muted); height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; }
+    .subnav-tab:hover { color: var(--primary); }
+    .subnav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .subnav-actions { display: flex; align-items: center; gap: 16px; }
+    .btn-primary-sm { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-primary-sm:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+
+    .view-switcher { display: flex; background: #EEF2F6; padding: 4px; border-radius: 14px; border: 1px solid var(--border); gap: 4px; }
+    .view-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #64748B; text-decoration: none; transition: all 0.2s; }
+    .view-btn:hover { color: var(--primary); background: rgba(255,255,255,0.5); }
+    .view-btn.active { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.08); color: var(--text-main); border: 1px solid rgba(0,0,0,0.05); }
+
+    /* Page Actions */
+    .page-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .search-box { display: flex; align-items: center; border: 1px solid var(--border); background: var(--bg); border-radius: 12px; padding: 0 16px; height: 44px; width: 320px; transition: border-color 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .search-box:focus-within { border-color: var(--primary); }
+    .search-box input { border: none; outline: none; margin-left: 8px; font-family: 'Outfit'; font-size: 15px; width: 100%; color: var(--text-main); background: transparent; }
+
+    /* Grid Layout for Portfolio */
+    .portfolio-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .portfolio-card { background-color: var(--bg); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .portfolio-card:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); transform: translateY(-8px); }
+
+    .card-image {
+      width: 100%;
+      height: 200px;
+      background-color: var(--border);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .card-image::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.4) 100%);
+    }
+
+    .badge-price {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(255,255,255,0.9);
+      color: var(--text-main);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      z-index: 10;
+    }
+
+    .card-content {
+      padding: 16px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-category {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .card-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding: 12px 16px; margin: 0 -16px -16px -16px; margin-top: 12px; }
+    .action-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: white; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+    .action-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--surface); }
+
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div><div class="logo-text">Sutura</div></div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item active"><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item "><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      
+      <a href="../05-settings/01-settings-tab.html" class="nav-item "><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info"><div class="name">Admin User</div><div class="role">Administrator</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Production</div>
+      <div class="header-actions"><button class="icon-btn"><i data-lucide="bell" style="width: 20px;"></i></button></div>
+    </header>
+
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="01-job-orders-tab.html" class="subnav-tab">Job Orders</a>
+        <a href="04-portfolio-tab.html" class="subnav-tab active">Portfolio Showcase</a>
+      </div>
+      <div class="subnav-actions" style="display:flex;align-items:center;gap:10px;">
+        
+        <a href="10-fashion-designer-view.html" style="display:inline-flex;align-items:center;gap:7px;background:#FFF1F2;color:#F43F5E;border:1px solid #FECDD3;border-radius:12px;padding:0 16px;height:40px;font-size:13px;font-weight:700;text-decoration:none;transition:all 0.2s;white-space:nowrap;" title="Switch to Fashion Designer View">
+          <i data-lucide="sparkles" style="width:15px;"></i> Designer View
+        </a>
+        <a href="05-portfolio-add-modal.html" class="btn-primary-sm"><i data-lucide="plus" style="width: 18px;"></i> Add Portfolio Item</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Search bar -->
+      <div class="page-actions">
+        <div class="search-box">
+          <i data-lucide="search" style="width: 18px; color: var(--text-muted);"></i>
+          <input type="text" placeholder="Search portfolio..." />
+        </div>
+        <div style="font-size: 13px; color: var(--text-muted);">Showing <strong style="color: var(--text-main);">8</strong> items</div>
+      </div>
+
+
+      <div class="portfolio-grid">
+        <!-- Card 1: Men's Suit -->
+        <div class="portfolio-card">
+          <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1594932224010-75f2a7789990?q=80&w=800&auto=format&fit=crop');">
+            <div class="badge-price">₱18,500</div>
+            <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.6); color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">SIGNATURE</div>
+          </div>
+          <div class="card-content">
+            <div class="card-title">Midnight Bespoke Suit</div>
+            <div class="card-category">Men's Formal · By Carlos</div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+              <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-muted);"><i data-lucide="eye" style="width:12px;"></i> 2.4k</div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-muted);"><i data-lucide="heart" style="width:12px;"></i> 182</div>
+            </div>
+            <div class="card-actions">
+              <button class="action-btn"><i data-lucide="share-2" style="width: 14px;"></i></button>
+              <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Gown -->
+        <div class="portfolio-card">
+          <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=800&auto=format&fit=crop');">
+            <div class="badge-price">₱32,000</div>
+            <div style="position:absolute; top:12px; right:12px; background:#F43F5E; color:white; padding:4px 8px; border-radius:6px; font-size:10px; font-weight:700;">BEST SELLER</div>
+          </div>
+          <div class="card-content">
+            <div class="card-title">Crimson Silk Evening Gown</div>
+            <div class="card-category">Couture · By Sofia</div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+              <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-muted);"><i data-lucide="eye" style="width:12px;"></i> 4.1k</div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-muted);"><i data-lucide="heart" style="width:12px;"></i> 340</div>
+            </div>
+            <div class="card-actions">
+              <button class="action-btn"><i data-lucide="share-2" style="width: 14px;"></i></button>
+              <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Barong -->
+        <div class="portfolio-card">
+          <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1593030103066-014436fe4937?q=80&w=800&auto=format&fit=crop');">
+            <div class="badge-price">₱8,500</div>
+          </div>
+          <div class="card-content">
+            <div class="card-title">Heritage Piña Barong</div>
+            <div class="card-category">Traditional · By Carlos</div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+              <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-muted);"><i data-lucide="eye" style="width:12px;"></i> 1.8k</div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-muted);"><i data-lucide="heart" style="width:12px;"></i> 95</div>
+            </div>
+            <div class="card-actions">
+              <button class="action-btn"><i data-lucide="share-2" style="width: 14px;"></i></button>
+              <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Wedding -->
+        <div class="portfolio-card">
+          <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1594932224424-d7f9509424f0?q=80&w=800&auto=format&fit=crop');">
+            <div class="badge-price">₱45,000</div>
+          </div>
+          <div class="card-content">
+            <div class="card-title">Ivory Wedding Ensemble</div>
+            <div class="card-category">Bridal · By Sofia</div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+              <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-muted);"><i data-lucide="eye" style="width:12px;"></i> 3.2k</div>
+              <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text-muted);"><i data-lucide="heart" style="width:12px;"></i> 210</div>
+            </div>
+            <div class="card-actions">
+              <button class="action-btn"><i data-lucide="share-2" style="width: 14px;"></i></button>
+              <button class="action-btn"><i data-lucide="edit-2" style="width: 14px;"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

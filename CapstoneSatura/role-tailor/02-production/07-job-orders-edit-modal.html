@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Edit Job Order (Clean)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #0F172A; --primary-hover: #1E293B; --bg: #F8FAFC; --surface: #FFFFFF;
+      --text-main: #1E293B; --text-muted: #64748B; --border: #F1F5F9;
+      --accent: #2563EB; --accent-light: #EFF6FF;
+      --warning: #F59E0B; --warning-light: #FFFBEB;
+      --danger: #EF4444; --danger-light: #FEF2F2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--bg); color: var(--text-main); width: 100%; min-height: 100vh; overflow-x: hidden; display: flex; position: relative; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    
+    .modal { background: var(--surface); width: 850px; height: 880px; border-radius: 24px; box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.25); display: flex; flex-direction: column; overflow: hidden; animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes modalSlideUp { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .modal-header { padding: 32px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .header-info h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.03em; }
+    .header-info p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    
+    .close-btn { width: 44px; height: 44px; border-radius: 12px; border: none; background: var(--bg); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .close-btn:hover { background: var(--danger-light); color: var(--danger); }
+
+    .modal-body { padding: 40px; display: flex; flex-direction: column; gap: 32px; }
+
+    .form-section { display: flex; flex-direction: column; gap: 24px; }
+    .section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; display: flex; align-items: center; gap: 10px; }
+    .section-label::after { content: ''; height: 1px; background: var(--border); flex: 1; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    
+    .input-field { 
+      padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 14px; font-size: 15px;
+      font-family: 'Outfit'; outline: none; background: white; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--text-main);
+    }
+    .input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-light); }
+    .input-field::placeholder { color: #CBD5E1; }
+    .input-field:disabled { background: var(--bg); color: var(--text-muted); cursor: not-allowed; border-style: dashed; }
+
+    .select-wrapper { position: relative; }
+    .select-wrapper select { width: 100%; appearance: none; padding-right: 44px; }
+    .select-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+
+    /* Priority Card - Ultra Clean */
+    .priority-card { 
+      background: var(--warning-light); border: 1px solid #FEF3C7; border-radius: 20px; padding: 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .p-brand { display: flex; align-items: center; gap: 16px; }
+    .p-icon { width: 44px; height: 44px; background: var(--warning); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 8px 16px -4px rgba(245, 158, 11, 0.3); }
+    .p-text h4 { font-size: 15px; font-weight: 700; color: #92400E; }
+    .p-text p { font-size: 12px; color: #B45309; opacity: 0.8; }
+
+    .switch { width: 52px; height: 28px; appearance: none; background: #E2E8F0; border-radius: 30px; position: relative; cursor: pointer; transition: 0.3s; outline: none; }
+    .switch:checked { background: var(--warning); }
+    .switch::after { content: ''; position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .switch:checked::after { transform: translateX(24px); }
+
+    .modal-footer { padding: 32px 40px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    
+    .btn { height: 52px; padding: 0 28px; border-radius: 14px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s; font-family: 'Outfit'; }
+    .btn-secondary { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); text-decoration: none; }
+    .btn-secondary:hover { background: #EDF2F7; }
+    
+    .btn-primary { background: var(--primary); color: white; border: none; text-decoration: none; box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.2); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 15px 30px -5px rgba(15, 23, 42, 0.3); }
+
+    .btn-danger-minimal { background: none; border: none; color: var(--danger); font-size: 14px; font-weight: 600; cursor: pointer; padding: 0 12px; }
+    .btn-danger-minimal:hover { text-decoration: underline; }
+
+    textarea.input-field { resize: none; line-height: 1.6; }
+
+  </style>
+</head>
+<body>
+
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="header-info">
+          <h2>Edit Order Configuration</h2>
+          <p>Modifying <strong style="color:var(--primary);">ORD-1003 (Juan Dela Cruz)</strong></p>
+        </div>
+        <a href="01-job-orders-tab.html" class="close-btn"><i data-lucide="x" style="width:24px;"></i></a>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-section">
+          <div class="section-label">General Information</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Customer (Locked)</label>
+              <input type="text" class="input-field" value="Juan Dela Cruz" disabled>
+            </div>
+            <div class="form-group">
+              <label>Garment Type</label>
+              <div class="select-wrapper">
+                <select class="input-field">
+                  <option selected>Traditional Barong Tagalog</option>
+                  <option>Slim Fit Suit</option>
+                  <option>Formal Trousers</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-icon" style="width:18px;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-label">Schedule & Production</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Completion Deadline</label>
+              <input type="date" class="input-field" value="2023-11-20">
+            </div>
+            <div class="form-group">
+              <label>Assigned Lead Tailor</label>
+              <div class="select-wrapper">
+                <select class="input-field">
+                  <option selected>Mike Ross</option>
+                  <option>Sarah Connor</option>
+                  <option>Harvey Specter</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-icon" style="width:18px;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="priority-card">
+          <div class="p-brand">
+            <div class="p-icon"><i data-lucide="zap" style="width:20px;"></i></div>
+            <div class="p-text">
+              <h4>Rush Order Optimization</h4>
+              <p>Priority scheduling enabled. Surcharge of ₱500.00 applied.</p>
+            </div>
+          </div>
+          <input type="checkbox" class="switch" checked>
+        </div>
+
+        <div class="form-section">
+          <div class="section-label">Instructions & Fabrication Notes</div>
+          <div class="form-group">
+            <label>Internal Technical Notes</label>
+            <textarea class="input-field" rows="4">Mandarin collar, French cuffs. Use the premium Ivory Pina-Seda fabric from the new inventory batch. Double-check sleeve length during the first fitting.</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-danger-minimal">Void Order</button>
+        <div style="display: flex; gap: 16px;">
+          <a href="01-job-orders-tab.html" class="btn btn-secondary">Discard Changes</a>
+          <a href="01-job-orders-tab.html" class="btn btn-primary"><i data-lucide="save" style="width:18px;"></i> Update Job Order</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

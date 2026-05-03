@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Sales Tab</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --success-bg: #F0FDF4; --success-text: #22C55E;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow-x: hidden; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; background-color: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background-color: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background-color: var(--surface); color: var(--primary); }
+    .nav-item.active { background-color: var(--primary); color: white; }
+    .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
+    .user-info .name { font-size: 14px; font-weight: 600; }
+    .user-info .role { font-size: 12px; color: var(--text-muted); }
+
+    /* Main Content */
+    .main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--surface); }
+    .header { height: 72px; background-color: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; width: calc(100vw - 260px); }
+    .header-title { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+    .header-actions { display: flex; align-items: center; gap: 16px; }
+    .icon-btn { color: var(--text-muted); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; }
+    .icon-btn:hover { background-color: var(--surface); color: var(--primary); }
+
+    .content { padding: 32px; flex-grow: 1; overflow-y: auto; }
+
+    /* ── Sub-nav bar ─────────────────────────── */
+    .subnav { height: 64px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 32px; gap: 8px; flex-shrink: 0; justify-content: space-between; position: sticky; top: 72px; z-index: 90; width: calc(100vw - 260px); }
+    .subnav-tabs { display: flex; gap: 32px; height: 100%; align-items: center; }
+    .subnav-tab { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--text-muted); height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; }
+    .subnav-tab:hover { color: var(--primary); }
+    .subnav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+    .subnav-actions { display: flex; align-items: center; gap: 16px; }
+    .btn-primary-sm { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-primary-sm:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+    .btn-secondary { background-color: var(--bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 12px; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { background-color: var(--surface); }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .stat-label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+
+
+
+    /* Table Container */
+    .table-container { background: white; border-radius: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .table-header { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .table-title { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    
+    .search-box { position: relative; width: 320px; }
+    .search-box input { width: 100%; height: 40px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0 16px 0 40px; font-family: 'Outfit'; font-size: 14px; outline: none; transition: all 0.2s; }
+    .search-box input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 4px rgba(0,0,0,0.03); }
+    .search-box i, .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: #F8FAFC; padding: 16px 32px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 20px 32px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #F8FAFC; }
+    
+    .transaction-id { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
+    .transaction-date { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .amount { font-size: 15px; font-weight: 700; color: var(--text-main); }
+    
+    .badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.02em; }
+    .badge.success { background: #F0FDF4; color: #15803d; border-color: #BBF7D0; }
+
+    .actions { display: flex; gap: 8px; }
+    .action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #F3F4F6; border-radius: 10px; cursor: pointer; color: #9CA3AF; transition: all 0.2s; }
+    .action-btn:hover { border-color: var(--primary); color: var(--primary); background: #F9FAFB; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div><div class="logo-text">Sutura</div></div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item "><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item active"><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      <a href="../00-dashboard/08-branch-management.html" class="nav-item "><i data-lucide="git-branch" style="width: 20px;"></i> Branches</a>
+      <a href="../05-settings/01-settings-tab.html" class="nav-item "><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="name">Admin User</div><div class="role">Administrator</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Finance</div>
+      <div class="header-actions"><button class="icon-btn"><i data-lucide="bell" style="width: 20px;"></i></button></div>
+    </header>
+
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="01-sales-tab.html" class="subnav-tab active">Sales</a>
+        <a href="02-expenses-tab.html" class="subnav-tab">Expenses</a>
+        <a href="04-invoices-tab.html" class="subnav-tab">Invoices</a>
+        <a href="08-financial-reports-tab.html" class="subnav-tab">Reports</a>
+      </div>
+      <div class="subnav-actions">
+        <button class="btn-secondary" style="height: 40px; border-radius: 10px; font-size: 14px;"><i data-lucide="download" style="width: 18px;"></i> Export Report</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Revenue (This Month)</div>
+          <div class="stat-value">₱12,450.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Transactions</div>
+          <div class="stat-value">142</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Payments</div>
+          <div class="stat-value">₱3,200.00</div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <div class="table-title">Transaction History</div>
+          <div class="search-box">
+            <i data-lucide="search" style="width: 18px;"></i>
+            <input type="text" placeholder="Search transactions...">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>TRANSACTION DETAILS</th>
+              <th>CUSTOMER</th>
+              <th>AMOUNT</th>
+              <th>PAYMENT METHOD</th>
+              <th>REF # / TRACEABILITY</th>
+              <th>AUDIT</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="transaction-id">TRX-9002</div>
+                <div class="transaction-date">Apr 26, 2026 • Term: POS-01</div>
+              </td>
+              <td><div class="customer-info"><div class="name">Alexander McQueen</div></div></td>
+              <td><div class="amount">₱600.00</div></td>
+              <td>GCash / E-Wallet</td>
+              <td><code style="font-family: monospace; background: #F1F5F9; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; color: var(--accent);">GCSH-9921-A</code></td>
+              <td><span class="badge success" style="display: flex; align-items: center; gap: 4px; background: #ECFDF5; color: #059669;"><i data-lucide="check-circle" style="width: 10px;"></i> Deposit Captured</span></td>
+              <td>
+                <div class="actions">
+                  <button class="action-btn" title="Download Voucher"><i data-lucide="download" style="width: 14px;"></i></button>
+                  <a href="06-send-receipt-modal.html" class="action-btn" title="Send Receipt"><i data-lucide="mail" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="transaction-id">TRX-9001</div>
+                <div class="transaction-date">Apr 25, 2026 • Term: POS-02</div>
+              </td>
+              <td><div class="customer-info"><div class="name">Maria Santos</div></div></td>
+              <td><div class="amount">₱850.00</div></td>
+              <td>Cash</td>
+              <td><code style="font-family: monospace; background: #F1F5F9; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 12px;">OR-2026-0041</code></td>
+              <td><span class="badge success" style="display: flex; align-items: center; gap: 4px; background: #F0F9FF; color: #0284C7; border-color: #BAE6FD;"><i data-lucide="check-circle" style="width: 10px;"></i> Balance Settled</span></td>
+              <td>
+                <div class="actions">
+                  <button class="action-btn" title="Download Voucher"><i data-lucide="download" style="width: 14px;"></i></button>
+                  <a href="06-send-receipt-modal.html" class="action-btn" title="Send Receipt"><i data-lucide="mail" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="transaction-id">TRX-9000</div>
+                <div class="transaction-date">Apr 24, 2026 at 09:00 AM</div>
+              </td>
+              <td><div class="customer-info"><div class="name">Juan Dela Cruz</div></div></td>
+              <td><div class="amount">₱200.00</div></td>
+              <td>Bank Transfer</td>
+              <td><code style="font-family: monospace; background: #F1F5F9; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; color: var(--accent);">BNK-PYMT-102</code></td>
+              <td><span class="badge success" style="display: flex; align-items: center; gap: 4px;"><i data-lucide="check-circle" style="width: 10px;"></i> Verified</span></td>
+              <td>
+                <div class="actions">
+                  <button class="action-btn" title="Download Voucher"><i data-lucide="download" style="width: 14px;"></i></button>
+                  <a href="06-send-receipt-modal.html" class="action-btn" title="Send Receipt"><i data-lucide="mail" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

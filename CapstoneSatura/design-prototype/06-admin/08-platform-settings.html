@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sutura | Platform Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { 
+      --bg: #09090B; 
+      --sidebar: rgba(9, 9, 11, 0.96); 
+      --card: #121217;
+      --card-2: #17171e;
+      --card-3: #1f1f29;
+      --accent: #3B82F6; 
+      --accent-muted: rgba(59, 130, 246, 0.12);
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text: #FAFAFA;
+      --text-dim: #A1A1AA;
+      --border: #27272A;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { 
+      font-family: 'Outfit', sans-serif; 
+      background: 
+        radial-gradient(circle at top, rgba(59,130,246,0.08), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(168,85,247,0.06), transparent 18%),
+        var(--bg); 
+      color: var(--text); 
+      display: flex; 
+      min-height: 100vh; 
+      overflow: hidden; 
+      letter-spacing: -0.02em; 
+    }
+
+    button, input, select, textarea { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar { 
+      background: var(--sidebar); 
+      border-right: 1px solid var(--border);
+      display: flex; 
+      flex-direction: column; 
+      position: sticky; 
+      top: 0; 
+      height: 100vh; 
+      backdrop-filter: blur(12px);
+    }
+    .sidebar-header { padding: 34px 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: white; }
+    .brand-sub { margin-top: 6px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; }
+    
+    .nav { padding: 14px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: auto; list-style: none; }
+    .nav-group-label { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 12px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .nav-item i { width: 18px; height: 18px; }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .nav-item.active { background: var(--accent-muted); color: var(--accent); box-shadow: inset 0 0 0 1px rgba(59,130,246,0.18); }
+
+    .nav-badge { margin-left: auto; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(239,68,68,0.14); color: #fecaca; border: 1px solid rgba(239,68,68,0.18); padding: 3px 7px; border-radius: 999px; }
+    
+    .sidebar-footer { padding: 18px 20px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; background: var(--card-3); border: 1px solid var(--border); border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: white; font-size: 12px; flex: 0 0 auto; }
+    .user-info .name { font-weight: 700; color: white; font-size: 13px; }
+    .user-info .role { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    /* Main Content */
+    .main { flex: 1; padding: 34px 40px 40px; overflow-y: auto; position: relative; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+    .header {
+      height: 72px;
+      background: rgba(9,9,11,0.92);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+
+    .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.04em; }
+    .header-sub { font-size: 13px; color: var(--text-dim); margin-top: 3px; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+
+    .icon-btn {
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      transition: 0.2s ease;
+      position: relative;
+    }
+
+    .icon-btn:hover { background: rgba(255,255,255,0.04); color: white; }
+    .notif-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+    }
+
+    .content {
+      padding: 32px 40px 40px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .page-title h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      line-height: 1.05;
+    }
+
+    .page-title p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--text-dim);
+      max-width: 760px;
+      line-height: 1.55;
+    }
+
+    /* Settings Sections */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+      gap: 24px;
+    }
+
+    .settings-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--accent-muted);
+      color: var(--accent);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-title { font-size: 18px; font-weight: 700; letter-spacing: -0.03em; }
+    .section-desc { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+    .input-group { margin-bottom: 24px; }
+    .input-group:last-child { margin-bottom: 0; }
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+
+    .input-group input, .input-group select, .input-group textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: white;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+      border-color: rgba(59,130,246,0.45);
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+    }
+
+    .btn-primary {
+      padding: 14px 28px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 10px 24px rgba(59,130,246,0.18);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); background: #2563eb; }
+
+    .switch-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .switch-info h4 { font-size: 14px; font-weight: 700; }
+    .switch-info p { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #27272a;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider { background-color: var(--accent); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    @media (max-width: 1024px) {
+      .settings-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">Sutura Admin</div>
+        <div class="brand-sub">Platform Management</div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group-label">Overview</div>
+        <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Overview</a>
+
+        <div class="nav-group-label">Management</div>
+        <a href="02-registrations.html" class="nav-item"><i data-lucide="clipboard-check"></i> Shop Verifications <span class="nav-badge">3</span></a>
+        <a href="03-shops.html" class="nav-item"><i data-lucide="building"></i> Registered Shops</a>
+        <a href="08-announcements-tab.html" class="nav-item"><i data-lucide="megaphone"></i> Announcements</a>
+        <a href="05-subscription-plans.html" class="nav-item"><i data-lucide="credit-card"></i> Revenue & Plans</a>
+        <a href="07-support-tickets.html" class="nav-item"><i data-lucide="life-buoy"></i> Support Tickets</a>
+
+        <div class="nav-group-label">System</div>
+        <a href="06-system-monitor.html" class="nav-item"><i data-lucide="activity"></i> System Health</a>
+        <a href="16-admin-audit-logs.html" class="nav-item"><i data-lucide="shield"></i> Security Logs</a>
+        <a href="08-platform-settings.html" class="nav-item active"><i data-lucide="settings"></i> Platform Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar">A</div>
+        <div>
+          <div style="font-weight:700;font-size:13px;">Admin-99</div>
+          <div class="muted-11">System Superuser</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="header-main" style="margin-bottom: 24px;">
+        <h1 style="font-size: 30px; font-weight: 800; letter-spacing: -0.05em;">Platform Settings</h1>
+        <p style="color: var(--text-dim); font-size: 14px; margin-top: 10px; max-width: 760px; line-height: 1.55;">Global controls for the Sutura ecosystem. Any changes made here will reflect across all shop environments and designer portfolios instantly.</p>
+      </header>
+
+      <div class="settings-grid">
+        <!-- Global Announcement -->
+        <div class="settings-card">
+          <div class="section-header">
+            <div class="section-icon"><i data-lucide="megaphone"></i></div>
+            <div>
+              <div class="section-title">Global Announcement</div>
+              <div class="section-desc">Broadcast high-priority messages to all platform actors</div>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label>Announcement Target</label>
+            <select>
+              <option>All Actors (Global Broadcast)</option>
+              <option>Verified Shop Owners Only</option>
+              <option>Portfolio Designers Only</option>
+              <option>Premium Tier Subscribers</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Message Content</label>
+            <textarea rows="5" placeholder="Type your broadcast message here. Support for basic markdown is enabled..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="btn-primary" onclick="alert('Announcement Broadcasted!')"><i data-lucide="send" style="width:18px;"></i> Broadcast Now</button>
+            <div style="font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="info" style="width:14px;"></i> Message will expire in 24 hours
+            </div>
+          </div>
+        </div>
+
+        <!-- System Governance -->
+        <div class="settings-card">
+          <div class="section-header">
+            <div class="section-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i data-lucide="sliders"></i></div>
+            <div>
+              <div class="section-title">System Governance</div>
+              <div class="section-desc">Manage maintenance windows and security thresholds</div>
+            </div>
+          </div>
+
+          <div class="switch-group">
+            <div class="switch-info">
+              <h4>Maintenance Mode</h4>
+              <p>Disable client-side access for scheduled updates</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="switch-group" style="margin-bottom: 24px;">
+            <div class="switch-info">
+              <h4>Auto-Verification</h4>
+              <p>Enable AI-driven verification for standard permits</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="input-group">
+              <label>API Rate Limit (Req/min)</label>
+              <input type="number" value="1000">
+            </div>
+            <div class="input-group">
+              <label>Max Attachment Size (MB)</label>
+              <input type="number" value="10">
+            </div>
+          </div>
+
+          <div style="margin-top: 8px;">
+            <button class="btn-primary" style="background: transparent; border: 1px solid var(--border); box-shadow: none;">Update Configuration</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Section (Horizontal) -->
+      <div class="settings-card" style="margin-top: 24px;">
+        <div class="section-header">
+          <div class="section-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);"><i data-lucide="shield-check"></i></div>
+          <div>
+            <div class="section-title">Security & API Access</div>
+            <div class="section-desc">Rotate platform-level master keys and audit access patterns</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 32px; align-items: flex-end; flex-wrap: wrap;">
+          <div class="input-group" style="flex: 1; min-width: 300px;">
+            <label>Platform Master Public Key</label>
+            <div style="position: relative;">
+              <input type="text" value="sb_pub_live_51PqR4hSJ..." readonly style="background: #000; font-family: monospace; color: var(--success); padding-right: 44px;">
+              <button style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-dim); cursor: pointer;"><i data-lucide="copy" style="width:16px;"></i></button>
+            </div>
+          </div>
+          <div style="padding-bottom: 24px;">
+            <button class="btn-primary" style="background: #EF4444;">Rotate Master Keys</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

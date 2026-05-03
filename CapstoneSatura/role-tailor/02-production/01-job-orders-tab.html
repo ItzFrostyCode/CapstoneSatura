@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Job Orders Tab</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --success-bg: #F0FDF4; --success-text: #22C55E;
+      --warning-bg: #FFFBEB; --warning-text: #D97706;
+      --info-bg: #EFF6FF; --info-text: #2563EB;
+      --purple-bg: #FAF5FF; --purple-text: #9333EA;
+      --indigo-bg: #EEF2FF; --indigo-text: #4F46E5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow-x: hidden; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; background-color: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background-color: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background-color: var(--surface); color: var(--primary); }
+    .nav-item.active { background-color: var(--primary); color: white; }
+    .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background-color: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; flex-shrink: 0; }
+    .user-info .name { font-size: 14px; font-weight: 600; }
+    .user-info .role { font-size: 12px; color: var(--text-muted); }
+
+    /* Main Content */
+    .main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--surface); min-width: 0; }
+    .header { height: 72px; background-color: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; width: calc(100vw - 260px); }
+    .header-title { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+    .header-actions { display: flex; align-items: center; gap: 16px; }
+    .icon-btn { color: var(--text-muted); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background-color 0.2s; }
+    .icon-btn:hover { background-color: var(--surface); color: var(--primary); }
+
+    .content { padding: 40px; flex-grow: 1; overflow-y: auto; overflow-x: auto; }
+
+    /* ── Sub-nav bar ─────────────────────────── */
+    .subnav { height: 64px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 40px; gap: 8px; flex-shrink: 0; justify-content: space-between; position: sticky; top: 72px; z-index: 90; width: calc(100vw - 260px); }
+    .subnav-tabs { display: flex; gap: 32px; height: 100%; align-items: center; }
+    .subnav-tab { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--text-muted); height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; }
+    .subnav-tab:hover { color: var(--primary); }
+    .subnav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    .subnav-actions { display: flex; align-items: center; gap: 16px; }
+    .btn-primary-sm { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-primary-sm:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .stat-label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); letter-spacing: -0.5px; }
+
+    /* Page Actions */
+    .page-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .search-box { display: flex; align-items: center; border: 1px solid var(--border); background: var(--bg); border-radius: 8px; padding: 0 16px; height: 44px; width: 320px; transition: border-color 0.2s; }
+    .search-box:focus-within { border-color: var(--primary); }
+    .search-box input { border: none; outline: none; margin-left: 8px; font-family: 'Outfit'; font-size: 15px; width: 100%; color: var(--text-main); background: transparent; }
+    .btn-primary { background-color: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 20px; height: 44px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-decoration: none; }
+    .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+
+    /* Order Filter Tabs */
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-tab { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); transition: all 0.2s; text-decoration: none; }
+    .filter-tab:hover { background: var(--surface); color: var(--primary); }
+    .filter-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* Table Container */
+    .table-container { background: white; border-radius: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: #F8FAFC; padding: 16px 32px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 20px 32px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 14px; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #F8FAFC; }
+    
+    .order-id { font-family: monospace; font-size: 13px; font-weight: 700; color: var(--primary); background: #F1F5F9; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border); }
+    .customer-info .name { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
+    
+    .badge { font-size: 11px; font-weight: 700; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); padding: 4px 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.02em; }
+    .badge-blue { background: #EFF6FF; color: #2563EB; border-color: #DBEAFE; }
+    .badge-yellow { background: #FFFBEB; color: #D97706; border-color: #FEF3C7; }
+    .badge-purple { background: #FAF5FF; color: #9333EA; border-color: #F3E8FF; }
+    .badge-indigo { background: #EEF2FF; color: #4F46E5; border-color: #E0E7FF; }
+    .badge-green { background: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
+    
+    .small-text { font-size: 14px; font-weight: 500; color: var(--text-muted); }
+    .fw-600 { font-weight: 700; color: var(--text-main); }
+
+    .actions { display: flex; gap: 8px; }
+    .action-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: white; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+    .action-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--surface); }
+
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div><div class="logo-text">Sutura</div></div>
+    <nav class="nav-list">
+      <a href="../02-production/06-kanban-board.html" class="nav-item active"><i data-lucide="scissors" style="width: 20px;"></i> My Tasks</a>
+    </nav>
+        <div class="sidebar-footer">
+      <div class="avatar" style="background:#FAF5FF;color:#9333EA;border:1px solid #F3E8FF;">T</div>
+      <div class="user-info">
+        <div class="name">Tony Tailor</div>
+        <div class="role">Master Tailor</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Production</div>
+      <div class="header-actions"><button class="icon-btn"><i data-lucide="bell" style="width: 20px;"></i></button></div>
+    </header>
+
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="01-job-orders-tab.html" class="subnav-tab active">Job Orders</a>
+        <a href="04-portfolio-tab.html" class="subnav-tab">Portfolio Showcase</a>
+      </div>
+      <div class="subnav-actions" style="display:flex;align-items:center;gap:10px;">
+        <div class="view-switcher" style="display: flex; background: #EEF2F6; padding: 4px; border-radius: 14px; border: 1px solid var(--border); gap: 4px;">
+          <a href="01-job-orders-tab.html" class="view-btn active" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.08); color: var(--text-main); border: 1px solid rgba(0,0,0,0.05); text-decoration: none; transition: all 0.2s;">
+            <i data-lucide="list" style="width: 18px;"></i>
+          </a>
+          <a href="06-kanban-board.html" class="view-btn" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #64748B; text-decoration: none; transition: all 0.2s;">
+            <i data-lucide="columns-3" style="width: 18px;"></i>
+          </a>
+        </div>
+        <a href="../07-role-portals/03-seamstress-board.html" style="display:inline-flex;align-items:center;gap:7px;background:#FAF5FF;color:#7C3AED;border:1px solid #DDD6FE;border-radius:12px;padding:0 16px;height:40px;font-size:13px;font-weight:700;text-decoration:none;transition:all 0.2s;white-space:nowrap;" title="Switch to Seamstress / Tailor View">
+          <i data-lucide="scissors" style="width:15px;"></i> Seamstress View
+        </a>
+        <a href="10-fashion-designer-view.html" style="display:inline-flex;align-items:center;gap:7px;background:#FFF1F2;color:#F43F5E;border:1px solid #FECDD3;border-radius:12px;padding:0 16px;height:40px;font-size:13px;font-weight:700;text-decoration:none;transition:all 0.2s;white-space:nowrap;" title="Switch to Fashion Designer View">
+          <i data-lucide="sparkles" style="width:15px;"></i> Designer View
+        </a>
+        <a href="02-job-orders-add-modal.html" class="btn-primary-sm"><i data-lucide="plus" style="width: 20px;"></i> Create Job Order</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Active</div>
+          <div class="stat-value">20</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">In Progress</div>
+          <div class="stat-value">8</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ready / QC</div>
+          <div class="stat-value">4</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Due This Week</div>
+          <div class="stat-value">7</div>
+        </div>
+      </div>
+
+      <div class="page-actions">
+        <div class="search-box">
+          <i data-lucide="search" style="width: 18px; color: var(--text-muted);"></i>
+          <input type="text" placeholder="Search orders..." />
+        </div>
+        <div style="font-size: 13px; color: var(--text-muted);">Showing <strong style="color: var(--text-main);">20</strong> active orders</div>
+      </div>
+
+      <div class="filter-tabs">
+        <a href="#" class="filter-tab active">All</a>
+        <a href="#" class="filter-tab">Created</a>
+        <a href="#" class="filter-tab">Measured</a>
+        <a href="#" class="filter-tab">Cutting</a>
+        <a href="#" class="filter-tab">In Progress</a>
+        <a href="#" class="filter-tab">QC</a>
+        <a href="#" class="filter-tab">Alteration</a>
+        <a href="#" class="filter-tab">Ready</a>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ORDER ID</th>
+              <th>CUSTOMER</th>
+              <th>GARMENT</th>
+              <th>PRICE</th>
+              <th>DUE DATE</th>
+              <th>STAFF</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- ORD-1001: Juan Dela Cruz Suit -->
+            <tr>
+              <td><span class="order-id">ORD-1001</span></td>
+              <td><div class="customer-name">Juan Dela Cruz</div></td>
+              <td>
+                <div class="fw-600">3-Piece Charcoal Suit</div>
+                <div class="small-text"><span class="badge badge-gray" style="padding: 0 6px; font-size: 10px;">Solo</span></div>
+              </td>
+              <td>
+                <div class="fw-600">₱12,500.00</div>
+              </td>
+              <td class="small-text">May 10, 2026</td>
+              <td>
+                <div class="small-text fw-600">Carla, Elena, Ricardo</div>
+              </td>
+              <td><span class="badge badge-indigo">In Progress</span></td>
+              <td>
+                <div class="actions">
+                  <a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="eye" style="width: 14px;"></i></a>
+                  <a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="edit-2" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ORD-1002: Alexander McQueen Polos -->
+            <tr>
+              <td><span class="order-id">ORD-1002</span></td>
+              <td><div class="customer-name">Alexander McQueen</div></td>
+              <td>
+                <div class="fw-600">Boutique Staff Polos</div>
+                <div class="small-text"><span class="badge badge-purple" style="padding: 0 6px; font-size: 10px;">Bulk (15 pcs)</span></div>
+              </td>
+              <td>
+                <div class="fw-600">₱22,500.00</div>
+              </td>
+              <td class="small-text">May 15, 2026</td>
+              <td>
+                <div class="small-text fw-600">Carla, Elena</div>
+              </td>
+              <td><span class="badge badge-yellow">Cutting</span></td>
+              <td>
+                <div class="actions">
+                  <a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="eye" style="width: 14px;"></i></a>
+                  <a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="edit-2" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ORD-1003: Maria Santos Dress -->
+            <tr>
+              <td><span class="order-id">ORD-1003</span></td>
+              <td><div class="customer-name">Maria Santos</div></td>
+              <td>
+                <div class="fw-600">Silk Cocktail Dress</div>
+                <div class="small-text"><span class="badge badge-gray" style="padding: 0 6px; font-size: 10px;">Solo</span></div>
+              </td>
+              <td>
+                <div class="fw-600">₱4,500.00</div>
+              </td>
+              <td class="small-text">Apr 28, 2026</td>
+              <td>
+                <div class="small-text fw-600">Elena, Ricardo</div>
+              </td>
+              <td><span class="badge badge-green">Ready</span></td>
+              <td>
+                <div class="actions">
+                  <a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="eye" style="width: 14px;"></i></a>
+                  <a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="edit-2" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ORD-1004: BGC Tech Polos -->
+            <tr>
+              <td><span class="order-id">ORD-1004</span></td>
+              <td><div class="customer-name">BGC Tech Solutions</div></td>
+              <td>
+                <div class="fw-600">Company Polos</div>
+                <div class="small-text"><span class="badge badge-purple" style="padding: 0 6px; font-size: 10px;">Bulk (50 pcs)</span></div>
+              </td>
+              <td>
+                <div class="fw-600">₱45,000.00</div>
+              </td>
+              <td class="small-text">Jun 01, 2026</td>
+              <td>
+                <div class="small-text fw-600" style="color: var(--text-muted); font-style: italic;">Unassigned</div>
+              </td>
+              <td><span class="badge badge-gray">Measured</span></td>
+              <td>
+                <div class="actions">
+                  <a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="eye" style="width: 14px;"></i></a>
+                  <a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="edit-2" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ORD-1005: Liza Soberano Gown -->
+            <tr>
+              <td><span class="order-id">ORD-1005</span></td>
+              <td><div class="customer-name">Liza Soberano</div></td>
+              <td>
+                <div class="fw-600">Evening Gown</div>
+                <div class="small-text"><span class="badge badge-gray" style="padding: 0 6px; font-size: 10px;">Solo</span></div>
+              </td>
+              <td>
+                <div class="fw-600">₱35,000.00</div>
+                <div class="small-text"><span class="badge badge-yellow" style="padding: 0 6px; font-size: 10px;">Priority</span></div>
+              </td>
+              <td class="small-text">May 05, 2026</td>
+              <td>
+                <div class="staff-avatars">
+                  <div class="staff-avatar" title="Pattern Maker: Carla">C</div>
+                  <div class="staff-avatar" title="Tailor: Ricardo">R</div>
+                </div>
+              </td>
+              <td><span class="badge badge-green">Released</span></td>
+              <td>
+                <div class="actions">
+                  <a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="eye" style="width: 14px;"></i></a>
+                  <a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="edit-2" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+
+            <!-- ORD-1006: Piña Silk Barong -->
+            <tr>
+              <td><span class="order-id">ORD-1006</span></td>
+              <td><div class="customer-name">Juan Dela Cruz</div></td>
+              <td>
+                <div class="fw-600">Piña Silk Barong</div>
+                <div class="small-text"><span class="badge badge-gray" style="padding: 0 6px; font-size: 10px;">Solo</span></div>
+              </td>
+              <td>
+                <div class="fw-600">₱8,500.00</div>
+              </td>
+              <td class="small-text">Apr 29, 2026</td>
+              <td>
+                <div class="staff-avatars">
+                  <div class="staff-avatar" title="Tailor: Ricardo">R</div>
+                </div>
+              </td>
+              <td><span class="badge badge-green">Ready</span></td>
+              <td>
+                <div class="actions">
+                  <a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="eye" style="width: 14px;"></i></a>
+                  <a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration: none;"><i data-lucide="edit-2" style="width: 14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <!-- 15 additional seed rows -->
+          <tbody>
+            <tr><td><span class="order-id">ORD-1000</span></td><td><div class="customer-name">Sofia Anderson</div></td><td><div class="fw-600">Blazer</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱6,800.00</div></td><td class="small-text">Oct 18, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="John">J</div><div class="staff-avatar" title="Mike">M</div></div></td><td><span class="badge badge-indigo">In Progress</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><button class="action-btn"><i data-lucide="edit-2" style="width:14px;"></i></button></div></td></tr>
+            <tr><td><span class="order-id">ORD-0999</span></td><td><div class="customer-name">Miguel Reyes</div></td><td><div class="fw-600">Barong</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱5,200.00</div></td><td class="small-text">Oct 17, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Anna">A</div></div></td><td><span class="badge badge-green">Ready</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><button class="action-btn"><i data-lucide="edit-2" style="width:14px;"></i></button></div></td></tr>
+            <tr><td><span class="order-id">ORD-0998</span></td><td><div class="customer-name">Alexander McQueen</div></td><td><div class="fw-600">Suit</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱12,000.00</div><div class="small-text"><span class="badge badge-yellow" style="padding:0 6px;font-size:10px;">Priority</span></div></td><td class="small-text">Oct 15, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="John">J</div><div class="staff-avatar" title="Sarah">S</div><div class="staff-avatar" title="Mike">M</div></div></td><td><span class="badge badge-purple" style="background:#FAF5FF;color:#9333EA;">QC</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><button class="action-btn"><i data-lucide="edit-2" style="width:14px;"></i></button></div></td></tr>
+            <tr><td><span class="order-id">ORD-0997</span></td><td><div class="customer-name">Maria Santos</div></td><td><div class="fw-600">Skirt</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱3,100.00</div></td><td class="small-text">Oct 14, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Anna">A</div></div></td><td><span class="badge badge-gray">Measured</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><button class="action-btn"><i data-lucide="edit-2" style="width:14px;"></i></button></div></td></tr>
+            <tr><td><span class="order-id">ORD-0996</span></td><td><div class="customer-name">Elena Gomez</div></td><td><div class="fw-600">T-Shirt</div><div class="small-text"><span class="badge badge-purple" style="background:#FAF5FF;color:#9333EA;padding:0 6px;font-size:10px;">Bulk (20 pcs)</span></div></td><td><div class="fw-600">₱9,000.00</div></td><td class="small-text">Oct 12, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Sarah">S</div><div class="staff-avatar" title="Mike">M</div></div></td><td><span class="badge badge-indigo">In Progress</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><button class="action-btn"><i data-lucide="edit-2" style="width:14px;"></i></button></div></td></tr>
+            <tr><td><span class="order-id">ORD-0995</span></td><td><div class="customer-name">John Doe</div></td><td><div class="fw-600">Polo</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱4,000.00</div></td><td class="small-text">Oct 10, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="John">J</div></div></td><td><span class="badge badge-yellow">Cutting</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><button class="action-btn"><i data-lucide="edit-2" style="width:14px;"></i></button></div></td></tr>
+            <tr><td><span class="order-id">ORD-0994</span></td><td><div class="customer-name">Sofia Anderson</div></td><td><div class="fw-600">Dress</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱7,500.00</div></td><td class="small-text">Oct 8, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Anna">A</div><div class="staff-avatar" title="Mike">M</div></div></td><td><span class="badge badge-green">Ready</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><button class="action-btn"><i data-lucide="edit-2" style="width:14px;"></i></button></div></td></tr>
+            <tr><td><span class="order-id">ORD-0993</span></td><td><div class="customer-name">Miguel Reyes</div></td><td><div class="fw-600">Blazer</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱6,200.00</div><div class="small-text"><span class="badge badge-yellow" style="padding:0 6px;font-size:10px;">Priority</span></div></td><td class="small-text">Oct 6, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Sarah">S</div></div></td><td><span class="badge badge-indigo">In Progress</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="edit-2" style="width:14px;"></i></a></div></td></tr>
+            <tr><td><span class="order-id">ORD-0992</span></td><td><div class="customer-name">Juan Dela Cruz</div></td><td><div class="fw-600">Uniform</div><div class="small-text"><span class="badge badge-purple" style="background:#FAF5FF;color:#9333EA;padding:0 6px;font-size:10px;">Bulk (10 pcs)</span></div></td><td><div class="fw-600">₱18,000.00</div></td><td class="small-text">Oct 5, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="John">J</div><div class="staff-avatar" title="Anna">A</div></div></td><td><span class="badge badge-gray">Created</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="edit-2" style="width:14px;"></i></a></div></td></tr>
+            <tr><td><span class="order-id">ORD-0991</span></td><td><div class="customer-name">Alexander McQueen</div></td><td><div class="fw-600">Pants</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱3,800.00</div></td><td class="small-text">Oct 3, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Mike">M</div></div></td><td><span class="badge badge-green">Released</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="edit-2" style="width:14px;"></i></a></div></td></tr>
+            <tr><td><span class="order-id">ORD-0990</span></td><td><div class="customer-name">Maria Santos</div></td><td><div class="fw-600">Barong</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱5,500.00</div></td><td class="small-text">Oct 1, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="John">J</div></div></td><td><span class="badge badge-yellow" style="background:#FFF7ED;color:#F97316;">Alteration</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="edit-2" style="width:14px;"></i></a></div></td></tr>
+            <tr><td><span class="order-id">ORD-0989</span></td><td><div class="customer-name">John Doe</div></td><td><div class="fw-600">Dress</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱8,900.00</div></td><td class="small-text">Sep 29, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Sarah">S</div><div class="staff-avatar" title="Anna">A</div></div></td><td><span class="badge badge-purple" style="background:#FAF5FF;color:#9333EA;">QC</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="edit-2" style="width:14px;"></i></a></div></td></tr>
+            <tr><td><span class="order-id">ORD-0988</span></td><td><div class="customer-name">Elena Gomez</div></td><td><div class="fw-600">Polo</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱4,200.00</div></td><td class="small-text">Sep 27, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Mike">M</div></div></td><td><span class="badge badge-gray">Measured</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="edit-2" style="width:14px;"></i></a></div></td></tr>
+            <tr><td><span class="order-id">ORD-0987</span></td><td><div class="customer-name">Sofia Anderson</div></td><td><div class="fw-600">Skirt</div><div class="small-text"><span class="badge badge-gray" style="padding:0 6px;font-size:10px;">Solo</span></div></td><td><div class="fw-600">₱2,800.00</div></td><td class="small-text">Sep 25, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="Anna">A</div></div></td><td><span class="badge badge-green">Released</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="edit-2" style="width:14px;"></i></a></div></td></tr>
+            <tr><td><span class="order-id">ORD-0986</span></td><td><div class="customer-name">Miguel Reyes</div></td><td><div class="fw-600">Suit</div><div class="small-text"><span class="badge badge-purple" style="background:#FAF5FF;color:#9333EA;padding:0 6px;font-size:10px;">Bulk (3 pcs)</span></div></td><td><div class="fw-600">₱28,500.00</div><div class="small-text"><span class="badge badge-yellow" style="padding:0 6px;font-size:10px;">Priority</span></div></td><td class="small-text">Sep 22, 2023</td><td><div class="staff-avatars"><div class="staff-avatar" title="John">J</div><div class="staff-avatar" title="Sarah">S</div></div></td><td><span class="badge badge-indigo">In Progress</span></td><td><div class="actions"><a href="03-job-orders-view-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="eye" style="width:14px;"></i></a><a href="07-job-orders-edit-modal.html" class="action-btn" style="text-decoration:none;"><i data-lucide="edit-2" style="width:14px;"></i></a></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura - Shop Profile & Branding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--primary-hover:#333;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;width:100%;min-height:100vh;overflow-x:hidden;}
+    .sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-header{height:72px;display:flex;align-items:center;padding:0 24px;gap:12px;border-bottom:1px solid var(--border);}
+    .logo-icon{background:var(--primary);color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;}
+    .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .nav-list{padding:24px 16px;display:flex;flex-direction:column;gap:8px;flex-grow:1;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}
+    .nav-item:hover{background:var(--surface);color:var(--primary);}
+    .nav-item.active{background:var(--primary);color:white;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;}
+    .user-info .name{font-size:14px;font-weight:600;}
+    .user-info .role{font-size:12px;color:var(--text-muted);}
+    .main{flex-grow:1;display:flex;flex-direction:column;background:var(--surface);}
+    .header{height:72px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 40px;flex-shrink:0;position:sticky;top:0;z-index:100;width:calc(100vw - 260px);}
+    .header-title{font-size:20px;font-weight:600;letter-spacing:-0.5px;}
+    .header-actions{display:flex;align-items:center;gap:16px;}
+    .icon-btn{color:var(--text-muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:background 0.2s;}
+    .icon-btn:hover{background:var(--surface);color:var(--primary);}
+    .subnav{height:64px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px;gap:8px;flex-shrink:0;position:sticky;top:72px;z-index:90;width:calc(100vw - 260px);overflow-x:auto;}
+    .subnav-tabs{display:flex;gap:32px;height:100%;align-items:center;}
+    .subnav-tab{text-decoration:none;font-size:14px;font-weight:600;color:var(--text-muted);height:100%;display:flex;align-items:center;border-bottom:2px solid transparent;transition:all 0.2s;cursor:pointer;white-space:nowrap;}
+    .subnav-tab:hover{color:var(--primary);}
+    .subnav-tab.active{color:var(--primary);border-bottom:2px solid var(--primary);}
+    /* Premium tab badge */
+    .tab-premium{font-size:10px;font-weight:700;background:#FAF5FF;color:#8B5CF6;border:1px solid #DDD6FE;padding:1px 6px;border-radius:5px;margin-left:6px;vertical-align:middle;}
+    .content{padding:40px;flex-grow:1;overflow-y:auto;max-width:960px;margin:0 auto;width:100%;}
+
+    /* Premium feature banner */
+    .premium-banner{background:linear-gradient(135deg,#FAF5FF 0%,#EDE9FE 100%);border:1px solid #DDD6FE;border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:14px;margin-bottom:32px;}
+    .premium-banner-icon{width:40px;height:40px;background:#8B5CF6;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;}
+    .premium-banner-text strong{font-size:14px;font-weight:700;color:#6D28D9;display:block;margin-bottom:2px;}
+    .premium-banner-text span{font-size:13px;color:#8B5CF6;}
+    .premium-badge{margin-left:auto;background:#8B5CF6;color:white;font-size:11px;font-weight:700;padding:4px 14px;border-radius:8px;white-space:nowrap;}
+
+    /* Settings card */
+    .settings-card{background:white;border-radius:24px;border:1px solid var(--border);box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);overflow:hidden;margin-bottom:28px;}
+    .settings-header{padding:28px 36px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;}
+    .settings-header-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .settings-title{font-size:17px;font-weight:700;color:var(--text-main);margin-bottom:3px;}
+    .settings-subtitle{font-size:13px;color:var(--text-muted);}
+    .settings-body{padding:32px 36px;}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;}
+    .form-group{display:flex;flex-direction:column;gap:8px;}
+    .form-group.full-width{grid-column:span 2;}
+    label{font-size:14px;font-weight:600;color:var(--text-main);}
+    .label-sub{font-size:12px;font-weight:400;color:var(--text-muted);margin-left:6px;}
+    input[type="text"],input[type="email"],input[type="tel"],input[type="url"],select,textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-family:'Outfit';font-size:15px;outline:none;transition:all 0.2s;color:var(--text-main);}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary);background:white;box-shadow:0 0 0 4px rgba(0,0,0,0.03);}
+    input,select{height:48px;padding:0 16px;}
+    textarea{height:100px;padding:16px;resize:none;}
+    .form-actions{padding:20px 36px;border-top:1px solid var(--border);background:var(--surface);display:flex;justify-content:flex-end;gap:10px;}
+    .btn-cancel-sm{background:none;color:var(--text-muted);border:1px solid var(--border);border-radius:12px;padding:0 24px;height:44px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Outfit';transition:all 0.2s;}
+    .btn-cancel-sm:hover{background:white;}
+    .btn-primary{display:flex;align-items:center;gap:8px;justify-content:center;background:var(--primary);color:white;border:none;border-radius:12px;padding:0 32px;height:44px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit';transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+    .btn-primary:hover{background:var(--primary-hover);transform:translateY(-1px);}
+
+    /* Logo uploader */
+    .logo-upload-area{border:2px dashed var(--border);border-radius:16px;padding:28px;display:flex;align-items:center;gap:24px;transition:all 0.2s;cursor:pointer;}
+    .logo-upload-area:hover{border-color:#8B5CF6;background:#FAF5FF;}
+    .logo-preview{width:80px;height:80px;border-radius:18px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-size:28px;font-weight:800;flex-shrink:0;letter-spacing:-1px;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+    .logo-upload-text .title{font-size:15px;font-weight:700;color:var(--text-main);margin-bottom:4px;}
+    .logo-upload-text .sub{font-size:13px;color:var(--text-muted);line-height:1.5;}
+    .upload-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface);color:var(--primary);border:1px solid var(--border);border-radius:10px;padding:0 16px;height:36px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit';margin-top:10px;transition:all 0.2s;}
+    .upload-btn:hover{border-color:var(--primary);}
+
+    /* Color palette */
+    .color-palette{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;transition:transform 0.2s;border:3px solid transparent;position:relative;}
+    .color-swatch:hover{transform:scale(1.12);}
+    .color-swatch.selected::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:700;}
+    .color-swatch.selected{border-color:white;box-shadow:0 0 0 2px var(--primary);}
+    .color-input-row{display:flex;align-items:center;gap:10px;margin-top:12px;}
+    .hex-input{width:140px;height:40px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-family:'Outfit';font-size:14px;font-weight:600;outline:none;}
+    .hex-input:focus{border-color:var(--primary);}
+    .color-dot-preview{width:32px;height:32px;border-radius:8px;background:#1A1A1A;border:1px solid var(--border);flex-shrink:0;}
+
+    /* Social links */
+    .social-row{display:flex;align-items:center;gap:12px;}
+    .social-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+    .social-icon.fb{background:#EFF6FF;color:#2563EB;}
+    .social-icon.ig{background:#FFF1F2;color:#F43F5E;}
+    .social-icon.web{background:#F0FDF4;color:#16A34A;}
+
+    /* Live preview card */
+    .preview-card{background:linear-gradient(135deg,#1A1A1A 0%,#374151 100%);border-radius:20px;padding:28px;color:white;position:relative;overflow:hidden;}
+    .preview-card::after{content:'';position:absolute;top:-30px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.04);}
+    .preview-logo{width:56px;height:56px;border-radius:14px;background:white;display:flex;align-items:center;justify-content:center;color:#1A1A1A;font-weight:800;font-size:20px;margin-bottom:14px;border:3px solid rgba(255,255,255,0.2);}
+    .preview-name{font-size:20px;font-weight:800;letter-spacing:-0.3px;margin-bottom:4px;}
+    .preview-tag{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:16px;}
+    .preview-divider{height:1px;background:rgba(255,255,255,0.12);margin-bottom:16px;}
+    .preview-info-row{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;}
+    .preview-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.12);color:white;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);}
+    .preview-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+      <div class="logo-text">Sutura</div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item "><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      <a href="../00-dashboard/08-branch-management.html" class="nav-item "><i data-lucide="git-branch" style="width: 20px;"></i> Branches</a>
+      <a href="../05-settings/01-settings-tab.html" class="nav-item active"><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info"><div class="name">Admin User</div><div class="role">Shop Owner</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Settings</div>
+      <div class="header-actions">
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="01-settings-tab.html" class="subnav-tab">General</a>
+        <a href="03-employees-tab.html" class="subnav-tab">Employees</a>
+        <a href="09-roles-permissions-tab.html" class="subnav-tab">Roles & Permissions</a>
+        <a href="10-security-data-tab.html" class="subnav-tab">Security & Data</a>
+        <a href="05-audit-log-tab.html" class="subnav-tab">Audit Log</a>
+        <a href="08-shop-profile-tab.html" class="subnav-tab active">Shop Branding</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Premium banner -->
+      <div class="premium-banner">
+        <div class="premium-banner-icon"><i data-lucide="palette" style="width:20px;"></i></div>
+        <div class="premium-banner-text">
+          <strong>Customized Shop Profile — Premium Feature</strong>
+          <span>Personalize your shop's public identity: logo, colors, social links, and business info.</span>
+        </div>
+        <div class="premium-badge">✦ Premium Plan</div>
+      </div>
+
+      <!-- Logo & Identity -->
+      <div class="settings-card">
+        <div class="settings-header">
+          <div class="settings-header-icon" style="background:#F0F9FF;color:#0369A1;"><i data-lucide="image" style="width:20px;"></i></div>
+          <div>
+            <div class="settings-title">Shop Logo & Identity</div>
+            <div class="settings-subtitle">Upload your shop logo and set your display name</div>
+          </div>
+        </div>
+        <div class="settings-body">
+          <!-- Logo uploader -->
+          <div style="margin-bottom:24px;">
+            <label style="display:block;margin-bottom:10px;">Shop Logo</label>
+            <div class="logo-upload-area">
+              <div class="logo-preview">S</div>
+              <div class="logo-upload-text">
+                <div class="title">Sutura Tailoring</div>
+                <div class="sub">Current logo (auto-generated from name)<br>Recommended: 400×400px, PNG or SVG, max 2MB</div>
+                <button class="upload-btn"><i data-lucide="upload" style="width:13px;"></i> Upload Logo</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Shop Name</label>
+              <input type="text" value="Sutura Tailoring"/>
+            </div>
+            <div class="form-group">
+              <label>Tagline <span class="label-sub">Optional</span></label>
+              <input type="text" value="Crafted with precision. Worn with pride."/>
+            </div>
+            <div class="form-group full-width">
+              <label>Shop Description</label>
+              <textarea>Sutura Tailoring is a premium bespoke tailoring house specializing in custom garments, formal wear, and traditional Filipino attire. Serving clients across Makati, Cebu, and Davao since 2010.</textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel-sm">Discard</button>
+          <button class="btn-primary"><i data-lucide="save" style="width:16px;"></i> Save Identity</button>
+        </div>
+      </div>
+
+      <!-- Brand Colors -->
+      <div class="settings-card">
+        <div class="settings-header">
+          <div class="settings-header-icon" style="background:#FAF5FF;color:#8B5CF6;"><i data-lucide="palette" style="width:20px;"></i></div>
+          <div>
+            <div class="settings-title">Brand Colors</div>
+            <div class="settings-subtitle">Set your primary and accent colors for your public shop profile</div>
+          </div>
+        </div>
+        <div class="settings-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Primary Color</label>
+              <div class="color-palette">
+                <div class="color-swatch selected" style="background:#1A1A1A;"></div>
+                <div class="color-swatch" style="background:#2563EB;"></div>
+                <div class="color-swatch" style="background:#8B5CF6;"></div>
+                <div class="color-swatch" style="background:#059669;"></div>
+                <div class="color-swatch" style="background:#D97706;"></div>
+                <div class="color-swatch" style="background:#DC2626;"></div>
+                <div class="color-swatch" style="background:#EC4899;"></div>
+                <div class="color-swatch" style="background:#0891B2;"></div>
+              </div>
+              <div class="color-input-row">
+                <div class="color-dot-preview" style="background:#1A1A1A;"></div>
+                <input class="hex-input" type="text" value="#1A1A1A" placeholder="#000000"/>
+                <span style="font-size:13px;color:var(--text-muted);">Hex code</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Accent Color</label>
+              <div class="color-palette">
+                <div class="color-swatch" style="background:#1A1A1A;"></div>
+                <div class="color-swatch" style="background:#2563EB;"></div>
+                <div class="color-swatch selected" style="background:#8B5CF6;"></div>
+                <div class="color-swatch" style="background:#059669;"></div>
+                <div class="color-swatch" style="background:#D97706;"></div>
+                <div class="color-swatch" style="background:#DC2626;"></div>
+                <div class="color-swatch" style="background:#EC4899;"></div>
+                <div class="color-swatch" style="background:#0891B2;"></div>
+              </div>
+              <div class="color-input-row">
+                <div class="color-dot-preview" style="background:#8B5CF6;"></div>
+                <input class="hex-input" type="text" value="#8B5CF6" placeholder="#000000"/>
+                <span style="font-size:13px;color:var(--text-muted);">Hex code</span>
+              </div>
+            </div>
+
+            <!-- Live preview -->
+            <div class="form-group full-width">
+              <label>Live Profile Preview</label>
+              <div class="preview-card">
+                <div class="preview-label">Your Public Shop Card</div>
+                <div class="preview-logo">S</div>
+                <div class="preview-name">Sutura Tailoring</div>
+                <div class="preview-tag">Crafted with precision. Worn with pride.</div>
+                <div class="preview-divider"></div>
+                <div class="preview-info-row"><i data-lucide="map-pin" style="width:12px;"></i> Ayala Ave., Makati City</div>
+                <div class="preview-info-row"><i data-lucide="phone" style="width:12px;"></i> +63 912 345 6789</div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                  <span class="preview-badge"><i data-lucide="star" style="width:10px;"></i> Premium Shop</span>
+                  <span class="preview-badge">3 Branches</span>
+                  <span class="preview-badge">Est. 2010</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel-sm">Discard</button>
+          <button class="btn-primary"><i data-lucide="save" style="width:16px;"></i> Save Colors</button>
+        </div>
+      </div>
+
+      <!-- Business Info -->
+      <div class="settings-card">
+        <div class="settings-header">
+          <div class="settings-header-icon" style="background:#F0FDF4;color:#16A34A;"><i data-lucide="building-2" style="width:20px;"></i></div>
+          <div>
+            <div class="settings-title">Business Information</div>
+            <div class="settings-subtitle">Public-facing business details shown on your shop profile</div>
+          </div>
+        </div>
+        <div class="settings-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Business Type</label>
+              <select>
+                <option selected>Bespoke Tailoring</option>
+                <option>Alterations & Repairs</option>
+                <option>Uniform Maker</option>
+                <option>Fashion Design Studio</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Year Established</label>
+              <input type="text" value="2010"/>
+            </div>
+            <div class="form-group">
+              <label>Business Hours</label>
+              <input type="text" value="Mon–Sat, 9:00 AM – 6:00 PM"/>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" value="+63 912 345 6789"/>
+            </div>
+            <div class="form-group full-width">
+              <label>Primary Address</label>
+              <input type="text" value="Ayala Avenue, Makati City, Metro Manila, Philippines"/>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel-sm">Discard</button>
+          <button class="btn-primary"><i data-lucide="save" style="width:16px;"></i> Save Business Info</button>
+        </div>
+      </div>
+
+      <!-- Social Links -->
+      <div class="settings-card">
+        <div class="settings-header">
+          <div class="settings-header-icon" style="background:#FFF1F2;color:#F43F5E;"><i data-lucide="share-2" style="width:20px;"></i></div>
+          <div>
+            <div class="settings-title">Social Media & Website</div>
+            <div class="settings-subtitle">Link your social accounts to your public shop profile</div>
+          </div>
+        </div>
+        <div class="settings-body">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="social-row">
+              <div class="social-icon fb"><i data-lucide="facebook" style="width:18px;"></i></div>
+              <input type="url" placeholder="https://facebook.com/yourshop" value="https://facebook.com/suturatailoring"/>
+            </div>
+            <div class="social-row">
+              <div class="social-icon ig"><i data-lucide="instagram" style="width:18px;"></i></div>
+              <input type="url" placeholder="https://instagram.com/yourshop" value="https://instagram.com/sutura.tailoring"/>
+            </div>
+            <div class="social-row">
+              <div class="social-icon web"><i data-lucide="globe" style="width:18px;"></i></div>
+              <input type="url" placeholder="https://yourwebsite.com" value="https://suturatailoring.ph"/>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel-sm">Discard</button>
+          <button class="btn-primary"><i data-lucide="save" style="width:16px;"></i> Save Social Links</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

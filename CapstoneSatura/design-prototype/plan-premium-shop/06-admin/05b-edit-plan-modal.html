@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Sutura Admin - Subscription Plans</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--primary-hover:#333;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    .sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-header{height:72px;display:flex;align-items:center;padding:0 24px;gap:12px;border-bottom:1px solid var(--border);}
+    .logo-icon{background:var(--primary);color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;flex-shrink:0;}
+    .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .logo-badge{font-size:10px;font-weight:700;background:#EF4444;color:white;padding:2px 7px;border-radius:6px;margin-left:4px;}
+    .nav-list{padding:24px 16px;display:flex;flex-direction:column;gap:4px;flex-grow:1;}
+    .nav-section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;padding:8px 16px 4px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}
+    .nav-item:hover{background:var(--surface);color:var(--primary);}
+    .nav-item.active{background:var(--primary);color:white;}
+    .nav-item .badge-count{margin-left:auto;background:#EF4444;color:white;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:#1A1A1A;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+    .user-info .name{font-size:14px;font-weight:600;}
+    .user-info .role{font-size:12px;color:var(--text-muted);}
+    .main{flex-grow:1;display:flex;flex-direction:column;min-width:0;}
+    .header{height:72px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 40px;flex-shrink:0;position:sticky;top:0;z-index:100;}
+    .header-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .header-sub{font-size:13px;color:var(--text-muted);}
+    .icon-btn{color:var(--text-muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:background 0.2s;}
+    .icon-btn:hover{background:var(--surface);color:var(--primary);}
+    .content{padding:40px;flex-grow:1;overflow-y:auto;}
+
+    /* Info banner */
+    .info-banner{background:#EFF6FF;border:1px solid #DBEAFE;border-radius:14px;padding:16px 22px;display:flex;align-items:center;gap:14px;margin-bottom:32px;}
+    .info-banner-icon{width:36px;height:36px;background:#DBEAFE;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#2563EB;flex-shrink:0;}
+    .info-banner-text{font-size:13px;color:#1D4ED8;line-height:1.6;}
+    .info-banner-text strong{font-weight:700;}
+    .info-banner-link{margin-left:auto;font-size:13px;font-weight:700;color:#2563EB;text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;}
+    .info-banner-link:hover{text-decoration:underline;}
+
+    .section-header{margin-bottom:28px;}
+    .section-title{font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;}
+    .section-sub{font-size:14px;color:var(--text-muted);}
+
+    /* Plan grid — 3 columns matching settings tab */
+    .plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+    .plan-card{background:var(--bg);border:2px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.04);transition:all 0.2s;display:flex;flex-direction:column;}
+    .plan-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.08);}
+    .plan-card.active-plan{border-color:#6366F1;box-shadow:0 0 0 4px #EEF2FF;}
+    .plan-card.premium-plan{border-color:#8B5CF6;}
+    .card-accent{height:6px;}
+    .accent-basic{background:#9CA3AF;}
+    .accent-pro{background:#6366F1;}
+    .accent-premium{background:#8B5CF6;}
+    .plan-top{padding:28px 28px 20px;border-bottom:1px solid var(--border);}
+    .plan-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:14px;text-transform:uppercase;}
+    .plan-tag.basic-tag{background:var(--surface);color:var(--text-muted);border:1px solid var(--border);}
+    .plan-tag.pro-tag{background:#EEF2FF;color:#6366F1;border:1px solid #C7D2FE;}
+    .plan-tag.premium-tag{background:#FAF5FF;color:#8B5CF6;border:1px solid #DDD6FE;}
+    .plan-name{font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px;}
+    .plan-price{font-size:34px;font-weight:800;letter-spacing:-1px;color:var(--text-main);line-height:1;display:flex;align-items:baseline;gap:4px;}
+    .plan-price span{font-size:14px;font-weight:500;color:var(--text-muted);letter-spacing:0;}
+    .plan-desc{font-size:13px;color:var(--text-muted);margin-top:8px;line-height:1.5;}
+    .plan-subscribers{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;color:var(--text-muted);font-weight:600;}
+    .plan-subscribers strong{color:var(--text-main);}
+    .plan-features{padding:20px 28px;flex-grow:1;}
+    .feat-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-main);margin-bottom:12px;line-height:1.4;}
+    .feat-item:last-child{margin-bottom:0;}
+    .feat-item .check{color:#10B981;flex-shrink:0;margin-top:1px;}
+    .feat-item .cross{color:#D1D5DB;flex-shrink:0;margin-top:1px;}
+    .feat-item.dim{color:var(--text-muted);}
+    .plan-actions{padding:0 28px 28px;display:flex;gap:10px;flex-direction:column;}
+    .btn-edit{background:var(--primary);color:white;border:none;font-size:13px;font-weight:700;padding:10px 0;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;width:100%;}
+    .btn-edit:hover{background:var(--primary-hover);}
+    .btn-edit.pro-btn{background:#6366F1;}
+    .btn-edit.pro-btn:hover{background:#4F46E5;}
+    .btn-edit.premium-btn{background:#8B5CF6;}
+    .btn-edit.premium-btn:hover{background:#7C3AED;}
+    .btn-view-subs{background:var(--surface);color:var(--text-main);border:1px solid var(--border);font-size:13px;font-weight:600;padding:10px 0;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s;width:100%;text-decoration:none;}
+    .btn-view-subs:hover{border-color:var(--primary);color:var(--primary);}
+    .subscriber-breakdown{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:28px;margin-top:32px;box-shadow:0 2px 8px rgba(0,0,0,0.03);}
+    .breakdown-title{font-size:16px;font-weight:700;margin-bottom:20px;}
+    .breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+    .breakdown-row:last-child{border-bottom:none;}
+    .breakdown-label{font-size:14px;font-weight:600;color:var(--text-main);}
+    .breakdown-count{font-size:14px;font-weight:700;color:var(--text-main);}
+    .breakdown-bar-wrap{flex-grow:1;margin:0 20px;height:6px;background:var(--surface);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+    .breakdown-bar{height:100%;border-radius:99px;}
+  
+    /* Advanced Plan Editor Modal Styles */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px);
+      z-index: 100; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .plan-modal {
+      background: var(--bg); width: 100%; max-width: 800px;
+      border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; overflow: hidden; max-height: 90vh;
+    }
+    .plan-header {
+      padding: 24px; background: #FFFBEB; border-bottom: 1px solid #FDE68A;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    
+    .plan-body { padding: 24px; overflow-y: auto; background: var(--bg); }
+    
+    .form-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+    .section-title-small { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    
+    .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; color: var(--text-main); outline: none; transition: 0.2s; }
+    .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    
+    /* Feature Toggle Switch */
+    .feature-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .feature-row:last-child { border-bottom: none; }
+    .feature-info { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .feature-desc { font-size: 12px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
+    
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #E5E7EB; transition: .4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    input:checked + .slider { background-color: #10B981; }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    .modal-footer { padding: 20px 24px; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+    
+    /* Warning Banner */
+    .warning-banner { background: #FEF2F2; border: 1px solid #FECACA; padding: 16px; border-radius: 8px; display: flex; gap: 12px; margin-bottom: 24px; }
+    .warning-banner i { color: #EF4444; flex-shrink: 0; }
+    .warning-text h4 { font-size: 14px; color: #991B1B; margin-bottom: 4px; }
+    .warning-text p { font-size: 13px; color: #B91C1C; line-height: 1.5; }
+
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="shield" style="width:18px;"></i></div>
+      <div class="logo-text">Sutura <span class="logo-badge">ADMIN</span></div>
+    </div>
+    <nav class="nav-list">
+      <div class="nav-section-label">Overview</div>
+      <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard" style="width:18px;"></i> Dashboard</a>
+      <a href="04-platform-revenue.html" class="nav-item"><i data-lucide="dollar-sign" style="width:18px;"></i> Platform Revenue</a>
+      
+      <div class="nav-section-label">Management</div>
+      <a href="02-registrations.html" class="nav-item"><i data-lucide="clipboard-list" style="width:18px;"></i> Registrations <span class="badge-count">3</span></a>
+      <a href="03-accounts.html" class="nav-item"><i data-lucide="store" style="width:18px;"></i> Shop Accounts</a>
+      <a href="05-subscription-plans.html" class="nav-item active"><i data-lucide="credit-card" style="width:18px;"></i> Subscription Plans</a>
+      <a href="07-support-tickets.html" class="nav-item"><i data-lucide="life-buoy" style="width:18px;"></i> Support Tickets</a>
+      
+      <div class="nav-section-label">System</div>
+      <a href="06-system-monitor.html" class="nav-item"><i data-lucide="activity" style="width:18px;"></i> System Monitor</a>
+      <a href="08-platform-settings.html" class="nav-item"><i data-lucide="settings" style="width:18px;"></i> Platform Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">SA</div>
+      <div class="user-info"><div class="name">Super Admin</div><div class="role">Administrator</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div>
+        <div class="header-title">Subscription Plans</div>
+        <div class="header-sub">Manage and monitor all plans visible to shop owners</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+
+
+      <div class="section-header">
+        <div class="section-title">Available Plans</div>
+        <div class="section-sub">38 active subscriptions across all shops — 20 Premium, 18 Basic</div>
+      </div>
+
+      <!-- 3 plans matching what settings tab shows -->
+      <div class="plan-grid">
+
+        <!-- Basic -->
+        <div class="plan-card">
+          <div class="card-accent accent-basic"></div>
+          <div class="plan-top">
+            <div class="plan-tag basic-tag">Free Tier</div>
+            <div class="plan-name">Basic</div>
+            <div class="plan-price">₱249 <span>/ month</span></div>
+            <div class="plan-desc">Essential tools for small tailoring shops to manage daily operations.</div>
+            <div class="plan-subscribers"><i data-lucide="users" style="width:14px;"></i> <strong>12</strong> active subscribers</div>
+          </div>
+          <div class="plan-features">
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Unlimited orders</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Customer profiles & directory</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Manual job order tracking</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Physical receipt printing</div>
+            <div class="feat-item dim"><i data-lucide="x" class="cross" style="width:15px;"></i> Advanced analytics</div>
+            <div class="feat-item dim"><i data-lucide="x" class="cross" style="width:15px;"></i> Multi-branch support</div>
+          </div>
+          <div class="plan-actions">
+            <button class="btn-edit"><i data-lucide="edit-2" style="width:14px;"></i> Edit Plan</button>
+            <a href="03-accounts.html" class="btn-view-subs"><i data-lucide="users" style="width:14px;"></i> View 12 Subscribers</a>
+          </div>
+        </div>
+
+        <!-- Pro -->
+        <div class="plan-card active-plan">
+          <div class="card-accent accent-pro"></div>
+          <div class="plan-top">
+            <div class="plan-tag pro-tag"><i data-lucide="star" style="width:11px;"></i> Popular</div>
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">₱749 <span>/ month</span></div>
+            <div class="plan-desc">Advanced tools for growing tailoring businesses with analytics and more staff.</div>
+            <div class="plan-subscribers"><i data-lucide="users" style="width:14px;"></i> <strong>0</strong> subscribers — Coming Soon</div>
+          </div>
+          <div class="plan-features">
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Unlimited orders</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> All Basic features</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Inventory & supplier management</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Digital invoice generation</div>
+            <div class="feat-item dim"><i data-lucide="x" class="cross" style="width:15px;"></i> Multi-branch support</div>
+            <div class="feat-item dim"><i data-lucide="x" class="cross" style="width:15px;"></i> Priority support</div>
+          </div>
+          <div class="plan-actions">
+            <button class="btn-edit pro-btn"><i data-lucide="edit-2" style="width:14px;"></i> Configure Plan</button>
+          </div>
+        </div>
+
+        <!-- Premium -->
+        <div class="plan-card premium-plan">
+          <div class="card-accent accent-premium"></div>
+          <div class="plan-top">
+            <div class="plan-tag premium-tag"><i data-lucide="zap" style="width:11px;"></i> Enterprise</div>
+            <div class="plan-name">Premium</div>
+            <div class="plan-price">₱1,299 <span>/ month</span></div>
+            <div class="plan-desc">Full-featured solution for established tailoring businesses and multi-branch shops.</div>
+            <div class="plan-subscribers"><i data-lucide="users" style="width:14px;"></i> <strong>0</strong> subscribers — Coming Soon</div>
+          </div>
+          <div class="plan-features">
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Unlimited orders</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> All Pro features</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Multi-branch support</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Advanced analytics & audit logs</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> SMS & email notifications</div>
+            <div class="feat-item"><i data-lucide="check" class="check" style="width:15px;"></i> Priority support</div>
+          </div>
+          <div class="plan-actions">
+            <button class="btn-edit premium-btn"><i data-lucide="edit-2" style="width:14px;"></i> Configure Plan</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Subscriber breakdown -->
+      <div class="subscriber-breakdown">
+        <div class="breakdown-title">Subscriber Distribution</div>
+        <div class="breakdown-row">
+          <div class="breakdown-label">Basic Plan</div>
+          <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:100%;background:#9CA3AF;"></div></div>
+          <div class="breakdown-count">12 shops</div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label">Pro Plan</div>
+          <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:0%;background:#6366F1;"></div></div>
+          <div class="breakdown-count">0 shops</div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label">Premium Plan</div>
+          <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:0%;background:#8B5CF6;"></div></div>
+          <div class="breakdown-count">0 shops</div>
+        </div>
+      </div>
+
+      <!-- Revenue / Earnings Section -->
+      <div class="subscriber-breakdown" style="margin-top:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div class="breakdown-title" style="margin-bottom:0;">System Revenue Overview</div>
+          <span style="font-size:12px;font-weight:700;background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;padding:3px 10px;border-radius:6px;">Private — Admin Only</span>
+        </div>
+
+        <!-- KPI row -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+          <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:14px;padding:20px;">
+            <div style="font-size:12px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Total Subscribers</div>
+            <div style="font-size:28px;font-weight:800;color:#111827;letter-spacing:-1px;">12</div>
+            <div style="font-size:12px;color:#6B7280;margin-top:4px;">All on Basic Plan</div>
+          </div>
+          <div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:14px;padding:20px;">
+            <div style="font-size:12px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Monthly Recurring Revenue</div>
+            <div style="font-size:28px;font-weight:800;color:#1D4ED8;letter-spacing:-1px;">₱2,988</div>
+            <div style="font-size:12px;color:#2563EB;margin-top:4px;">12 × ₱249 (Basic)</div>
+          </div>
+          <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:14px;padding:20px;">
+            <div style="font-size:12px;font-weight:700;color:#15803D;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Total Earned (All Time)</div>
+            <div style="font-size:28px;font-weight:800;color:#15803D;letter-spacing:-1px;">₱8,964</div>
+            <div style="font-size:12px;color:#16A34A;margin-top:4px;">3 months × ₱2,988</div>
+          </div>
+        </div>
+
+        <!-- Per-plan earnings breakdown -->
+        <div style="font-size:13px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;">Earnings by Plan</div>
+        <div class="breakdown-row">
+          <div class="breakdown-label">Basic Plan <span style="font-size:12px;color:#9CA3AF;font-weight:500;">12 subscribers</span></div>
+          <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:100%;background:#9CA3AF;"></div></div>
+          <div class="breakdown-count" style="color:#111827;">₱2,988 / mo</div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label">Pro Plan <span style="font-size:12px;color:#9CA3AF;font-weight:500;">0 subscribers</span></div>
+          <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:0%;background:#6366F1;"></div></div>
+          <div class="breakdown-count" style="color:#9CA3AF;">₱0 / mo</div>
+        </div>
+        <div class="breakdown-row">
+          <div class="breakdown-label">Premium Plan <span style="font-size:12px;color:#9CA3AF;font-weight:500;">0 subscribers</span></div>
+          <div class="breakdown-bar-wrap"><div class="breakdown-bar" style="width:0%;background:#8B5CF6;"></div></div>
+          <div class="breakdown-count" style="color:#9CA3AF;">₱0 / mo</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+  <!-- PLAN EDITOR MODAL OVERLAY -->
+  <div class="modal-backdrop">
+    <div class="plan-modal">
+      
+      <div class="plan-header">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#D97706;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Edit Configuration</div>
+          <h2 style="font-size:24px;font-weight:800;color:#92400E;display:flex;align-items:center;gap:12px;">Premium Plan <span class="badge badge-amber" style="font-size:12px;">20 Active Shops</span></h2>
+        </div>
+        <a href="05-subscription-plans.html" style="color:#B45309;"><i data-lucide="x" style="width:24px;"></i></a>
+      </div>
+
+      <div class="plan-body">
+        
+        <div class="warning-banner">
+          <i data-lucide="alert-triangle"></i>
+          <div class="warning-text">
+            <h4>High-Risk Action</h4>
+            <p>You are modifying a live subscription plan currently used by 20 shops. Changes to pricing will only affect <strong>new</strong> sign-ups. Changes to usage limits will affect <strong>all</strong> existing shops immediately upon saving.</p>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title-small">Pricing & Billing</div>
+          <div class="input-grid">
+            <div class="form-group">
+              <label>Monthly Price (USD)</label>
+              <div style="position:relative;">
+                <span style="position:absolute;left:14px;top:12px;color:var(--text-muted);font-weight:600;">$</span>
+                <input type="number" class="form-control" value="149.00" style="padding-left:28px;">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Annual Price (USD) - 20% Discount</label>
+              <div style="position:relative;">
+                <span style="position:absolute;left:14px;top:12px;color:var(--text-muted);font-weight:600;">$</span>
+                <input type="number" class="form-control" value="1430.00" style="padding-left:28px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title-small">Usage Limits</div>
+          <div class="input-grid">
+            <div class="form-group">
+              <label>Max Branches Allowed</label>
+              <input type="number" class="form-control" value="5">
+              <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Set to -1 for unlimited.</div>
+            </div>
+            <div class="form-group">
+              <label>Max Staff Accounts</label>
+              <input type="number" class="form-control" value="-1">
+              <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Set to -1 for unlimited.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title-small">Feature Flags</div>
+          
+          <div class="feature-row">
+            <div>
+              <div class="feature-info">Enable Multi-Branch Dashboard</div>
+              <div class="feature-desc">Allows the owner to see analytics consolidated across all branches.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="feature-row">
+            <div>
+              <div class="feature-info">White-Label Client Portal</div>
+              <div class="feature-desc">Removes 'Powered by Sutura' branding from the customer measurement portal.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="feature-row">
+            <div>
+              <div class="feature-info">API Access (Beta)</div>
+              <div class="feature-desc">Provides REST API keys for custom integrations. Currently in beta.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title-small">Rollout Settings</div>
+          <div class="form-group">
+            <label>Effective Date for Pricing Changes</label>
+            <select class="form-control">
+              <option>Apply immediately to new sign-ups only</option>
+              <option>Apply to next billing cycle for all (Requires 30-day notice)</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+      
+      <div class="modal-footer">
+        <a href="05-subscription-plans.html"><button class="btn-sm badge-gray" style="background:white;border:1px solid var(--border);">Cancel</button></a>
+        <button class="btn-sm" style="background:#1A1A1A;color:white;border:none;" onclick="document.getElementById('confirmPlanModal').style.display='flex'">Save Configuration</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PLAN CHANGE CONFIRMATION -->
+  <div id="confirmPlanModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;">
+    <div style="background:white;width:440px;border-radius:16px;padding:24px;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;"><i data-lucide="save"></i></div>
+        <h3 style="font-size:18px;font-weight:700;">Confirm Plan Updates</h3>
+      </div>
+      <p style="font-size:14px;color:#4B5563;margin-bottom:16px;line-height:1.5;">You are about to modify the <strong>Premium Plan</strong>. Please review your changes carefully.</p>
+      
+      <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px;margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;">
+          <span style="color:#6B7280;">Monthly Price</span>
+          <span style="font-weight:600;">₱149.00 <span style="color:#10B981;">(No Change)</span></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;">
+          <span style="color:#6B7280;">Usage Limits</span>
+          <span style="font-weight:600;">Immediate update to 20 shops</span>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:12px;">
+        <button class="btn-sm badge-gray" style="background:white;border:1px solid #E5E7EB;" onclick="document.getElementById('confirmPlanModal').style.display='none'">Back to Editor</button>
+        <button class="btn-sm" style="background:#1A1A1A;color:white;border:none;" onclick="alert('Plan updated successfully!'); document.getElementById('confirmPlanModal').style.display='none'; window.location.href='05-subscription-plans.html';">Confirm & Save</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

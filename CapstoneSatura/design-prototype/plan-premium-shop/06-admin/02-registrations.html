@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Sutura Admin | Customer Inquiries</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { --primary:#1A1A1A; --accent:#2C6BED; --bg:#FFFFFF; --surface:#F9FAFB; --text-main:#111827; --text-muted:#6B7280; --border:#E5E7EB; --warning:#F59E0B; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    
+    /* Sidebar */
+    .sidebar{width:280px;background:white;border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+    .sidebar-header{padding:32px;border-bottom:1px solid var(--border);}
+    .nav-list{padding:24px 16px;list-style:none;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;margin-bottom:4px;transition:0.2s;}
+    .nav-item.active{background:var(--primary);color:white;}
+    .nav-item:hover:not(.active){background:var(--surface);color:var(--text-main);}
+
+    /* Main Content */
+    .main{flex:1;padding:40px 60px;}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px;}
+
+    /* Inquiry Cards */
+    .inquiry-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    .inquiry-card { background: white; padding: 24px; border-radius: 20px; border: 1.5px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .client-info { display: flex; gap: 16px; align-items: center; }
+    .avatar { width: 48px; height: 48px; background: var(--surface); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--accent); }
+    
+    .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; background: #FFFBEB; color: var(--warning); }
+    .btn-action { padding: 10px 20px; border-radius: 10px; border: 1.5px solid var(--border); background: white; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-action:hover { border-color: var(--primary); background: var(--primary); color: white; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div style="font-size: 24px; font-weight: 900;">Sutura <span style="color: var(--accent);">PRO</span></div>
+    </div>
+    <nav class="nav-list">
+      <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Executive Overview</a>
+      <a href="02-registrations.html" class="nav-item active"><i data-lucide="message-square"></i> Customer Inquiries</a>
+      <a href="01-staff-management-tab.html" class="nav-item"><i data-lucide="users"></i> Staff Directory</a>
+      <a href="16-admin-audit-logs.html" class="nav-item"><i data-lucide="history"></i> System Audit Logs</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div>
+        <h1 style="font-size: 32px; font-weight: 800;">Customer Inquiries</h1>
+        <p style="color: var(--text-muted);">New custom design requests from your online portfolio.</p>
+      </div>
+      <div class="status-badge">4 Pending Review</div>
+    </header>
+
+    <div class="inquiry-grid">
+      <div class="inquiry-card">
+        <div class="client-info">
+          <div class="avatar">JD</div>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800;">Jane Doe</h3>
+            <p style="font-size: 14px; color: var(--text-muted);">Request for: Modern Filipiniana (Bridal)</p>
+          </div>
+        </div>
+        <div style="text-align: right; display: flex; align-items: center; gap: 24px;">
+          <div style="font-size: 13px; color: var(--text-muted);">Submitted 2 hours ago</div>
+          <button class="btn-action">Review Request</button>
+        </div>
+      </div>
+
+      <div class="inquiry-card">
+        <div class="client-info">
+          <div class="avatar">PM</div>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800;">Peter Malinao</h3>
+            <p style="font-size: 14px; color: var(--text-muted);">Request for: Custom 3-Piece Suit</p>
+          </div>
+        </div>
+        <div style="text-align: right; display: flex; align-items: center; gap: 24px;">
+          <div style="font-size: 13px; color: var(--text-muted);">Submitted 5 hours ago</div>
+          <button class="btn-action">Review Request</button>
+        </div>
+      </div>
+
+      <div class="inquiry-card">
+        <div class="client-info">
+          <div class="avatar">SL</div>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 800;">Sarah Lim</h3>
+            <p style="font-size: 14px; color: var(--text-muted);">Request for: Bridesmaid Dresses (Set of 6)</p>
+          </div>
+        </div>
+        <div style="text-align: right; display: flex; align-items: center; gap: 24px;">
+          <div style="font-size: 13px; color: var(--text-muted);">Submitted Yesterday</div>
+          <button class="btn-action">Review Request</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

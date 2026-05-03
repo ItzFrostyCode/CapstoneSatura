@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Print Job Order - ORD-1001</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Outfit', sans-serif; padding: 40px; color: #111827; background: #f3f4f6; display: flex; justify-content: center; }
+    .print-container { background: white; width: 800px; padding: 60px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 8px; position: relative; }
+    
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #1A1A1A; padding-bottom: 20px; margin-bottom: 30px; }
+    .shop-info h1 { font-size: 28px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+    .shop-info p { font-size: 14px; color: #6B7280; }
+    
+    .order-meta { text-align: right; }
+    .order-id { font-size: 24px; font-weight: 800; color: #1A1A1A; }
+    .order-date { font-size: 14px; color: #6B7280; margin-top: 5px; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+    .section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #6B7280; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px; margin-bottom: 15px; letter-spacing: 1px; }
+    
+    .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; }
+    .detail-label { color: #6B7280; font-weight: 500; }
+    .detail-value { font-weight: 700; }
+
+    .measurements-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .measurements-table td { padding: 8px 0; border-bottom: 1px dashed #E5E7EB; font-size: 14px; }
+    .measurements-table .m-label { font-weight: 600; color: #4B5563; }
+    .measurements-table .m-value { font-weight: 800; text-align: right; }
+
+    .sketch-placeholder { border: 2px dashed #E5E7EB; height: 200px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #9CA3AF; font-size: 14px; font-weight: 600; flex-direction: column; gap: 10px; }
+
+    .footer-notes { margin-top: 40px; padding: 20px; background: #F9FAFB; border-radius: 12px; font-size: 13px; line-height: 1.6; }
+    
+    .barcode { margin-top: 30px; text-align: center; }
+    .barcode-img { width: 250px; height: 60px; background: #1A1A1A; display: inline-block; }
+    
+    .print-btn { position: fixed; top: 40px; right: 40px; background: #1A1A1A; color: white; padding: 15px 30px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+    .print-btn:hover { background: #333; transform: translateY(-2px); }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .print-btn { display: none; }
+      .print-container { box-shadow: none; width: 100%; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn" onclick="window.print()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+    Print Job Slip
+  </button>
+
+  <div class="print-container">
+    <div class="header">
+      <div class="shop-info">
+        <h1>La Belle Couture</h1>
+        <p>123 Bespoke Lane, Quezon City, Philippines</p>
+        <p>Tel: +63 912 345 6789 | Email: contact@labelle.com</p>
+      </div>
+      <div class="order-meta">
+        <div class="order-id">ORD-1001</div>
+        <div class="order-date">April 25, 2026</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="section-title">Client Information</div>
+        <div class="detail-row"><span class="detail-label">Name</span> <span class="detail-value">Juan Dela Cruz</span></div>
+        <div class="detail-row"><span class="detail-label">Contact</span> <span class="detail-value">+63 999 888 7766</span></div>
+        <div class="detail-row"><span class="detail-label">Order Type</span> <span class="detail-value">Bespoke 3-Piece Suit</span></div>
+        
+        <div class="section-title" style="margin-top: 30px;">Production Details</div>
+        <div class="detail-row"><span class="detail-label">Master Tailor</span> <span class="detail-value">Ricardo</span></div>
+        <div class="detail-row"><span class="detail-label">Fabric</span> <span class="detail-value">Charcoal Wool Tweed</span></div>
+        <div class="detail-row"><span class="detail-label">Priority</span> <span class="detail-value" style="color: #DC2626;">HIGH</span></div>
+        <div class="detail-row"><span class="detail-label">Deadline</span> <span class="detail-value" style="text-decoration: underline;">MAY 10, 2026</span></div>
+      </div>
+
+      <div>
+        <div class="section-title">Measurements (Inches)</div>
+        <table class="measurements-table">
+          <tr><td class="m-label">Chest</td> <td class="m-value">42 1/2"</td></tr>
+          <tr><td class="m-label">Shoulder</td> <td class="m-value">18 3/4"</td></tr>
+          <tr><td class="m-label">Sleeve</td> <td class="m-value">25 1/4"</td></tr>
+          <tr><td class="m-label">Waist</td> <td class="m-value">36"</td></tr>
+          <tr><td class="m-label">Inseam</td> <td class="m-value">31 1/2"</td></tr>
+          <tr><td class="m-label">Neck</td> <td class="m-value">16 1/4"</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Design Sketch & Special Instructions</div>
+    <div class="sketch-placeholder">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l5 5"></path><path d="M9.5 14.5L16 8"></path></svg>
+      <span>Attach design photo or sketch here</span>
+    </div>
+
+    <div class="footer-notes">
+      <strong>Special Instructions:</strong> 
+      Double-vented back, functional sleeve buttons, purple silk lining. Ensure high-waisted cut for the trousers as per client preference. First fitting scheduled for May 1st.
+    </div>
+
+    <div class="barcode">
+      <div class="barcode-img"></div>
+      <div style="font-size: 12px; font-weight: 700; margin-top: 5px; font-family: monospace;">* ORD-1001-RICARDO *</div>
+    </div>
+  </div>
+
+</body>
+</html>

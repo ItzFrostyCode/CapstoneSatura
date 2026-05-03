@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura - Publish to Shop</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #111827; 
+      --bg: #FAFAFA; 
+      --surface: #FFFFFF;
+      --text-main: #1F2937; 
+      --text-muted: #6B7280; 
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+
+    /* ── Minimalist Sidebar ── */
+    .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px; flex-shrink: 0; }
+    .brand { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 48px; letter-spacing: -0.5px; }
+    .nav-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; margin-top: 32px; }
+    .nav-list { display: flex; flex-direction: column; gap: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-main); text-decoration: none; transition: all 0.2s; }
+    .nav-item i { width: 18px; color: var(--text-muted); transition: color 0.2s; }
+    .nav-item:hover { background: #F3F4F6; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-item.active i { color: white; }
+
+    /* ── Main Content ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; }
+    .header { height: 90px; display: flex; align-items: center; justify-content: flex-end; padding: 0 48px; background: var(--bg); }
+    .user-profile { display: flex; align-items: center; gap: 16px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+    .user-name { font-weight: 600; font-size: 14px; }
+
+    .content { padding: 0 48px 48px; max-width: 1000px; width: 100%; margin: 0 auto; }
+
+    .page-title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+    .page-desc { font-size: 15px; color: var(--text-muted); margin-bottom: 48px; }
+
+    .form-layout { display: grid; grid-template-columns: 300px 1fr; gap: 48px; }
+
+    /* Left: Design Selection */
+    .design-selection { display: flex; flex-direction: column; gap: 16px; }
+    .selected-design { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; text-align: center; }
+    .selected-design img { width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 16px; }
+    .selected-design h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .selected-design p { font-size: 13px; color: var(--text-muted); }
+    .btn-change { background: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 16px; width: 100%; }
+
+    /* Right: Commercial Details */
+    .commercial-form { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; }
+    
+    .form-section-title { font-size: 14px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+    .form-group { margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--border); font-family: 'Outfit', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s; background: var(--bg); }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); background: white; }
+    textarea { height: 100px; resize: none; }
+
+    .price-input { position: relative; }
+    .price-input span { position: absolute; left: 16px; top: 14px; font-weight: 600; color: var(--text-muted); }
+    .price-input input { padding-left: 36px; font-weight: 600; font-size: 18px; color: var(--primary); }
+
+    .btn-publish { background: var(--primary); color: white; border: none; padding: 16px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 24px; width: 100%; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-publish:hover { opacity: 0.9; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">Sutura Studio</div>
+    
+    <div class="nav-label">Community</div>
+    <nav class="nav-list">
+      <a href="06-explore-feed.html" class="nav-item"><i data-lucide="compass"></i> Explore Designs</a>
+    </nav>
+
+    <div class="nav-label">Workspace</div>
+    <nav class="nav-list">
+      <a href="01-designer-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="03-design-post-creator.html" class="nav-item"><i data-lucide="pen-tool"></i> Create Post</a>
+      <a href="04-product-publisher.html" class="nav-item active"><i data-lucide="send"></i> Publish to Shop</a>
+    </nav>
+
+    <div class="nav-label">Identity</div>
+    <nav class="nav-list">
+      <a href="05-portfolio-gallery.html" class="nav-item"><i data-lucide="image"></i> View Portfolio</a>
+      <a href="02-profile-manager.html" class="nav-item"><i data-lucide="user"></i> Profile Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <header class="header">
+      <div class="user-profile">
+        <span class="user-name">Elena Rossi</span>
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" alt="Avatar" class="user-avatar">
+      </div>
+    </header>
+
+    <div class="content">
+      <h1 class="page-title">Publish to Shop Catalog</h1>
+      <p class="page-desc">Convert your portfolio design into a commercial listing for the tailoring shop.</p>
+
+      <div class="form-layout">
+        
+        <!-- Left: Selected Design -->
+        <div class="design-selection">
+          <div class="selected-design">
+            <img src="https://images.unsplash.com/photo-1539109132314-3477524c8959?auto=format&fit=crop&q=80&w=400" alt="Design">
+            <h3>Midnight Silk Gala</h3>
+            <p>From: Evening Wear Collection</p>
+            <button class="btn-change">Select Different Design</button>
+          </div>
+        </div>
+
+        <!-- Right: Commercial Details -->
+        <div class="commercial-form">
+          <h2 class="form-section-title">Commercial Listing Details</h2>
+          
+          <div class="form-group">
+            <label>Public Product Name</label>
+            <input type="text" value="The Midnight Gala Dress">
+          </div>
+
+          <div class="form-group">
+            <label>Base Customization Price</label>
+            <div class="price-input">
+              <span>₱</span>
+              <input type="number" value="12500">
+            </div>
+          </div>
+
+          <h2 class="form-section-title" style="margin-top: 40px;">Supply Chain & Production</h2>
+
+          <div class="form-group">
+            <label>Primary Material Required</label>
+            <select>
+              <option>Silk Charmeuse (Navy Blue)</option>
+              <option>Cotton Blend</option>
+              <option>Linen</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Estimated Yardage (per garment)</label>
+            <input type="text" placeholder="e.g., 4.5 Yards">
+          </div>
+
+          <div class="form-group">
+            <label>Production Notes for Sastre (Tailor)</label>
+            <textarea placeholder="Specific instructions for cutting and draping...">Please ensure bias cut on the main skirt panels to achieve the desired drape.</textarea>
+          </div>
+
+          <button class="btn-publish" id="btnPublish"><i data-lucide="tag" style="width: 18px;"></i> Confirm & Publish Listing</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    // Simulate "Publish Product Design" -> "Confirm Save" UML flow
+    const btnPublish = document.getElementById('btnPublish');
+
+    btnPublish.addEventListener('click', function() {
+      this.innerHTML = '<i data-lucide="loader-2" class="lucide-spin" style="width: 18px; animation: spin 2s linear infinite;"></i> Processing Listing...';
+      this.style.opacity = '0.7';
+      
+      // Simulate Database Delay
+      setTimeout(() => {
+        this.innerHTML = '<i data-lucide="check-circle" style="width: 18px;"></i> Successfully Published';
+        this.style.background = '#059669';
+        this.style.opacity = '1';
+        lucide.createIcons();
+        
+        setTimeout(() => {
+          window.location.href = '05-portfolio-gallery.html';
+        }, 1500);
+      }, 1500);
+    });
+  </script>
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

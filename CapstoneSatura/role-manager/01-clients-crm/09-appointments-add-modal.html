@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Add Appointment Modal</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: rgba(17, 24, 39, 0.4); display: flex; align-items: center; justify-content: center; width: 1440px; height: 100vh; overflow: hidden; backdrop-filter: blur(4px); }
+
+    .modal { background-color: var(--bg); border-radius: 16px; width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; max-height: 90vh; }
+    .modal-header { padding: 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 18px; font-weight: 600; color: var(--text-main); }
+    .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
+    .close-btn:hover { color: var(--primary); }
+
+    .modal-body { padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-label { font-size: 14px; font-weight: 500; color: var(--text-main); }
+    .form-input { border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-family: 'Outfit'; font-size: 15px; color: var(--text-main); background-color: var(--bg); transition: border-color 0.2s; outline: none; width: 100%; }
+    .form-input:focus { border-color: var(--primary); }
+    select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; padding-right: 40px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .modal-footer { padding: 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background-color: var(--surface); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; }
+    .btn-secondary { background-color: var(--bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 0 20px; height: 44px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-secondary:hover { background-color: var(--surface); }
+    .btn-primary { background-color: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 20px; height: 44px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Schedule Appointment</h2>
+      <a href="08-appointments-tab.html" class="close-btn"><i data-lucide="x" style="width: 20px;"></i></a>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Customer</label>
+        <select class="form-input">
+          <option>Select Customer...</option>
+          <option>Alexander McQueen</option>
+          <option>Maria Santos</option>
+          <option>John Doe</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time</label>
+          <input type="time" class="form-input" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Appointment Type</label>
+        <select class="form-input">
+          <option>Fitting</option>
+          <option>Consultation</option>
+          <option>Pick-up</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" rows="3" placeholder="Additional details about this appointment..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="08-appointments-tab.html" class="btn-secondary">Cancel</a>
+      <a href="08-appointments-tab.html" class="btn-primary">Save Appointment</a>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

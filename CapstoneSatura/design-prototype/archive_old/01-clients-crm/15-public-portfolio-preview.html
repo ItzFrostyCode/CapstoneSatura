@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Preview - La Belle Couture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #000000; --bg: #FFFFFF; --accent: #D4AF37; /* Gold */
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: #fdfcfb; }
+
+    /* Public Website Aesthetic */
+    nav { height: 100px; display: flex; align-items: center; justify-content: space-between; padding: 0 100px; background: white; border-bottom: 1px solid #f0f0f0; }
+    .logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
+    .nav-links { display: flex; gap: 40px; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; }
+    
+    .hero { height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center; background: #fafafa; padding: 0 20px; position: relative; overflow: hidden; }
+    .hero-content { position: relative; z-index: 2; max-width: 900px; }
+    .hero h1 { font-size: 80px; font-weight: 900; line-height: 0.9; margin-bottom: 30px; letter-spacing: -3px; }
+    .hero p { font-size: 20px; color: #666; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .btn-cta { background: var(--primary); color: white; padding: 20px 50px; border-radius: 0; font-weight: 800; text-decoration: none; font-size: 14px; text-transform: uppercase; letter-spacing: 3px; display: inline-block; transition: all 0.3s; }
+    .btn-cta:hover { background: var(--accent); color: white; }
+
+    .gallery { padding: 100px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+    .gallery-item { position: relative; overflow: hidden; aspect-ratio: 1; background: #eee; }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; opacity: 0; transition: all 0.4s; }
+    .gallery-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+    .gallery-tag { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
+
+    /* Admin Bar */
+    .admin-bar { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #111; color: white; padding: 10px 24px; border-radius: 50px; display: flex; gap: 20px; align-items: center; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+    .admin-tag { font-size: 10px; font-weight: 900; background: var(--accent); color: black; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <div class="admin-bar">
+    <span class="admin-tag">Preview Mode</span>
+    <span style="font-size: 13px; font-weight: 600; color: #999;">Public Portfolio Website</span>
+    <div style="width: 1px; height: 20px; background: #333;"></div>
+    <button style="background: none; border: none; color: white; font-weight: 700; cursor: pointer; font-size: 13px;">Edit Design</button>
+    <button style="background: white; color: black; border: none; padding: 6px 16px; border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 13px;">Publish Changes</button>
+  </div>
+
+  <nav>
+    <div class="logo">La Belle <span style="color: var(--accent);">Couture</span></div>
+    <div class="nav-links">
+      <a href="#" style="color: black; text-decoration: none;">Collection</a>
+      <a href="#" style="color: #999; text-decoration: none;">Bespoke Process</a>
+      <a href="#" style="color: #999; text-decoration: none;">Our Story</a>
+      <a href="#" style="color: #999; text-decoration: none;">Contact</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div style="font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 5px; margin-bottom: 20px;">Est. 1998 — Manila</div>
+      <h1>CRAFTING <br> TIMELESS <br> ELEGANCE</h1>
+      <p>Luxury tailoring for the modern soul. Every stitch is a story, every cut a masterpiece. Experience the pinnacle of Filipino craftsmanship.</p>
+      <a href="#" class="btn-cta">Book a Consultation</a>
+    </div>
+  </section>
+
+  <section class="gallery">
+    <div class="gallery-item">
+      <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#ccc;"><i data-lucide="image" style="width:48px;"></i></div>
+      <div class="gallery-overlay">
+        <div class="gallery-title">The Royal Barong</div>
+        <div class="gallery-tag">Traditional Wear</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#ccc;"><i data-lucide="image" style="width:48px;"></i></div>
+      <div class="gallery-overlay">
+        <div class="gallery-title">Midnight Tuxedo</div>
+        <div class="gallery-tag">Bespoke Suit</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:#ccc;"><i data-lucide="image" style="width:48px;"></i></div>
+      <div class="gallery-overlay">
+        <div class="gallery-title">Silk Wedding Gown</div>
+        <div class="gallery-tag">Bridal Collection</div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="padding: 100px; background: white; text-align: center; border-top: 1px solid #f0f0f0;">
+    <div class="logo" style="margin-bottom: 20px;">La Belle Couture</div>
+    <div style="color: #999; font-size: 14px; letter-spacing: 1px;">&copy; 2026 Sutura Platform • Powered by Sutura Premium</div>
+  </footer>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

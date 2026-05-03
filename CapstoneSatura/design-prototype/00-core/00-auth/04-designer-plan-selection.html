@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Designer Plan Selection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #2C6BED;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: #F3F4F6; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+
+    .split-layout { display: flex; width: 1440px; background: white; min-height: 100vh; box-shadow: 0 0 100px rgba(0,0,0,0.05); }
+
+    /* Left Side - Static Image */
+    .hero-section { width: 40%; position: sticky; top: 0; height: 100vh; background-color: var(--primary); }
+    .hero-image {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&q=80&w=1440');
+      background-size: cover; background-position: center; opacity: 0.8; transition: transform 12s ease;
+    }
+    .hero-section:hover .hero-image { transform: scale(1.1); }
+    .hero-overlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+      display: flex; flex-direction: column; justify-content: flex-end; padding: 60px; color: white;
+    }
+    .hero-text h1 { font-size: 48px; font-weight: 700; margin-bottom: 20px; letter-spacing: -1.5px; }
+
+    /* Right Side - Plans */
+    .plan-section { width: 60%; padding: 80px 60px; }
+    .header-content { max-width: 800px; margin-bottom: 60px; }
+    .header-content h2 { font-size: 42px; font-weight: 700; letter-spacing: -1.5px; margin-bottom: 16px; }
+    .header-content p { font-size: 18px; color: var(--text-muted); }
+
+    .plan-card {
+      background: #F0F7FF; border: 1.5px solid var(--accent); border-radius: 24px; padding: 56px 32px 40px 32px;
+      display: flex; flex-direction: column; position: relative; max-width: 400px; margin-top: 40px;
+    }
+    .badge {
+      position: absolute; top: 16px; right: 24px; background: var(--accent); color: white;
+      padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;
+    }
+    .plan-name { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+    .plan-price { font-size: 44px; font-weight: 700; margin-bottom: 32px; letter-spacing: -2px; }
+    .plan-price span { font-size: 16px; color: var(--text-muted); font-weight: 400; letter-spacing: 0; }
+
+    .feature-list { list-style: none; margin-bottom: 40px; }
+    .feature-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; font-size: 15px; color: var(--text-main); }
+    .feature-item i { color: #10B981; margin-top: 2px; flex-shrink: 0; }
+
+    .btn-select {
+      width: 100%; height: 54px; border-radius: 12px; border: none; background: var(--accent);
+      color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-select:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(44, 107, 237, 0.2); }
+
+    .footer-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--border); padding-top: 40px; margin-top: 60px; }
+    .btn-back { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-muted); font-weight: 500; transition: color 0.2s; }
+    .btn-back:hover { color: var(--text-main); }
+  </style>
+</head>
+<body>
+
+  <div class="split-layout">
+    <div class="hero-section">
+      <div class="hero-image"></div>
+      <div class="hero-overlay">
+        <div class="hero-text"><h1>Grow your craft.</h1></div>
+      </div>
+    </div>
+
+    <div class="plan-section">
+      <a href="../../index.html" class="logo" style="text-decoration: none; display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+        <div style="width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;"><i data-lucide="scissors" style="width: 20px;"></i></div>
+        <div style="font-size: 24px; font-weight: 800; color: var(--text-main); letter-spacing: -1px;">Sutura</div>
+      </a>
+      <div class="header-content">
+        <div style="background: #F0F7FF; color: var(--accent); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 800; width: fit-content; margin-bottom: 16px; text-transform: uppercase; border: 1px solid var(--accent);">Account Type: Fashion Designer</div>
+        <h2>Finalize your Portfolio Plan</h2>
+        <p>Complete your registration to start showcasing your designs in the Sutura Marketplace.</p>
+      </div>
+
+      <div class="plan-card">
+        <div class="badge">Freelancer Special</div>
+        <div class="plan-name">Independent Designer</div>
+        <div class="plan-price">₱99<span>/mo</span></div>
+        
+        <ul class="feature-list">
+          <li class="feature-item"><i data-lucide="check-circle-2" style="width: 18px;"></i> Manage Design Profile</li>
+          <li class="feature-item"><i data-lucide="check-circle-2" style="width: 18px;"></i> Publish Portfolio Posts</li>
+          <li class="feature-item"><i data-lucide="check-circle-2" style="width: 18px;"></i> Showcase in Marketplace</li>
+          <li class="feature-item"><i data-lucide="check-circle-2" style="width: 18px;"></i> Collaboration Technical View</li>
+        </ul>
+
+        <button class="btn-select" onclick="completeRegistration()">Join as Designer</button>
+      </div>
+
+      <div class="footer-actions">
+        <a href="02-register.html" class="btn-back"><i data-lucide="arrow-left" style="width: 18px;"></i> Back to business details</a>
+        <p style="font-size: 14px; color: var(--text-muted);">Secure checkout with Sutura Platform</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    function completeRegistration() {
+      alert('Subscription Activated! Redirecting to your personal dashboard.');
+      window.location.href = '../../plan-independent-designer/07-role-portals/05-designer-admin-dashboard.html';
+    }
+  </script>
+</body>
+</html>

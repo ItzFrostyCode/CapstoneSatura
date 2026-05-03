@@ -1,0 +1,13 @@
+[
+  {
+    "id": "ffd1829c-27f4-4a26-9955-7a26467194a3",
+    "businessName": "Test Business",
+    "ownerName": "John Doe",
+    "email": "test_designer@example.com",
+    "password": "password123",
+    "subscriptionPlan": "basic",
+    "role": "shop_owner",
+    "status": "pending_approval",
+    "createdAt": "2026-05-01T19:21:04.142Z"
+  }
+]

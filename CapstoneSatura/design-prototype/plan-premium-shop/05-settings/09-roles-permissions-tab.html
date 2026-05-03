@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Sutura Admin - Roles & Permissions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--primary-hover:#333;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    .sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-header{height:72px;display:flex;align-items:center;padding:0 24px;gap:12px;border-bottom:1px solid var(--border);}
+    .logo-icon{background:var(--primary);color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;flex-shrink:0;}
+    .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .logo-badge{font-size:10px;font-weight:700;background:#EF4444;color:white;padding:2px 7px;border-radius:6px;margin-left:4px;}
+    .nav-list{padding:24px 16px;display:flex;flex-direction:column;gap:4px;flex-grow:1;}
+    .nav-section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;padding:8px 16px 4px;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}
+    .nav-item:hover{background:var(--surface);color:var(--primary);}
+    .nav-item.active{background:var(--primary);color:white;}
+    .nav-item .badge-count{margin-left:auto;background:#EF4444;color:white;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:#1A1A1A;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+    .user-info .name{font-size:14px;font-weight:600;}
+    .user-info .role{font-size:12px;color:var(--text-muted);}
+    .main{flex-grow:1;display:flex;flex-direction:column;min-width:0;}
+    .header{height:72px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 40px;flex-shrink:0;position:sticky;top:0;z-index:100;}
+    .header-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .header-sub{font-size:13px;color:var(--text-muted);}
+    .icon-btn{color:var(--text-muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:background 0.2s;}
+    .icon-btn:hover{background:var(--surface);color:var(--primary);}
+    /* Sub-nav bar */
+    .subnav { height: 64px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 40px; gap: 8px; flex-shrink: 0; justify-content: flex-start; position: sticky; top: 72px; z-index: 90; width: 100%; overflow-x: auto; }
+    .subnav-tabs { display: flex; gap: 32px; height: 100%; align-items: center; }
+    .subnav-tab { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--text-muted); height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; white-space: nowrap; }
+    .subnav-tab:hover { color: var(--primary); }
+    .subnav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+    .content{padding:36px 40px;flex-grow:1;overflow-y:auto;}
+    .two-col{display:grid;grid-template-columns:320px 1fr;gap:24px;}
+    /* Info banner */
+    .info-banner{background:#EFF6FF;border:1px solid #DBEAFE;border-radius:14px;padding:16px 22px;display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+    .info-banner-icon{width:36px;height:36px;background:#DBEAFE;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#2563EB;flex-shrink:0;}
+    .info-banner-text{font-size:13px;color:#1D4ED8;line-height:1.6;}
+    .info-banner-text strong{font-weight:700;}
+    .info-banner-link{margin-left:auto;font-size:13px;font-weight:700;color:#2563EB;text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;}
+    .info-banner-link:hover{text-decoration:underline;}
+    /* Roles List */
+    .roles-card{background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.03);}
+    .card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-size:15px;font-weight:700;}
+    .role-item{display:flex;align-items:center;gap:12px;padding:16px 24px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;}
+    .role-item:last-child{border-bottom:none;}
+    .role-item:hover{background:var(--surface);}
+    .role-item.selected{background:#F1F5F9;border-right:3px solid var(--primary);}
+    .role-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .role-icon.owner{background:#EFF6FF;color:#2563EB;}
+    .role-icon.manager{background:#F0FDF4;color:#16A34A;}
+    .role-icon.staff{background:#FFFBEB;color:#D97706;}
+    .role-icon.seamstress{background:#FAF5FF;color:#9333EA;}
+    .role-name{font-size:14px;font-weight:700;color:var(--text-main);}
+    .role-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+    .role-count{margin-left:auto;font-size:12px;font-weight:700;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);padding:2px 8px;border-radius:6px;}
+    /* Permissions panel */
+    .perms-card{background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.03);}
+    .perms-header{padding:20px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .perms-title{font-size:15px;font-weight:700;}
+    .btn-save{background:var(--primary);color:white;border:none;font-size:13px;font-weight:700;padding:8px 20px;border-radius:10px;cursor:pointer;transition:all 0.2s;}
+    .btn-save:hover{background:var(--primary-hover);}
+    .perm-group{padding:20px 28px;border-bottom:1px solid var(--border);}
+    .perm-group:last-child{border-bottom:none;}
+    .perm-group-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;}
+    .perm-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+    .perm-row:last-child{border-bottom:none;}
+    .perm-label-group{}
+    .perm-label{font-size:14px;font-weight:600;color:var(--text-main);}
+    .perm-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+    .checkbox{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);appearance:none;cursor:pointer;transition:all 0.2s;background:var(--bg);flex-shrink:0;}
+    .checkbox:checked{background:var(--primary);border-color:var(--primary);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.5 3.5L6 11 2.5 7.5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+      <div class="logo-text">Sutura</div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item "><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      <a href="../00-dashboard/08-branch-management.html" class="nav-item "><i data-lucide="git-branch" style="width: 20px;"></i> Branches</a>
+      <a href="../05-settings/01-settings-tab.html" class="nav-item active"><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info">
+        <div class="name">Admin User</div>
+        <div class="role">Shop Owner</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Settings</div>
+      <div class="header-actions">
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="01-settings-tab.html" class="subnav-tab">General</a>
+        <a href="03-employees-tab.html" class="subnav-tab">Employees</a>
+        <a href="09-roles-permissions-tab.html" class="subnav-tab active">Roles & Permissions</a>
+        <a href="10-security-data-tab.html" class="subnav-tab">Security & Data</a>
+        <a href="05-audit-log-tab.html" class="subnav-tab">Audit Log</a>
+        <a href="08-shop-profile-tab.html" class="subnav-tab">Shop Branding</a>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="two-col">
+        <!-- Roles -->
+        <div class="roles-card">
+          <div class="card-header">
+            <div class="card-title">System Roles</div>
+          </div>
+          <div class="role-item selected" onclick="selectRole('owner', this)">
+            <div class="role-icon owner"><i data-lucide="crown" style="width:18px;"></i></div>
+            <div>
+              <div class="role-name">Shop Owner</div>
+              <div class="role-desc">Full dashboard access</div>
+            </div>
+            <span class="role-count">14</span>
+          </div>
+          <div class="role-item" onclick="selectRole('manager', this)">
+            <div class="role-icon manager"><i data-lucide="briefcase" style="width:18px;"></i></div>
+            <div>
+              <div class="role-name">Manager</div>
+              <div class="role-desc">Manages orders, no finance</div>
+            </div>
+            <span class="role-count">6</span>
+          </div>
+          <div class="role-item" onclick="selectRole('staff', this)">
+            <div class="role-icon staff"><i data-lucide="user" style="width:18px;"></i></div>
+            <div>
+              <div class="role-name">Staff</div>
+              <div class="role-desc">Orders and customers only</div>
+            </div>
+            <span class="role-count">18</span>
+          </div>
+          <div class="role-item" onclick="selectRole('seamstress', this)">
+            <div class="role-icon seamstress"><i data-lucide="scissors" style="width:18px;"></i></div>
+            <div>
+              <div class="role-name">Seamstress / Tailor</div>
+              <div class="role-desc">Updates order status only</div>
+            </div>
+            <span class="role-count">22</span>
+          </div>
+        </div>
+
+        <!-- Permissions for selected role -->
+        <div class="perms-card">
+          <div class="perms-header">
+            <div class="perms-title">Permissions — Shop Owner</div>
+            <button class="btn-save">Save Changes</button>
+          </div>
+
+          <div class="perm-group">
+            <div class="perm-group-title">Customer Management</div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">View Customer Profiles</div><div class="perm-desc">Browse and search client directory</div></div>
+              <input type="checkbox" id="perm-cust-view" class="checkbox" checked/>
+            </div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">Create / Edit Customers</div><div class="perm-desc">Add new clients and edit existing profiles</div></div>
+              <input type="checkbox" id="perm-cust-edit" class="checkbox" checked/>
+            </div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">Delete Customers</div><div class="perm-desc">Permanently remove client records</div></div>
+              <input type="checkbox" id="perm-cust-del" class="checkbox" checked/>
+            </div>
+          </div>
+
+          <div class="perm-group">
+            <div class="perm-group-title">Production</div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">View Job Orders</div><div class="perm-desc">See all active and completed orders</div></div>
+              <input type="checkbox" id="perm-prod-view" class="checkbox" checked/>
+            </div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">Create / Manage Job Orders</div><div class="perm-desc">Create orders, assign staff, update status</div></div>
+              <input type="checkbox" id="perm-prod-edit" class="checkbox" checked/>
+            </div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">Update Order Status</div><div class="perm-desc">Move orders through production stages</div></div>
+              <input type="checkbox" id="perm-prod-status" class="checkbox" checked/>
+            </div>
+          </div>
+
+          <div class="perm-group">
+            <div class="perm-group-title">Finance</div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">View Sales & Reports</div><div class="perm-desc">Access revenue data and reports</div></div>
+              <input type="checkbox" id="perm-fin-view" class="checkbox" checked/>
+            </div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">Manage Payments</div><div class="perm-desc">Record payments and print receipts</div></div>
+              <input type="checkbox" id="perm-fin-pay" class="checkbox" checked/>
+            </div>
+          </div>
+
+          <div class="perm-group">
+            <div class="perm-group-title">Settings</div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">Manage Staff & Roles</div><div class="perm-desc">Add employees and assign roles</div></div>
+              <input type="checkbox" id="perm-set-staff" class="checkbox" checked/>
+            </div>
+            <div class="perm-row">
+              <div class="perm-label-group"><div class="perm-label">System Settings</div><div class="perm-desc">Edit business info and preferences</div></div>
+              <input type="checkbox" id="perm-set-sys" class="checkbox" checked/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    const roleConfigs = {
+      'owner': {
+        title: 'Shop Owner',
+        perms: ['perm-cust-view', 'perm-cust-edit', 'perm-cust-del', 'perm-prod-view', 'perm-prod-edit', 'perm-prod-status', 'perm-fin-view', 'perm-fin-pay', 'perm-set-staff', 'perm-set-sys']
+      },
+      'manager': {
+        title: 'Manager',
+        perms: ['perm-cust-view', 'perm-cust-edit', 'perm-prod-view', 'perm-prod-edit', 'perm-prod-status']
+      },
+      'staff': {
+        title: 'Staff',
+        perms: ['perm-cust-view', 'perm-cust-edit', 'perm-prod-view', 'perm-prod-status']
+      },
+      'seamstress': {
+        title: 'Seamstress / Tailor',
+        perms: ['perm-prod-view', 'perm-prod-status']
+      }
+    };
+
+    function selectRole(roleKey, element) {
+      // Update selected class
+      document.querySelectorAll('.role-item').forEach(el => el.classList.remove('selected'));
+      element.classList.add('selected');
+
+      // Update title
+      const config = roleConfigs[roleKey];
+      document.querySelector('.perms-title').textContent = 'Permissions — ' + config.title;
+
+      // Uncheck all first
+      document.querySelectorAll('.checkbox').forEach(cb => {
+        cb.checked = false;
+        if (roleKey === 'owner') {
+          cb.disabled = true; // Owner permissions shouldn't be editable
+        } else {
+          cb.disabled = false;
+        }
+      });
+
+      // Check the ones for this role
+      config.perms.forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb) {
+          cb.checked = true;
+        }
+      });
+      
+      // Also specifically set owner to checked (in case of re-enablement)
+      if (roleKey === 'owner') {
+        config.perms.forEach(id => {
+           const cb = document.getElementById(id);
+           if(cb) cb.checked = true;
+        });
+      }
+    }
+  </script>
+
+</body>
+
+</html>

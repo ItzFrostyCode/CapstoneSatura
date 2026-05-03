@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Sutura | Shop Management Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { --primary:#1A1A1A; --accent:#2C6BED; --bg:#FFFFFF; --surface:#F9FAFB; --text-main:#111827; --text-muted:#6B7280; --border:#E5E7EB; --success:#10B981; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    
+    /* Sidebar */
+    .sidebar{width:280px;background:white;border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+    .sidebar-header{padding:32px;border-bottom:1px solid var(--border);}
+    .nav-list{padding:24px 16px;list-style:none;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;margin-bottom:4px;transition:0.2s;}
+    .nav-item.active{background:var(--primary);color:white;}
+    .nav-item:hover:not(.active){background:var(--surface);color:var(--text-main);}
+
+    /* Main Content */
+    .main{flex:1;padding:40px 60px;}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px;}
+    .branch-tag { background: var(--accent); color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+
+    /* KPI Cards */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:40px;}
+    .kpi-card{background:white;padding:24px;border-radius:24px;border:1.5px solid var(--border);box-shadow:0 10px 20px rgba(0,0,0,0.02);}
+    .kpi-label{font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;display:block;}
+    .kpi-value{font-size:28px;font-weight:800;letter-spacing:-1px;}
+
+    /* Charts/Tables */
+    .data-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 32px; }
+    .card { background: white; border-radius: 24px; border: 1.5px solid var(--border); overflow: hidden; }
+    .card-header { padding: 24px; border-bottom: 1.5px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 18px; font-weight: 800; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 16px 24px; background: var(--surface); font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div style="font-size: 24px; font-weight: 900;">Sutura <span style="color: var(--accent);">PRO</span></div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Business Management Suite</p>
+    </div>
+    <nav class="nav-list">
+      <a href="01-admin-dashboard.html" class="nav-item active"><i data-lucide="layout-dashboard"></i> Executive Overview</a>
+      <a href="17-admin-branch-management.html" class="nav-item"><i data-lucide="map-pin"></i> My Branches</a>
+      <a href="01-staff-management-tab.html" class="nav-item"><i data-lucide="users"></i> Staff Directory</a>
+      <a href="../03-supply-chain/01-inventory-list.html" class="nav-item"><i data-lucide="package"></i> Inventory Master</a>
+      <a href="16-admin-audit-logs.html" class="nav-item"><i data-lucide="history"></i> System Audit Logs</a>
+      <div style="margin-top: 32px; padding: 0 16px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Settings</div>
+      <a href="../05-settings/01-settings-tab.html" class="nav-item"><i data-lucide="settings"></i> Shop Settings</a>
+      <a href="../05-settings/04-subscription-tab.html" class="nav-item"><i data-lucide="credit-card"></i> Billing & Plans</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div>
+        <h1 style="font-size: 32px; font-weight: 800; letter-spacing: -1.5px;">Business Performance</h1>
+        <p style="color: var(--text-muted);">Real-time metrics for all active branches.</p>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <div class="branch-tag">Premium Account</div>
+        <div class="branch-tag" style="background: white; border: 1.5px solid var(--border); color: var(--text-main);">Davao Main</div>
+      </div>
+    </header>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Gross Revenue</span>
+        <div class="kpi-value">₱245,850.00</div>
+        <span style="font-size: 12px; color: var(--success); font-weight: 700;">↑ 12% vs last month</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Active Orders</span>
+        <div class="kpi-value">58 Items</div>
+        <span style="font-size: 12px; color: var(--accent); font-weight: 700;">8 Due this week</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Staff Efficiency</span>
+        <div class="kpi-value">94.2%</div>
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">Avg. production time: 3 days</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Inventory Level</span>
+        <div class="kpi-value">142 Rolls</div>
+        <span style="font-size: 12px; color: #EF4444; font-weight: 700;">3 Fabrics Low Stock</span>
+      </div>
+    </div>
+
+    <div class="data-grid">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Recent Branch Activity</h3>
+          <a href="#" style="font-size: 13px; color: var(--accent); text-decoration: none; font-weight: 700;">View Full Report</a>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Branch</th>
+              <th>Customer</th>
+              <th>Item</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span style="font-weight: 700;">Davao Main</span></td>
+              <td>Juan Dela Cruz</td>
+              <td>Custom Barong</td>
+              <td>₱4,500.00</td>
+              <td><span class="status-badge" style="background: #ECFDF5; color: #059669;">Production</span></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 700;">Tagum Branch</span></td>
+              <td>Maria Clara</td>
+              <td>Bridal Gown</td>
+              <td>₱45,000.00</td>
+              <td><span class="status-badge" style="background: #EFF6FF; color: var(--accent);">Measurement</span></td>
+            </tr>
+            <tr>
+              <td><span style="font-weight: 700;">Davao Main</span></td>
+              <td>Roberto Gomez</td>
+              <td>Suit Jacket</td>
+              <td>₱8,200.00</td>
+              <td><span class="status-badge" style="background: #FFFBEB; color: #D97706;">Fitting</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Staff Leaders</h3>
+        </div>
+        <div style="padding: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 32px; height: 32px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">ES</div>
+              <div>
+                <div style="font-size: 14px; font-weight: 700;">Eduardo S.</div>
+                <div style="font-size: 12px; color: var(--text-muted);">Tailor</div>
+              </div>
+            </div>
+            <div style="font-weight: 800; color: var(--success);">14 Done</div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 32px; height: 32px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">MC</div>
+              <div>
+                <div style="font-size: 14px; font-weight: 700;">Maria C.</div>
+                <div style="font-size: 12px; color: var(--text-muted);">Cutter</div>
+              </div>
+            </div>
+            <div style="font-weight: 800; color: var(--success);">11 Done</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

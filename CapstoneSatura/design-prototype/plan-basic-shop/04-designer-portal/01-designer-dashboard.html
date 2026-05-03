@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura - Designer Workspace</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #111827; 
+      --bg: #FAFAFA; 
+      --surface: #FFFFFF;
+      --text-main: #1F2937; 
+      --text-muted: #6B7280; 
+      --border: #E5E7EB;
+      --accent: #000000; 
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+
+    /* ── Minimalist Sidebar ── */
+    .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px; flex-shrink: 0; }
+    .brand { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 48px; letter-spacing: -0.5px; }
+    .nav-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; margin-top: 32px; }
+    .nav-list { display: flex; flex-direction: column; gap: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-main); text-decoration: none; transition: all 0.2s; }
+    .nav-item i { width: 18px; color: var(--text-muted); transition: color 0.2s; }
+    .nav-item:hover { background: #F3F4F6; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-item.active i { color: white; }
+
+    /* ── Main Content ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; }
+    .header { height: 90px; display: flex; align-items: center; justify-content: flex-end; padding: 0 48px; background: var(--bg); }
+    .user-profile { display: flex; align-items: center; gap: 16px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+    .user-name { font-weight: 600; font-size: 14px; }
+
+    .content { padding: 0 48px 48px; max-width: 1200px; width: 100%; margin: 0 auto; }
+
+    /* Welcome Banner */
+    .welcome-banner { margin-bottom: 48px; }
+    .greeting { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+    .date-text { font-size: 15px; color: var(--text-muted); }
+
+    /* Action & Stats Grid */
+    .top-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; margin-bottom: 48px; }
+    
+    .action-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; justify-content: space-between; }
+    .action-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; margin-bottom: 12px; }
+    .action-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+    .btn-primary { background: var(--primary); color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; width: fit-content; transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.9; }
+
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; display: flex; flex-direction: column; justify-content: center; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 600; line-height: 1; margin-bottom: 8px; }
+    .stat-label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Recent Activity / Workspace Overview */
+    .section-title { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    
+    .activity-list { display: flex; flex-direction: column; gap: 16px; }
+    .activity-item { display: flex; align-items: center; justify-content: space-between; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .activity-item:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
+    .activity-left { display: flex; align-items: center; gap: 20px; }
+    .activity-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; background: #F3F4F6; }
+    .activity-details h4 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .activity-details p { font-size: 13px; color: var(--text-muted); }
+    .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-draft { background: #F3F4F6; color: #374151; }
+    .status-published { background: #ECFDF5; color: #059669; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">Sutura Studio</div>
+    
+    <div class="nav-label">Community</div>
+    <nav class="nav-list">
+      <a href="06-explore-feed.html" class="nav-item"><i data-lucide="compass"></i> Explore Designs</a>
+    </nav>
+
+    <div class="nav-label">Workspace</div>
+    <nav class="nav-list">
+      <a href="01-designer-dashboard.html" class="nav-item active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="03-design-post-creator.html" class="nav-item"><i data-lucide="pen-tool"></i> Create Post</a>
+      <a href="04-product-publisher.html" class="nav-item"><i data-lucide="send"></i> Publish to Shop</a>
+    </nav>
+
+    <div class="nav-label">Identity</div>
+    <nav class="nav-list">
+      <a href="05-portfolio-gallery.html" class="nav-item"><i data-lucide="image"></i> View Portfolio</a>
+      <a href="02-profile-manager.html" class="nav-item"><i data-lucide="user"></i> Profile Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <header class="header">
+      <div class="user-profile">
+        <span class="user-name">Elena Rossi</span>
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" alt="Avatar" class="user-avatar">
+      </div>
+    </header>
+
+    <div class="content">
+      
+      <div class="welcome-banner">
+        <h1 class="greeting">Good morning, Elena.</h1>
+        <p class="date-text">Thursday, October 24th — Let's bring your concepts to life.</p>
+      </div>
+
+      <div class="top-grid">
+        <div class="action-card">
+          <div>
+            <h2 class="action-title">Capture Inspiration</h2>
+            <p class="action-desc">Upload your latest sketches, fabric swatches, or mood boards to your personal portfolio workspace.</p>
+          </div>
+          <a href="03-design-post-creator.html" class="btn-primary"><i data-lucide="plus" style="width: 16px;"></i> Start New Post</a>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">24</div>
+          <div class="stat-label">Portfolio Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Published to Shop</div>
+        </div>
+      </div>
+
+      <div class="workspace-overview">
+        <h3 class="section-title">Recent Activity</h3>
+        
+        <div class="activity-list">
+          <!-- Item 1 -->
+          <div class="activity-item">
+            <div class="activity-left">
+              <img src="https://images.unsplash.com/photo-1539109132314-3477524c8959?auto=format&fit=crop&q=80&w=150" class="activity-thumb">
+              <div class="activity-details">
+                <h4>Midnight Silk Gala</h4>
+                <p>Updated 2 hours ago • Evening Wear Collection</p>
+              </div>
+            </div>
+            <div class="status-badge status-published">Published to Shop</div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="activity-item">
+            <div class="activity-left">
+              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=150" class="activity-thumb">
+              <div class="activity-details">
+                <h4>Urban Chic Concept</h4>
+                <p>Created yesterday • Streetwear Collection</p>
+              </div>
+            </div>
+            <div class="status-badge status-draft">Portfolio Draft</div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="activity-item">
+            <div class="activity-left">
+              <div class="activity-thumb" style="display:flex; align-items:center; justify-content:center;">
+                <i data-lucide="image" style="color:var(--text-muted);"></i>
+              </div>
+              <div class="activity-details">
+                <h4>Summer Linen Series</h4>
+                <p>Created 3 days ago • Casual Wear</p>
+              </div>
+            </div>
+            <div class="status-badge status-draft">Portfolio Draft</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

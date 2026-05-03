@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>Receive Purchase Order - Sutura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #2C6BED; --success: #10B981; --warning: #F59E0B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; height: 100vh; }
+
+    .modal { background: var(--bg); width: 700px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; animation: slideUp 0.3s ease-out; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-header { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+    .po-badge { font-size: 12px; background: #EEF2FF; color: #4F46E5; padding: 4px 10px; border-radius: 20px; font-weight: 700; }
+    .close-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); }
+
+    .modal-body { padding: 32px; }
+    
+    .receive-info { margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: var(--surface); padding: 16px; border-radius: 16px; }
+    .info-item .label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .info-item .value { font-size: 14px; font-weight: 700; color: var(--text-main); }
+
+    .items-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .items-table th { text-align: left; padding: 12px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .items-table td { padding: 16px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    
+    .qty-input { width: 80px; height: 36px; border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; font-family: 'Outfit'; font-weight: 600; text-align: center; }
+    .qty-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(44, 107, 237, 0.1); }
+    
+    .status-preview { display: flex; align-items: center; gap: 8px; margin-top: 24px; padding: 12px 16px; border-radius: 12px; background: #FFFBEB; color: #B45309; font-size: 13px; font-weight: 600; }
+
+    .modal-footer { padding: 24px 32px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background: var(--surface); }
+    .btn { padding: 10px 20px; border-radius: 12px; font-family: 'Outfit'; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-ghost { background: none; color: var(--text-muted); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #333; transform: translateY(-1px); }
+
+    .item-name { font-weight: 700; color: var(--text-main); }
+    .item-sku { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+  </style>
+</head>
+<body>
+
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <i data-lucide="package" style="color: var(--accent);"></i>
+        Receive Items
+        <span class="po-badge">PO-2023-094</span>
+      </div>
+      <button class="close-btn" onclick="window.location.href='02-procurement-tab.html'"><i data-lucide="x"></i></button>
+    </div>
+
+    <div class="modal-body">
+      <div class="receive-info">
+        <div class="info-item">
+          <div class="label">Supplier</div>
+          <div class="value">Premium Fabrics Inc.</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Expected Delivery</div>
+          <div class="value">Oct 28, 2023</div>
+        </div>
+      </div>
+
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Item Details</th>
+            <th>Expected</th>
+            <th>Received Now</th>
+            <th>Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="item-name">Denim Fabric Roll</div>
+              <div class="item-sku">SKU: FAB-DEN-001</div>
+            </td>
+            <td><strong>50</strong></td>
+            <td><input type="number" class="qty-input" value="30"></td>
+            <td style="color: var(--text-muted); font-weight: 500;">yards</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="item-name">Industrial Needles</div>
+              <div class="item-sku">SKU: ACC-NEE-055</div>
+            </td>
+            <td><strong>10</strong></td>
+            <td><input type="number" class="qty-input" value="10"></td>
+            <td style="color: var(--text-muted); font-weight: 500;">packs</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="status-preview">
+        <i data-lucide="alert-circle" style="width: 18px;"></i>
+        Status will change to <strong>Partial Received</strong> (30/50 Denim received).
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="window.location.href='02-procurement-tab.html'">Cancel</button>
+      <button class="btn btn-primary" onclick="window.location.href='02-procurement-tab.html'">Confirm Receipt</button>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>

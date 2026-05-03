@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Admin Portal Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A;
+      --bg: #F9FAFB;
+      --surface: #FFFFFF;
+      --text-main: #111827;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --accent: #2563EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
+      border: 1px solid var(--border);
+    }
+
+    .logo-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .logo-icon {
+      background: var(--primary);
+      color: white;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: #EF4444;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group { margin-bottom: 24px; position: relative; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+    .form-group input { 
+      width: 100%; 
+      height: 48px; 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
+      padding: 0 16px; 
+      font-size: 15px; 
+      font-family: 'Outfit', sans-serif; 
+      outline: none; 
+      transition: all 0.2s;
+      background: var(--bg);
+    }
+    .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); background: var(--surface); }
+    .input-icon { position: absolute; right: 16px; top: 38px; color: var(--text-muted); cursor: pointer; }
+
+    .security-note {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .security-note i { color: var(--accent); flex-shrink: 0; }
+    .security-note p { font-size: 13px; color: #1E3A8A; line-height: 1.4; }
+
+    .btn-login {
+      width: 100%;
+      height: 52px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-login:hover {
+      background: #000;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    .footer-links {
+      text-align: center;
+      margin-top: 32px;
+    }
+    .footer-links a {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text-main); }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="logo-container">
+        <div class="logo-icon"><i data-lucide="shield" style="width: 28px; height: 28px;"></i></div>
+        <div class="logo-text">Sutura <span class="logo-badge">ADMIN</span></div>
+      </div>
+
+      <div class="security-note">
+        <i data-lucide="lock" style="width: 20px;"></i>
+        <p><strong>Restricted Access.</strong> This portal is for Sutura system administrators only. Unauthorized access is strictly prohibited.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Administrator Email</label>
+        <input type="email" value="sysadmin@sutura.com" />
+      </div>
+
+      <div class="form-group">
+        <label>Master Password</label>
+        <input type="password" value="••••••••••••" />
+        <i data-lucide="eye" class="input-icon"></i>
+      </div>
+
+      <button class="btn-login" onclick="window.location.href='01-admin-dashboard.html'">Authenticate</button>
+
+      <div class="footer-links">
+        <a href="#"><i data-lucide="key" style="width: 14px; display: inline-block; vertical-align: -2px; margin-right: 4px;"></i> Authenticate via SSO</a>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sutura | Platform Revenue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { 
+      --bg: #09090B; 
+      --sidebar: rgba(9, 9, 11, 0.96); 
+      --card: #121217;
+      --card-2: #17171e;
+      --card-3: #1f1f29;
+      --accent: #3B82F6; 
+      --accent-muted: rgba(59, 130, 246, 0.12);
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text: #FAFAFA;
+      --text-dim: #A1A1AA;
+      --border: #27272A;
+      --shadow: none;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Outfit', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      display: flex; 
+      min-height: 100vh; 
+      overflow: hidden; 
+      letter-spacing: -0.02em; 
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar { 
+      background: var(--sidebar); 
+      border-right: 1px solid var(--border);
+      display: flex; 
+      flex-direction: column; 
+      position: sticky; 
+      top: 0; 
+      height: 100vh; 
+      backdrop-filter: blur(12px);
+    }
+    .sidebar-header { padding: 34px 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: white; }
+    .brand-sub { margin-top: 6px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; }
+    
+    .nav { padding: 14px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: auto; list-style: none; }
+    .nav-group-label { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 12px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .nav-item i { width: 18px; height: 18px; }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .nav-item.active { background: var(--accent-muted); color: var(--accent); box-shadow: inset 0 0 0 1px rgba(59,130,246,0.18); }
+
+    .nav-badge { margin-left: auto; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(239,68,68,0.14); color: #fecaca; border: 1px solid rgba(239,68,68,0.18); padding: 3px 7px; border-radius: 999px; }
+    
+    .sidebar-footer { padding: 18px 20px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; background: var(--card-3); border: 1px solid var(--border); border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: white; font-size: 12px; flex: 0 0 auto; }
+    .user-info .name { font-weight: 700; color: white; font-size: 13px; }
+    .user-info .role { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    /* Main Content */
+    .main { flex: 1; padding: 34px 40px 40px; overflow-y: auto; position: relative; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; }
+
+    /* Revenue Metrics */
+    .revenue-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }
+    .metric-card { background: var(--card); padding: 32px; border-radius: 24px; border: 1px solid var(--border); }
+    .metric-label { font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-value { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; }
+
+    /* Plans Table */
+    .table-card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 20px 32px; background: rgba(255,255,255,0.02); font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
+    td { padding: 20px 32px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    
+    .plan-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; background: rgba(255,255,255,0.05); }
+    .badge-premium { background: rgba(59, 130, 246, 0.1); color: var(--accent); }
+    .badge-pro { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">Sutura Admin</div>
+        <div class="brand-sub">Platform Management</div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group-label">Overview</div>
+        <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Overview</a>
+
+        <div class="nav-group-label">Management</div>
+        <a href="02-registrations.html" class="nav-item"><i data-lucide="clipboard-check"></i> Shop Verifications <span class="nav-badge">3</span></a>
+        <a href="03-shops.html" class="nav-item"><i data-lucide="users"></i> Registered Accounts</a>
+        <a href="08-announcements-tab.html" class="nav-item"><i data-lucide="megaphone"></i> Announcements</a>
+        <a href="05-subscription-plans.html" class="nav-item active"><i data-lucide="credit-card"></i> Revenue & Plans</a>
+        <a href="07-support-tickets.html" class="nav-item"><i data-lucide="life-buoy"></i> Support Tickets</a>
+
+        <div class="nav-group-label">System</div>
+        <a href="06-system-monitor.html" class="nav-item"><i data-lucide="activity"></i> System Health</a>
+        <a href="16-admin-audit-logs.html" class="nav-item"><i data-lucide="shield"></i> Security Logs</a>
+        <a href="08-platform-settings.html" class="nav-item"><i data-lucide="settings"></i> Platform Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar">A</div>
+        <div>
+          <div style="font-weight:700;font-size:13px;">Admin-99</div>
+          <div class="muted-11">System Superuser</div>
+        </div>
+      </div>
+    </aside>
+
+  <main class="main">
+    <header class="header">
+      <div>
+        <h1 style="font-size: 28px; font-weight: 600; letter-spacing: -0.02em;">Revenue & Plans</h1>
+        <p style="color: var(--text-dim); font-size: 14px;">Platform-wide subscription metrics and revenue tracking.</p>
+      </div>
+    </header>
+
+    <div class="revenue-grid">
+      <div class="metric-card">
+        <div class="metric-label">Monthly Recurring Revenue</div>
+        <div class="metric-value">₱245,000.00</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Active Subscriptions</div>
+        <div class="metric-value">1,248</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Platform ARR</div>
+        <div class="metric-value">₱2.4M</div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Plan Name</th>
+            <th>Monthly Price</th>
+            <th>Total Shops</th>
+            <th>Revenue Share</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="plan-badge badge-premium">Premium Shop</span></td>
+            <td>₱499.00</td>
+            <td>412</td>
+            <td>₱205,588</td>
+            <td><span style="color: var(--success); font-weight: 700;">● High Growth</span></td>
+          </tr>
+          <tr>
+            <td><span class="plan-badge badge-pro">Pro Shop</span></td>
+            <td>₱299.00</td>
+            <td>836</td>
+            <td>₱249,964</td>
+            <td><span style="color: var(--success); font-weight: 700;">● Stable</span></td>
+          </tr>
+
+          <tr>
+            <td><span class="plan-badge" style="background: rgba(161, 161, 170, 0.1); color: var(--text-dim);">Basic Shop</span></td>
+            <td>₱149.00</td>
+            <td>2,150</td>
+            <td>₱320,350</td>
+            <td><span style="color: var(--success); font-weight: 700;">● Core Tier</span></td>
+          </tr>
+          <tr>
+            <td><span class="plan-badge" style="background: rgba(161, 161, 170, 0.1); color: var(--text-dim);">Independent Designer</span></td>
+            <td>₱99.00</td>
+            <td>284</td>
+            <td>₱28,116</td>
+            <td><span style="color: var(--accent); font-weight: 700;">● Emerging</span></td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

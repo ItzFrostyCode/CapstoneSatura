@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Approve Restock Request - Sutura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;min-height:100vh;backdrop-filter:blur(4px);padding:24px;}
+    .modal{background:var(--bg);width:740px;border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,0.25);overflow:hidden;animation:slideUp 0.25s ease-out;}
+    @keyframes slideUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+    .modal-header{padding:28px 36px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+    .modal-badge{display:inline-flex;align-items:center;gap:6px;background:#FFFBEB;color:#D97706;border:1px solid #FEF3C7;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;text-transform:uppercase;white-space:nowrap;}
+    .modal-title{font-size:20px;font-weight:800;letter-spacing:-0.3px;}
+    .modal-sub{font-size:13px;color:var(--text-muted);margin-top:4px;}
+    .close-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;flex-shrink:0;}
+    .close-btn:hover{background:var(--surface);color:var(--primary);}
+
+    .modal-body{padding:28px 36px;}
+
+    .requester-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 22px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px;}
+    .info-item .i-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+    .info-item .i-value{font-size:14px;font-weight:700;color:var(--text-main);}
+
+    .section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+
+    .items-list{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    th{padding:11px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;background:#F8FAFC;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+    td{padding:14px 16px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .item-name{font-weight:600;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .item-sku{font-size:11px;color:var(--text-muted);font-family:monospace;margin-top:2px;}
+
+    .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;white-space:nowrap;}
+    .badge-red{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5;}
+    .badge-amber{background:#FFFBEB;color:#D97706;border:1px solid #FEF3C7;}
+
+    .reason-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:20px;}
+    .reason-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+    .reason-text{font-size:14px;color:var(--text-main);line-height:1.6;}
+
+    .approval-note{margin-bottom:18px;}
+    .approval-note label{font-size:13px;font-weight:700;color:var(--text-main);display:block;margin-bottom:8px;}
+    textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-family:'Outfit';font-size:14px;padding:12px 16px;resize:none;height:80px;outline:none;transition:all 0.2s;color:var(--text-main);}
+    textarea:focus{border-color:var(--primary);background:white;box-shadow:0 0 0 4px rgba(0,0,0,0.04);}
+
+    .info-note{background:#EFF6FF;border:1px solid #DBEAFE;border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#1D4ED8;line-height:1.6;}
+    .info-note strong{font-weight:700;}
+
+    .modal-footer{padding:22px 36px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:var(--surface);}
+    .btn-cancel{background:none;color:var(--text-muted);border:1px solid var(--border);font-size:14px;font-weight:600;padding:0 20px;height:44px;border-radius:12px;cursor:pointer;transition:all 0.2s;font-family:'Outfit';}
+    .btn-cancel:hover{background:#fff;}
+    .btn-reject{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5;font-size:14px;font-weight:700;padding:0 22px;height:44px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;font-family:'Outfit';white-space:nowrap;}
+    .btn-reject:hover{background:#DC2626;color:white;}
+    .btn-approve{background:#1A1A1A;color:white;border:none;font-size:14px;font-weight:700;padding:0 28px;height:44px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:'Outfit';white-space:nowrap;}
+    .btn-approve:hover{background:#333;transform:translateY(-1px);}
+
+    /* Column widths */
+    .col-mat{width:36%;}
+    .col-stock{width:16%;}
+    .col-qty{width:16%;}
+    .col-price{width:15%;}
+    .col-alert{width:17%;}
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-badge"><i data-lucide="clock" style="width:11px;"></i> Pending Approval</div>
+        <div class="modal-title">Approve Restock Request</div>
+        <div class="modal-sub">PO-2023-093 — Requested by Staff · Apr 25, 2026 at 9:00 AM</div>
+      </div>
+      <a href="02-procurement-tab.html"><button class="close-btn"><i data-lucide="x" style="width:15px;"></i></button></a>
+    </div>
+
+    <div class="modal-body">
+      <div class="requester-box">
+        <div class="info-item">
+          <div class="i-label">Requested By</div>
+          <div class="i-value">Staff User</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Supplier</div>
+          <div class="i-value">QC Garment Supplies</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Estimated Cost</div>
+          <div class="i-value">₱2,650.00</div>
+        </div>
+      </div>
+
+      <div class="section-label">Requested Materials</div>
+      <div class="items-list">
+        <table>
+          <colgroup>
+            <col class="col-mat"/><col class="col-stock"/><col class="col-qty"/><col class="col-price"/><col class="col-alert"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Current Stock</th>
+              <th>Qty to Order</th>
+              <th>Unit Price</th>
+              <th>Alert</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="item-name">Piña Fabric (Natural)</div>
+                <div class="item-sku">SKU: FAB-PIA-002</div>
+              </td>
+              <td style="font-weight:700;color:#DC2626;">2 meters</td>
+              <td style="font-weight:700;">20 meters</td>
+              <td style="color:var(--text-muted);">₱85/m</td>
+              <td><span class="badge badge-red">Low Stock</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="item-name">Silk Lining (Ivory)</div>
+                <div class="item-sku">SKU: FAB-SLK-011</div>
+              </td>
+              <td style="font-weight:700;color:#D97706;">1.5 meters</td>
+              <td style="font-weight:700;">15 meters</td>
+              <td style="color:var(--text-muted);">₱120/m</td>
+              <td><span class="badge badge-red">Low Stock</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="reason-box">
+        <div class="reason-label">Reason for Request</div>
+        <div class="reason-text">Stock below minimum threshold. Piña fabric needed for ORD-1006 (Barong, due Apr 29). Silk lining needed for ORD-1003 (Cocktail Dress, due Apr 28). Both orders at risk of delay.</div>
+      </div>
+
+      <div class="approval-note">
+        <label>Approval Note <span style="color:var(--text-muted);font-weight:500;">(optional)</span></label>
+        <textarea placeholder="e.g. Approved for urgent orders ORD-1003 and ORD-1006..."></textarea>
+      </div>
+
+      <div class="info-note">
+        <i data-lucide="info" style="width:16px;flex-shrink:0;margin-top:2px;"></i>
+        <div>Upon <strong>Approval</strong>, the system generates a Purchase Order and sends an SMS restock notification to <strong>QC Garment Supplies</strong>. Upon <strong>Rejection</strong>, the requester is notified and no PO is created.</div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="02-procurement-tab.html"><button class="btn-cancel">Cancel</button></a>
+      <button class="btn-reject"><i data-lucide="x" style="width:15px;"></i> Reject Request</button>
+      <button class="btn-approve"><i data-lucide="check" style="width:15px;"></i> Approve & Send to Supplier</button>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

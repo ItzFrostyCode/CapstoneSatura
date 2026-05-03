@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura Admin | Edit Subscription Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { 
+      --bg: #09090B; 
+      --sidebar: rgba(9, 9, 11, 0.96); 
+      --card: #121217;
+      --card-2: #17171e;
+      --card-3: #1f1f29;
+      --accent: #3B82F6; 
+      --accent-muted: rgba(59, 130, 246, 0.12);
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text: #FAFAFA;
+      --text-dim: #A1A1AA;
+      --border: #27272A;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Outfit', sans-serif; 
+      background: 
+        radial-gradient(circle at top, rgba(59,130,246,0.08), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(168,85,247,0.06), transparent 18%),
+        var(--bg); 
+      color: var(--text); 
+      display: flex; 
+      min-height: 100vh; 
+      overflow: hidden; 
+      letter-spacing: -0.02em; 
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar { 
+      background: var(--sidebar); 
+      border-right: 1px solid var(--border);
+      display: flex; 
+      flex-direction: column; 
+      position: sticky; 
+      top: 0; 
+      height: 100vh; 
+      backdrop-filter: blur(12px);
+    }
+    .sidebar-header { padding: 34px 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: white; }
+    .brand-sub { margin-top: 6px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; }
+    
+    .nav { padding: 14px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: auto; list-style: none; }
+    .nav-group-label { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 12px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .nav-item i { width: 18px; height: 18px; }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .nav-item.active { background: var(--accent-muted); color: var(--accent); box-shadow: inset 0 0 0 1px rgba(59,130,246,0.18); }
+
+    .nav-badge { margin-left: auto; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(239,68,68,0.14); color: #fecaca; border: 1px solid rgba(239,68,68,0.18); padding: 3px 7px; border-radius: 999px; }
+    
+    .sidebar-footer { padding: 18px 20px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; background: var(--card-3); border: 1px solid var(--border); border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: white; font-size: 12px; flex: 0 0 auto; }
+    .user-info .name { font-weight: 700; color: white; font-size: 13px; }
+    .user-info .role { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    /* Main Content */
+    .main { flex: 1; padding: 34px 40px 40px; overflow-y: auto; position: relative; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+    /* Modal Backdrop as a Layout Tool */
+    .modal-backdrop {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px);
+      z-index: 10; display: flex; align-items: flex-start; justify-content: center;
+      padding: 40px; overflow-y: auto;
+    }
+    .plan-modal {
+      background: var(--card); width: 100%; max-width: 800px;
+      border-radius: 24px; border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column; margin-bottom: 40px;
+    }
+    .plan-header {
+      padding: 32px; background: rgba(245, 158, 11, 0.03); border-bottom: 1px solid rgba(245, 158, 11, 0.1);
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .plan-body { padding: 32px; }
+    
+    .form-section { background: rgba(255,255,255,0.015); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-bottom: 24px; }
+    .section-title-small { font-size: 12px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    
+    .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; }
+    .form-control { width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; color: white; font-size: 14px; outline: none; transition: 0.2s; }
+    .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-muted); }
+    
+    .feature-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .feature-row:last-child { border-bottom: none; }
+    .feature-info { font-size: 14px; font-weight: 700; color: white; }
+    .feature-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--success); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    .modal-footer { padding: 24px 32px; background: rgba(0,0,0,0.2); border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+    .btn-save { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
+    .btn-cancel { background: transparent; border: 1px solid var(--border); color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; }
+
+    .warning-banner { background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); padding: 20px; border-radius: 16px; display: flex; gap: 16px; margin-bottom: 24px; }
+    .warning-banner i { color: var(--danger); }
+    .warning-text h4 { font-size: 14px; font-weight: 800; color: #fecaca; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .warning-text p { font-size: 13px; color: #fca5a5; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">Sutura Admin</div>
+        <div class="brand-sub">Platform Management</div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group-label">Overview</div>
+        <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Overview</a>
+
+        <div class="nav-group-label">Management</div>
+        <a href="02-registrations.html" class="nav-item"><i data-lucide="clipboard-check"></i> Shop Verifications <span class="nav-badge">3</span></a>
+        <a href="03-shops.html" class="nav-item"><i data-lucide="building"></i> Registered Shops</a>
+        <a href="08-announcements-tab.html" class="nav-item"><i data-lucide="megaphone"></i> Announcements</a>
+        <a href="05-subscription-plans.html" class="nav-item active"><i data-lucide="credit-card"></i> Revenue & Plans</a>
+        <a href="07-support-tickets.html" class="nav-item"><i data-lucide="life-buoy"></i> Support Tickets</a>
+
+        <div class="nav-group-label">System</div>
+        <a href="06-system-monitor.html" class="nav-item"><i data-lucide="activity"></i> System Health</a>
+        <a href="16-admin-audit-logs.html" class="nav-item"><i data-lucide="shield"></i> Security Logs</a>
+        <a href="08-platform-settings.html" class="nav-item"><i data-lucide="settings"></i> Platform Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar">A</div>
+        <div>
+          <div style="font-weight:700;font-size:13px;">Admin-99</div>
+          <div class="muted-11">System Superuser</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="modal-backdrop">
+        <div class="plan-modal">
+          <div class="plan-header">
+            <div>
+              <div style="font-size:11px;font-weight:800;color:var(--warning);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Edit Configuration</div>
+              <h2 style="font-size:26px;font-weight:800;letter-spacing:-0.05em;display:flex;align-items:center;gap:12px;">Premium Plan <span style="background:rgba(245,158,11,0.1);color:var(--warning);font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid rgba(245,158,11,0.2);">20 Active Shops</span></h2>
+            </div>
+            <a href="05-subscription-plans.html" style="color:var(--text-dim);"><i data-lucide="x"></i></a>
+          </div>
+
+          <div class="plan-body">
+            <div class="warning-banner">
+              <i data-lucide="alert-triangle"></i>
+              <div class="warning-text">
+                <h4>High-Risk Action</h4>
+                <p>You are modifying a live subscription plan currently used by 20 shops. Changes to pricing will only affect <strong>new</strong> sign-ups. Changes to usage limits will affect <strong>all</strong> existing shops immediately upon saving.</p>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-title-small">Pricing & Billing</div>
+              <div class="input-grid">
+                <div class="form-group">
+                  <label>Monthly Price (PHP)</label>
+                  <div style="position:relative;">
+                    <span style="position:absolute;left:14px;top:14px;color:var(--text-dim);font-weight:700;">₱</span>
+                    <input type="number" class="form-control" value="1299.00" style="padding-left:28px;">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Annual Price (PHP) - 15% Discount</label>
+                  <div style="position:relative;">
+                    <span style="position:absolute;left:14px;top:14px;color:var(--text-dim);font-weight:700;">₱</span>
+                    <input type="number" class="form-control" value="13250.00" style="padding-left:28px;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-title-small">Usage Limits</div>
+              <div class="input-grid">
+                <div class="form-group">
+                  <label>Max Branches Allowed</label>
+                  <input type="number" class="form-control" value="10">
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:8px;">Set to -1 for unlimited.</div>
+                </div>
+                <div class="form-group">
+                  <label>Max Staff Accounts</label>
+                  <input type="number" class="form-control" value="-1">
+                  <div style="font-size:11px;color:var(--text-dim);margin-top:8px;">Set to -1 for unlimited.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-title-small">Feature Flags</div>
+              <div class="feature-row">
+                <div>
+                  <div class="feature-info">Enable Multi-Branch Dashboard</div>
+                  <div class="feature-desc">Consolidated analytics across all physical locations.</div>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
+              </div>
+              <div class="feature-row">
+                <div>
+                  <div class="feature-info">White-Label Client Portal</div>
+                  <div class="feature-desc">Removes system branding from the customer-facing interface.</div>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
+              </div>
+              <div class="feature-row">
+                <div>
+                  <div class="feature-info">Advanced Audit Logs</div>
+                  <div class="feature-desc">Granular tracking of all administrative and staff actions.</div>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <a href="05-subscription-plans.html"><button class="btn-cancel">Cancel</button></a>
+            <button class="btn-save" onclick="alert('Configuration updated successfully!')">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

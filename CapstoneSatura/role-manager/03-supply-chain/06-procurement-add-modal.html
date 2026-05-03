@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>New Purchase Order | Sutura Management</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="suppliers-data.js"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #2C6BED;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+
+    .modal-container {
+      background: white;
+      width: 1100px;
+      max-height: 96vh;
+      border-radius: 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      animation: modalSlideUp 0.3s ease-out;
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 32px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-info h2 { font-size: 24px; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; }
+    .header-info p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+    .modal-body {
+      padding: 40px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .form-group input, .form-group select {
+      height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+    .form-group input:focus { border-color: var(--primary); background: white; }
+
+    /* Items Table */
+    .items-section { margin-top: 32px; }
+    .section-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    
+    .items-table { width: 100%; border-collapse: collapse; }
+    .items-table th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .items-table td { padding: 16px; border-bottom: 1px solid var(--border); }
+
+    .item-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 40px; gap: 16px; align-items: center; }
+    
+    .add-row-btn {
+      margin-top: 20px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      padding: 12px;
+      border-radius: 12px;
+      width: 100%;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .add-row-btn:hover { background: #f3f4f6; color: var(--primary); border-style: solid; }
+
+    .modal-footer {
+      padding: 32px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+    }
+
+    .summary-group { display: flex; gap: 40px; }
+    .summary-item { display: flex; flex-direction: column; }
+    .summary-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+    .summary-value { font-size: 20px; font-weight: 700; color: var(--text-main); }
+
+    .footer-actions { display: flex; gap: 12px; }
+    .btn {
+      height: 48px;
+      padding: 0 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-secondary { background: white; border: 1px solid var(--border); color: var(--text-main); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+    .remove-btn { color: #EF4444; cursor: pointer; padding: 8px; border-radius: 8px; border: none; background: none; }
+    .remove-btn:hover { background: #FEF2F2; }
+  </style>
+</head>
+<body>
+
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="header-info">
+        <h2>Create Purchase Order</h2>
+        <p>Draft a new order for inventory replenishment.</p>
+      </div>
+      <button onclick="window.location.href='02-procurement-tab.html'" style="background:none; border:none; cursor:pointer;"><i data-lucide="x"></i></button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Select Supplier</label>
+          <select id="supplierSelect">
+            <!-- Dynamic suppliers will be injected here -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Order Date</label>
+          <input type="date" value="2023-10-24">
+        </div>
+        <div class="form-group">
+          <label>Expected Delivery</label>
+          <input type="date">
+        </div>
+      </div>
+
+      <div class="items-section">
+        <div class="section-title"><i data-lucide="list"></i> Order Items</div>
+        
+        <div class="items-table-header" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 40px; gap: 16px; padding: 12px 16px; border-bottom: 2px solid var(--border); font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">
+          <div>Item Name</div>
+          <div>Unit Price</div>
+          <div>Quantity</div>
+          <div>Subtotal</div>
+          <div></div>
+        </div>
+
+        <div id="items-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+          <div class="item-row" style="padding: 0 16px;">
+            <select style="height: 48px; border: 1px solid var(--border); border-radius: 12px; padding: 0 12px; font-family: inherit;">
+              <option>Cotton Fabric Roll (SKU-FAB-001)</option>
+              <option>Polyester Fabric Roll (SKU-FAB-004)</option>
+              <option>Buttons (Assorted Packs)</option>
+            </select>
+            <input type="number" placeholder="₱ 0.00" style="height: 48px; border: 1px solid var(--border); border-radius: 12px; padding: 0 12px;">
+            <input type="number" value="1" style="height: 48px; border: 1px solid var(--border); border-radius: 12px; padding: 0 12px;">
+            <div style="font-weight: 700; font-size: 14px;">₱ 0.00</div>
+            <button class="remove-btn"><i data-lucide="trash-2" style="width: 18px;"></i></button>
+          </div>
+        </div>
+
+        <button class="add-row-btn"><i data-lucide="plus" style="width: 14px;"></i> Add Another Item</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="summary-group">
+        <div class="summary-item">
+          <span class="summary-label">Total Items</span>
+          <span class="summary-value">1</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Estimated Total</span>
+          <span class="summary-value" style="color: var(--accent);">₱ 0.00</span>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <button class="btn btn-secondary" onclick="window.location.href='02-procurement-tab.html'">Cancel</button>
+        <button class="btn btn-primary" onclick="window.location.href='02-procurement-tab.html'">Confirm Order</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function populateSuppliers() {
+      const suppliers = getSuppliers();
+      const select = document.getElementById('supplierSelect');
+      select.innerHTML = '';
+      
+      suppliers.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.textContent = s.name;
+        select.appendChild(option);
+      });
+    }
+
+    populateSuppliers();
+  </script>
+
+</body>
+</html>

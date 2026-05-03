@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Material Allocation - Sutura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;min-height:100vh;backdrop-filter:blur(4px);padding:24px;}
+    .modal{background:var(--bg);width:820px;border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,0.25);overflow:hidden;animation:slideUp 0.25s ease-out;}
+    @keyframes slideUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+    .modal-header{padding:28px 36px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+    .modal-badge{display:inline-flex;align-items:center;gap:6px;background:#FAF5FF;color:#9333EA;border:1px solid #DDD6FE;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;margin-bottom:10px;text-transform:uppercase;white-space:nowrap;}
+    .modal-title{font-size:20px;font-weight:800;letter-spacing:-0.3px;}
+    .modal-sub{font-size:13px;color:var(--text-muted);margin-top:4px;}
+    .close-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all 0.2s;flex-shrink:0;}
+    .close-btn:hover{background:var(--surface);color:var(--primary);}
+
+    .modal-body{padding:28px 36px;}
+
+    .actor-label{display:inline-flex;align-items:center;gap:8px;background:#FAF5FF;border:1px solid #DDD6FE;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#9333EA;margin-bottom:20px;white-space:nowrap;}
+
+    .job-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 22px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+    .info-item .i-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+    .info-item .i-value{font-size:14px;font-weight:700;color:var(--text-main);}
+
+    .section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+
+    .alloc-table-wrap{border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    th{padding:11px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;background:#F8FAFC;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+    td{padding:14px 16px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .mat-name{font-weight:600;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .mat-sku{font-size:11px;color:var(--text-muted);font-family:monospace;margin-top:2px;}
+
+    /* Column widths for allocation table */
+    .col-mat{width:32%;}
+    .col-stock{width:16%;}
+    .col-avail{width:22%;}
+    .col-alloc{width:14%;}
+    .col-unit{width:16%;}
+
+    /* Stock availability cell — badge + bar inline */
+    .avail-cell{display:flex;flex-direction:column;gap:5px;}
+    .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;white-space:nowrap;width:fit-content;}
+    .badge-green{background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;}
+    .badge-amber{background:#FFFBEB;color:#D97706;border:1px solid #FEF3C7;}
+    .badge-red{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5;}
+    .badge-blue{background:#EFF6FF;color:#2563EB;border:1px solid #DBEAFE;}
+    .badge-purple{background:#FAF5FF;color:#9333EA;border:1px solid #DDD6FE;}
+
+    .stock-bar-wrap{width:72px;height:5px;background:#E5E7EB;border-radius:99px;overflow:hidden;}
+    .stock-bar{height:100%;border-radius:99px;}
+    .bar-ok{background:#16A34A;}
+    .bar-low{background:#D97706;}
+    .bar-none{background:#DC2626;}
+
+    .qty-input{width:76px;height:36px;border:1px solid var(--border);border-radius:9px;padding:0 10px;font-family:'Outfit';font-weight:600;text-align:center;font-size:14px;outline:none;transition:all 0.2s;background:var(--bg);}
+    .qty-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,0,0,0.06);}
+    .qty-input.warn{border-color:#D97706;background:#FFFBEB;color:#D97706;}
+    .qty-input.disabled{background:#FEF2F2;border-color:#FCA5A5;color:#DC2626;cursor:not-allowed;}
+
+    .summary-row{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 22px;display:flex;align-items:center;gap:0;margin-bottom:20px;}
+    .summary-item{text-align:center;flex:1;}
+    .summary-item .s-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+    .summary-item .s-value{font-size:18px;font-weight:800;color:var(--text-main);}
+    .summary-divider{width:1px;height:40px;background:var(--border);}
+
+    .seamstress-note{background:#FAF5FF;border:1px solid #DDD6FE;border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#7C3AED;line-height:1.6;}
+    .seamstress-note strong{font-weight:700;}
+
+    .modal-footer{padding:22px 36px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:var(--surface);}
+    .btn-cancel{background:none;color:var(--text-muted);border:1px solid var(--border);font-size:14px;font-weight:600;padding:0 20px;height:44px;border-radius:12px;cursor:pointer;transition:all 0.2s;font-family:'Outfit';}
+    .btn-cancel:hover{background:#fff;}
+    .btn-allocate{background:#1A1A1A;color:white;border:none;font-size:14px;font-weight:700;padding:0 28px;height:44px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-family:'Outfit';white-space:nowrap;}
+    .btn-allocate:hover{background:#333;transform:translateY(-1px);}
+  </style>
+</head>
+<body>
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-badge"><i data-lucide="scissors" style="width:11px;"></i> Seamstress / Tailor Action</div>
+        <div class="modal-title">Allocate Materials to Job Order</div>
+        <div class="modal-sub">Check material availability and reserve quantities for production</div>
+      </div>
+      <a href="../02-production/01-job-orders-tab.html"><button class="close-btn"><i data-lucide="x" style="width:15px;"></i></button></a>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="actor-label">
+        <i data-lucide="user" style="width:14px;"></i>
+        Performed by: Seamstress / Tailor
+      </div>
+
+      <div class="section-label">Job Order</div>
+      <div class="job-card">
+        <div class="info-item">
+          <div class="i-label">Order ID</div>
+          <div class="i-value" style="color:#2563EB;">ORD-1006</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Item / Garment</div>
+          <div class="i-value">Barong Tagalog</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Due Date</div>
+          <div class="i-value" style="color:#DC2626;">Apr 29, 2026</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Customer</div>
+          <div class="i-value">Mr. Reyes</div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Current Stage</div>
+          <div class="i-value"><span class="badge badge-blue">Cutting</span></div>
+        </div>
+        <div class="info-item">
+          <div class="i-label">Priority</div>
+          <div class="i-value"><span class="badge badge-amber">Urgent</span></div>
+        </div>
+      </div>
+
+      <div class="section-label">Required Materials — Check availability &amp; set allocation quantity</div>
+      <div class="alloc-table-wrap">
+        <table>
+          <colgroup>
+            <col class="col-mat"/><col class="col-stock"/><col class="col-avail"/><col class="col-alloc"/><col class="col-unit"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Current Stock</th>
+              <th>Availability</th>
+              <th>Allocate</th>
+              <th>Unit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="mat-name">Piña Fabric (Natural)</div>
+                <div class="mat-sku">SKU: FAB-PIA-002</div>
+              </td>
+              <td style="font-weight:700;">22 meters</td>
+              <td>
+                <div class="avail-cell">
+                  <span class="badge badge-green">Sufficient</span>
+                  <div class="stock-bar-wrap"><div class="stock-bar bar-ok" style="width:80%;"></div></div>
+                </div>
+              </td>
+              <td><input type="number" class="qty-input" value="3" min="0"/></td>
+              <td style="color:var(--text-muted);font-weight:500;">meters</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="mat-name">White Embroidery Thread</div>
+                <div class="mat-sku">SKU: THR-WHT-008</div>
+              </td>
+              <td style="font-weight:700;">4 spools</td>
+              <td>
+                <div class="avail-cell">
+                  <span class="badge badge-amber">Low Stock</span>
+                  <div class="stock-bar-wrap"><div class="stock-bar bar-low" style="width:30%;"></div></div>
+                </div>
+              </td>
+              <td><input type="number" class="qty-input warn" value="2" min="0"/></td>
+              <td style="color:var(--text-muted);font-weight:500;">spools</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="mat-name">Barong Buttons (Small)</div>
+                <div class="mat-sku">SKU: ACC-BTN-031</div>
+              </td>
+              <td style="font-weight:700;color:#DC2626;">0 sets</td>
+              <td>
+                <div class="avail-cell">
+                  <span class="badge badge-red">Out of Stock</span>
+                  <div class="stock-bar-wrap"><div class="stock-bar bar-none" style="width:2%;"></div></div>
+                </div>
+              </td>
+              <td><input type="number" class="qty-input disabled" value="0" min="0" disabled/></td>
+              <td style="color:var(--text-muted);font-weight:500;">sets</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-item">
+          <div class="s-label">Items to Allocate</div>
+          <div class="s-value">2 / 3</div>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <div class="s-label">Next Stage After</div>
+          <div class="s-value" style="font-size:14px;"><span class="badge badge-blue">Cutting → Sewing</span></div>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <div class="s-label">Blocked Items</div>
+          <div class="s-value" style="color:#DC2626;">1</div>
+        </div>
+      </div>
+
+      <div class="seamstress-note">
+        <i data-lucide="alert-triangle" style="width:16px;flex-shrink:0;margin-top:2px;"></i>
+        <div><strong>1 item is out of stock</strong> (Barong Buttons). A restock request will be automatically flagged for the Shop Owner to approve. Production can still begin with the available materials.</div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="../02-production/01-job-orders-tab.html"><button class="btn-cancel">Cancel</button></a>
+      <button class="btn-allocate"><i data-lucide="check" style="width:16px;"></i> Allocate &amp; Start Production</button>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

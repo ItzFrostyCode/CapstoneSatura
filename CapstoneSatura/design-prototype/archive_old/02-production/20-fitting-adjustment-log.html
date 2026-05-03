@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Fitting Adjustment Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333;
+      --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #8B5CF6; /* Purple for Fitting */
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: rgba(0,0,0,0.5); height: 100vh; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+
+    .modal { background: white; width: 640px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; }
+    .modal-header { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+    
+    .modal-body { padding: 32px; }
+    
+    .fitting-step { display: flex; gap: 16px; margin-bottom: 24px; position: relative; }
+    .step-indicator { width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; z-index: 2; flex-shrink: 0; }
+    .step-indicator.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .step-indicator.done { background: #10B981; border-color: #10B981; color: white; }
+    
+    .step-content { flex-grow: 1; }
+    .step-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .step-desc { font-size: 13px; color: var(--text-muted); }
+
+    .adjustment-box { background: var(--surface); border-radius: 16px; padding: 20px; border: 1.5px solid var(--border); margin-top: 16px; }
+    .adjustment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    
+    label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    input, textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-family: 'Outfit'; font-size: 14px; outline: none; }
+
+    .modal-footer { padding: 24px 32px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+    .btn-primary { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i data-lucide="scissors"></i> Fitting Progress: ORD-1002</div>
+      <div style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Client: Juan Marcelo</div>
+    </div>
+    
+    <div class="modal-body">
+      <div class="fitting-step">
+        <div class="step-indicator done"><i data-lucide="check" style="width:14px;"></i></div>
+        <div class="step-content">
+          <div class="step-title">Initial Consultation</div>
+          <div class="step-desc">Measurements recorded on April 15, 2026.</div>
+        </div>
+      </div>
+
+      <div class="fitting-step">
+        <div class="step-indicator active">2</div>
+        <div class="step-content">
+          <div class="step-title">First Fitting (Baste)</div>
+          <div class="step-desc">Current Session - April 28, 2026</div>
+          
+          <div class="adjustment-box">
+            <label>Adjustment Notes (Required for Tailor)</label>
+            <textarea placeholder="e.g. Chest area needs 0.5 inch intake, sleeves are too long."></textarea>
+            
+            <div class="adjustment-grid">
+              <div>
+                <label>Shoulder Adjustment</label>
+                <input type="text" placeholder="+/- Inches" />
+              </div>
+              <div>
+                <label>Waist Intake</label>
+                <input type="text" placeholder="+/- Inches" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fitting-step">
+        <div class="step-indicator">3</div>
+        <div class="step-content">
+          <div class="step-title">Final Fitting & Delivery</div>
+          <div class="step-desc">Target Date: May 05, 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button style="background: var(--surface); border: 1px solid var(--border); padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;">Cancel</button>
+      <button class="btn-primary" onclick="alert('Adjustment Logged! Tailor notified.');">Save & Notify Tailor</button>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

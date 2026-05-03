@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura Admin | Audit Logs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --accent: #2C6BED; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --error: #EF4444; --info: #3B82F6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: #F3F4F6; color: var(--text-main); display: flex; }
+
+    /* Sidebar (Reused) */
+    .sidebar { width: 280px; height: 100vh; background: white; border-right: 1.5px solid var(--border); padding: 32px; position: sticky; top: 0; }
+    .nav-list { list-style: none; margin-top: 40px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; margin-bottom: 8px; transition: all 0.2s; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-item:hover:not(.active) { background: var(--surface); color: var(--text-main); }
+
+    /* Main Content */
+    .main-content { flex: 1; padding: 40px 60px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+    .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+
+    /* Filter Bar */
+    .filter-bar { display: flex; gap: 16px; margin-bottom: 32px; background: white; padding: 16px; border-radius: 16px; border: 1.5px solid var(--border); }
+    .filter-input { padding: 10px 16px; border-radius: 10px; border: 1.5px solid var(--border); font-family: inherit; font-size: 14px; flex: 1; }
+
+    /* Timeline Table */
+    .table-container { background: white; border-radius: 24px; border: 1.5px solid var(--border); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 20px 24px; background: var(--surface); font-size: 14px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1.5px solid var(--border); }
+    td { padding: 20px 24px; border-bottom: 1.5px solid var(--border); font-size: 14px; }
+
+    .action-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+    .action-create { background: #ECFDF5; color: #059669; }
+    .action-delete { background: #FEF2F2; color: var(--error); }
+    .action-update { background: #EFF6FF; color: var(--info); }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div style="font-size: 24px; font-weight: 800;">Sutura Admin</div>
+    <nav class="nav-list">
+      <a href="01-admin-dashboard.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i> Dashboard
+      </a>
+      <a href="01-staff-management-tab.html" class="nav-item">
+        <i data-lucide="users"></i> Staff Management
+      </a>
+      <a href="16-admin-audit-logs.html" class="nav-item active">
+        <i data-lucide="history"></i> Audit Logs
+      </a>
+      <a href="#" class="nav-item">
+        <i data-lucide="globe"></i> Marketplace Settings
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div>
+        <h1>Administrative Audit Logs</h1>
+        <p style="color: var(--text-muted);">Track all critical system operations across all branches.</p>
+      </div>
+      <button class="filter-bar" style="cursor: pointer; border: none; padding: 12px 24px; background: var(--primary); color: white;">
+        <i data-lucide="download" style="width: 18px;"></i> Export Logs (CSV)
+      </button>
+    </header>
+
+    <div class="filter-bar">
+      <input type="text" class="filter-input" placeholder="Search by staff name or action...">
+      <select class="filter-input" style="flex: 0.5;">
+        <option>All Branches</option>
+        <option>Davao Main</option>
+        <option>Tagum Branch</option>
+      </select>
+      <select class="filter-input" style="flex: 0.5;">
+        <option>All Actions</option>
+        <option>Creation</option>
+        <option>Deletions</option>
+        <option>Status Changes</option>
+      </select>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Staff Member</th>
+            <th>Action</th>
+            <th>Description</th>
+            <th>Branch</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color: var(--text-muted);">Apr 29, 2026 - 02:45 PM</td>
+            <td style="font-weight: 700;">Eduardo Santos</td>
+            <td><span class="action-badge action-create">Order Created</span></td>
+            <td>Created Order #8842 (Bespoke Suit)</td>
+            <td>Davao Main</td>
+            <td>192.168.1.104</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted);">Apr 29, 2026 - 01:20 PM</td>
+            <td style="font-weight: 700;">Maria Clara</td>
+            <td><span class="action-badge action-update">Inventory Update</span></td>
+            <td>Adjusted stock for 'Silk Charcoal' (-5 yards)</td>
+            <td>Davao Main</td>
+            <td>192.168.1.105</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted);">Apr 29, 2026 - 11:15 AM</td>
+            <td style="font-weight: 700;">Roberto Gomez</td>
+            <td><span class="action-badge action-delete">Payment Voided</span></td>
+            <td>Voided Transaction TXN-5591 (Client error)</td>
+            <td>Tagum Branch</td>
+            <td>192.168.1.112</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted);">Apr 29, 2026 - 09:30 AM</td>
+            <td style="font-weight: 700;">Admin Account</td>
+            <td><span class="action-badge action-update">Role Change</span></td>
+            <td>Promoted 'Juan Dela Cruz' to Manager</td>
+            <td>System-wide</td>
+            <td>124.88.92.10</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

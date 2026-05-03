@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Designer Profile Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #F472B6; /* Designer Pink */
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--text-main); padding: 40px; }
+
+    .card { background: white; border-radius: 32px; border: 1px solid var(--border); padding: 48px; max-width: 800px; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+    
+    .profile-header { display: flex; align-items: center; gap: 32px; margin-bottom: 48px; }
+    .avatar-upload { width: 120px; height: 120px; border-radius: 32px; background: #fdf2f8; border: 2px dashed var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .avatar-upload:hover { background: #fce7f3; }
+    
+    .form-group { margin-bottom: 24px; }
+    label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    input, textarea, select { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; font-family: 'Outfit'; font-size: 15px; outline: none; background: var(--surface); }
+    textarea { height: 120px; resize: none; }
+
+    .tag-cloud { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .tag { background: #f3f4f6; color: #4b5563; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .tag.active { background: var(--accent); color: white; }
+
+    .btn-save { background: var(--primary); color: white; border: none; padding: 16px 32px; border-radius: 16px; font-weight: 800; cursor: pointer; width: 100%; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+      <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -1px;">Designer Profile Settings</h1>
+      <a href="12-design-lookbook.html" style="text-decoration: none; color: var(--text-muted); font-weight: 700; font-size: 14px;">Back to Portfolio</a>
+    </div>
+
+    <div class="profile-header">
+      <div class="avatar-upload">
+        <i data-lucide="camera" style="color: var(--accent); width: 24px;"></i>
+        <span style="font-size: 10px; font-weight: 800; margin-top: 8px; color: var(--accent);">UPLOAD LOGO</span>
+      </div>
+      <div>
+        <h2 style="font-size: 20px; font-weight: 700;">Brand Identity</h2>
+        <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">This info will be visible to Shop Owners in the Discovery Marketplace.</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Full Name / Artist Name</label>
+      <input type="text" value="Maria Clara Designs" />
+    </div>
+
+    <div class="form-group">
+      <label>Professional Bio</label>
+      <textarea>Passionate about traditional Filipino craftsmanship. Specializing in bespoke bridal gowns and modern Barong Tagalog since 1998.</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Your Specialties (Click to select)</label>
+      <div class="tag-cloud">
+        <div class="tag active">Bridal</div>
+        <div class="tag active">Formal Wear</div>
+        <div class="tag">Corporate</div>
+        <div class="tag">Traditional</div>
+        <div class="tag">Casual</div>
+        <div class="tag">Modern Barong</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="form-group">
+        <label>Base Collaboration Rate (₱)</label>
+        <input type="text" value="₱1,500.00 / project" />
+      </div>
+      <div class="form-group">
+        <label>Social / Portfolio Link</label>
+        <input type="text" value="instagram.com/mariaclara_designs" />
+      </div>
+    </div>
+
+    <button class="btn-save" onclick="alert('Profile Updated Successfully!'); window.location.href='12-design-lookbook.html'">Update Profile & Sync to Marketplace</button>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

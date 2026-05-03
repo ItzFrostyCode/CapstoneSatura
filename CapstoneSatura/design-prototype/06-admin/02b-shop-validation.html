@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sutura Admin | Shop Validation Stack</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg: #09090B;
+      --card: #121217;
+      --card-2: #17171e;
+      --accent: #3B82F6;
+      --success: #059669; /* Emerald */
+      --warning: #d97706; /* Amber */
+      --danger: #e11d48; /* Rose */
+      --text: #FAFAFA;
+      --text-dim: #A1A1AA;
+      --border: #27272A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; letter-spacing: -0.02em; }
+    
+    .validation-container {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      height: 100vh;
+    }
+
+    /* Left Side: Document View */
+    .doc-viewer {
+      padding: 20px 24px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+      background: rgba(255,255,255,0.005);
+      height: 100vh;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .viewer-header {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dim);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+    .back-btn:hover { color: white; }
+
+    .viewer-title { font-size: 24px; font-weight: 800; margin-top: 12px; }
+
+    /* Doc Grid */
+    .section-label { font-size: 11px; font-weight: 900; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; display: block; }
+    
+    .doc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+    .doc-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+    .doc-card:hover { border-color: var(--accent); background: rgba(255,255,255,0.02); transform: translateY(-2px); }
+    
+    /* Verified State */
+    .doc-card.verified { border-color: var(--success); background: rgba(5, 150, 105, 0.04); }
+    .doc-card.verified .doc-icon { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); }
+    .doc-card.verified .doc-status { color: var(--success); font-weight: 700; }
+
+    /* Flagged State */
+    .doc-card.flagged { border-color: var(--danger); background: rgba(225, 29, 72, 0.04); }
+    .doc-card.flagged .doc-icon { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2); }
+    .doc-card.flagged .doc-status { color: var(--danger); font-weight: 700; }
+
+    .doc-icon { width: 28px; height: 28px; background: rgba(255,255,255,0.04); border-radius: 6px; display: grid; place-items: center; color: var(--accent); }
+    .doc-icon i, .doc-icon svg { width: 14px; height: 14px; }
+    .doc-name { font-weight: 700; font-size: 12px; }
+    .doc-status { font-size: 10px; color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
+    .doc-status.success { color: var(--success); }
+    .doc-status.warning { color: var(--warning); }
+
+    /* Media Grid */
+    .media-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .media-card {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      aspect-ratio: 16/10;
+      background: #000;
+      position: relative;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .media-card:hover { border-color: var(--accent); transform: scale(1.02); }
+    .media-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.3s; }
+    .media-card:hover img { opacity: 1; }
+    
+    .media-card.verified { border-color: var(--success); }
+    .media-card.verified::after {
+      content: '\2713'; /* Checkmark */
+      position: absolute; top: 12px; right: 12px;
+      width: 24px; height: 24px; background: var(--success);
+      color: white; border-radius: 50%; display: grid; place-items: center;
+      font-weight: 900; font-size: 14px; z-index: 10;
+    }
+
+    .media-card.flagged { border-color: var(--danger); }
+    .media-card.flagged::after {
+      content: '!'; 
+      position: absolute; top: 12px; right: 12px;
+      width: 24px; height: 24px; background: var(--danger);
+      color: white; border-radius: 50%; display: grid; place-items: center;
+      font-weight: 900; font-size: 14px; z-index: 10;
+    }
+
+    .media-tag { position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; z-index: 5; }
+
+    /* Right Side: Sidebar */
+    .applicant-sidebar {
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      background: var(--card);
+    }
+
+    .profile-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .profile-avatar { width: 64px; height: 64px; background: var(--accent-muted); color: var(--accent); border-radius: 20px; display: grid; place-items: center; font-size: 24px; font-weight: 800; margin-bottom: 16px; }
+    .profile-name { font-size: 18px; font-weight: 800; }
+    .profile-tier { font-size: 11px; font-weight: 900; text-transform: uppercase; color: var(--accent); background: rgba(59,130,246,0.1); padding: 4px 12px; border-radius: 999px; margin-top: 8px; }
+
+    .info-list { display: flex; flex-direction: column; gap: 20px; }
+    .info-item label { display: block; font-size: 10px; font-weight: 900; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .info-item span { font-size: 14px; font-weight: 600; display: block; }
+
+    .action-panel { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+    .btn-verify { 
+      background: var(--success); color: white; border: none; 
+      padding: 14px; border-radius: 12px; font-weight: 700; font-size: 14px; 
+      cursor: pointer; transition: 0.2s; 
+    }
+    .btn-verify:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    
+    .btn-reject { 
+      background: rgba(239,68,68,0.1); color: var(--danger); 
+      border: 1px solid rgba(239,68,68,0.2); padding: 14px; 
+      border-radius: 12px; font-weight: 700; font-size: 14px; 
+      cursor: pointer; transition: 0.2s; 
+    }
+    .btn-reject:hover { background: rgba(239,68,68,0.15); }
+
+    .btn-chat { 
+      background: var(--card-2); color: white; 
+      border: 1px solid var(--border); padding: 14px; 
+      border-radius: 12px; font-weight: 700; font-size: 14px;
+      display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; 
+    }
+    /* Lightbox System */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      cursor: zoom-out;
+      padding: 40px;
+    }
+    .lightbox-overlay.show { display: flex; }
+    .lightbox-image {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      box-shadow: 0 0 100px rgba(0,0,0,0.5);
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      color: white;
+      background: rgba(255,255,255,0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body style="overflow: hidden;">
+  <div class="validation-container">
+    <!-- Left: Content Viewer -->
+    <main class="doc-viewer">
+      <div class="viewer-header">
+        <div>
+          <a href="02-registrations.html" class="back-btn"><i data-lucide="arrow-left" style="width:16px;"></i> Back to Validation Queue</a>
+          <h1 class="viewer-title">Bankerohan Tailorshop</h1>
+        </div>
+        <div style="text-align: right;">
+          <span class="section-label" style="margin-bottom: 8px;">Submission Date</span>
+          <div style="font-weight: 700; font-size: 15px;">Oct 30, 2026 • 2:45 PM</div>
+        </div>
+      </div>
+
+      <span class="section-label">Legal Permit Stack</span>
+      <div class="doc-grid">
+        <div class="doc-card">
+          <div class="doc-icon"><i data-lucide="file-text"></i></div>
+          <div class="doc-name">DTI / SEC Certificate</div>
+          <div class="doc-status"><i data-lucide="clock" style="width:14px;"></i> Pending Manual Audit</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-icon"><i data-lucide="hash"></i></div>
+          <div class="doc-name">BIR Form 2303</div>
+          <div class="doc-status"><i data-lucide="clock" style="width:14px;"></i> Awaiting Document Review</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-icon" style="color: var(--warning);"><i data-lucide="building"></i></div>
+          <div class="doc-name">Mayor's Permit (2026)</div>
+          <div class="doc-status warning"><i data-lucide="eye" style="width:14px;"></i> Awaiting Manual Audit</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-icon" style="color: var(--warning);"><i data-lucide="map-pin"></i></div>
+          <div class="doc-name">Barangay Clearance</div>
+          <div class="doc-status warning"><i data-lucide="clock" style="width:14px;"></i> Pending Inspection</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-icon"><i data-lucide="image"></i></div>
+          <div class="doc-name">Shop Signage</div>
+          <div class="doc-status"><i data-lucide="clock" style="width:14px;"></i> Awaiting Review</div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-icon"><i data-lucide="wrench"></i></div>
+          <div class="doc-name">Equipment & Workspace</div>
+          <div class="doc-status"><i data-lucide="clock" style="width:14px;"></i> Awaiting Review</div>
+        </div>
+      </div>
+
+      <span class="section-label">Validation Evidence (Permits & Photos)</span>
+      <div class="media-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div class="media-card" data-type="photo">
+          <img src="https://images.unsplash.com/photo-1568667256549-094345857637?auto=format&fit=crop&q=80&w=600" alt="DTI Cert" />
+          <div class="media-tag">DTI Certificate</div>
+        </div>
+        <div class="media-card" data-type="photo">
+          <img src="https://images.unsplash.com/photo-1554224155-1696413565d3?auto=format&fit=crop&q=80&w=600" alt="BIR Form" />
+          <div class="media-tag">BIR Form 2303</div>
+        </div>
+        <div class="media-card" data-type="photo">
+          <img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&q=80&w=600" alt="Mayor's Permit" />
+          <div class="media-tag">Mayor's Permit</div>
+        </div>
+        <div class="media-card" data-type="photo">
+          <img src="https://images.unsplash.com/photo-1621252179027-94459d278660?auto=format&fit=crop&q=80&w=600" alt="Brgy Clearance" />
+          <div class="media-tag">Barangay Clearance</div>
+        </div>
+        <div class="media-card" data-type="photo">
+          <img src="https://images.unsplash.com/photo-1520004434532-668416a08753?auto=format&fit=crop&q=80&w=600" alt="Shop Signage" />
+          <div class="media-tag">Shop Signage</div>
+        </div>
+        <div class="media-card" data-type="photo">
+          <img src="https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?auto=format&fit=crop&q=80&w=600" alt="Equipment" />
+          <div class="media-tag">Workstation</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Lightbox Overlay -->
+    <div class="lightbox-overlay" id="lightbox">
+      <div class="lightbox-close"><i data-lucide="x"></i></div>
+      <img src="" class="lightbox-image" id="lightboxImg">
+    </div>
+
+    <!-- Right: Applicant Info -->
+    <aside class="applicant-sidebar">
+      <div class="profile-card">
+        <div class="profile-avatar">BT</div>
+        <div class="profile-name">Bankerohan Tailorshop</div>
+        <div class="profile-tier">Basic Shop Tier</div>
+      </div>
+
+      <div class="info-list">
+        <div class="info-item">
+          <label>Owner Name</label>
+          <span>Juan Dela Cruz</span>
+        </div>
+        <div class="info-item">
+          <label>Registered Location</label>
+          <span>Quezon City, Metro Manila, PH</span>
+        </div>
+        <div class="info-item">
+          <label>Contact Number</label>
+          <span>+63 912 345 6789</span>
+        </div>
+        <div class="info-item">
+          <label>Tax Identification Number</label>
+          <span>000-123-456-789</span>
+        </div>
+      </div>
+
+      <div class="action-panel">
+        <button class="btn-chat"><i data-lucide="message-square" style="width:18px;"></i> Open Direct Message</button>
+        <button class="btn-reject" onclick="confirm('Are you sure you want to reject this applicant? This will send a notification with the rejection reason.')">Reject Registration</button>
+        <button class="btn-verify" onclick="alert('Shop successfully validated! The account is now live.'); location.href='02-registrations.html'">Verify Full Legitimacy</button>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+
+      const cards = document.querySelectorAll('.doc-card');
+      
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          const statusEl = card.querySelector('.doc-status');
+          const iconContainer = card.querySelector('.doc-icon');
+          
+          if (!card.classList.contains('verified') && !card.classList.contains('flagged')) {
+            // Move to Verified
+            card.classList.add('verified');
+            statusEl.innerHTML = '<i data-lucide="check-circle" style="width:14px;"></i> Document Verified';
+            iconContainer.innerHTML = '<i data-lucide="check"></i>';
+          } else if (card.classList.contains('verified')) {
+            // Move to Flagged
+            card.classList.remove('verified');
+            card.classList.add('flagged');
+            statusEl.innerHTML = '<i data-lucide="alert-circle" style="width:14px;"></i> Issue Flagged';
+            iconContainer.innerHTML = '<i data-lucide="alert-triangle"></i>';
+          } else {
+            // Back to Pending
+            card.classList.remove('flagged');
+            statusEl.innerHTML = '<i data-lucide="clock" style="width:14px;"></i> Pending Manual Audit';
+            // Restore original icon based on doc type (simplified here)
+            const docName = card.querySelector('.doc-name').innerText;
+            let originalIcon = 'file-text';
+            if (docName.includes('BIR')) originalIcon = 'hash';
+            if (docName.includes('Mayor')) originalIcon = 'building';
+            if (docName.includes('Barangay')) originalIcon = 'map-pin';
+            if (docName.includes('Signage')) originalIcon = 'image';
+            if (docName.includes('Equipment')) originalIcon = 'wrench';
+            iconContainer.innerHTML = `<i data-lucide="${originalIcon}"></i>`;
+          }
+          
+          lucide.createIcons();
+        });
+      });
+
+      // Lightbox Logic
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightboxImg');
+      const mediaCards = document.querySelectorAll('.media-card');
+
+      mediaCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          // If clicking near the corner (where status tag is), toggle audit status
+          // Otherwise open lightbox
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          if (x > rect.width - 50 && y < 50) {
+            // Toggle Status Logic for Photos
+            if (!card.classList.contains('verified') && !card.classList.contains('flagged')) {
+              card.classList.add('verified');
+            } else if (card.classList.contains('verified')) {
+              card.classList.remove('verified');
+              card.classList.add('flagged');
+            } else {
+              card.classList.remove('flagged');
+            }
+          } else {
+            const img = card.querySelector('img');
+            lightboxImg.src = img.src;
+            lightbox.classList.add('show');
+          }
+        });
+      });
+
+      lightbox.addEventListener('click', () => {
+        lightbox.classList.remove('show');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Emergency Restock | Sutura Management</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #DC2626; /* Changed to red for emergency restock */
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+
+    .modal-container {
+      background: white;
+      width: 1000px;
+      max-height: 90vh;
+      border-radius: 28px;
+      box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 32px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-info h2 { font-size: 24px; font-weight: 700; color: var(--text-main); letter-spacing: -0.02em; display: flex; align-items: center; gap: 12px; }
+    .header-info p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+    .linked-badge { background: #FEF2F2; color: #DC2626; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid #FEE2E2; text-transform: uppercase; }
+
+    .modal-body {
+      padding: 40px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-group input, .form-group select {
+      height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+    .form-group input:focus { border-color: var(--primary); background: white; }
+
+    /* Items Table */
+    .items-section { margin-top: 32px; }
+    .section-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    
+    .item-row { 
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16px; align-items: center; 
+      background: #FFFBEB; border: 1px solid #FDE68A; padding: 20px; border-radius: 16px;
+    }
+    
+    .modal-footer {
+      padding: 32px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+    }
+
+    .summary-group { display: flex; gap: 40px; }
+    .summary-item { display: flex; flex-direction: column; }
+    .summary-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .summary-value { font-size: 20px; font-weight: 700; color: var(--text-main); }
+
+    .btn {
+      height: 52px;
+      padding: 0 32px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: none;
+      transition: all 0.2s;
+      font-family: 'Outfit';
+    }
+    .btn-secondary { background: white; border: 1px solid var(--border); color: var(--text-main); text-decoration: none; }
+    .btn-primary { background: var(--primary); color: white; text-decoration: none; box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+
+  <div class="modal-container">
+    <div class="modal-header">
+      <div class="header-info">
+        <h2><i data-lucide="zap" style="color:#F59E0B; width:24px; height:24px;"></i> Emergency Restock <span class="linked-badge">Linked to ORD-1004</span></h2>
+        <p>Pre-filled based on material shortage analysis.</p>
+      </div>
+      <a href="../02-production/02-job-orders-add-modal.html" style="color:var(--text-muted);"><i data-lucide="x"></i></a>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Supplier (Auto-Suggested)</label>
+          <select disabled><option selected>Elite Fabrics PH (Silk Specialist)</option></select>
+        </div>
+        <div class="form-group">
+          <label>Order Date</label>
+          <input type="text" value="Oct 26, 2023" disabled>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select style="border-color:#FDE68A; background:#FFFBEB;"><option selected>URGENT - Production Blocked</option></select>
+        </div>
+      </div>
+
+      <div class="items-section">
+        <div class="section-title"><i data-lucide="list"></i> Order Items</div>
+        
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16px; padding: 0 16px 12px; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">
+          <div>Item Name</div>
+          <div>Unit Price</div>
+          <div>Shortage Quantity</div>
+          <div>Subtotal</div>
+        </div>
+
+        <div class="item-row">
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <span style="font-weight:700; font-size:15px; color:#92400E;">Pina Silk (Grade A)</span>
+            <span style="font-size:12px; color:#B45309;">SKU-FAB-002 · 1.50m current stock</span>
+          </div>
+          <div style="font-weight:600;">₱ 520.00 /m</div>
+          <div style="font-weight:700; font-size:16px;">3.00 m</div>
+          <div style="font-weight:800; font-size:18px; color:#92400E;">₱ 1,560.00</div>
+        </div>
+
+        <p style="margin-top: 24px; font-size: 13px; color: var(--text-muted); background: var(--surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+          <strong>System Note:</strong> This order is generated to satisfy the shortage for <strong>Job Order #ORD-1004</strong>. Fulfilling this PO will automatically unblock the "Ready for Cutting" status for the linked job.
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="summary-group">
+        <div class="summary-item">
+          <span class="summary-label">Estimated Total</span>
+          <span class="summary-value" style="color: #92400E;">₱ 1,560.00</span>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <a href="../02-production/02-job-orders-add-modal.html" class="btn btn-secondary">Back to Order</a>
+        <a href="02-procurement-tab.html" class="btn btn-primary">Confirm Emergency PO</a>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Branch Management | Sutura Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    .sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-header{height:72px;display:flex;align-items:center;padding:0 24px;gap:12px;border-bottom:1px solid var(--border);}
+    .logo-icon{background:var(--primary);color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;}
+    .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .plan-badge{font-size:10px;font-weight:700;background:#FAF5FF;color:#8B5CF6;border:1px solid #DDD6FE;padding:2px 8px;border-radius:6px;margin-left:2px;}
+    .nav-list{padding:20px 16px;display:flex;flex-direction:column;gap:6px;flex-grow:1;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}
+    .nav-item:hover{background:var(--surface);color:var(--primary);}
+    .nav-item.active{background:var(--primary);color:white;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;}
+    .user-info .name{font-size:14px;font-weight:600;}
+    .user-info .role{font-size:12px;color:var(--text-muted);}
+    .main{flex-grow:1;display:flex;flex-direction:column;min-width:0;}
+    .header{height:72px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 40px;flex-shrink:0;position:sticky;top:0;z-index:100;}
+    .header-left .title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .header-left .sub{font-size:13px;color:var(--text-muted);}
+    .header-actions{display:flex;align-items:center;gap:10px;}
+    .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;border:none;border-radius:12px;padding:0 20px;height:42px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';transition:all 0.2s;text-decoration:none;white-space:nowrap;}
+    .btn-primary:hover{background:#333;}
+    .icon-btn{color:var(--text-muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:background 0.2s;}
+    .icon-btn:hover{background:var(--surface);color:var(--primary);}
+    .content{padding:36px 40px;flex-grow:1;overflow-y:auto;}
+
+    /* Premium banner */
+    .premium-banner{background:linear-gradient(135deg,#FAF5FF 0%,#EDE9FE 100%);border:1px solid #DDD6FE;border-radius:16px;padding:16px 22px;display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+    .premium-banner-icon{width:40px;height:40px;background:#8B5CF6;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;}
+    .premium-banner-text strong{font-size:14px;font-weight:700;color:#6D28D9;display:block;margin-bottom:2px;}
+    .premium-banner-text span{font-size:13px;color:#8B5CF6;}
+    .premium-banner-badge{margin-left:auto;background:#8B5CF6;color:white;font-size:11px;font-weight:700;padding:4px 12px;border-radius:8px;white-space:nowrap;}
+
+    /* Stats */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px;}
+    .stat-card{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:20px 22px;box-shadow:0 2px 6px rgba(0,0,0,0.03);}
+    .stat-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+    .stat-value{font-size:24px;font-weight:800;color:var(--text-main);}
+    .stat-sub{font-size:12px;color:var(--text-muted);margin-top:4px;}
+
+    /* Branch grid */
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    .section-title{font-size:16px;font-weight:700;}
+    .branch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px;}
+    .branch-card{background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;}
+    .branch-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.08);transform:translateY(-2px);}
+    .branch-card.main-branch{border-color:#8B5CF6;box-shadow:0 0 0 3px #EDE9FE;}
+    .branch-top{background:linear-gradient(135deg,#1A1A1A 0%,#374151 100%);padding:20px 22px;position:relative;}
+    .branch-top.cebu{background:linear-gradient(135deg,#2563EB 0%,#1D4ED8 100%);}
+    .branch-top.davao{background:linear-gradient(135deg,#059669 0%,#047857 100%);}
+    .branch-name{font-size:16px;font-weight:800;color:white;margin-bottom:3px;}
+    .branch-addr{font-size:12px;color:rgba(255,255,255,0.7);}
+    .branch-status-pill{position:absolute;top:16px;right:16px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3);}
+    .main-pill{background:rgba(139,92,246,0.9);border-color:#DDD6FE;}
+    .branch-body{padding:18px 22px;}
+    .branch-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+    .bstat .bl{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px;}
+    .bstat .bv{font-size:17px;font-weight:800;color:var(--text-main);}
+    .branch-staff{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:13px;color:var(--text-muted);}
+    .staff-avatars{display:flex;}
+    .sav{width:26px;height:26px;border-radius:50%;border:2px solid white;background:#E5E7EB;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#6B7280;margin-left:-8px;}
+    .sav:first-child{margin-left:0;}
+    .branch-actions{display:flex;gap:8px;}
+    .btn-sm{flex:1;height:36px;border-radius:10px;font-size:13px;font-weight:700;font-family:'Outfit';cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-main);text-decoration:none;}
+    .btn-sm:hover{border-color:var(--primary);color:var(--primary);}
+    .btn-sm.purple{background:#8B5CF6;color:white;border:none;}
+    .btn-sm.purple:hover{background:#7C3AED;}
+
+    /* Add branch card */
+    .add-branch-card{background:var(--bg);border:2px dashed var(--border);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:12px;cursor:pointer;transition:all 0.2s;color:var(--text-muted);min-height:220px;}
+    .add-branch-card:hover{border-color:#8B5CF6;color:#8B5CF6;background:#FAF5FF;}
+    .add-branch-card .add-icon{width:48px;height:48px;border-radius:14px;border:2px dashed currentColor;display:flex;align-items:center;justify-content:center;}
+    .add-branch-card span{font-size:14px;font-weight:700;}
+
+    /* Staff table */
+    .table-card{background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.03);}
+    .table-card-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .table-card-title{font-size:15px;font-weight:700;}
+    table{width:100%;border-collapse:collapse;}
+    th{padding:11px 20px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;background:#F8FAFC;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+    td{padding:14px 20px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:4px 10px;border-radius:7px;white-space:nowrap;}
+    .badge-green{background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;}
+    .badge-purple{background:#FAF5FF;color:#9333EA;border:1px solid #DDD6FE;}
+    .badge-blue{background:#EFF6FF;color:#2563EB;border:1px solid #DBEAFE;}
+    .badge-amber{background:#FFFBEB;color:#D97706;border:1px solid #FEF3C7;}
+    .branch-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+  
+    /* Advanced Paywall Modal Styles */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(8px);
+      z-index: 200; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .paywall-modal {
+      background: var(--surface); width: 100%; max-width: 800px;
+      border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+      display: flex; flex-direction: column; overflow: hidden; max-height: 90vh;
+      animation: modalSlideUp 0.3s ease-out;
+    }
+    @keyframes modalSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .paywall-header {
+      padding: 32px 40px; background: linear-gradient(135deg, #1A1A1A 0%, #374151 100%);
+      color: white; text-align: center; position: relative;
+    }
+    .paywall-close { position: absolute; top: 20px; right: 20px; color: rgba(255,255,255,0.5); cursor: pointer; transition: 0.2s; }
+    .paywall-close:hover { color: white; }
+    .paywall-icon-wrap {
+      width: 64px; height: 64px; background: rgba(255,255,255,0.1); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+      color: #FCD34D;
+    }
+    
+    .paywall-body { padding: 40px; overflow-y: auto; background: var(--bg); }
+    
+    .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+    
+    .plan-card {
+      border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+      position: relative; background: var(--surface); text-align: left;
+    }
+    .plan-card.premium {
+      border: 2px solid #D97706; background: #FFFBEB;
+      box-shadow: 0 10px 25px rgba(217, 119, 6, 0.1);
+    }
+    .plan-badge {
+      position: absolute; top: -12px; right: 24px; background: #D97706; color: white;
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 4px 12px; border-radius: 12px;
+    }
+    
+    .plan-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
+    .plan-price { font-size: 32px; font-weight: 800; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: baseline; gap: 4px; }
+    .plan-price span { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+    
+    .feature-list { list-style: none; margin-bottom: 24px; padding: 0; }
+    .feature-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
+    .feature-list li.pro { color: var(--text-main); font-weight: 600; }
+    .feature-list i { color: #10B981; flex-shrink: 0; width: 16px; margin-top: 2px; }
+    .feature-list i.x { color: #EF4444; }
+    
+    .btn-upgrade {
+      width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700;
+      background: #1A1A1A; color: white; border: none; cursor: pointer; transition: 0.2s;
+    }
+    .btn-upgrade:hover { background: #374151; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .btn-current {
+      width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700;
+      background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); cursor: not-allowed;
+    }
+
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:18px;"></i></div>
+      <div class="logo-text">Sutura <span class="plan-badge">Premium</span></div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item "><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      
+      <a href="../05-settings/01-settings-tab.html" class="nav-item "><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info"><div class="name">Admin User</div><div class="role">Shop Owner</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-left">
+        <div class="title">Branch Management</div>
+        <div class="sub">Manage all your Sutura locations from one place</div>
+      </div>
+      <div class="header-actions">
+        <a href="09-branch-analytics.html" class="btn-primary" style="background:#FAF5FF;color:#8B5CF6;border:1px solid #DDD6FE;">
+          <i data-lucide="bar-chart-2" style="width:16px;"></i> Branch Analytics
+        </a>
+        <a href="08b-branch-add-modal.html" class="btn-primary"><i data-lucide="plus" style="width:16px;"></i> Add Branch</a>
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Premium feature banner -->
+      <div class="premium-banner">
+        <div class="premium-banner-icon"><i data-lucide="git-branch" style="width:20px;"></i></div>
+        <div class="premium-banner-text">
+          <strong>Multi-Branch Support — Premium Feature</strong>
+          <span>Manage multiple Sutura locations, staff, and analytics from a single account.</span>
+        </div>
+        <div class="premium-banner-badge">✦ Premium Plan</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Branches</div>
+          <div class="stat-value">3</div>
+          <div class="stat-sub">All active</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Staff</div>
+          <div class="stat-value">12</div>
+          <div class="stat-sub">Across all branches</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Combined Revenue</div>
+          <div class="stat-value">₱184,500</div>
+          <div class="stat-sub">April 2026</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Orders</div>
+          <div class="stat-value">34</div>
+          <div class="stat-sub">Across all branches</div>
+        </div>
+      </div>
+
+      <!-- Branch cards -->
+      <div class="section-header">
+        <div class="section-title">Your Branches</div>
+      </div>
+      <div class="branch-grid">
+
+        <!-- Main Branch -->
+        <div class="branch-card main-branch">
+          <div class="branch-top">
+            <div class="branch-name">Sutura — Makati (HQ)</div>
+            <div class="branch-addr">Ayala Ave., Makati City</div>
+            <span class="branch-status-pill main-pill">Main Branch</span>
+          </div>
+          <div class="branch-body">
+            <div class="branch-stats">
+              <div class="bstat"><div class="bl">Revenue</div><div class="bv">₱84,500</div></div>
+              <div class="bstat"><div class="bl">Orders</div><div class="bv">18 active</div></div>
+            </div>
+            <div class="branch-staff">
+              <div class="staff-avatars">
+                <div class="sav">R</div><div class="sav">J</div><div class="sav">A</div><div class="sav" style="background:#E0E7FF;color:#4F46E5;">+3</div>
+              </div>
+              <span>6 staff members</span>
+            </div>
+            <div class="branch-actions">
+              <a href="01-dashboard.html" class="btn-sm" style="flex:2;"><i data-lucide="layout-dashboard" style="width:13px;"></i> Go to HQ Dashboard</a>
+              <a href="../05-settings/01-settings-tab.html" class="btn-sm" style="background:#FAF5FF;color:#8B5CF6;border-color:#DDD6FE;"><i data-lucide="settings" style="width:13px;"></i> Settings</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cebu Branch -->
+        <div class="branch-card">
+          <div class="branch-top cebu">
+            <div class="branch-name">Sutura — Cebu City</div>
+            <div class="branch-addr">Colon St., Cebu City</div>
+            <span class="branch-status-pill">Active</span>
+          </div>
+          <div class="branch-body">
+            <div class="branch-stats">
+              <div class="bstat"><div class="bl">Revenue</div><div class="bv">₱62,300</div></div>
+              <div class="bstat"><div class="bl">Orders</div><div class="bv">10 active</div></div>
+            </div>
+            <div class="branch-staff">
+              <div class="staff-avatars">
+                <div class="sav">M</div><div class="sav">L</div><div class="sav" style="background:#E0F2FE;color:#0369A1;">+2</div>
+              </div>
+              <span>4 staff members</span>
+            </div>
+            <div class="branch-actions">
+              <a href="10-branch-oversight.html" class="btn-sm"><i data-lucide="eye" style="width:13px;"></i> View</a>
+              <a href="08c-branch-manage-modal.html" class="btn-sm"><i data-lucide="settings" style="width:13px;"></i> Manage</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Davao Branch -->
+        <div class="branch-card">
+          <div class="branch-top davao">
+            <div class="branch-name">Sutura — Davao City</div>
+            <div class="branch-addr">Uyanguren St., Davao City</div>
+            <span class="branch-status-pill">Active</span>
+          </div>
+          <div class="branch-body">
+            <div class="branch-stats">
+              <div class="bstat"><div class="bl">Revenue</div><div class="bv">₱37,700</div></div>
+              <div class="bstat"><div class="bl">Orders</div><div class="bv">6 active</div></div>
+            </div>
+            <div class="branch-staff">
+              <div class="staff-avatars">
+                <div class="sav">C</div><div class="sav">F</div>
+              </div>
+              <span>2 staff members</span>
+            </div>
+            <div class="branch-actions">
+              <a href="10-branch-oversight.html" class="btn-sm"><i data-lucide="eye" style="width:13px;"></i> View</a>
+              <a href="08c-branch-manage-modal.html" class="btn-sm"><i data-lucide="settings" style="width:13px;"></i> Manage</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Branch -->
+        <a href="08b-branch-add-modal.html" class="add-branch-card" style="text-decoration:none;">
+          <div class="add-icon"><i data-lucide="plus" style="width:22px;"></i></div>
+          <span>Add New Branch</span>
+          <small style="font-size:12px;text-align:center;line-height:1.5;">Expand to a new location. Each branch gets its own staff, orders, and inventory.</small>
+        </a>
+      </div>
+
+      <!-- Branch-Level Staff Control -->
+      <div class="table-card">
+        <div class="table-card-header">
+          <div class="table-card-title">Branch-Level Staff Directory</div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Staff Name</th><th>Role</th><th>Branch</th><th>Active Orders</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:700;">Rosa Dela Cruz</td>
+              <td style="color:var(--text-muted);">Seamstress</td>
+              <td><span class="branch-dot" style="background:#1A1A1A;"></span>Makati HQ</td>
+              <td style="font-weight:700;">4</td>
+              <td><span class="badge badge-green">Active</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;">Juan Mendoza</td>
+              <td style="color:var(--text-muted);">Tailor</td>
+              <td><span class="branch-dot" style="background:#1A1A1A;"></span>Makati HQ</td>
+              <td style="font-weight:700;">3</td>
+              <td><span class="badge badge-green">Active</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;">Maria Lim</td>
+              <td style="color:var(--text-muted);">Seamstress</td>
+              <td><span class="branch-dot" style="background:#2563EB;"></span>Cebu City</td>
+              <td style="font-weight:700;">5</td>
+              <td><span class="badge badge-green">Active</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;">Carlos Reyes</td>
+              <td style="color:var(--text-muted);">Fashion Designer</td>
+              <td><span class="branch-dot" style="background:#2563EB;"></span>Cebu City</td>
+              <td style="font-weight:700;">—</td>
+              <td><span class="badge badge-purple">Designer</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;">Flora Santos</td>
+              <td style="color:var(--text-muted);">Seamstress</td>
+              <td><span class="branch-dot" style="background:#059669;"></span>Davao City</td>
+              <td style="font-weight:700;">2</td>
+              <td><span class="badge badge-amber">On Leave</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+
+  <!-- UPGRADE PAYWALL MODAL -->
+  <div class="modal-backdrop">
+    <div class="paywall-modal">
+      
+      <div class="paywall-header">
+        
+        <div class="paywall-icon-wrap">
+          <i data-lucide="lock" style="width:28px; height:28px;"></i>
+        </div>
+        <h2 style="font-size:24px;font-weight:800;letter-spacing:-0.5px;margin-bottom:8px;">Branch Limit Reached</h2>
+        <p style="font-size:15px;color:rgba(255,255,255,0.8);">Your current Basic Plan only supports 1 active branch. Upgrade your subscription to scale your operations.</p>
+      </div>
+
+      <div class="paywall-body">
+        
+        <div class="pricing-grid">
+          
+          <!-- Current Plan -->
+          <div class="plan-card">
+            <div class="plan-title">Basic Plan</div>
+            <div class="plan-price">₱49<span>/month</span></div>
+            <ul class="feature-list">
+              <li><i data-lucide="check"></i> 1 Active Branch</li>
+              <li><i data-lucide="check"></i> 5 Staff Accounts</li>
+              <li><i data-lucide="check"></i> Basic Support</li>
+              <li><i data-lucide="x" class="x"></i> Multi-Branch Analytics</li>
+              <li><i data-lucide="x" class="x"></i> White-Label Portal</li>
+            </ul>
+            <button class="btn-current">Current Plan</button>
+          </div>
+
+          <!-- Upgrade Plan -->
+          <div class="plan-card premium">
+            <div class="plan-badge">Most Popular</div>
+            <div class="plan-title" style="color:#D97706;">Premium Plan</div>
+            <div class="plan-price">₱149<span>/month</span></div>
+            <ul class="feature-list">
+              <li class="pro"><i data-lucide="check"></i> Up to 5 Active Branches</li>
+              <li class="pro"><i data-lucide="check"></i> Unlimited Staff Accounts</li>
+              <li class="pro"><i data-lucide="check"></i> Priority 24/7 Support</li>
+              <li class="pro"><i data-lucide="check"></i> Multi-Branch Analytics</li>
+              <li class="pro"><i data-lucide="check"></i> White-Label Customer Portal</li>
+            </ul>
+            <button class="btn-upgrade" onclick="alert('Redirecting to secure Stripe checkout...'); window.location.href='08-branch-management.html';">Upgrade to Premium</button>
+          </div>
+
+        </div>
+
+        <div style="text-align:center;margin-top:24px;font-size:13px;color:var(--text-muted);">
+          Need an Enterprise solution for more than 5 branches? <a href="#" style="color:#2563EB;font-weight:600;text-decoration:none;">Contact Sales</a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

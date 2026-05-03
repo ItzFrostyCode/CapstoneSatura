@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sutura | Platform Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { 
+      --bg: #09090B; 
+      --sidebar: rgba(9, 9, 11, 0.96); 
+      --card: #121217;
+      --card-2: #17171e;
+      --card-3: #1f1f29;
+      --accent: #3B82F6; 
+      --accent-muted: rgba(59, 130, 246, 0.12);
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text: #FAFAFA;
+      --text-dim: #A1A1AA;
+      --border: #27272A;
+      --shadow: none;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Outfit', sans-serif; 
+      background: var(--bg); 
+      color: var(--text); 
+      display: flex; 
+      min-height: 100vh; 
+      overflow: hidden; 
+      letter-spacing: -0.02em; 
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar { 
+      background: var(--sidebar); 
+      border-right: 1px solid var(--border);
+      display: flex; 
+      flex-direction: column; 
+      position: sticky; 
+      top: 0; 
+      height: 100vh; 
+      backdrop-filter: blur(12px);
+    }
+    .sidebar-header { padding: 34px 24px 22px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: white; }
+    .brand-sub { margin-top: 6px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; }
+    
+    .nav { padding: 14px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; overflow: auto; list-style: none; }
+    .nav-group-label { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 12px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .nav-item i { width: 18px; height: 18px; }
+    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .nav-item.active { background: var(--accent-muted); color: var(--accent); box-shadow: inset 0 0 0 1px rgba(59,130,246,0.18); }
+
+    .nav-badge { margin-left: auto; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(239,68,68,0.14); color: #fecaca; border: 1px solid rgba(239,68,68,0.18); padding: 3px 7px; border-radius: 999px; }
+    
+    .sidebar-footer { padding: 18px 20px 22px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; background: var(--card-3); border: 1px solid var(--border); border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: white; font-size: 12px; flex: 0 0 auto; }
+    .user-info .name { font-weight: 700; color: white; font-size: 13px; }
+    .user-info .role { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    /* Main Content */
+    .main { padding: 34px 40px 40px; overflow-y: auto; position: relative; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+    .bg-grid { position: fixed; top: 0; right: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px); background-size: 50px 50px; z-index: -1; }
+
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; }
+    .status-pill { background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; gap: 6px; }
+    .status-pill::before { content: ''; width: 6px; height: 6px; background: var(--success); border-radius: 50%; display: block; }
+
+    /* KPI Cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .kpi-card { background: var(--card); padding: 24px; border-radius: 16px; border: 1px solid var(--border); transition: 0.2s; }
+    .kpi-card:hover { border-color: #3F3F46; }
+    .kpi-label { font-size: 13px; font-weight: 500; color: var(--text-dim); margin-bottom: 8px; display: block; }
+    .kpi-value { font-size: 24px; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 4px; }
+    .kpi-trend { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+    /* Data Tables */
+    .section-title { font-size: 20px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+    .table-card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 20px 32px; background: rgba(255,255,255,0.02); font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+    td { padding: 20px 32px; border-bottom: 1px solid var(--border); font-size: 14px; font-family: 'Outfit', sans-serif; }
+    
+    .shop-info { display: flex; align-items: center; gap: 12px; }
+    .shop-logo { width: 36px; height: 36px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--accent); }
+    
+    .plan-badge { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .plan-premium { background: rgba(139, 92, 246, 0.1); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.2); }
+    .plan-pro { background: rgba(59, 130, 246, 0.1); color: #93C5FD; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .plan-basic { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--border); }
+
+    .btn-verify { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-verify:hover { background: #2563EB; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- bg-grid removed -->
+
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">Sutura Admin</div>
+        <div class="brand-sub">Platform Management</div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group-label">Overview</div>
+        <a href="01-admin-dashboard.html" class="nav-item active"><i data-lucide="layout-grid"></i> Overview</a>
+
+        <div class="nav-group-label">Management</div>
+        <a href="02-registrations.html" class="nav-item"><i data-lucide="clipboard-check"></i> Shop Verifications <span class="nav-badge">3</span></a>
+        <a href="03-shops.html" class="nav-item"><i data-lucide="users"></i> Registered Accounts</a>
+        <a href="08-announcements-tab.html" class="nav-item"><i data-lucide="megaphone"></i> Announcements</a>
+        <a href="05-subscription-plans.html" class="nav-item"><i data-lucide="credit-card"></i> Revenue & Plans</a>
+        <a href="07-support-tickets.html" class="nav-item"><i data-lucide="life-buoy"></i> Support Tickets</a>
+
+        <div class="nav-group-label">System</div>
+        <a href="06-system-monitor.html" class="nav-item"><i data-lucide="activity"></i> System Health</a>
+        <a href="16-admin-audit-logs.html" class="nav-item"><i data-lucide="shield"></i> Security Logs</a>
+        <a href="08-platform-settings.html" class="nav-item"><i data-lucide="settings"></i> Platform Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar">A</div>
+        <div>
+          <div style="font-weight:700;font-size:13px;">Admin-99</div>
+          <div class="muted-11">System Superuser</div>
+        </div>
+      </div>
+    </aside>
+
+  <main class="main">
+    <header class="header">
+      <div>
+        <h1 style="font-size: 28px; font-weight: 600; letter-spacing: -0.02em;">Platform Overview</h1>
+        <p style="color: var(--text-dim); font-size: 14px;">Monitoring platform growth and system integrity.</p>
+      </div>
+      <div class="status-pill">System Nominal</div>
+    </header>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Total Verified Shops</span>
+        <div class="kpi-value">1,248</div>
+        <div class="kpi-trend" style="color: var(--success);"><i data-lucide="trending-up" style="width: 14px;"></i> +42 this week</div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Platform ARR</span>
+        <div class="kpi-value">₱2.4M</div>
+        <div class="kpi-trend" style="color: var(--success);"><i data-lucide="trending-up" style="width: 14px;"></i> +18% growth</div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Pending Reviews</span>
+        <div class="kpi-value">12</div>
+        <div class="kpi-trend" style="color: var(--warning);"><i data-lucide="clock" style="width: 14px;"></i> 3 Critical Urgent</div>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Active Users</span>
+        <div class="kpi-value">8.4k</div>
+        <div class="kpi-trend" style="color: var(--accent);"><i data-lucide="users" style="width: 14px;"></i> Live Now</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <i data-lucide="clock" style="color: var(--accent);"></i> Recent Shop Registrations
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Shop / Business</th>
+            <th>Owner</th>
+            <th>Plan Tier</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="shop-info">
+                <div class="shop-logo" style="background: var(--accent); color: white;">BT</div>
+                <div style="font-weight: 700;">Bankerohan Tailorshop</div>
+              </div>
+            </td>
+            <td>Juan Dela Cruz</td>
+            <td><span class="plan-badge plan-basic">Basic</span></td>
+            <td>Quezon City, PH</td>
+            <td>Oct 30, 2026</td>
+            <td><button class="btn-verify" onclick="location.href='02-registrations.html'">Review</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="shop-info">
+                <div class="shop-logo">TC</div>
+                <div style="font-weight: 700;">Threads & Co.</div>
+              </div>
+            </td>
+            <td>Maria Santos</td>
+            <td><span class="plan-badge plan-pro">Pro</span></td>
+            <td>Davao, PH</td>
+            <td>Oct 27, 2026</td>
+            <td><button class="btn-verify">Review</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="shop-info">
+                <div class="shop-logo">ST</div>
+                <div style="font-weight: 700;">Sutura Tailors</div>
+              </div>
+            </td>
+            <td>Jose Rizal</td>
+            <td><span class="plan-badge plan-basic">Basic</span></td>
+            <td>Cebu, PH</td>
+            <td>Oct 27, 2026</td>
+            <td><button class="btn-verify">Review</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  </div>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

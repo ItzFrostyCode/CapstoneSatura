@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura - Designer Shop</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333;
+      --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #8B5CF6; --accent-hover: #7C3AED; --accent-light: #EDE9FE;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+    .sidebar-header { padding: 32px 24px; display: flex; flex-direction: column; gap: 4px; }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .logo-icon { background: var(--accent); color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+    .logo-text { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .nav-list { padding: 0 16px; display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background: var(--surface); color: var(--accent); }
+    .nav-item.active { background: var(--accent); color: white; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.2); }
+
+    /* ── Main ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; align-items: center; }
+    .header { height: 80px; width: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; position: sticky; top: 0; z-index: 100; }
+    .header-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+
+    /* ── Shop Container ── */
+    .shop-container { width: 100%; max-width: 1000px; padding: 40px 20px; }
+
+    /* ── Top Bar ── */
+    .shop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .shop-tabs { display: flex; gap: 32px; }
+    .shop-tab { font-size: 14px; font-weight: 700; color: var(--text-muted); cursor: pointer; padding-bottom: 8px; border-bottom: 2px solid transparent; }
+    .shop-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── Shop Grid ── */
+    .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .shop-item { background: white; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: all 0.2s; position: relative; }
+    .shop-item:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+    
+    .item-img { width: 100%; aspect-ratio: 1; background: var(--surface); overflow: hidden; position: relative; }
+    .item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .item-badge { position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+
+    .item-info { padding: 16px; }
+    .item-price { font-size: 18px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+    .item-name { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    
+    .item-footer { padding: 12px 16px; border-top: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center; }
+    .item-status { font-size: 11px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #10B981; }
+
+    /* ── Add New Item Button ── */
+    .btn-add-item { background: var(--accent); color: white; border: none; padding: 0 20px; height: 44px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .btn-add-item:hover { background: var(--accent-hover); }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-wrap">
+        <div class="logo-icon"><i data-lucide="scissors" style="width:22px;"></i></div>
+        <div class="logo-text">Sutura</div>
+      </div>
+    </div>
+    
+    <nav class="nav-list">
+      <a href="01-designer-dashboard.html" class="nav-item"><i data-lucide="home"></i> Feed</a>
+      <a href="#" class="nav-item"><i data-lucide="search"></i> Explore</a>
+      <a href="03-design-posts.html" class="nav-item"><i data-lucide="palette"></i> My Portfolio</a>
+      <a href="04-publish-product.html" class="nav-item active"><i data-lucide="shopping-bag"></i> Catalog</a>
+      <a href="#" class="nav-item"><i data-lucide="message-circle"></i> Messages</a>
+      <a href="02-profile-settings.html" class="nav-item"><i data-lucide="user"></i> Profile</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Design Catalog</div>
+      <button class="btn-add-item"><i data-lucide="plus"></i> Publish Design</button>
+    </header>
+
+    <div class="shop-container">
+      
+      <div class="shop-header">
+        <div class="shop-tabs">
+          <div class="shop-tab active">Active Designs</div>
+          <div class="shop-tab">Pending Review</div>
+          <div class="shop-tab">Drafts</div>
+        </div>
+      </div>
+
+      <!-- Shop Grid -->
+      <div class="shop-grid">
+        
+        <div class="shop-item">
+          <div class="item-img">
+            <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&auto=format&fit=crop&q=60">
+            <div class="item-badge">Featured</div>
+          </div>
+          <div class="item-info">
+            <div class="item-price">₱4,500</div>
+            <div class="item-name">Linen Summer Blazer</div>
+          </div>
+          <div class="item-footer">
+            <div class="item-status"><span class="status-dot"></span> Published</div>
+            <i data-lucide="edit-3" style="width: 14px; color: var(--text-muted); cursor: pointer;"></i>
+          </div>
+        </div>
+
+        <div class="shop-item">
+          <div class="item-img">
+            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&auto=format&fit=crop&q=60">
+          </div>
+          <div class="item-info">
+            <div class="item-price">₱3,200</div>
+            <div class="item-name">Minimalist Overcoat</div>
+          </div>
+          <div class="item-footer">
+            <div class="item-status"><span class="status-dot"></span> Published</div>
+            <i data-lucide="edit-3" style="width: 14px; color: var(--text-muted); cursor: pointer;"></i>
+          </div>
+        </div>
+
+        <div class="shop-item">
+          <div class="item-img">
+            <img src="https://images.unsplash.com/photo-1445205170230-053b830c6050?w=600&auto=format&fit=crop&q=60">
+          </div>
+          <div class="item-info">
+            <div class="item-price">₱12,500</div>
+            <div class="item-name">The Petal Train - Bridal</div>
+          </div>
+          <div class="item-footer">
+            <div class="item-status"><span class="status-dot" style="background: #F59E0B;"></span> Reviewing</div>
+            <i data-lucide="edit-3" style="width: 14px; color: var(--text-muted); cursor: pointer;"></i>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

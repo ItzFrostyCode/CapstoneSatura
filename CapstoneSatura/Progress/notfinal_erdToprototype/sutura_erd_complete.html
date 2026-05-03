@@ -1,0 +1,344 @@
+
+<style>
+#erd-wrap { 
+  padding: 20px; 
+  background-color: #e7ecf4; 
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  margin: 10px;
+}
+#erd-wrap svg { width: 100%; height: auto; }
+#erd-wrap .mermaid-error { color: #ff7b72; padding: 12px; font-size: 13px; }
+</style>
+<div id="erd-wrap"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  fontFamily: '"Inter", "Outfit", sans-serif',
+  themeVariables: {
+    primaryColor: '#58a6ff',
+    primaryTextColor: '#000000ff',
+    primaryBorderColor: '#30363d',
+    lineColor: '#8b949e',
+    secondaryColor: '#161b22',
+    tertiaryColor: '#FFF',
+    mainBkg: '#FAFAFA',
+    nodeBorder: '#30363d',
+    clusterBkg: '#FFFF',
+    clusterBorder: '#30363d',
+    fontSize: '13px',
+    textColor: '#000',
+    linkColor: '#58a6ff'
+  },
+});
+
+const diagram = `erDiagram
+  direction TD
+
+  PLATFORM_ADMIN {
+    int admin_id PK
+    string full_name
+    string email
+    string password_hash
+    timestamp created_at
+  }
+
+  SUBSCRIPTION_PLAN {
+    int plan_id PK
+    string plan_name
+    string tier
+    decimal monthly_price
+    decimal yearly_price
+    text features_json
+    timestamp created_at
+  }
+
+  BUSINESS {
+    int business_id PK
+    int plan_id FK
+    string business_name
+    string owner_full_name
+    string address
+    string contact_number
+    string email
+    string bir_tax_id
+    string permit_number
+    string proof_document_path
+    string status
+    int approved_by FK
+    timestamp approved_at
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  USER_ACCOUNT {
+    int user_id PK
+    int business_id FK
+    string full_name
+    string email
+    string password_hash
+    string role
+    string status
+    timestamp last_login
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  DESIGNER_PROFILE {
+    int designer_id PK
+    int user_id FK
+    string bio
+    string profile_photo_path
+    string shop_url_slug
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  DESIGNER_POST {
+    int post_id PK
+    int designer_id FK
+    string title
+    text description
+    string image_path
+    string status
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  DESIGNER_PRODUCT {
+    int product_id PK
+    int designer_id FK
+    string product_name
+    text description
+    decimal price
+    string image_path
+    string status
+    timestamp created_at
+  }
+
+  CUSTOMER {
+    int customer_id PK
+    int business_id FK
+    string full_name
+    string contact_number
+    string email
+    string address
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  MEASUREMENT {
+    int measurement_id PK
+    int customer_id FK
+    int recorded_by FK
+    decimal chest_cm
+    decimal waist_cm
+    decimal hips_cm
+    decimal shoulder_cm
+    decimal sleeve_length_cm
+    decimal inseam_cm
+    decimal neck_cm
+    decimal back_length_cm
+    text notes
+    timestamp recorded_at
+  }
+
+  JOB_ORDER {
+    int order_id PK
+    int business_id FK
+    int customer_id FK
+    int measurement_id FK
+    int assigned_to FK
+    string order_code
+    text design_description
+    string garment_type
+    date target_completion_date
+    string status
+    decimal total_amount
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  ORDER_STATUS_LOG {
+    int log_id PK
+    int order_id FK
+    int updated_by FK
+    string previous_status
+    string new_status
+    text remarks
+    timestamp changed_at
+  }
+
+  APPOINTMENT {
+    int appointment_id PK
+    int business_id FK
+    int customer_id FK
+    int order_id FK
+    int confirmed_by FK
+    string appointment_type
+    date scheduled_date
+    string scheduled_time
+    string status
+    text notes
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  NOTIFICATION {
+    int notification_id PK
+    int business_id FK
+    int user_id FK
+    string notification_type
+    text message
+    string reference_type
+    int reference_id
+    string is_read
+    timestamp created_at
+  }
+
+  SUPPLIER {
+    int supplier_id PK
+    int business_id FK
+    string supplier_name
+    string contact_person
+    string contact_number
+    string email
+    string address
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  MATERIAL {
+    int material_id PK
+    int business_id FK
+    string material_name
+    string category
+    string unit
+    decimal current_stock
+    decimal low_stock_threshold
+    string status
+    timestamp updated_at
+  }
+
+  PROCUREMENT {
+    int procurement_id PK
+    int business_id FK
+    int supplier_id FK
+    int material_id FK
+    int requested_by FK
+    int received_by FK
+    decimal quantity_ordered
+    decimal quantity_received
+    decimal unit_price
+    string status
+    date requested_date
+    date received_date
+    timestamp created_at
+  }
+
+  INVOICE {
+    int invoice_id PK
+    int order_id FK
+    int business_id FK
+    int generated_by FK
+    string invoice_number
+    decimal subtotal
+    decimal discount
+    decimal total_amount
+    string status
+    timestamp generated_at
+  }
+
+  PAYMENT {
+    int payment_id PK
+    int invoice_id FK
+    int recorded_by FK
+    decimal amount_paid
+    decimal running_balance
+    string payment_type
+    string reference_note
+    timestamp paid_at
+  }
+
+  REPORT_LOG {
+    int report_id PK
+    int business_id FK
+    int generated_by FK
+    string report_type
+    date date_from
+    date date_to
+    string file_path
+    timestamp generated_at
+  }
+
+  PLATFORM_ADMIN ||--o{ BUSINESS : "approves"
+  SUBSCRIPTION_PLAN ||--o{ BUSINESS : "subscribed by"
+  BUSINESS ||--o{ USER_ACCOUNT : "employs"
+  BUSINESS ||--o{ CUSTOMER : "serves"
+  BUSINESS ||--o{ SUPPLIER : "works with"
+  BUSINESS ||--o{ MATERIAL : "manages"
+  BUSINESS ||--o{ INVOICE : "issues"
+  BUSINESS ||--o{ REPORT_LOG : "generates"
+  BUSINESS ||--o{ APPOINTMENT : "schedules"
+  BUSINESS ||--o{ NOTIFICATION : "sends"
+  BUSINESS ||--o{ JOB_ORDER : "creates"
+  BUSINESS ||--o{ PROCUREMENT : "initiates"
+  USER_ACCOUNT ||--o| DESIGNER_PROFILE : "has"
+  DESIGNER_PROFILE ||--o{ DESIGNER_POST : "publishes"
+  DESIGNER_PROFILE ||--o{ DESIGNER_PRODUCT : "lists"
+  CUSTOMER ||--o{ MEASUREMENT : "has"
+  CUSTOMER ||--o{ JOB_ORDER : "placed"
+  CUSTOMER ||--o{ APPOINTMENT : "books"
+  MEASUREMENT ||--o{ JOB_ORDER : "referenced in"
+  JOB_ORDER ||--o{ ORDER_STATUS_LOG : "tracks"
+  JOB_ORDER ||--o{ APPOINTMENT : "linked to"
+  JOB_ORDER ||--|| INVOICE : "billed as"
+  INVOICE ||--o{ PAYMENT : "settled by"
+  SUPPLIER ||--o{ PROCUREMENT : "fulfills"
+  MATERIAL ||--o{ PROCUREMENT : "ordered in"
+  USER_ACCOUNT ||--o{ MEASUREMENT : "records"
+  USER_ACCOUNT ||--o{ ORDER_STATUS_LOG : "logs"
+  USER_ACCOUNT ||--o{ APPOINTMENT : "confirms"
+  USER_ACCOUNT ||--o{ PROCUREMENT : "requests"
+  USER_ACCOUNT ||--o{ PROCUREMENT : "receives"
+  USER_ACCOUNT ||--o{ INVOICE : "generates"
+  USER_ACCOUNT ||--o{ PAYMENT : "records"
+  USER_ACCOUNT ||--o{ REPORT_LOG : "runs"
+  USER_ACCOUNT ||--o{ NOTIFICATION : "receives"
+`;
+
+try {
+  const { svg } = await mermaid.render('erd-svg', diagram);
+  document.getElementById('erd-wrap').innerHTML = svg;
+
+  document.querySelectorAll('#erd-wrap svg.erDiagram .node').forEach(node => {
+    const firstPath = node.querySelector('path[d]');
+    if (!firstPath) return;
+    const d = firstPath.getAttribute('d');
+    const nums = d.match(/-?[\d.]+/g)?.map(Number);
+    if (!nums || nums.length < 8) return;
+    const xs = [nums[0], nums[2], nums[4], nums[6]];
+    const ys = [nums[1], nums[3], nums[5], nums[7]];
+    const x = Math.min(...xs), y = Math.min(...ys);
+    const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', x); rect.setAttribute('y', y);
+    rect.setAttribute('width', w); rect.setAttribute('height', h);
+    rect.setAttribute('rx', '8');
+    for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+      if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+    }
+    firstPath.replaceWith(rect);
+  });
+
+  document.querySelectorAll('#erd-wrap svg.erDiagram .row-rect-odd path, #erd-wrap svg.erDiagram .row-rect-even path').forEach(p => {
+    p.setAttribute('stroke', 'none');
+  });
+} catch(e) {
+  document.getElementById('erd-wrap').innerHTML = '<div class="mermaid-error">ERD rendering error: ' + e.message + '</div>';
+}
+</script>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333;
+      --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; width: 100%; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0; }
+    .logo-text { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background: var(--surface); color: var(--primary); }
+    .nav-item.active { background: var(--primary); color: white; }
+    .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; flex-shrink: 0; }
+    .user-info .name { font-size: 14px; font-weight: 600; }
+    .user-info .role { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Main ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; flex-direction: column; gap: 2px; }
+    .header-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .header-date { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { color: var(--text-muted); background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: background 0.2s; position: relative; }
+    .icon-btn:hover { background: var(--surface); color: var(--primary); }
+    .notif-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #EF4444; border-radius: 50%; border: 2px solid white; }
+    .btn-primary-sm { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; border: none; border-radius: 10px; padding: 0 18px; height: 40px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .btn-primary-sm:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+    /* ── Content ── */
+    .content { padding: 36px 40px; flex-grow: 1; overflow-y: auto; }
+
+    /* ── KPI Grid ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
+    .kpi-card { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: box-shadow 0.2s; }
+    .kpi-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+    .kpi-top { display: flex; align-items: center; justify-content: space-between; }
+    .kpi-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .kpi-icon.blue  { background: #EFF6FF; color: #2563EB; }
+    .kpi-icon.green { background: #F0FDF4; color: #16A34A; }
+    .kpi-icon.amber { background: #FFFBEB; color: #D97706; }
+    .kpi-icon.purple{ background: #FAF5FF; color: #9333EA; }
+    .kpi-change { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+    .kpi-change.up   { background: #F0FDF4; color: #16A34A; }
+    .kpi-change.warn { background: #FFFBEB; color: #D97706; }
+    .kpi-label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-value { font-size: 30px; font-weight: 800; color: var(--text-main); letter-spacing: -1px; line-height: 1; }
+
+    /* ── Two-col layout ── */
+    .two-col { display: grid; grid-template-columns: 1fr 360px; gap: 20px; margin-bottom: 20px; }
+
+    /* ── Card Shell ── */
+    .card { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .card-header { padding: 20px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+    .card-link { font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color 0.2s; }
+    .card-link:hover { color: var(--primary); }
+
+    /* ── Recent Orders Table ── */
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 28px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); background: #F8FAFC; text-align: left; }
+    td { padding: 16px 28px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #F8FAFC; }
+    .order-id { font-family: monospace; font-size: 12px; font-weight: 700; color: var(--primary); background: #F1F5F9; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); white-space: nowrap; }
+    .fw-600 { font-weight: 600; color: var(--text-main); }
+    .small-muted { font-size: 13px; color: var(--text-muted); }
+
+    /* ── Badges ── */
+    .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 7px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+    .badge-blue   { background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; }
+    .badge-yellow { background: #FFFBEB; color: #D97706; border: 1px solid #FEF3C7; }
+    .badge-green  { background: #F0FDF4; color: #15803D; border: 1px solid #BBF7D0; }
+    .badge-purple { background: #FAF5FF; color: #9333EA; border: 1px solid #F3E8FF; }
+    .badge-gray   { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .badge-red    { background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; }
+
+    /* ── Right-col stacked cards ── */
+    .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── Appointment List ── */
+    .appt-list { padding: 8px 0; }
+    .appt-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 24px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .appt-item:last-child { border-bottom: none; }
+    .appt-item:hover { background: var(--surface); }
+    .appt-time-col { display: flex; flex-direction: column; align-items: center; min-width: 44px; }
+    .appt-time { font-size: 13px; font-weight: 700; color: var(--text-main); }
+    .appt-ampm { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+    .appt-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .appt-dot.fitting { background: #2563EB; }
+    .appt-dot.consult { background: #9333EA; }
+    .appt-dot.release { background: #16A34A; }
+    .appt-info .appt-name  { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .appt-info .appt-type  { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+
+    /* ── Low Stock Alerts ── */
+    .alert-list { padding: 8px 0; }
+    .alert-item { display: flex; align-items: center; gap: 14px; padding: 14px 24px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-item:hover { background: var(--surface); }
+    .alert-icon-wrap { width: 36px; height: 36px; background: #FEF2F2; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #DC2626; }
+    .alert-info .alert-name  { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .alert-info .alert-stock { font-size: 12px; color: #DC2626; font-weight: 600; margin-top: 2px; }
+    .alert-ack { margin-left: auto; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .alert-ack:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── Production Progress Bar ── */
+    .prod-section { padding: 20px 28px; }
+    .prod-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+    .prod-row:last-child { margin-bottom: 0; }
+    .prod-label { font-size: 13px; font-weight: 600; color: var(--text-main); width: 80px; flex-shrink: 0; }
+    .prod-bar-wrap { flex-grow: 1; height: 8px; background: var(--surface); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+    .prod-bar { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+    .prod-count { font-size: 13px; font-weight: 700; color: var(--text-main); min-width: 30px; text-align: right; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+      <div class="logo-text">Sutura</div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item active"><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item "><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      <a href="../00-dashboard/08-branch-management.html" class="nav-item "><i data-lucide="git-branch" style="width: 20px;"></i> Branches</a>
+      <a href="../05-settings/01-settings-tab.html" class="nav-item "><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info">
+        <div class="name">Admin User</div>
+        <div class="role">Shop Owner</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="header">
+      <div class="header-left">
+        <div class="header-title">Dashboard</div>
+        <div class="header-date">Friday, April 25, 2026 &mdash; Good morning! ☀️</div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn">
+          <i data-lucide="bell" style="width:20px;"></i>
+          <span class="notif-dot"></span>
+        </button>
+        <a href="../02-production/02-job-orders-add-modal.html" class="btn-primary-sm">
+          <i data-lucide="plus" style="width:18px;"></i> New Job Order
+        </a>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- KPI Row -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon blue"><i data-lucide="briefcase" style="width:20px;"></i></div>
+            <span class="kpi-change up">↑ 4 active</span>
+          </div>
+          <div class="kpi-label">Active Job Orders</div>
+          <div class="kpi-value">20</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon green"><i data-lucide="philippine-peso" style="width:20px;"></i></div>
+            <span class="kpi-change up">↑ ₱12k vs LW</span>
+          </div>
+          <div class="kpi-label">Revenue (MTD)</div>
+          <div class="kpi-value">₱84,500</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon amber"><i data-lucide="receipt" style="width:20px;"></i></div>
+            <span class="kpi-change warn">OPEX + COGS</span>
+          </div>
+          <div class="kpi-label">Total Expenses</div>
+          <div class="kpi-value">₱18,450</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top">
+            <div class="kpi-icon purple"><i data-lucide="trending-up" style="width:20px;"></i></div>
+            <span class="kpi-change up">Net Margin</span>
+          </div>
+          <div class="kpi-label">Monthly Profit</div>
+          <div class="kpi-value" style="color: #16A34A;">₱66,050</div>
+        </div>
+      </div>
+
+      <!-- Action Required Section -->
+      <div style="margin-bottom: 32px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+        <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 20px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 48px; height: 48px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #E11D48;">
+              <i data-lucide="sparkles" style="width: 24px;"></i>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 700; color: #9F1239;">3 Designer Quotations Pending</div>
+              <div style="font-size: 12px; color: #BE123C;">Pricing required for new design listings</div>
+            </div>
+          </div>
+          <a href="../02-production/01-job-orders-tab.html" style="background: #E11D48; color: white; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none;">Price Now</a>
+        </div>
+
+        <div style="background: #F0F9FF; border: 1px solid #BAE6FD; border-radius: 20px; padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="width: 48px; height: 48px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #0284C7;">
+              <i data-lucide="alert-circle" style="width: 24px;"></i>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 700; color: #075985;">2 Materials Missing</div>
+              <div style="font-size: 12px; color: #0369A1;">Production blocked for ORD-1002, ORD-1004</div>
+            </div>
+          </div>
+          <a href="../03-supply-chain/01-inventory-tab.html" style="background: #0284C7; color: white; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none;">Order Stock</a>
+        </div>
+      </div>
+
+      <!-- Two-column layout -->
+      <div class="two-col">
+
+        <!-- Recent Job Orders -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Job Orders</div>
+            <a href="../02-production/01-job-orders-tab.html" class="card-link">View all <i data-lucide="arrow-right" style="width:14px;"></i></a>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Garment</th>
+                <th>Due</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="order-id">ORD-1001</span></td>
+                <td><div class="fw-600">Juan Dela Cruz</div></td>
+                <td><div class="small-muted">3-Piece Charcoal Suit</div></td>
+                <td><div class="small-muted">May 10</div></td>
+                <td><span class="badge badge-blue">In Progress</span></td>
+              </tr>
+              <tr>
+                <td><span class="order-id">ORD-1002</span></td>
+                <td><div class="fw-600">Alexander McQueen</div></td>
+                <td><div class="small-muted">Boutique Staff Polos</div></td>
+                <td><div class="small-muted">May 15</div></td>
+                <td><span class="badge badge-yellow">Cutting</span></td>
+              </tr>
+              <tr>
+                <td><span class="order-id">ORD-1003</span></td>
+                <td><div class="fw-600">Maria Santos</div></td>
+                <td><div class="small-muted">Silk Cocktail Dress</div></td>
+                <td><div class="small-muted" style="color:#DC2626;font-weight:700;">Apr 28 ⚠</div></td>
+                <td><span class="badge badge-green">Ready</span></td>
+              </tr>
+              <tr>
+                <td><span class="order-id">ORD-1004</span></td>
+                <td><div class="fw-600">BGC Tech Solutions</div></td>
+                <td><div class="small-muted">Company Polos (50 pcs)</div></td>
+                <td><div class="small-muted">Jun 01</div></td>
+                <td><span class="badge badge-gray">Measured</span></td>
+              </tr>
+              <tr>
+                <td><span class="order-id">ORD-1005</span></td>
+                <td><div class="fw-600">Liza Soberano</div></td>
+                <td><div class="small-muted">Evening Gown</div></td>
+                <td><div class="small-muted">May 05</div></td>
+                <td><span class="badge badge-green">Released</span></td>
+              </tr>
+              <tr>
+                <td><span class="order-id">ORD-1006</span></td>
+                <td><div class="fw-600">Juan Dela Cruz</div></td>
+                <td><div class="small-muted">Piña Silk Barong</div></td>
+                <td><div class="small-muted" style="color:#D97706;font-weight:700;">Apr 29</div></td>
+                <td><span class="badge badge-green">Ready</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Right column -->
+        <div class="right-col">
+
+          <!-- Production Status -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Production Status</div>
+              <a href="../02-production/06-kanban-board.html" class="card-link">Kanban <i data-lucide="arrow-right" style="width:14px;"></i></a>
+            </div>
+            <div class="prod-section">
+              <div class="prod-row">
+                <div class="prod-label">In Progress</div>
+                <div class="prod-bar-wrap"><div class="prod-bar" style="width:40%; background:#4F46E5;"></div></div>
+                <div class="prod-count">8</div>
+              </div>
+              <div class="prod-row">
+                <div class="prod-label">Cutting</div>
+                <div class="prod-bar-wrap"><div class="prod-bar" style="width:15%; background:#D97706;"></div></div>
+                <div class="prod-count">3</div>
+              </div>
+              <div class="prod-row">
+                <div class="prod-label">QC</div>
+                <div class="prod-bar-wrap"><div class="prod-bar" style="width:10%; background:#9333EA;"></div></div>
+                <div class="prod-count">2</div>
+              </div>
+              <div class="prod-row">
+                <div class="prod-label">QC Rework</div>
+                <div class="prod-bar-wrap"><div class="prod-bar" style="width:12%; background:#EF4444;"></div></div>
+                <div class="prod-count">1</div>
+              </div>
+              <div class="prod-row">
+                <div class="prod-label">Ready</div>
+                <div class="prod-bar-wrap"><div class="prod-bar" style="width:20%; background:#16A34A;"></div></div>
+                <div class="prod-count">4</div>
+              </div>
+              <div class="prod-row">
+                <div class="prod-label">Alteration</div>
+                <div class="prod-bar-wrap"><div class="prod-bar" style="width:8%; background:#F97316;"></div></div>
+                <div class="prod-count">2</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Appointments -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Today's Appointments</div>
+              <a href="../01-clients-crm/08-appointments-tab.html" class="card-link">View all <i data-lucide="arrow-right" style="width:14px;"></i></a>
+            </div>
+            <div class="appt-list">
+              <div class="appt-item">
+                <div class="appt-time-col">
+                  <div class="appt-time">9:00</div>
+                  <div class="appt-ampm">AM</div>
+                  <div class="appt-dot fitting"></div>
+                </div>
+                <div class="appt-info">
+                  <div class="appt-name">Maria Santos</div>
+                  <div class="appt-type">Fitting — Silk Cocktail Dress</div>
+                </div>
+              </div>
+              <div class="appt-item">
+                <div class="appt-time-col">
+                  <div class="appt-time">11:30</div>
+                  <div class="appt-ampm">AM</div>
+                  <div class="appt-dot consult"></div>
+                </div>
+                <div class="appt-info">
+                  <div class="appt-name">Juan Dela Cruz</div>
+                  <div class="appt-type">Consultation — Barong inquiry</div>
+                </div>
+              </div>
+              <div class="appt-item">
+                <div class="appt-time-col">
+                  <div class="appt-time">2:00</div>
+                  <div class="appt-ampm">PM</div>
+                  <div class="appt-dot release"></div>
+                </div>
+                <div class="appt-info">
+                  <div class="appt-name">Liza Soberano</div>
+                  <div class="appt-type">Release — Evening Gown</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Low Stock Alerts (full width) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="alert-triangle" style="width:18px;color:#DC2626;"></i>
+            Low Stock Alerts
+            <span class="badge badge-red" style="font-size:11px;margin-left:4px;">3 items</span>
+          </div>
+          <a href="../03-supply-chain/01-inventory-tab.html" class="card-link">View inventory <i data-lucide="arrow-right" style="width:14px;"></i></a>
+        </div>
+        <div class="alert-list">
+          <div class="alert-item">
+            <div class="alert-icon-wrap"><i data-lucide="package" style="width:18px;"></i></div>
+            <div class="alert-info">
+              <div class="alert-name">Piña Fabric (Natural)</div>
+              <div class="alert-stock">Only 2 meters left — reorder threshold: 5m</div>
+            </div>
+            <button class="alert-ack">Acknowledge</button>
+          </div>
+          <div class="alert-item">
+            <div class="alert-icon-wrap"><i data-lucide="package" style="width:18px;"></i></div>
+            <div class="alert-info">
+              <div class="alert-name">Silk Lining (Ivory)</div>
+              <div class="alert-stock">Only 1.5 meters left — reorder threshold: 4m</div>
+            </div>
+            <button class="alert-ack">Acknowledge</button>
+          </div>
+          <div class="alert-item">
+            <div class="alert-icon-wrap"><i data-lucide="package" style="width:18px;"></i></div>
+            <div class="alert-info">
+              <div class="alert-name">Charcoal Wool Tweed</div>
+              <div class="alert-stock">Only 3 meters left — reorder threshold: 8m</div>
+            </div>
+            <button class="alert-ack">Acknowledge</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

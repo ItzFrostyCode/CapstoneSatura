@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Create Job Order (Default)</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --primary-hover: #333333; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --warning-bg: #FFFBEB; --warning-text: #D97706;
+      --info-bg: #EFF6FF; --info-text: #2563EB;
+      --purple-bg: #FAF5FF; --purple-text: #9333EA;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow-x: hidden; position: relative; }
+
+    .sidebar { width: 260px; background-color: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; opacity: 0.5; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background-color: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-muted); }
+    .nav-item.active { background-color: var(--primary); color: white; }
+
+    .main { flex-grow: 1; display: flex; flex-direction: column; opacity: 0.5; pointer-events: none; }
+    .header { height: 72px; background-color: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 40px; flex-shrink: 0; }
+    .header-title { font-size: 20px; font-weight: 600; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(17,24,39,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+    .modal { background: var(--bg); border-radius: 16px; width: 740px; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.12); overflow: hidden; }
+    .modal-header { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+    .modal-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+    .modal-close { color: var(--text-muted); background: none; border: none; cursor: pointer; display: flex; padding: 4px; border-radius: 6px; }
+    .modal-body { padding: 16px 28px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .form-row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-group input, .form-group select, .form-group textarea { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: 'Outfit'; outline: none; background: var(--bg); }
+    .form-group textarea { resize: none; }
+
+    .select-wrapper { position: relative; display: flex; align-items: center; }
+    .select-wrapper select { width: 100%; appearance: none; padding-right: 40px; }
+    .select-icon { position: absolute; right: 16px; color: var(--text-muted); pointer-events: none; }
+
+    .toggle-group { display: flex; background: var(--surface); padding: 3px; gap: 3px; border: 1px solid var(--border); border-radius: 8px; width: fit-content; }
+    .toggle-btn { padding: 7px 18px; border: none; background: none; font-size: 13px; font-weight: 700; font-family: 'Outfit'; color: var(--text-muted); cursor: pointer; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; }
+    .toggle-btn.active-solo { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+    .section-divider { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-top: 4px; }
+
+    /* Fabric panel (empty state - no garment/fabric selected) */
+    .fabric-panel { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 16px 20px; }
+    .fabric-panel-title { font-size: 12px; font-weight: 700; color: var(--info-text); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .fabric-empty { text-align: center; padding: 16px 0; color: var(--text-muted); font-size: 13px; }
+
+    /* Priority panel (unchecked/off) */
+    .priority-panel { border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 12px; background: var(--surface); }
+    .priority-icon { width: 36px; height: 36px; background: #FEF3C7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #D97706; flex-shrink: 0; }
+    .priority-info .title { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .priority-info .desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .switch { position: relative; width: 42px; height: 24px; appearance: none; background: #D1D5DB; border-radius: 12px; outline: none; cursor: pointer; flex-shrink: 0; }
+    .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+    .modal-footer { padding: 12px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: var(--surface); flex-shrink: 0; }
+    .btn-secondary { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 0 18px; height: 40px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; text-decoration: none; font-family: 'Outfit'; }
+    .btn-primary { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 0 20px; height: 40px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; text-decoration: none; gap: 6px; font-family: 'Outfit'; }
+
+    .state-nav { position: fixed; bottom: 24px; right: 24px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+    .state-nav a { display: flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; text-decoration: none; color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .state-nav a.current-state { background: var(--primary); color: white; border-color: var(--primary); }
+  </style>
+</head>
+<body>
+  
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="logo-icon"><i data-lucide="scissors" style="width:20px;"></i></div><div class="logo-text">Sutura</div></div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item active"><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item "><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header"><div class="header-title">Production</div></header>
+  </main>
+
+  <!-- MODAL STATE: Default / Clean -->
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Create New Job Order</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">State: Default (No selections yet)</div>
+        </div>
+        <a href="01-job-orders-tab.html" class="modal-close" style="display: flex; align-items: center; text-decoration: none;"><i data-lucide="x" style="width: 24px;"></i></a>
+      </div>
+      
+      <div class="modal-body">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>End Customer *</label>
+            <div class="select-wrapper">
+              <select><option value="">Select customer…</option><option>Alexander McQueen</option><option>Maria Santos</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width: 16px;"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Garment Type *</label>
+            <div class="select-wrapper">
+              <select><option value="">Select garment…</option><option>Pants</option><option>Polo</option><option>Barong</option><option>Dress</option><option>Blazer</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width: 16px;"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Type + Quantity hidden by default -->
+        <div class="form-group">
+          <label>Order Type</label>
+          <div class="toggle-group">
+            <a href="02-job-orders-add-modal.html" class="toggle-btn active-solo">Solo</a>
+            <a href="02b-job-orders-bulk-priority.html" class="toggle-btn">Bulk</a>
+          </div>
+        </div>
+
+        <!-- Fabric Smart Analysis — idle state (no garment selected) -->
+        <div class="fabric-panel">
+          <div class="fabric-panel-title">
+            <i data-lucide="zap" style="width: 14px;"></i>
+            Smart Fabric Analysis
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label style="font-size: 12px; color: var(--info-text);">Primary Fabric</label>
+            <div class="select-wrapper">
+              <select style="border-color: #BFDBFE; background: white; font-size: 14px; padding: 10px 16px;">
+                <option>No inventory fabric selected</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-icon" style="width: 16px;"></i>
+            </div>
+          </div>
+          <div class="fabric-empty">
+            <i data-lucide="package" style="width: 32px; margin-bottom: 8px; color: #BFDBFE; display: block; margin-left: auto; margin-right: auto;"></i>
+            Select a garment type and fabric above to see stock analysis and purchase recommendations.
+          </div>
+        </div>
+
+        <div class="section-divider">Schedule & Pricing</div>
+
+        <div class="form-row-4">
+          <div class="form-group">
+            <label>Due Date *</label>
+            <input type="date" />
+          </div>
+          <div class="form-group">
+            <label>Base Price (₱) *</label>
+            <input type="text" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label>Deposit (₱)</label>
+            <input type="text" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label>Payment Method</label>
+            <div class="select-wrapper">
+              <select><option>Cash</option><option>GCash</option><option>Card</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width: 14px;"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Priority Panel (OFF/idle state) -->
+        <div class="priority-panel">
+          <div class="priority-icon"><i data-lucide="zap" style="width: 18px;"></i></div>
+          <div class="priority-info" style="flex-grow: 1;">
+            <div class="title">Priority / Rush Order</div>
+            <div class="desc">Enable to add a rush fee. Solo = flat fee ₱, Bulk = percentage %.</div>
+          </div>
+          <input type="checkbox" class="switch" style="margin-left: auto;">
+        </div>
+
+        <div class="section-divider">Task Assignment</div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>Pattern Maker</label>
+            <div class="select-wrapper">
+              <select><option>Unassigned</option><option>John (Pattern Maker)</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width: 16px;"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Cutter</label>
+            <div class="select-wrapper">
+              <select><option>Unassigned</option><option>Sarah (Cutter)</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width: 16px;"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Tailor</label>
+            <div class="select-wrapper">
+              <select><option>Unassigned</option><option>Mike (Tailor)</option><option>Anna (Tailor)</option></select>
+              <i data-lucide="chevron-down" class="select-icon" style="width: 16px;"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description & Fabrication Notes</label>
+          <textarea placeholder="Fabric details, design notes, special instructions…"></textarea>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <a href="01-job-orders-tab.html" class="btn-secondary">Cancel</a>
+        <a href="01-job-orders-tab.html" class="btn-primary"><i data-lucide="check" style="width: 16px;"></i>Create Order</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- State navigation -->
+  <div class="state-nav">
+    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; text-align: right;">Modal States</div>
+    <a href="02-job-orders-add-modal.html">
+      <i data-lucide="user" style="width: 12px;"></i> Solo + Priority
+    </a>
+    <a href="02b-job-orders-bulk-priority.html">
+      <i data-lucide="layers" style="width: 12px;"></i> Bulk + Priority
+    </a>
+    <a href="02c-job-orders-default.html" class="current-state">
+      <i data-lucide="plus" style="width: 12px;"></i> Default (Empty)
+    </a>
+  </div>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

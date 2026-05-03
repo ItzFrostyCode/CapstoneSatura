@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Sutura - Technical Measurements (Designer View)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --designer-accent: #8B5CF6; /* Purple for Technical Design */
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--text-main); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 260px; background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .main { flex-grow: 1; padding: 40px; }
+
+    .header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
+    
+    .grid-measurements { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+    .measurement-card { background: white; border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .m-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .m-value { font-size: 18px; font-weight: 800; color: var(--primary); }
+
+    .technical-section { background: white; border-radius: 24px; border: 1px solid var(--border); padding: 32px; }
+    .section-title { font-size: 18px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; color: var(--designer-accent); }
+    
+    textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; font-family: 'Outfit'; font-size: 15px; outline: none; background: var(--surface); height: 150px; }
+    
+    .btn-save { background: var(--designer-accent); color: white; border: none; padding: 16px 32px; border-radius: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; display: flex; align-items: center; gap: 10px; }
+    
+    .client-profile-small { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; background: #F5F3FF; padding: 16px; border-radius: 16px; border: 1px solid #DDD6FE; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div style="padding: 24px; font-weight: 800; font-size: 20px;">Sutura</div>
+    <nav style="padding: 24px;">
+      <a href="04-designer-portfolio.html" style="display: flex; align-items: center; gap: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; padding: 12px;"><i data-lucide="arrow-left"></i> Back to Dashboard</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="header">
+      <div>
+        <h1 style="font-size: 32px; font-weight: 900; letter-spacing: -1.5px;">Technical Specifications</h1>
+        <p style="color: var(--text-muted);">Accurate body measurements for Order #ORD-2024-8821</p>
+      </div>
+      <div style="background: var(--designer-accent); color: white; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 700;">COLLAB MODE ACTIVE</div>
+    </div>
+
+    <div class="client-profile-small">
+      <div style="width: 48px; height: 48px; border-radius: 12px; background: white; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--designer-accent);">AM</div>
+      <div>
+        <div style="font-size: 16px; font-weight: 800;">Alexander McQueen</div>
+        <div style="font-size: 12px; color: #7C3AED;">Male · 3-Piece Suit Project</div>
+      </div>
+    </div>
+
+    <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">Accurate Measurements (Sync'd from Shop)</div>
+    
+    <div class="grid-measurements">
+      <div class="measurement-card"><span class="m-label">Shoulder Width</span><span class="m-value">18.5"</span></div>
+      <div class="measurement-card"><span class="m-label">Chest / Bust</span><span class="m-value">42.0"</span></div>
+      <div class="measurement-card"><span class="m-label">Waist</span><span class="m-value">34.5"</span></div>
+      <div class="measurement-card"><span class="m-label">Sleeve Length</span><span class="m-value">25.0"</span></div>
+      <div class="measurement-card"><span class="m-label">Neck Circumf.</span><span class="m-value">16.5"</span></div>
+      <div class="measurement-card"><span class="m-label">Hip / Seat</span><span class="m-value">40.0"</span></div>
+      <div class="measurement-card"><span class="m-label">Front Length</span><span class="m-value">30.0"</span></div>
+      <div class="measurement-card"><span class="m-label">Bicep Width</span><span class="m-value">14.5"</span></div>
+      <div class="measurement-card"><span class="m-label">Wrist</span><span class="m-value">7.5"</span></div>
+    </div>
+
+    <div class="technical-section">
+      <div class="section-title"><i data-lucide="edit-3"></i> Designer Technical Notes</div>
+      <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">These notes will be visible to the Sastre/Tailor during the production phase.</p>
+      
+      <textarea placeholder="Add specific technical instructions here (e.g. 'Use double-canvas for the lapels', 'Ensure high-armhole for slim-fit silhouette')"></textarea>
+      
+      <div style="display: flex; gap: 12px; margin-top: 20px;">
+        <button class="btn-save"><i data-lucide="save"></i> Save Technical Specs</button>
+        <button style="background: white; border: 1.5px solid var(--border); padding: 16px 24px; border-radius: 16px; font-weight: 700; cursor: pointer;">Print Spec Sheet</button>
+      </div>
+    </div>
+
+    <div style="margin-top: 32px; background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 20px; padding: 20px; display: flex; gap: 16px; align-items: center;">
+      <i data-lucide="alert-circle" style="color: #D97706;"></i>
+      <div style="font-size: 13px; color: #92400E;">
+        <strong>Data Integrity:</strong> These measurements are synchronized in real-time from the Shop Owner's records. Any changes made here will notify the Shop Owner for approval.
+      </div>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

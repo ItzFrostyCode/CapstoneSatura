@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura - Create Design Post</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #111827; 
+      --bg: #FAFAFA; 
+      --surface: #FFFFFF;
+      --text-main: #1F2937; 
+      --text-muted: #6B7280; 
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+
+    /* ── Minimalist Sidebar ── */
+    .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px; flex-shrink: 0; }
+    .brand { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 48px; letter-spacing: -0.5px; }
+    .nav-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; margin-top: 32px; }
+    .nav-list { display: flex; flex-direction: column; gap: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-main); text-decoration: none; transition: all 0.2s; }
+    .nav-item i { width: 18px; color: var(--text-muted); transition: color 0.2s; }
+    .nav-item:hover { background: #F3F4F6; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-item.active i { color: white; }
+
+    /* ── Main Content ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; }
+    .header { height: 90px; display: flex; align-items: center; justify-content: flex-end; padding: 0 48px; background: var(--bg); }
+    .user-profile { display: flex; align-items: center; gap: 16px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+    .user-name { font-weight: 600; font-size: 14px; }
+
+    .content { padding: 0 48px 48px; max-width: 1000px; width: 100%; margin: 0 auto; }
+
+    .page-title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+    .page-desc { font-size: 15px; color: var(--text-muted); margin-bottom: 48px; }
+
+    /* Editor Grid */
+    .editor-grid { display: grid; grid-template-columns: 1fr 350px; gap: 32px; }
+    
+    /* Upload Zone */
+    .upload-zone { border: 2px dashed var(--border); border-radius: 16px; background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 32px; text-align: center; cursor: pointer; transition: all 0.2s; height: 600px; position: relative; overflow: hidden; }
+    .upload-zone:hover { border-color: var(--primary); background: #F9FAFB; }
+    .upload-icon { width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 16px; }
+    .upload-text { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .upload-sub { font-size: 13px; color: var(--text-muted); }
+    
+    /* Settings Panel */
+    .settings-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; height: fit-content; }
+    
+    .form-group { margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    input[type="text"], textarea { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid var(--border); font-family: 'Outfit', sans-serif; font-size: 15px; outline: none; transition: border-color 0.2s; background: var(--bg); }
+    input[type="text"]:focus, textarea:focus { border-color: var(--primary); background: white; }
+    textarea { height: 120px; resize: none; }
+
+    .btn-save { background: var(--primary); color: white; border: none; padding: 16px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 16px; width: 100%; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-save:hover { opacity: 0.9; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">Sutura Studio</div>
+    
+    <div class="nav-label">Community</div>
+    <nav class="nav-list">
+      <a href="06-explore-feed.html" class="nav-item"><i data-lucide="compass"></i> Explore Designs</a>
+    </nav>
+
+    <div class="nav-label">Workspace</div>
+    <nav class="nav-list">
+      <a href="01-designer-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="03-design-post-creator.html" class="nav-item active"><i data-lucide="pen-tool"></i> Create Post</a>
+      <a href="04-product-publisher.html" class="nav-item"><i data-lucide="send"></i> Publish to Shop</a>
+    </nav>
+
+    <div class="nav-label">Identity</div>
+    <nav class="nav-list">
+      <a href="05-portfolio-gallery.html" class="nav-item"><i data-lucide="image"></i> View Portfolio</a>
+      <a href="02-profile-manager.html" class="nav-item"><i data-lucide="user"></i> Profile Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <header class="header">
+      <div class="user-profile">
+        <span class="user-name">Elena Rossi</span>
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" alt="Avatar" class="user-avatar">
+      </div>
+    </header>
+
+    <div class="content">
+      <h1 class="page-title">Capture Inspiration</h1>
+      <p class="page-desc">Upload high-resolution sketches or mood boards to your portfolio.</p>
+
+      <div class="editor-grid">
+        
+        <!-- Upload Area -->
+        <div class="upload-zone" id="uploadZone">
+          <i data-lucide="image-plus" class="upload-icon"></i>
+          <div class="upload-text">Drag and drop your design here</div>
+          <div class="upload-sub">Supports JPG, PNG, WEBP (Max 15MB)</div>
+        </div>
+
+        <!-- Details Panel -->
+        <div class="settings-panel">
+          <div class="form-group">
+            <label>Design Title</label>
+            <input type="text" placeholder="e.g., Spring Gala Concept">
+          </div>
+
+          <div class="form-group">
+            <label>Inspiration & Notes</label>
+            <textarea placeholder="Describe the materials, silhouette, and concept..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Collection / Tags</label>
+            <input type="text" placeholder="e.g., Bridal, Silk, 2026">
+          </div>
+
+          <button class="btn-save" id="btnSave"><i data-lucide="upload-cloud" style="width: 18px;"></i> Save Post Details</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    // Simulate "Save Post Details" -> "Confirm Save" UML flow
+    const btnSave = document.getElementById('btnSave');
+    const uploadZone = document.getElementById('uploadZone');
+
+    // Simulate image upload preview
+    uploadZone.addEventListener('click', function() {
+      this.innerHTML = `<img src="https://images.unsplash.com/photo-1556905055-8f358a7a4bbd?auto=format&fit=crop&q=80&w=800" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;">`;
+      this.style.border = 'none';
+    });
+
+    btnSave.addEventListener('click', function() {
+      this.innerHTML = '<i data-lucide="loader-2" class="lucide-spin" style="width: 18px; animation: spin 2s linear infinite;"></i> Saving to Database...';
+      this.style.opacity = '0.7';
+      
+      // Simulate Database Delay
+      setTimeout(() => {
+        this.innerHTML = '<i data-lucide="check-circle" style="width: 18px;"></i> Post Confirmed';
+        this.style.background = '#059669';
+        this.style.opacity = '1';
+        lucide.createIcons();
+        
+        setTimeout(() => {
+          window.location.href = '01-designer-dashboard.html';
+        }, 1500);
+      }, 1200);
+    });
+  </script>
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</body>
+</html>

@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sutura | Support Tickets</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg: #09090b;
+      --sidebar: rgba(9, 9, 11, 0.96);
+      --card: #121217;
+      --card-2: #17171e;
+      --card-3: #1f1f29;
+      --accent: #3b82f6;
+      --accent-muted: rgba(59, 130, 246, 0.12);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #fafafa;
+      --text-dim: #a1a1aa;
+      --border: #27272a;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(59,130,246,0.08), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(168,85,247,0.06), transparent 18%),
+        var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      letter-spacing: -0.02em;
+      overflow-x: hidden;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      backdrop-filter: blur(12px);
+    }
+
+    .sidebar-header {
+      padding: 34px 24px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .brand {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .brand-sub {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .nav {
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      overflow: auto;
+    }
+
+    .nav-group-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 10px 12px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: var(--text-dim);
+      font-weight: 600;
+      font-size: 14px;
+      transition: 0.2s ease;
+    }
+
+    .nav-item i { width: 18px; height: 18px; }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: var(--accent-muted);
+      color: var(--accent);
+      box-shadow: inset 0 0 0 1px rgba(59,130,246,0.18);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(239,68,68,0.14);
+      color: #fecaca;
+      border: 1px solid rgba(239,68,68,0.18);
+      padding: 3px 7px;
+      border-radius: 999px;
+    }
+
+    .sidebar-footer {
+      padding: 18px 20px 22px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--card-3);
+      border: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 12px;
+      flex: 0 0 auto;
+    }
+
+    .muted-11 { font-size: 11px; color: var(--text-dim); }
+    .muted-12 { font-size: 12px; color: var(--text-dim); }
+
+    /* Main */
+    .main {
+      padding: 34px 40px 40px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .title h1 {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .title p {
+      margin-top: 10px;
+      color: var(--text-dim);
+      font-size: 14px;
+      max-width: 760px;
+      line-height: 1.55;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(140px, 1fr));
+      gap: 12px;
+      min-width: min(100%, 500px);
+    }
+
+    .stat-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.14);
+    }
+
+    .stat-card .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      font-weight: 800;
+    }
+    .stat-card .value {
+      margin-top: 8px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .stat-card .value.warning { color: var(--warning); }
+    .stat-card .value.success { color: var(--success); }
+    .stat-card .value.accent { color: var(--accent); }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .search {
+      min-width: 280px;
+      flex: 1;
+      max-width: 460px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search input {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 13px 16px 13px 44px;
+      border-radius: 14px;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .search input:focus {
+      border-color: rgba(59,130,246,0.45);
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+    }
+
+    .search i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chip,
+    .btn-action,
+    .select,
+    .btn-sm {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .chip:hover,
+    .btn-action:hover,
+    .select:hover,
+    .btn-sm:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .chip.active {
+      background: rgba(59,130,246,0.14);
+      border-color: rgba(59,130,246,0.3);
+      color: #dbeafe;
+    }
+
+    .select { appearance: none; padding-right: 38px; }
+
+    .table-shell {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .table-head {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr 1.6fr 0.8fr 0.8fr 0.8fr;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 22px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .ticket-list {
+      overflow: auto;
+      max-height: calc(100vh - 330px);
+    }
+
+    .ticket-row {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr 1.6fr 0.8fr 0.8fr 0.8fr;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: 0.18s ease;
+    }
+
+    .ticket-row:hover { background: rgba(255,255,255,0.02); }
+
+    .ticket-id {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 800;
+      color: #71717a;
+    }
+
+    .shop-name { font-size: 15px; font-weight: 800; }
+    .shop-email { margin-top: 4px; font-size: 12px; color: var(--text-dim); }
+    .summary { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .summary-note { margin-top: 4px; font-size: 12px; color: var(--text-dim); line-height: 1.45; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .badge-high { background: rgba(239,68,68,0.12); color: #fca5a5; border-color: rgba(239,68,68,0.18); }
+    .badge-medium { background: rgba(245,158,11,0.12); color: #fcd34d; border-color: rgba(245,158,11,0.18); }
+    .badge-open { background: rgba(59,130,246,0.12); color: #bfdbfe; border-color: rgba(59,130,246,0.18); }
+    .badge-resolved { background: rgba(16,185,129,0.12); color: #6ee7b7; border-color: rgba(16,185,129,0.18); }
+    .badge-gray { background: rgba(255,255,255,0.05); color: #d4d4d8; border-color: rgba(255,255,255,0.08); }
+
+    .btn-resolve {
+      padding: 9px 14px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 10px 24px rgba(59,130,246,0.18);
+    }
+
+    .btn-resolve:hover { transform: translateY(-1px); }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show { display: flex; }
+
+    .ticket-modal {
+      background: var(--card);
+      width: 100%;
+      max-width: 1100px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.55);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      max-height: 90vh;
+    }
+
+    .ticket-header {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      background: linear-gradient(90deg, rgba(59,130,246,0.05), transparent 65%);
+    }
+
+    .ticket-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .ticket-meta-grid {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item { display: flex; flex-direction: column; gap: 4px; }
+    .meta-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .meta-value { font-size: 13px; font-weight: 700; color: var(--text); }
+
+    .close-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: white;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .ticket-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      background: #0e0e13;
+    }
+
+    .ticket-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border-right: 1px solid var(--border);
+      background: #0f0f14;
+    }
+
+    .ticket-sidebar {
+      width: 320px;
+      background: #101015;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .msg-bubble {
+      max-width: 85%;
+      padding: 16px;
+      border-radius: 14px;
+      position: relative;
+    }
+
+    .msg-user {
+      align-self: flex-start;
+      background: #1a1a22;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg-admin {
+      align-self: flex-end;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.25);
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg-internal {
+      align-self: center;
+      width: 100%;
+      max-width: 100%;
+      background: rgba(245,158,11,0.11);
+      border: 1px dashed rgba(245,158,11,0.35);
+      border-radius: 12px;
+    }
+
+    .msg-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .msg-name { font-weight: 800; color: var(--text); }
+    .msg-time { color: var(--text-dim); }
+    .msg-content { font-size: 14px; line-height: 1.6; color: var(--text); }
+
+    .attachment-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .chat-input-area {
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      background: #111116;
+    }
+
+    .reply-tabs {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .reply-tab {
+      padding: 8px 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .reply-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .reply-tab.internal { color: #f59e0b; }
+    .reply-tab.internal.active { border-bottom-color: #f59e0b; }
+
+    textarea.reply-box {
+      width: 100%;
+      height: 102px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #0b0b0f;
+      color: white;
+      outline: none;
+      resize: none;
+      transition: 0.2s ease;
+    }
+
+    textarea.reply-box:focus {
+      border-color: rgba(59,130,246,0.45);
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+    }
+
+    textarea.internal-box {
+      background: rgba(245,158,11,0.08);
+      border-color: rgba(245,158,11,0.25);
+    }
+
+    .chat-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-send {
+      background: var(--accent);
+      border: none;
+      color: white;
+      box-shadow: 0 10px 24px rgba(59,130,246,0.18);
+    }
+
+    .btn-soft {
+      background: rgba(255,255,255,0.03);
+      color: white;
+      border: 1px solid var(--border);
+    }
+
+    .sidebar-group { margin-bottom: 20px; }
+    .sidebar-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    select.admin-select {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-family: inherit;
+      background: #0b0b0f;
+      color: white;
+      outline: none;
+    }
+
+    .quick-actions {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .quick-actions a {
+      display: block;
+      font-size: 13px;
+      color: #93c5fd;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .quick-actions a:hover { color: #dbeafe; }
+
+    @media (max-width: 1180px) {
+      body { overflow: auto; }
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; }
+      .header { position: sticky; }
+      .ticket-list { max-height: none; }
+      .ticket-body { flex-direction: column; }
+      .ticket-sidebar { width: 100%; border-top: 1px solid var(--border); border-right: none; }
+      .stats { min-width: 0; grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .table-head, .ticket-row { grid-template-columns: 0.9fr 1.2fr 1.5fr 0.8fr 0.8fr 0.7fr; }
+    }
+
+    @media (max-width: 860px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; }
+      .main { padding: 20px; }
+      .header { padding: 0 20px; }
+      .stats { grid-template-columns: 1fr; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .search { max-width: none; min-width: 0; }
+      .table-head { display: none; }
+      .ticket-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 18px;
+      }
+      .table-shell { overflow: visible; }
+      .ticket-list { overflow: visible; }
+      .ticket-modal { max-height: 95vh; }
+      .ticket-header { flex-direction: column; }
+      .ticket-meta-grid { gap: 14px 18px; }
+      .msg-bubble { max-width: 100%; }
+      .chat-actions { flex-direction: column; align-items: stretch; }
+      .chat-actions > div { display: flex; gap: 8px; flex-wrap: wrap; }
+      .btn-resolve, .btn-send, .btn-soft { width: 100%; justify-content: center; }
+      .search input { padding-left: 42px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">Sutura Admin</div>
+        <div class="brand-sub">Platform Management</div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-group-label">Overview</div>
+        <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-grid"></i> Overview</a>
+
+        <div class="nav-group-label">Management</div>
+        <a href="02-registrations.html" class="nav-item"><i data-lucide="clipboard-check"></i> Shop Verifications <span class="nav-badge">3</span></a>
+        <a href="03-shops.html" class="nav-item"><i data-lucide="building"></i> Registered Shops</a>
+        <a href="08-announcements-tab.html" class="nav-item"><i data-lucide="megaphone"></i> Announcements</a>
+        <a href="05-subscription-plans.html" class="nav-item"><i data-lucide="credit-card"></i> Revenue & Plans</a>
+        <a href="07-support-tickets.html" class="nav-item active"><i data-lucide="life-buoy"></i> Support Tickets</a>
+
+        <div class="nav-group-label">System</div>
+        <a href="06-system-monitor.html" class="nav-item"><i data-lucide="activity"></i> System Health</a>
+        <a href="16-admin-audit-logs.html" class="nav-item"><i data-lucide="shield"></i> Security Logs</a>
+        <a href="08-platform-settings.html" class="nav-item"><i data-lucide="settings"></i> Platform Settings</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="avatar">A</div>
+        <div>
+          <div style="font-weight:700;font-size:13px;">Admin-99</div>
+          <div class="muted-11">System Superuser</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="header">
+        <div>
+          <div class="header-title">Support Helpdesk</div>
+          <div class="header-sub">Manage shop owner tickets and technical inquiries</div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" type="button" aria-label="Notifications">
+            <i data-lucide="bell" style="width:20px;height:20px;"></i>
+            <span class="notif-dot"></span>
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="top-row">
+          <div class="page-title">
+            <h1>Support Tickets</h1>
+            <p>Review and resolve issues from shop owners and designers. Keep the flow calm, fast, and human — the way a real admin desk should feel.</p>
+          </div>
+
+          <div class="stats">
+            <div class="stat-card">
+              <div class="stat-label">Open Tickets</div>
+              <div class="stat-value warning">8</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Resolved Today</div>
+              <div class="stat-value success">14</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Avg Response</div>
+              <div class="stat-value accent">1h 14m</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="search">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="Search ticket, user, shop, email, or issue..." />
+          </div>
+
+          <div class="filters">
+            <button class="chip active" type="button">All</button>
+            <button class="chip" type="button">Open</button>
+            <button class="chip" type="button">High Priority</button>
+            <button class="chip" type="button">Billing</button>
+            <button class="chip" type="button">Design</button>
+          </div>
+
+          <select class="select" aria-label="Sort tickets">
+            <option>Newest first</option>
+            <option>Oldest first</option>
+            <option>High priority first</option>
+          </select>
+        </div>
+
+        <section class="table-shell" aria-label="Support tickets list">
+          <div class="table-head">
+            <div>Ticket ID</div>
+            <div>Shop / User</div>
+            <div>Issue Summary</div>
+            <div>Priority</div>
+            <div>Status</div>
+            <div>Action</div>
+          </div>
+
+          <div class="ticket-list">
+            <div class="ticket-row">
+              <div class="ticket-id">#TK-8092</div>
+              <div>
+                <div class="shop-name">Kingsmen Suits HQ</div>
+                <div class="shop-email">admin@kingsmen.com</div>
+              </div>
+              <div>
+                <div class="summary">Cannot add 3rd branch</div>
+                <div class="summary-note">“My premium plan allows 5 branches but the button is disabled.”</div>
+              </div>
+              <div><span class="badge badge-high">High</span></div>
+              <div><span class="badge badge-open">Open</span></div>
+              <div><button class="btn-resolve" type="button" onclick="openModal('TK-8092', 'Cannot add 3rd branch')">Review</button></div>
+            </div>
+
+            <div class="ticket-row">
+              <div class="ticket-id">#TK-8091</div>
+              <div>
+                <div class="shop-name">Stitch & Co. Alterations</div>
+                <div class="shop-email">hello@stitchco.com</div>
+              </div>
+              <div>
+                <div class="summary">Billing failed notification</div>
+                <div class="summary-note">“I updated my credit card but still getting the warning.”</div>
+              </div>
+              <div><span class="badge badge-medium">Medium</span></div>
+              <div><span class="badge badge-resolved">Resolved</span></div>
+              <div><button class="btn-action" type="button" onclick="openModal('TK-8091', 'Billing failed notification')">View</button></div>
+            </div>
+
+            <div class="ticket-row">
+              <div class="ticket-id">#TK-8088</div>
+              <div>
+                <div class="shop-name">La Belle Couture</div>
+                <div class="shop-email">support@labelle.com</div>
+              </div>
+              <div>
+                <div class="summary">Plan mismatch on branch limit</div>
+                <div class="summary-note">User is seeing the old limit even after upgrade.</div>
+              </div>
+              <div><span class="badge badge-high">High</span></div>
+              <div><span class="badge badge-open">Open</span></div>
+              <div><button class="btn-resolve" type="button" onclick="openModal('TK-8088', 'Plan mismatch on branch limit')">Review</button></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="ticketModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ticketModalTitle">
+    <div class="ticket-modal">
+      <div class="ticket-header">
+        <div>
+          <div class="ticket-title-row">
+            <span class="ticket-id" id="modalTicketId">#TK-8092</span>
+            <h2 id="ticketModalTitle" style="font-size:18px;font-weight:800;letter-spacing:-0.04em;">Cannot add 3rd branch</h2>
+          </div>
+          <div class="ticket-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">Shop Owner</span>
+              <span class="meta-value">Kingsmen Suits HQ</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Submitted</span>
+              <span class="meta-value">Today, 09:41 AM</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Current Plan</span>
+              <span class="badge badge-medium" style="padding:2px 8px;">Premium</span>
+            </div>
+          </div>
+        </div>
+        <button class="close-btn" type="button" onclick="closeModal()" aria-label="Close modal">
+          <i data-lucide="x" style="width:20px;height:20px;"></i>
+        </button>
+      </div>
+
+      <div class="ticket-body">
+        <div class="ticket-chat">
+          <div class="chat-messages">
+            <div class="msg-bubble msg-user">
+              <div class="msg-header">
+                <span class="msg-name">Mark (Owner)</span>
+                <span class="msg-time">09:41 AM</span>
+              </div>
+              <div class="msg-content">
+                Hi Admin, my Premium plan clearly states that I am allowed up to 5 branches. I currently have 2 branches active, but when I try to create the 3rd one, the "Add Branch" button is disabled and greyed out.
+                <br><br>
+                Is there a bug with my subscription limit? I need to onboard my new Makati branch today.
+              </div>
+              <div class="attachment-pill">
+                <i data-lucide="image" style="width:14px;height:14px;color:#60a5fa;"></i>
+                screenshot_button_grey.png
+              </div>
+            </div>
+
+            <div class="msg-bubble msg-internal">
+              <div class="msg-header">
+                <span class="msg-name" style="color:#f59e0b;">
+                  <i data-lucide="lock" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;"></i>
+                  Internal Note (System Architect)
+                </span>
+                <span class="msg-time">10:15 AM</span>
+              </div>
+              <div class="msg-content">
+                Checked the DB. His <code style="font-family:ui-monospace,monospace;">organization_id</code> is linked to 2 active branches and 3 soft-deleted branches from last year. The query for max branches is not filtering out soft-deletes.
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <div class="reply-tabs">
+              <div class="reply-tab active" id="customerTab" onclick="setReplyMode('customer')">Reply to Customer</div>
+              <div class="reply-tab internal" id="internalTab" onclick="setReplyMode('internal')">Add Internal Note</div>
+            </div>
+            <textarea id="replyBox" class="reply-box" placeholder="Type your response to the shop owner..."></textarea>
+            <div class="chat-actions">
+              <button class="icon-btn btn-soft" type="button" style="width:auto;height:auto;border-radius:10px;padding:10px 12px;">
+                <i data-lucide="paperclip" style="width:16px;height:16px;"></i>
+              </button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn-sm btn-soft" type="button" onclick="closeModal()">Close</button>
+                <button class="btn-sm btn-soft" type="button">Resolve Ticket</button>
+                <button class="btn-sm btn-send" type="button" onclick="sendReply()">Send Reply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="ticket-sidebar">
+          <div class="sidebar-group">
+            <label for="statusSelect">Status</label>
+            <select id="statusSelect" class="admin-select">
+              <option selected>Open</option>
+              <option>Pending User</option>
+              <option>Resolved</option>
+            </select>
+          </div>
+
+          <div class="sidebar-group">
+            <label for="prioritySelect">Priority</label>
+            <select id="prioritySelect" class="admin-select">
+              <option>Low</option>
+              <option selected>Medium</option>
+              <option>High (Billing/Plan Issue)</option>
+              <option>Critical</option>
+            </select>
+          </div>
+
+          <div class="sidebar-group">
+            <label for="assigneeSelect">Assigned Admin</label>
+            <select id="assigneeSelect" class="admin-select">
+              <option>Unassigned</option>
+              <option selected>System Architect (You)</option>
+              <option>John Support</option>
+            </select>
+          </div>
+
+          <div class="sidebar-group">
+            <label>Quick Notes</label>
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:14px;line-height:1.55;color:var(--text-dim);font-size:13px;">
+              The ticket looks like a branch-limit bug caused by soft-deleted records not being excluded from the count.
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <label style="display:block;font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em;">Quick Actions</label>
+            <a href="03-accounts.html"><i data-lucide="external-link" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></i> View Shop Account</a>
+            <a href="#"><i data-lucide="log-in" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></i> Login as Shop Owner</a>
+            <a href="#"><i data-lucide="copy" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;"></i> Copy internal summary</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function openModal(ticketId, subject) {
+      document.getElementById('modalTicketId').textContent = '#' + ticketId;
+      document.getElementById('ticketModalTitle').textContent = subject;
+      document.getElementById('ticketModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      document.getElementById('ticketModal').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    function setReplyMode(mode) {
+      const customerTab = document.getElementById('customerTab');
+      const internalTab = document.getElementById('internalTab');
+      const replyBox = document.getElementById('replyBox');
+
+      if (mode === 'internal') {
+        customerTab.classList.remove('active');
+        internalTab.classList.add('active');
+        replyBox.classList.add('internal-box');
+        replyBox.placeholder = 'Write an internal note for the team...';
+      } else {
+        customerTab.classList.add('active');
+        internalTab.classList.remove('active');
+        replyBox.classList.remove('internal-box');
+        replyBox.placeholder = 'Type your response to the shop owner...';
+      }
+    }
+
+    function sendReply() {
+      const text = document.getElementById('replyBox').value.trim();
+      if (!text) {
+        alert('Please write a reply first.');
+        return;
+      }
+      alert('Reply sent successfully.');
+    }
+
+    document.getElementById('ticketModal').addEventListener('click', (e) => {
+      if (e.target.id === 'ticketModal') closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>

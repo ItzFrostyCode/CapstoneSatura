@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Track Your Order - Manila Bespoke</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A;
+      --bg: #F9FAFB;
+      --surface: #FFFFFF;
+      --text-main: #111827;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --accent: #2563EB;
+      --success: #10B981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; align-items: center; justify-content: center; padding: 40px; }
+    
+    .tracker-container {
+      width: 100%; max-width: 800px;
+      background: var(--surface);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    
+    .brand-header {
+      padding: 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      background: #FAFAFA;
+    }
+    .brand-logo {
+      width: 56px; height: 56px;
+      background: var(--primary);
+      color: white;
+      font-size: 20px;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+      margin: 0 auto 16px;
+    }
+    .brand-title { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    
+    .tracker-body { padding: 40px; }
+    
+    .search-box {
+      display: flex; gap: 12px; max-width: 480px; margin: 0 auto 40px;
+    }
+    .search-input {
+      flex: 1; padding: 16px 20px; font-size: 15px;
+      border: 1px solid var(--border); border-radius: 12px;
+      font-family: inherit; color: var(--text-main); outline: none; transition: 0.2s;
+    }
+    .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,26,26,0.1); }
+    .search-btn {
+      padding: 0 24px; background: var(--primary); color: white;
+      border: none; border-radius: 12px; font-weight: 700; font-family: inherit; font-size: 15px; cursor: pointer; transition: 0.2s;
+    }
+    .search-btn:hover { background: #333; }
+    
+    /* Order Details Card */
+    .order-details {
+      background: #F3F4F6; border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
+    }
+    .order-item-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+    .order-meta { font-size: 14px; color: var(--text-muted); display: flex; gap: 16px; }
+    .order-meta span { display: flex; align-items: center; gap: 6px; }
+    
+    /* Progress Stepper */
+    .stepper {
+      display: flex; justify-content: space-between; position: relative; margin-bottom: 20px;
+    }
+    .stepper::before {
+      content: ''; position: absolute; top: 18px; left: 0; width: 100%; height: 4px;
+      background: var(--border); z-index: 1; border-radius: 4px;
+    }
+    .stepper-progress {
+      position: absolute; top: 18px; left: 0; height: 4px;
+      background: var(--primary); z-index: 2; border-radius: 4px;
+      width: 50%; /* 50% = Sewing phase active */
+      transition: width 0.5s ease;
+    }
+    
+    .step {
+      display: flex; flex-direction: column; align-items: center; z-index: 3; position: relative;
+      width: 100px;
+    }
+    .step-icon {
+      width: 40px; height: 40px; border-radius: 50%; background: white;
+      border: 3px solid var(--border); display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: 16px; font-weight: 700; transition: 0.3s;
+      box-shadow: 0 0 0 4px var(--surface);
+    }
+    .step.completed .step-icon {
+      background: var(--primary); border-color: var(--primary); color: white;
+    }
+    .step.active .step-icon {
+      background: white; border-color: var(--primary); color: var(--primary);
+    }
+    .step-title {
+      font-size: 12px; font-weight: 700; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); text-align: center;
+    }
+    .step.completed .step-title, .step.active .step-title {
+      color: var(--text-main);
+    }
+    .step-date {
+      font-size: 11px; color: var(--text-muted); margin-top: 4px;
+    }
+    
+    .powered-by {
+      text-align: center; margin-top: 24px; font-size: 12px; color: var(--text-muted); font-weight: 500;
+    }
+    .powered-by span { font-weight: 800; color: #111827; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="tracker-container">
+    <div class="brand-header">
+      <div class="brand-logo">MB</div>
+      <div class="brand-title">Manila Bespoke Tailors</div>
+      <div class="brand-sub">Client Order Portal</div>
+    </div>
+    
+    <div class="tracker-body">
+      
+      <div class="search-box">
+        <input type="text" class="search-input" value="ORD-10294" placeholder="Enter your Order Tracking ID">
+        <button class="search-btn">Track Order</button>
+      </div>
+
+      <div class="order-details">
+        <div>
+          <div class="order-item-title">Navy Blue 3-Piece Suit</div>
+          <div class="order-meta">
+            <span><i data-lucide="user" style="width:14px;"></i> James Anderson</span>
+            <span><i data-lucide="calendar" style="width:14px;"></i> Ordered: Oct 12, 2026</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Expected Fitting</div>
+          <div style="font-size:16px;font-weight:800;color:var(--accent);">Oct 28, 2026</div>
+        </div>
+      </div>
+
+      <div class="stepper">
+        <div class="stepper-progress"></div>
+        
+        <div class="step completed">
+          <div class="step-icon"><i data-lucide="check" style="width:20px;"></i></div>
+          <div class="step-title">Measured</div>
+          <div class="step-date">Oct 12</div>
+        </div>
+        
+        <div class="step completed">
+          <div class="step-icon"><i data-lucide="check" style="width:20px;"></i></div>
+          <div class="step-title">Cutting</div>
+          <div class="step-date">Oct 15</div>
+        </div>
+        
+        <div class="step active">
+          <div class="step-icon"><i data-lucide="scissors" style="width:20px;"></i></div>
+          <div class="step-title">Sewing</div>
+          <div class="step-date">In Progress</div>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">4</div>
+          <div class="step-title">Fitting</div>
+          <div class="step-date">Pending</div>
+        </div>
+        
+        <div class="step">
+          <div class="step-icon">5</div>
+          <div class="step-title">Ready</div>
+          <div class="step-date">Pending</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 40px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 20px; display: flex; gap: 16px; align-items: flex-start;">
+        <div style="width: 40px; height: 40px; background: #DBEAFE; color: #2563EB; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i data-lucide="info"></i></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: #1E3A8A; margin-bottom: 4px;">Update: Master Tailor assigned</div>
+          <div style="font-size: 13px; color: #1E40AF; line-height: 1.5;">Your garment is currently in the sewing phase. Our master tailor is assembling the cut patterns. You will receive an SMS notification once your garment is ready for the first fitting.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="powered-by">
+    Powered by <span><i data-lucide="shield" style="width:14px;"></i> Sutura System</span>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440, initial-scale=1.0">
+  <title>Sutura - Designer Portfolio</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #111827; 
+      --bg: #FAFAFA; 
+      --surface: #FFFFFF;
+      --text-main: #1F2937; 
+      --text-muted: #6B7280; 
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
+
+    /* ── Minimalist Sidebar ── */
+    .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 32px; flex-shrink: 0; }
+    .brand { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 48px; letter-spacing: -0.5px; }
+    .nav-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; margin-top: 32px; }
+    .nav-list { display: flex; flex-direction: column; gap: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; font-size: 15px; font-weight: 500; color: var(--text-main); text-decoration: none; transition: all 0.2s; }
+    .nav-item i { width: 18px; color: var(--text-muted); transition: color 0.2s; }
+    .nav-item:hover { background: #F3F4F6; }
+    .nav-item.active { background: var(--primary); color: white; }
+    .nav-item.active i { color: white; }
+
+    /* ── Main Content ── */
+    .main { flex-grow: 1; display: flex; flex-direction: column; }
+    .header { height: 90px; display: flex; align-items: center; justify-content: flex-end; padding: 0 48px; background: var(--bg); }
+    .user-profile { display: flex; align-items: center; gap: 16px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+    .user-name { font-weight: 600; font-size: 14px; }
+
+    .content { padding: 0 48px 48px; max-width: 1200px; width: 100%; margin: 0 auto; }
+
+    /* Portfolio Header */
+    .portfolio-header { margin-bottom: 64px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .portfolio-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 24px; }
+    .portfolio-name { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+    .portfolio-title { font-size: 16px; font-weight: 600; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+    .portfolio-bio { font-size: 15px; color: var(--text-main); max-width: 600px; line-height: 1.6; margin-bottom: 24px; }
+    
+    .tags { display: flex; gap: 12px; justify-content: center; }
+    .tag { padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--text-main); }
+
+    /* Masonry Grid */
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .gallery-item { position: relative; border-radius: 16px; overflow: hidden; cursor: pointer; background: var(--surface); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .gallery-item:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    
+    .gallery-img { width: 100%; height: 400px; object-fit: cover; display: block; }
+    
+    /* Overlay for details on hover */
+    .gallery-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(17,24,39,0.9) 0%, rgba(17,24,39,0) 100%); opacity: 0; transition: opacity 0.3s; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px; color: white; }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    
+    .item-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    .item-cat { font-size: 13px; font-weight: 600; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .item-badge { display: inline-block; background: white; color: var(--primary); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">Sutura Studio</div>
+    
+    <div class="nav-label">Community</div>
+    <nav class="nav-list">
+      <a href="06-explore-feed.html" class="nav-item"><i data-lucide="compass"></i> Explore Designs</a>
+    </nav>
+
+    <div class="nav-label">Workspace</div>
+    <nav class="nav-list">
+      <a href="01-designer-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="03-design-post-creator.html" class="nav-item"><i data-lucide="pen-tool"></i> Create Post</a>
+      <a href="04-product-publisher.html" class="nav-item"><i data-lucide="send"></i> Publish to Shop</a>
+    </nav>
+
+    <div class="nav-label">Identity</div>
+    <nav class="nav-list">
+      <a href="05-portfolio-gallery.html" class="nav-item active"><i data-lucide="image"></i> View Portfolio</a>
+      <a href="02-profile-manager.html" class="nav-item"><i data-lucide="user"></i> Profile Settings</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <header class="header">
+      <div class="user-profile">
+        <span class="user-name">Elena Rossi</span>
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" alt="Avatar" class="user-avatar">
+      </div>
+    </header>
+
+    <div class="content">
+      
+      <!-- Profile Showcase -->
+      <div class="portfolio-header">
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400" alt="Avatar" class="portfolio-avatar">
+        <h1 class="portfolio-name">Elena Rossi</h1>
+        <div class="portfolio-title">Senior Fashion Designer</div>
+        <p class="portfolio-bio">Specializing in avant-garde evening wear and bespoke tailoring. Over 10 years of experience bringing intricate designs to life.</p>
+        <div class="tags">
+          <span class="tag">Evening Wear</span>
+          <span class="tag">Bridal</span>
+          <span class="tag">Streetwear</span>
+        </div>
+      </div>
+
+      <!-- Gallery -->
+      <div class="gallery-grid">
+        
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1539109132314-3477524c8959?auto=format&fit=crop&q=80&w=800" class="gallery-img">
+          <div class="gallery-overlay">
+            <div class="item-cat">Evening Wear</div>
+            <div class="item-title">Midnight Silk Gala</div>
+            <div><span class="item-badge">Shop Catalog</span></div>
+          </div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800" class="gallery-img">
+          <div class="gallery-overlay">
+            <div class="item-cat">Streetwear</div>
+            <div class="item-title">Urban Chic Concept</div>
+            <div><span class="item-badge" style="background: rgba(255,255,255,0.2); color: white;">Draft</span></div>
+          </div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1445205170230-053b830c6050?auto=format&fit=crop&q=80&w=800" class="gallery-img">
+          <div class="gallery-overlay">
+            <div class="item-cat">Bridal</div>
+            <div class="item-title">Petal Train Prototype</div>
+            <div><span class="item-badge">Shop Catalog</span></div>
+          </div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=800" class="gallery-img">
+          <div class="gallery-overlay">
+            <div class="item-cat">Outerwear</div>
+            <div class="item-title">Minimalist Overcoat</div>
+            <div><span class="item-badge">Shop Catalog</span></div>
+          </div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80&w=800" class="gallery-img">
+          <div class="gallery-overlay">
+            <div class="item-cat">Casual Wear</div>
+            <div class="item-title">Summer Linen Blazer</div>
+            <div><span class="item-badge">Shop Catalog</span></div>
+          </div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=800" class="gallery-img">
+          <div class="gallery-overlay">
+            <div class="item-cat">Collection</div>
+            <div class="item-title">Spring/Summer 2026</div>
+            <div><span class="item-badge" style="background: rgba(255,255,255,0.2); color: white;">Draft</span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

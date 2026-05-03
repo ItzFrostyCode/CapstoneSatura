@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Sutura Admin | Client Directory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root { --primary:#1A1A1A; --accent:#2C6BED; --bg:#FFFFFF; --surface:#F9FAFB; --text-main:#111827; --text-muted:#6B7280; --border:#E5E7EB; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    
+    /* Sidebar (Consistent) */
+    .sidebar{width:280px;background:white;border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+    .sidebar-header{padding:32px;border-bottom:1px solid var(--border);}
+    .nav-list{padding:24px 16px;list-style:none;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;margin-bottom:4px;transition:0.2s;}
+    .nav-item.active{background:var(--primary);color:white;}
+    .nav-item:hover:not(.active){background:var(--surface);color:var(--text-main);}
+
+    /* Main Content */
+    .main{flex:1;padding:40px 60px;}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px;}
+
+    /* Table */
+    .card { background: white; border-radius: 24px; border: 1.5px solid var(--border); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 20px 24px; background: var(--surface); font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    td { padding: 20px 24px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .client-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; background: #F3F4F6; }
+    .badge-vip { background: #FFFBEB; color: #D97706; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div style="font-size: 24px; font-weight: 900;">Sutura <span style="color: var(--accent);">PRO</span></div>
+    </div>
+    <nav class="nav-list">
+      <a href="01-admin-dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i> Executive Overview</a>
+      <a href="03-accounts.html" class="nav-item active"><i data-lucide="book-user"></i> Client Directory</a>
+      <a href="01-staff-management-tab.html" class="nav-item"><i data-lucide="users"></i> Staff Directory</a>
+      <a href="16-admin-audit-logs.html" class="nav-item"><i data-lucide="history"></i> System Audit Logs</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div>
+        <h1 style="font-size: 32px; font-weight: 800;">Client Directory</h1>
+        <p style="color: var(--text-muted);">Unified view of all registered customers across all branches.</p>
+      </div>
+      <button style="padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">+ New Client</button>
+    </header>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Client Name</th>
+            <th>Type</th>
+            <th>Total Orders</th>
+            <th>Lifetime Spend</th>
+            <th>Branch</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div style="font-weight: 700;">Davao Medical Center</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Corporate Account</div>
+            </td>
+            <td><span class="client-badge badge-vip">VIP / Bulk</span></td>
+            <td>12</td>
+            <td style="font-weight: 700;">₱124,000.00</td>
+            <td>Davao Main</td>
+            <td><button style="color: var(--accent); border: none; background: none; font-weight: 700; cursor: pointer;">View Profile</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-weight: 700;">Sarah Hernandez</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Private Client</div>
+            </td>
+            <td><span class="client-badge">Regular</span></td>
+            <td>4</td>
+            <td style="font-weight: 700;">₱18,500.00</td>
+            <td>Tagum Branch</td>
+            <td><button style="color: var(--accent); border: none; background: none; font-weight: 700; cursor: pointer;">View Profile</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

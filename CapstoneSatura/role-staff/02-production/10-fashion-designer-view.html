@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=1440, initial-scale=1.0"/>
+  <title>Fashion Designer — My Listings | Sutura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root{--primary:#1A1A1A;--bg:#FFFFFF;--surface:#F9FAFB;--text-main:#111827;--text-muted:#6B7280;--border:#E5E7EB;--rose:#F43F5E;--rose-bg:#FFF1F2;--rose-border:#FECDD3;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--surface);color:var(--text-main);display:flex;min-height:100vh;}
+    .sidebar{width:260px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+    .sidebar-header{height:72px;display:flex;align-items:center;padding:0 24px;gap:12px;border-bottom:1px solid var(--border);}
+    .logo-icon{background:var(--rose);color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;}
+    .logo-text{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .role-badge{font-size:10px;font-weight:700;background:var(--rose-bg);color:var(--rose);border:1px solid var(--rose-border);padding:2px 8px;border-radius:6px;margin-left:2px;}
+    .nav-list{padding:20px 16px;display:flex;flex-direction:column;gap:6px;flex-grow:1;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-muted);text-decoration:none;transition:all 0.2s;}
+    .nav-item:hover{background:var(--surface);color:var(--primary);}
+    .nav-item.active{background:var(--rose);color:white;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--rose-bg);border:1px solid var(--rose-border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--rose);}
+    .user-info .name{font-size:14px;font-weight:600;}
+    .user-info .role{font-size:12px;color:var(--rose);font-weight:600;}
+    .main{flex-grow:1;display:flex;flex-direction:column;min-width:0;}
+    .header{height:72px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 40px;flex-shrink:0;position:sticky;top:0;z-index:100;}
+    .header-left .title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+    .header-left .sub{font-size:13px;color:var(--text-muted);}
+    .header-actions{display:flex;align-items:center;gap:10px;}
+    .btn-back{display:inline-flex;align-items:center;gap:6px;background:var(--surface);color:var(--text-muted);border:1px solid var(--border);border-radius:12px;padding:0 14px;height:38px;font-size:13px;font-weight:600;text-decoration:none;transition:all 0.2s;white-space:nowrap;cursor:pointer;font-family:'Outfit';}
+    .btn-back:hover{border-color:var(--primary);color:var(--primary);}
+    .btn-new{display:inline-flex;align-items:center;gap:8px;background:var(--rose);color:white;border:none;border-radius:12px;padding:0 20px;height:40px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit';transition:all 0.2s;text-decoration:none;white-space:nowrap;}
+    .btn-new:hover{background:#E11D48;}
+    .icon-btn{color:var(--text-muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:background 0.2s;}
+    .icon-btn:hover{background:var(--surface);}
+    .content{padding:36px 40px;flex-grow:1;overflow-y:auto;}
+
+    /* Role banner */
+    .role-banner{background:var(--rose-bg);border:1px solid var(--rose-border);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+    .role-banner-icon{width:36px;height:36px;background:var(--rose);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;}
+    .role-banner-text{font-size:13px;color:var(--rose);font-weight:500;line-height:1.5;}
+    .role-banner-text strong{font-weight:700;}
+
+    /* Stats */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+    .stat-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:18px 20px;}
+    .stat-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;}
+    .stat-value{font-size:22px;font-weight:800;color:var(--text-main);}
+    .stat-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+
+    /* Toolbar */
+    .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+    .search-box{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:0 14px;height:40px;flex-grow:1;max-width:360px;}
+    .search-box input{border:none;outline:none;font-family:'Outfit';font-size:14px;background:transparent;color:var(--text-main);width:100%;}
+    .filter-select{height:40px;border:1px solid var(--border);border-radius:10px;padding:0 14px;font-family:'Outfit';font-size:14px;font-weight:600;color:var(--text-main);background:var(--bg);outline:none;}
+
+    /* Product grid */
+    .product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+    .product-card{background:var(--bg);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.2s;position:relative;}
+    .product-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.09);transform:translateY(-2px);}
+    .product-img{height:180px;background:#F3F4F6;background-size:cover;background-position:center;position:relative;}
+    .status-pill{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;backdrop-filter:blur(8px);}
+    .status-published{background:rgba(16,185,129,0.9);color:white;}
+    .status-draft{background:rgba(107,114,128,0.85);color:white;}
+    .status-review{background:rgba(245,158,11,0.9);color:white;}
+    .price-pill{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.75);color:white;font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;backdrop-filter:blur(4px);}
+    .product-body{padding:14px 16px;}
+    .product-name{font-size:14px;font-weight:700;color:var(--text-main);margin-bottom:3px;}
+    .product-cat{font-size:12px;color:var(--text-muted);margin-bottom:10px;}
+    .product-meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:10px;}
+    .product-meta span{display:flex;align-items:center;gap:4px;font-weight:600;}
+    .product-actions{display:flex;gap:6px;border-top:1px solid var(--border);padding-top:10px;}
+    .paction-btn{flex:1;height:32px;border-radius:8px;font-size:12px;font-weight:700;font-family:'Outfit';cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);white-space:nowrap;}
+    .paction-btn:hover{border-color:var(--primary);color:var(--primary);}
+    .paction-btn.rose{background:var(--rose);color:white;border:none;}
+    .paction-btn.rose:hover{background:#E11D48;}
+
+    /* Add product card */
+    .add-card{background:var(--bg);border:2px dashed var(--border);border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all 0.2s;color:var(--text-muted);}
+    .add-card:hover{border-color:var(--rose);color:var(--rose);background:var(--rose-bg);}
+    .add-card .add-icon{width:48px;height:48px;border-radius:14px;border:2px dashed currentColor;display:flex;align-items:center;justify-content:center;}
+    .add-card span{font-size:14px;font-weight:700;}
+    .add-card small{font-size:12px;text-align:center;line-height:1.6;padding:0 20px;color:inherit;opacity:0.8;}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="sparkles" style="width:18px;"></i></div>
+      <div class="logo-text">Sutura <span class="role-badge">Designer</span></div>
+    </div>
+    <nav class="nav-list">
+      <a href="10-fashion-designer-view.html" class="nav-item active"><i data-lucide="layout-grid" style="width:18px;"></i> My Listings</a>
+      <a href="04-portfolio-tab.html" class="nav-item"><i data-lucide="image" style="width:18px;"></i> Portfolio</a>
+    </nav>
+        <div class="sidebar-footer">
+      <div class="avatar" style="background:#FFFBEB;color:#D97706;border:1px solid #FEF3C7;">S</div>
+      <div class="user-info">
+        <div class="name">Sarah Staff</div>
+        <div class="role">Store Staff</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="header-left">
+        <div class="title">Product Listing Management</div>
+        <div class="sub">Create and manage your posted fashion designs</div>
+      </div>
+      <div class="header-actions">
+        <a href="../02-production/01-job-orders-tab.html" class="btn-back"><i data-lucide="arrow-left" style="width:14px;"></i> Manager View</a>
+        <button class="btn-new"><i data-lucide="plus" style="width:15px;"></i> New Listing</button>
+        <button class="icon-btn"><i data-lucide="bell" style="width:20px;"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Actor role banner -->
+      <div class="role-banner">
+        <div class="role-banner-icon"><i data-lucide="sparkles" style="width:18px;"></i></div>
+        <div class="role-banner-text">
+          You are logged in as <strong>Fashion Designer</strong>. You can create, publish, and manage product listings. Contact the Shop Owner for order management and pricing approvals.
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Listings</div>
+          <div class="stat-value">8</div>
+          <div class="stat-sub">Products posted</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Published</div>
+          <div class="stat-value" style="color:#10B981;">5</div>
+          <div class="stat-sub">Live on profile</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Drafts</div>
+          <div class="stat-value" style="color:#6B7280;">2</div>
+          <div class="stat-sub">Not yet published</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Views This Month</div>
+          <div class="stat-value">142</div>
+          <div class="stat-sub">Across all listings</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <i data-lucide="search" style="width:16px;color:var(--text-muted);"></i>
+          <input type="text" placeholder="Search your listings..."/>
+        </div>
+        <select class="filter-select">
+          <option>All Status</option>
+          <option>Published</option>
+          <option>Draft</option>
+          <option>Under Review</option>
+        </select>
+        <select class="filter-select">
+          <option>All Categories</option>
+          <option>Men's Wear</option>
+          <option>Women's Formal</option>
+          <option>Traditional</option>
+        </select>
+      </div>
+
+      <!-- Product grid -->
+      <div class="product-grid">
+
+        <!-- Published -->
+        <div class="product-card">
+          <div class="product-img" style="background-image:url('https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&q=80');background-size:cover;">
+            <span class="status-pill status-published">Published</span>
+            <span class="price-pill">₱12,500</span>
+          </div>
+          <div class="product-body">
+            <div class="product-name">Bespoke Barong Suit</div>
+            <div class="product-cat">Traditional / Formal</div>
+            <div class="product-meta">
+              <span><i data-lucide="eye" style="width:13px;"></i> 42 views</span>
+              <span><i data-lucide="heart" style="width:13px;"></i> 8 saves</span>
+            </div>
+            <div class="product-actions">
+              <button class="paction-btn"><i data-lucide="edit-2" style="width:12px;"></i> Edit</button>
+              <button class="paction-btn rose"><i data-lucide="eye" style="width:12px;"></i> View</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Published -->
+        <div class="product-card">
+          <div class="product-img" style="background-image:url('https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=400&q=80');background-size:cover;">
+            <span class="status-pill status-published">Published</span>
+            <span class="price-pill">₱22,000</span>
+          </div>
+          <div class="product-body">
+            <div class="product-name">Ivory Wedding Gown</div>
+            <div class="product-cat">Women's Bridal</div>
+            <div class="product-meta">
+              <span><i data-lucide="eye" style="width:13px;"></i> 58 views</span>
+              <span><i data-lucide="heart" style="width:13px;"></i> 21 saves</span>
+            </div>
+            <div class="product-actions">
+              <button class="paction-btn"><i data-lucide="edit-2" style="width:12px;"></i> Edit</button>
+              <button class="paction-btn rose"><i data-lucide="eye" style="width:12px;"></i> View</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Draft -->
+        <div class="product-card">
+          <div class="product-img" style="background:linear-gradient(135deg,#D1D5DB 0%,#9CA3AF 100%);display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="image" style="width:36px;height:36px;color:rgba(255,255,255,0.5);"></i>
+            <span class="status-pill status-draft">Draft</span>
+            <span class="price-pill">₱8,500</span>
+          </div>
+          <div class="product-body">
+            <div class="product-name">Navy Pinstripe Suit</div>
+            <div class="product-cat">Men's Formal</div>
+            <div class="product-meta">
+              <span><i data-lucide="eye" style="width:13px;"></i> 0 views</span>
+              <span style="color:var(--text-muted);font-style:italic;">Not published</span>
+            </div>
+            <div class="product-actions">
+              <button class="paction-btn"><i data-lucide="edit-2" style="width:12px;"></i> Edit</button>
+              <button class="paction-btn rose"><i data-lucide="send" style="width:12px;"></i> Publish</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Under review -->
+        <div class="product-card">
+          <div class="product-img" style="background-image:url('https://images.unsplash.com/photo-1617137968427-85924c800a22?w=400&q=80');background-size:cover;">
+            <span class="status-pill status-review">Under Review</span>
+            <span class="price-pill">₱6,200</span>
+          </div>
+          <div class="product-body">
+            <div class="product-name">Silk Cocktail Dress</div>
+            <div class="product-cat">Women's Evening</div>
+            <div class="product-meta">
+              <span><i data-lucide="clock" style="width:13px;"></i> Awaiting approval</span>
+            </div>
+            <div class="product-actions">
+              <button class="paction-btn"><i data-lucide="edit-2" style="width:12px;"></i> Edit</button>
+              <button class="paction-btn" style="color:#D97706;border-color:#FEF3C7;"><i data-lucide="clock" style="width:12px;"></i> Pending</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add card -->
+        <div class="add-card" onclick="alert('New Listing — prototype only')" style="min-height:318px;">
+          <div class="add-icon"><i data-lucide="plus" style="width:22px;"></i></div>
+          <span>Create New Listing</span>
+          <small>Add a new fashion design to your product listings for the shop's profile.</small>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

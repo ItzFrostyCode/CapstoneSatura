@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>Procurement | Sutura Management</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --accent: #2C6BED;
+      --pending: #F59E0B; --pending-bg: #FFFBEB;
+      --success: #10B981; --success-bg: #ECFDF5;
+      --info: #3B82F6; --info-bg: #EFF6FF;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow-x: hidden; }
+
+    /* Sidebar Styles */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background: var(--primary); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; }
+    .nav-list { padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; font-size: 15px; font-weight: 500; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background: var(--surface); color: var(--primary); }
+    .nav-item.active { background: var(--primary); color: white; }
+    .sidebar-footer { padding: 24px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 40px; height: 40px; border-radius: 12px; background: #E5E7EB; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--text-muted); }
+
+    /* Main Styles */
+    .main { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; width: calc(100vw - 260px); }
+    .header-title { font-size: 20px; font-weight: 600; }
+    .icon-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: none; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; text-decoration: none; }
+    .icon-btn:hover { background: var(--surface); color: var(--primary); border-color: var(--primary); }
+
+    /* Sub-nav */
+    .subnav { height: 64px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; position: sticky; top: 72px; z-index: 90; width: calc(100vw - 260px); }
+    .subnav-tabs { display: flex; gap: 32px; height: 100%; align-items: center; }
+    .subnav-tab { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--text-muted); height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer; }
+    .subnav-tab:hover { color: var(--primary); }
+    .subnav-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+    /* Content Area */
+    .content { padding: 40px; flex-grow: 1; overflow-y: auto; background: var(--surface); }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg); padding: 24px; border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 20px; }
+    .stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+    .bg-blue { background: #EEF2FF; color: #4F46E5; }
+    .bg-orange { background: #FFF7ED; color: #EA580C; }
+    .bg-green { background: #ECFDF5; color: #059669; }
+    .bg-indigo { background: #F5F3FF; color: #7C3AED; }
+    .stat-info .label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .stat-info .value { font-size: 24px; font-weight: 700; color: var(--text-main); margin-top: 4px; }
+
+    /* Table */
+    .table-container { background: var(--bg); border-radius: 24px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .table-header { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .table-title { font-size: 18px; font-weight: 700; }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 16px 32px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); background: var(--surface); border-bottom: 1px solid var(--border); }
+    td { padding: 20px 32px; font-size: 14px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    
+    .po-badge { font-weight: 700; color: var(--primary); }
+    .supplier-name { font-weight: 600; color: var(--text-main); }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .status-pending { background: var(--pending-bg); color: var(--pending); }
+    .status-shipped { background: var(--info-bg); color: var(--info); }
+    .status-received { background: var(--success-bg); color: var(--success); }
+    .status-draft { background: #F3F4F6; color: #374151; }
+    .status-partial { background: #FDF2F8; color: #BE185D; }
+    .status-cancelled { background: #FEF2F2; color: #EF4444; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .btn-primary-sm { display: flex; align-items: center; gap: 8px; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 20px; height: 44px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-primary-sm:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"><i data-lucide="scissors"></i></div>
+      <div class="logo-text">Sutura</div>
+    </div>
+    <nav class="nav-list">
+      <a href="../00-dashboard/01-dashboard.html" class="nav-item "><i data-lucide="layout-dashboard" style="width: 20px;"></i> Dashboard</a>
+      <a href="../01-clients-crm/02-customers-tab.html" class="nav-item "><i data-lucide="users" style="width: 20px;"></i> Customers</a>
+      <a href="../02-production/01-job-orders-tab.html" class="nav-item "><i data-lucide="briefcase" style="width: 20px;"></i> Production</a>
+      <a href="../03-supply-chain/01-inventory-tab.html" class="nav-item active"><i data-lucide="package" style="width: 20px;"></i> Supply Chain</a>
+      <a href="../04-finance/01-sales-tab.html" class="nav-item "><i data-lucide="credit-card" style="width: 20px;"></i> Finance</a>
+      <a href="../00-dashboard/08-branch-management.html" class="nav-item "><i data-lucide="git-branch" style="width: 20px;"></i> Branches</a>
+      <a href="../05-settings/01-settings-tab.html" class="nav-item "><i data-lucide="settings" style="width: 20px;"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info">
+        <div style="font-weight:700; font-size:14px;">Admin User</div>
+        <div style="font-size:12px; color:var(--text-muted);">Administrator</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+    <header class="header">
+      <div class="header-title">Supply Chain</div>
+      <div class="header-actions">
+        <button class="icon-btn"><i data-lucide="bell"></i></button>
+      </div>
+    </header>
+
+    <!-- Sub-nav tabs -->
+    <div class="subnav">
+      <div class="subnav-tabs">
+        <a href="01-inventory-tab.html" class="subnav-tab">Inventory</a>
+        <a href="02-procurement-tab.html" class="subnav-tab active">Procurement</a>
+        <a href="03-suppliers-tab.html" class="subnav-tab">Suppliers</a>
+      </div>
+      <div class="subnav-actions">
+        <a href="06-procurement-add-modal.html" class="btn-primary-sm"><i data-lucide="plus"></i> New Purchase Order</a>
+      </div>
+    </div>
+
+    <div class="content">
+      
+      <!-- Procurement Summary -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon bg-orange"><i data-lucide="alert-circle"></i></div>
+          <div class="stat-info">
+            <div class="label">Low Stock Alerts</div>
+            <div class="value">5 Items</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-blue"><i data-lucide="truck"></i></div>
+          <div class="stat-info">
+            <div class="label">Pending Deliveries</div>
+            <div class="value">2 Orders</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-green"><i data-lucide="dollar-sign"></i></div>
+          <div class="stat-info">
+            <div class="label">Monthly Material Spend</div>
+            <div class="value">₱27,950</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-indigo"><i data-lucide="award"></i></div>
+          <div class="stat-info">
+            <div class="label">Primary Category</div>
+            <div class="value">Fabrics</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Orders Table -->
+      <div class="table-container">
+        <div class="table-header">
+          <div class="table-title">Active Purchase Orders</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Supplier</th>
+              <th>Order Date</th>
+              <th>Expected Delivery</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: #FFF1F2;">
+              <td><span class="po-badge" style="color: #E11D48;">PO-2026-102</span></td>
+              <td><span class="supplier-name">Premium Fabrics Inc.</span></td>
+              <td>Apr 26, 2026</td>
+              <td>Apr 28, 2026</td>
+              <td>₱5,250.00</td>
+              <td><span class="status-pill status-shipped" style="background: #FDA4AF; color: #9F1239;"><span class="status-dot"></span> ⚡ URGENT: IN TRANSIT</span></td>
+              <td>
+                <div class="actions">
+                  <a href="07-procurement-view-modal.html" class="icon-btn" title="View Details"><i data-lucide="eye" style="width:14px;"></i></a>
+                  <a href="10-verify-delivery-modal.html" class="icon-btn" title="Verify Delivery"><i data-lucide="package-check" style="width:14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="po-badge">PO-2026-094</span></td>
+              <td><span class="supplier-name">Premium Fabrics Inc.</span></td>
+              <td>Apr 23, 2026</td>
+              <td>Apr 28, 2026</td>
+              <td>₱12,400.00</td>
+              <td><span class="status-pill status-shipped"><span class="status-dot"></span> In Transit</span></td>
+              <td>
+                <div class="actions">
+                  <a href="07-procurement-view-modal.html" class="icon-btn" title="View Details"><i data-lucide="eye" style="width:14px;"></i></a>
+                  <a href="10-verify-delivery-modal.html" class="icon-btn" title="Verify Delivery & Report Defects"><i data-lucide="package-check" style="width:14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="po-badge">PO-2023-093</span></td>
+              <td><span class="supplier-name">QC Garment Supplies</span></td>
+              <td>Oct 22, 2023</td>
+              <td>Oct 25, 2023</td>
+              <td>₱2,650.00</td>
+              <td><span class="status-pill status-pending"><span class="status-dot"></span> Pending Approval</span></td>
+              <td>
+                <div class="actions">
+                  <a href="07-procurement-view-modal.html" class="icon-btn" title="View Details"><i data-lucide="eye" style="width:14px;"></i></a>
+                  <a href="09-restock-approval-modal.html" class="icon-btn" title="Approve / Reject Request" style="background:#FFFBEB;border-color:#FEF3C7;color:#D97706;"><i data-lucide="check-circle" style="width:14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="po-badge">PO-2023-092</span></td>
+              <td><span class="supplier-name">Textile World Manila</span></td>
+              <td>Oct 21, 2023</td>
+              <td>Oct 24, 2023</td>
+              <td>₱3,200.00</td>
+              <td><span class="status-pill status-received"><span class="status-dot"></span> Received</span></td>
+              <td>
+                <div class="actions">
+                  <a href="07-procurement-view-modal.html" class="icon-btn" title="View Details"><i data-lucide="eye" style="width:14px;"></i></a>
+                  <a href="08-procurement-receive-modal.html" class="icon-btn" title="Receive Items"><i data-lucide="package" style="width:14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="po-badge">PO-2023-091</span></td>
+              <td><span class="supplier-name">Sewing Essentials Co.</span></td>
+              <td>Oct 20, 2023</td>
+              <td>Oct 22, 2023</td>
+              <td>₱1,200.00</td>
+              <td><span class="status-pill status-partial"><span class="status-dot"></span> Partial Received</span></td>
+              <td>
+                <div class="actions">
+                  <a href="07-procurement-view-modal.html" class="icon-btn" title="View Details"><i data-lucide="eye" style="width:14px;"></i></a>
+                  <a href="08-procurement-receive-modal.html" class="icon-btn" title="Receive Items"><i data-lucide="package" style="width:14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="po-badge">PO-2023-090</span></td>
+              <td><span class="supplier-name">Premium Fabrics Inc.</span></td>
+              <td>Oct 19, 2023</td>
+              <td>—</td>
+              <td>₱8,500.00</td>
+              <td><span class="status-pill status-draft"><span class="status-dot"></span> Draft</span></td>
+              <td>
+                <div class="actions">
+                  <a href="07-procurement-view-modal.html" class="icon-btn" title="View Details"><i data-lucide="eye" style="width:14px;"></i></a>
+                  <a href="08-procurement-receive-modal.html" class="icon-btn" title="Receive Items"><i data-lucide="package" style="width:14px;"></i></a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

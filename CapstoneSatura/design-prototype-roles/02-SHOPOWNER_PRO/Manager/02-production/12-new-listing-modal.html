@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1440, initial-scale=1.0" />
+  <title>Designer — Create New Listing | Sutura</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --primary: #1A1A1A; --bg: #FFFFFF; --surface: #F9FAFB;
+      --text-main: #111827; --text-muted: #6B7280; --border: #E5E7EB;
+      --rose: #F43F5E; --rose-bg: #FFF1F2; --rose-border: #FECDD3;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background-color: var(--surface); color: var(--text-main); display: flex; width: 100%; min-height: 100vh; overflow: hidden; }
+
+    /* Blurred background layout */
+    .sidebar { width: 260px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; filter: blur(2px); opacity: 0.6; }
+    .sidebar-header { height: 72px; display: flex; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 1px solid var(--border); }
+    .logo-icon { background: var(--rose); color: white; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .logo-text { font-size: 20px; font-weight: 700; }
+    .nav-list { padding: 20px 16px; display: flex; flex-direction: column; gap: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--text-muted); }
+    .nav-item.active { background: var(--rose); color: white; }
+    
+    .main { flex-grow: 1; display: flex; flex-direction: column; filter: blur(4px); opacity: 0.6; }
+    .header { height: 72px; background: var(--bg); border-bottom: 1px solid var(--border); }
+
+    /* Modal Overlay */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(17,24,39,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+    
+    .modal { background: var(--bg); width: 680px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+    .modal-header { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: #FCFDFF; }
+    .modal-title { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+    .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 8px; }
+    .modal-close:hover { background: var(--surface); color: var(--text-main); }
+    
+    .modal-body { padding: 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+    
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    
+    label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    input[type="text"], input[type="number"], select, textarea { 
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Outfit'; 
+      font-size: 15px; outline: none; background: var(--bg); transition: all 0.2s; 
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--rose); box-shadow: 0 0 0 4px var(--rose-bg); }
+    textarea { height: 80px; resize: none; }
+    
+    .image-dropzone { 
+      border: 2px dashed var(--border); border-radius: 14px; padding: 32px; text-align: center; 
+      background: var(--surface); cursor: pointer; transition: all 0.2s; 
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .image-dropzone:hover { border-color: var(--rose); background: var(--rose-bg); color: var(--rose); }
+    .image-dropzone i { color: var(--text-muted); }
+    .image-dropzone:hover i { color: var(--rose); }
+    .drop-text { font-size: 14px; font-weight: 600; }
+    .drop-sub { font-size: 12px; color: var(--text-muted); }
+
+    .cost-notice { background: var(--rose-bg); border: 1px solid var(--rose-border); border-radius: 12px; padding: 14px 18px; display: flex; gap: 12px; align-items: flex-start; }
+    .cost-notice i { color: var(--rose); flex-shrink: 0; margin-top: 2px; }
+    .cost-notice-text { font-size: 12px; color: #9F1239; line-height: 1.5; font-weight: 500; }
+
+    .modal-footer { padding: 20px 32px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #FCFDFF; }
+    .btn-secondary { background: var(--bg); border: 1px solid var(--border); color: var(--text-main); height: 44px; padding: 0 20px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Outfit'; }
+    .btn-secondary:hover { background: var(--surface); border-color: var(--text-muted); }
+    .btn-primary { background: var(--rose); color: white; border: none; height: 44px; padding: 0 24px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Outfit'; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2); }
+    .btn-primary:hover { background: #E11D48; transform: translateY(-1px); }
+
+    .status-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="logo-icon"><i data-lucide="sparkles" style="width:18px;"></i></div><div class="logo-text">Sutura</div></div>
+    <nav class="nav-list">
+      <div class="nav-item active"><i data-lucide="layout-grid" style="width:18px;"></i> My Listings</div>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header"></header>
+    <div class="content"></div>
+  </main>
+
+  <div class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Create New Listing</div>
+        <a href="10-fashion-designer-view.html" class="modal-close" style="text-decoration:none;"><i data-lucide="x" style="width: 22px;"></i></a>
+      </div>
+      
+      <div class="modal-body">
+        
+        <div class="image-dropzone">
+          <i data-lucide="upload-cloud" style="width: 32px; height: 32px;"></i>
+          <div class="drop-text">Upload Design Reference Photo</div>
+          <div class="drop-sub">Drag and drop or click to browse (JPG, PNG)</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Design Name *</label>
+            <input type="text" placeholder="e.g., Midnight Gala Suit" />
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select>
+              <option value="">Select category...</option>
+              <option>Men's Formal</option>
+              <option>Women's Evening</option>
+              <option>Traditional / Barong</option>
+              <option>Corporate Uniform</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Design Description</label>
+          <textarea placeholder="Briefly describe the design inspiration and key features..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Technical Notes for the Shop</label>
+          <textarea style="height:100px;" placeholder="Specify preferred fabrics, stitching style, button types, or special fabrication needs..."></textarea>
+        </div>
+
+        <div class="cost-notice">
+          <i data-lucide="info" style="width: 18px;"></i>
+          <div class="cost-notice-text">
+            <strong>Quotation Process:</strong> Upon submission, the Shop Manager will calculate the production cost based on your technical notes. You will be notified to review and approve the final quotation before this design can be used for orders.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <div class="status-badge"><i data-lucide="clock" style="width:14px;"></i> New Listing</div>
+        <div style="display:flex; gap:12px;">
+          <a href="10-fashion-designer-view.html" class="btn-secondary" style="text-decoration:none; display:flex; align-items:center;">Save Draft</a>
+          <a href="10-fashion-designer-view.html" class="btn-primary" style="text-decoration:none;">
+            <i data-lucide="send" style="width:16px;"></i> Submit for Quotation
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+
+</body>
+</html>

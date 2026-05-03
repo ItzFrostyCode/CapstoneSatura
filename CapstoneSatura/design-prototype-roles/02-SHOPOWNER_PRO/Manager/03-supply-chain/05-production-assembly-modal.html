@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Production Assembly | Sutura Management</title>
+  <link rel="stylesheet" href="../../assets/css/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #1A1A1A;
+      --primary-hover: #333333;
+      --bg: #FFFFFF;
+      --text: #111827;
+      --border: #E5E7EB;
+      --accent: #2C6BED;
+      --surface: #F9FAFB;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--surface);
+      color: var(--text);
+      width: 1920px;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-container {
+      background: white;
+      width: 1175px;
+      max-height: 96vh;
+      border-radius: 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlide {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 24px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .modal-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .step-indicator {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .step-dot {
+      width: 24px;
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .step-dot.active {
+      background: var(--primary);
+      width: 32px;
+    }
+
+    .modal-body {
+      padding: 40px;
+      max-height: 85vh;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .material-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 48px; /* Fixed widths for qty and delete for better alignment */
+      gap: 16px;
+      background: var(--bg);
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      align-items: flex-start; /* Align to top */
+      border: 1.5px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .material-row:hover {
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+
+    .input-group { margin: 0; } /* Remove margin for grid alignment */
+    
+    select, input {
+      width: 100%;
+      height: 48px; /* Fixed height for all inputs to ensure they are 'pantay' */
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.2s;
+      background: white;
+      font-family: inherit;
+    }
+
+    /* Style for the trash button */
+    .action-btn {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .action-btn:hover {
+      background: #FEF2F2;
+      color: var(--danger);
+      border-color: #FCA5A5;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(44, 107, 237, 0.1);
+    }
+
+    .add-material-btn {
+      width: 100%;
+      padding: 12px;
+      background: white;
+      border: 1.5px dashed var(--border);
+      border-radius: 12px;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      margin-bottom: 32px;
+      font-family: inherit;
+    }
+
+    .add-material-btn:hover {
+      border-color: var(--accent);
+      background: rgba(44, 107, 237, 0.02);
+    }
+
+    .output-section {
+      background: var(--surface);
+      padding: 24px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .modal-footer {
+      padding: 24px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      border: none;
+    }
+
+    .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #E5E7EB; color: var(--text-main); }
+
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+    .stock-impact {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .impact-negative { color: #ef4444; font-weight: 600; }
+    .impact-positive { color: #10b981; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="modal-backdrop">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div>
+          <h2><i data-lucide="layers"></i> Production Assembly</h2>
+          <div class="step-indicator">
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+          </div>
+        </div>
+        <button class="btn-secondary" style="padding: 8px; border-radius: 8px;" onclick="window.location.href='01-inventory-tab.html'">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Step 1: Raw Materials -->
+        <div class="section-title">
+          <i data-lucide="box"></i> 1. Materials to Use (Stock Reduction)
+        </div>
+
+        <div id="materials-list">
+          <div class="material-row">
+            <div>
+              <select>
+                <option>Select Material...</option>
+                <option selected>Cotton Fabric Roll (SKU-FAB-001)</option>
+                <option>Polyester Fabric Roll (SKU-FAB-004)</option>
+                <option>Denim Fabric Roll (SKU-FAB-005)</option>
+                <option>Buttons (Assorted) (SKU-ACC-001)</option>
+                <option>Thread (White) (SKU-THR-001)</option>
+              </select>
+              <div class="stock-impact">Current: 50 rolls • <span class="impact-negative">-5 rolls</span></div>
+            </div>
+            <div>
+              <input type="number" value="5" placeholder="Qty">
+            </div>
+            <button class="action-btn" style="color: #ef4444;"><i data-lucide="trash-2" style="width: 16px;"></i></button>
+          </div>
+
+          <div class="material-row">
+            <div>
+              <select>
+                <option>Select Material...</option>
+                <option>Cotton Fabric Roll (SKU-FAB-001)</option>
+                <option selected>Buttons (Assorted) (SKU-ACC-001)</option>
+                <option>Thread (White) (SKU-THR-001)</option>
+              </select>
+              <div class="stock-impact">Current: 500 packs • <span class="impact-negative">-10 packs</span></div>
+            </div>
+            <div>
+              <input type="number" value="10" placeholder="Qty">
+            </div>
+            <button class="action-btn" style="color: #ef4444;"><i data-lucide="trash-2" style="width: 16px;"></i></button>
+          </div>
+        </div>
+
+        <button class="add-material-btn">
+          <i data-lucide="plus"></i> Add Another Material
+        </button>
+
+        <!-- Step 2: Finished Product -->
+        <div class="section-title">
+          <i data-lucide="sparkles"></i> 2. Production Output (Stock Addition)
+        </div>
+
+        <div class="output-section">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+            <div class="input-group">
+              <label>Select Finished Product</label>
+              <select>
+                <option>Select Premade Item...</option>
+                <option selected>School Uniform Set – Elementary (SKU-UNI-001)</option>
+                <option>PE Uniform Set (SKU-UNI-005)</option>
+                <option>Office Uniform (Male) (SKU-UNI-007)</option>
+              </select>
+              <div class="stock-impact">Current: 80 sets • <span class="impact-positive">+20 sets</span></div>
+            </div>
+            <div class="input-group">
+              <label>Quantity Produced</label>
+              <input type="number" value="20">
+            </div>
+          </div>
+          
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05); font-size: 0.8rem; color: #64748b; line-height: 1.5;">
+            <strong>Note:</strong> Finalizing this batch will automatically deduct the raw materials above and increase the stock of the selected uniform. This is an <strong>internal conversion</strong> and does not create a sale record.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.location.href='01-inventory-tab.html'">Cancel</button>
+        <button class="btn btn-primary" onclick="window.location.href='01-inventory-tab.html'">
+          <i data-lucide="check-circle"></i>
+          Finalize Production
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>
