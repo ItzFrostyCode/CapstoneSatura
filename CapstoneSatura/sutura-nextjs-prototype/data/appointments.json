@@ -1,1 +1,29 @@
-[]
+[
+  { 
+    "id": "APT-1024",
+    "customer": "Alexander McQueen",
+    "type": "First Fitting",
+    "date": "Oct 28, 2026",
+    "time": "10:00 AM",
+    "status": "Confirmed",
+    "branch": "Makati Central"
+  },
+  { 
+    "id": "APT-1025",
+    "customer": "Elena Rostova",
+    "type": "Initial Consultation",
+    "date": "Oct 28, 2026",
+    "time": "02:30 PM",
+    "status": "Pending",
+    "branch": "BGC Premium"
+  },
+  { 
+    "id": "APT-1026",
+    "customer": "Maria Santos",
+    "type": "Final Fitting / Pickup",
+    "date": "Oct 29, 2026",
+    "time": "11:00 AM",
+    "status": "Delayed",
+    "branch": "Makati Central"
+  }
+]

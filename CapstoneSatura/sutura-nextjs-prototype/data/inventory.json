@@ -1,1 +1,10 @@
-[]
+[
+  { "sku": "FAB-NAV-001", "item": "Premium Navy Wool", "cat": "Fabric", "stock": 45, "unit": "m", "price": "₱1,200.00", "cost": "₱850.00", "status": "In Stock", "location": "Shelf A-1" },
+  { "sku": "BTN-SIL-012", "item": "Metallic Silver Buttons", "cat": "Buttons", "stock": 500, "unit": "pcs", "price": "₱15.00", "cost": "₱5.00", "status": "In Stock", "location": "Bin B-4" },
+  { "sku": "ZIP-BLK-005", "item": "YKK 8-inch Zipper", "cat": "Zipper", "stock": 12, "unit": "pcs", "price": "₱45.00", "cost": "₱25.00", "status": "Low Stock", "location": "Bin C-2" },
+  { "sku": "THR-NAV-022", "item": "Indigo Industrial Thread", "cat": "Thread", "stock": 5, "unit": "cones", "price": "₱120.00", "cost": "₱80.00", "status": "Out of Stock", "location": "Shelf D-1" },
+  { "sku": "FAB-WHT-002", "item": "Oxford Cotton White", "cat": "Fabric", "stock": 120, "unit": "m", "price": "₱450.00", "cost": "₱300.00", "status": "In Stock", "location": "Shelf A-5" },
+  { "sku": "UNF-POL-001", "item": "Police Service Uniform", "cat": "Finished Goods", "stock": 15, "unit": "sets", "price": "₱3,500.00", "cost": "₱2,100.00", "status": "In Stock", "location": "Rack 1-A" },
+  { "sku": "UNF-SEC-002", "item": "Security Guard Upper", "cat": "Finished Goods", "stock": 4, "unit": "pcs", "price": "₱1,800.00", "cost": "₱950.00", "status": "Low Stock", "location": "Rack 2-B" },
+  { "sku": "LBL-SUT-001", "item": "Sutura Brand Label", "cat": "Label", "stock": 1000, "unit": "pcs", "price": "₱2.00", "cost": "₱0.50", "status": "In Stock", "location": "Bin E-1" }
+]

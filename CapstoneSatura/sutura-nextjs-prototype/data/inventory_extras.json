@@ -1,0 +1,13 @@
+{
+  "suppliers": [
+    { "name": "Global Fabrics Inc.", "contact": "John Doe", "phone": "+63 917 123 4567", "items": ["Premium Wool", "Oxford Cotton"], "leadTime": "3-5 days", "rating": 4.8 },
+    { "name": "Fastener Hub", "contact": "Jane Smith", "phone": "+63 918 234 5678", "items": ["YKK Zippers", "Metal Buttons"], "leadTime": "1-2 days", "rating": 4.5 },
+    { "name": "Textile Solutions", "contact": "Mike Ross", "phone": "+63 919 345 6789", "items": ["Industrial Thread", "Lining"], "leadTime": "5-7 days", "rating": 4.2 }
+  ],
+  "movements": [
+    { "date": "2024-05-01", "type": "Stock In", "item": "Premium Navy Wool", "qty": "+50m", "staff": "Admin", "ref": "PO-001" },
+    { "date": "2024-05-02", "type": "Usage", "item": "Premium Navy Wool", "qty": "-2.5m", "staff": "Cutter", "ref": "JO-102" },
+    { "date": "2024-05-02", "type": "Usage", "item": "Metallic Silver Buttons", "qty": "-6pcs", "staff": "Sewer", "ref": "JO-102" },
+    { "date": "2024-05-03", "type": "Stock Adjustment", "item": "Oxford Cotton White", "qty": "-2m", "staff": "Admin", "ref": "Damage" }
+  ]
+}

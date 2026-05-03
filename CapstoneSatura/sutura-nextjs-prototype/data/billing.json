@@ -1,1 +1,9 @@
-[]
+[
+  { "id": "#CIV-012001", "customer": "James Brown", "email": "james@gmail.com", "date": "Feb 05 - Feb 10, 2025", "amount": "₱10,213.00", "status": "Open", "subject": "Custom Suit Design", "color": "indigo" },
+  { "id": "#CIV-013005", "customer": "Arthur Taylor", "email": "arthur@gmail.com", "date": "Feb 08 - Feb 12, 2025", "amount": "₱600.00", "status": "Paid", "subject": "Alterations & Repair", "color": "emerald" },
+  { "id": "#CIV-012010", "customer": "Matthew Johnson", "email": "matt@gmail.com", "date": "Feb 10 - Feb 16, 2025", "amount": "₱1,000.00", "status": "Open", "subject": "Barong Tagalog", "color": "indigo" },
+  { "id": "#CIV-014024", "customer": "Wei Chen", "email": "weichen@gmail.com", "date": "Feb 11 - Feb 18, 2025", "amount": "₱8,000.00", "status": "Past Due", "subject": "Wedding Gown Deposit", "color": "rose" },
+  { "id": "#CIV-015049", "customer": "Jump Amend", "email": "jump@gmail.com", "date": "Feb 14 - Feb 22, 2025", "amount": "₱300.00", "status": "Draft", "subject": "Product Design", "color": "sky" },
+  { "id": "#CIV-014025", "customer": "Ravi Patel", "email": "ravipatel@gmail.com", "date": "Feb 15 - Feb 25, 2025", "amount": "₱430.00", "status": "Past Due", "subject": "Pants Shortening", "color": "rose" },
+  { "id": "#CIV-012001", "customer": "David Smith", "email": "david@gmail.com", "date": "Feb 16 - Feb 24, 2025", "amount": "₱1,250.00", "status": "Paid", "subject": "Office Uniforms", "color": "emerald" }
+]

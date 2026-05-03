@@ -1,1 +1,11 @@
-[]
+[
+  { "name": "Joshua Arabejo", "role": "Staff", "email": "joshua@sutura.com", "phone": "+63 912 345 6789", "status": "Active", "avatar": "JA", "color": "indigo" },
+  { "name": "Elena Cruz", "role": "Staff", "email": "elena@sutura.com", "phone": "+63 923 456 7890", "status": "Active", "avatar": "EC", "color": "indigo" },
+  { "name": "Michael Tan", "role": "Staff", "email": "michael@sutura.com", "phone": "+63 934 567 8901", "status": "Active", "avatar": "MT", "color": "indigo" },
+  { "name": "Sarah Santos", "role": "Staff", "email": "sarah@sutura.com", "phone": "+63 945 678 9012", "status": "Active", "avatar": "SS", "color": "indigo" },
+  { "name": "David Lim", "role": "Staff", "email": "david@sutura.com", "phone": "+63 956 789 0123", "status": "Active", "avatar": "DL", "color": "indigo" },
+  { "name": "Maria Garcia", "role": "Measure", "email": "maria@sutura.com", "phone": "+63 967 890 1234", "status": "Active", "avatar": "MG", "color": "emerald" },
+  { "name": "Juan Reyes", "role": "Cutting", "email": "juan@sutura.com", "phone": "+63 978 901 2345", "status": "Active", "avatar": "JR", "color": "amber" },
+  { "name": "Ricardo Gomez", "role": "Sewing", "email": "ricardo@sutura.com", "phone": "+63 989 012 3456", "status": "Active", "avatar": "RG", "color": "rose" },
+  { "name": "Anna Lee", "role": "QC Check", "email": "anna@sutura.com", "phone": "+63 990 123 4567", "status": "Active", "avatar": "AL", "color": "sky" }
+]

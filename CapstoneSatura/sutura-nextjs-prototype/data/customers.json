@@ -1,1 +1,38 @@
-[]
+[
+  { 
+    "id": "CUS-001", 
+    "name": "Maria Santos", 
+    "email": "maria.s@example.com", 
+    "phone": "+63 917 111 2222",
+    "lastOrder": "Oct 24, 2026", 
+    "status": "Measurements Complete", 
+    "ordersCount": 5
+  },
+  { 
+    "id": "CUS-002", 
+    "name": "Carlos Reyes", 
+    "email": "carlos.r@example.com", 
+    "phone": "+63 920 333 4444",
+    "lastOrder": "Oct 22, 2026", 
+    "status": "Pending Fitting", 
+    "ordersCount": 2
+  },
+  { 
+    "id": "CUS-003", 
+    "name": "Elena Cruz", 
+    "email": "elena.c@example.com", 
+    "phone": "+63 918 555 6666",
+    "lastOrder": "Sep 15, 2026", 
+    "status": "Ready for Pickup", 
+    "ordersCount": 12
+  },
+  { 
+    "id": "CUS-004", 
+    "name": "David Lee", 
+    "email": "d.lee@example.com", 
+    "phone": "+63 905 777 8888",
+    "lastOrder": "Aug 01, 2026", 
+    "status": "Measurements Outdated", 
+    "ordersCount": 1
+  }
+]

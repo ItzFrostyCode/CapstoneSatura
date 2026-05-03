@@ -1,1 +1,10 @@
-[]
+[
+  { "id": "ORD-1045", "customer": "Maria Garcia", "garment": "Wedding Gown (Silk)", "price": 45000, "balance": 0, "dueDate": "May 15", "staff": "Isabella", "status": "QC Check", "priority": "High", "progress": 100 },
+  { "id": "ORD-1044", "customer": "Alexander McQueen", "garment": "Bespoke Navy Suit", "price": 32000, "balance": 15000, "dueDate": "May 18", "staff": "Juan", "status": "Sewing", "priority": "Normal", "progress": 65 },
+  { "id": "ORD-1043", "customer": "Elena Rostova", "garment": "Summer Dress", "price": 8500, "balance": 0, "dueDate": "May 10", "staff": "Maria", "status": "Ready", "priority": "Normal", "progress": 100 },
+  { "id": "ORD-1042", "customer": "David Torres", "garment": "3x Linen Shirts", "price": 12000, "balance": 0, "dueDate": "May 22", "staff": "Carlo", "status": "Cutting", "priority": "Low", "progress": 30 },
+  { "id": "ORD-1041", "customer": "Sofia Andres", "garment": "Tuxedo Alteration", "price": 4500, "balance": 1000, "dueDate": "May 08", "staff": "Juan", "status": "Measured", "priority": "Urgent", "progress": 10 },
+  { "id": "ORD-1040", "customer": "James Wilson", "garment": "Evening Coat", "price": 18000, "balance": 0, "dueDate": "May 05", "staff": "Isabella", "status": "Released", "priority": "Normal", "progress": 100 },
+  { "id": "ORD-1039", "customer": "Roberto Gomez", "garment": "Barong Tagalog", "price": 12500, "balance": 5000, "dueDate": "May 12", "staff": "Mike", "status": "Ready", "priority": "High", "progress": 100, "isBlocked": true, "blockReason": "Missing Buttons" },
+  { "id": "ORD-1038", "customer": "Lucia Santos", "garment": "Cocktail Dress", "price": 15000, "balance": 0, "dueDate": "May 11", "staff": "Sarah", "status": "QC Check", "priority": "Normal", "progress": 100, "isRework": true, "reworkReason": "Uneven Hemline" }
+]
