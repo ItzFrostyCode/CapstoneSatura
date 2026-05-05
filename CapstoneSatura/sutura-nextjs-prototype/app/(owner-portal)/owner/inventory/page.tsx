@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Plus,
   Search,
@@ -28,7 +28,12 @@ import {
   FileX,
   ChevronRight,
   ClipboardList,
-  MapPin
+  MapPin,
+  Camera,
+  Package,
+  Printer,
+  TrendingDown,
+  ChevronDown
 } from 'lucide-react';
 
 import { useERPStore, InventoryItem } from '../../store/useERPStore';
@@ -77,7 +82,7 @@ const renderAvatar = (name: string, size: number = 40, imageUrl?: string) => {
     return (
       <img 
         src={imageUrl} 
-        alt={name}
+        alt=""
         className="rounded-xl object-cover shrink-0 shadow-sm border border-slate-100"
         style={{ width: `${size}px`, height: `${size}px` }}
       />
@@ -99,6 +104,23 @@ const renderAvatar = (name: string, size: number = 40, imageUrl?: string) => {
 };
 
 export default function InventoryPage() {
+  const {
+    inventory,
+    movements,
+    recipes,
+    staff,
+    suppliers,
+    customers,
+    addInventoryItem,
+    addMovement,
+    updateInventoryItem,
+    saveRecipe: globalSaveRecipe,
+    executeAssembly: globalExecuteAssembly,
+    createPO,
+    addPayment,
+    createNewOrder
+  } = useERPStore();
+
   const [activeTab, setActiveTab] = useState<'materials' | 'finished' | 'assembly' | 'history'>('materials');
   const [searchQuery, setSearchQuery] = useState('');
   const [isBOMModalOpen, setIsBOMModalOpen] = useState(false);
@@ -122,20 +144,190 @@ export default function InventoryPage() {
   // Action Menu State
   const [activeActionRow, setActiveActionRow] = useState<string | null>(null);
 
-  // Core ERP Store
-  const {
-    inventory,
-    movements,
-    recipes,
-    staff,
-    suppliers,
-    addInventoryItem,
-    addMovement,
-    updateInventoryItem,
-    saveRecipe: globalSaveRecipe,
-    executeAssembly: globalExecuteAssembly,
-    createPO
-  } = useERPStore();
+  // Batch Release State
+  const [batchCart, setBatchCart] = useState<{ sku: string; qty: number }[]>([]);
+  const [batchCustomerId, setBatchCustomerId] = useState('');
+  const [batchSuccess, setBatchSuccess] = useState(false);
+  const [batchPaymentMethod, setBatchPaymentMethod] = useState('Cash');
+  const [batchAmountTendered, setBatchAmountTendered] = useState<number>(0);
+
+  // ── BATCH RELEASE HELPERS ──
+  const addToBatch = (sku: string) => {
+    setBatchCart(prev => {
+      const exists = prev.find(i => i.sku === sku);
+      if (exists) return prev;
+      return [...prev, { sku, qty: 1 }];
+    });
+  };
+
+  const removeFromBatch = (sku: string) => {
+    setBatchCart(prev => prev.filter(i => i.sku !== sku));
+  };
+
+  const updateBatchQty = (sku: string, qty: number) => {
+    setBatchCart(prev => prev.map(i => i.sku === sku ? { ...i, qty: Math.max(1, qty) } : i));
+  };
+
+  const executeBatchRelease = useCallback(() => {
+    const totalValue = batchCart.reduce((sum, item) => {
+      const inv = inventory.find(i => i.sku === item.sku);
+      return sum + (inv ? inv.price * item.qty : 0);
+    }, 0);
+
+    const saleRef = `SALE-${Date.now().toString().slice(-6)}`;
+
+    // 1. Create a "Premade" Job Order for the Sale
+    createNewOrder({
+      customer_id: batchCustomerId || 'WALK-IN',
+      garment: `Batch Sale (${batchCart.length} items)`,
+      totalValue: totalValue,
+      amountPaid: totalValue, // Fully paid for quick release
+      dueDate: new Date().toISOString(),
+      assigned_tailor_id: 'STF-001',
+      priority: 'Normal',
+      is_premade: true,
+      notes: `Batch Release: ${batchCart.map(i => `${i.qty}x ${i.sku}`).join(', ')}`
+    });
+
+    // 2. Deduct stock and log movements
+    batchCart.forEach(item => {
+      const invItem = inventory.find(i => i.sku === item.sku);
+      if (invItem) {
+        updateInventoryItem(item.sku, { stock: invItem.stock - item.qty });
+        addMovement({
+          type: 'Usage',
+          itemSku: item.sku,
+          itemName: invItem.item,
+          qty: -item.qty,
+          unit: invItem.unit,
+          staff_id: 'STF-001',
+          ref: saleRef
+        });
+      }
+    });
+
+    // 3. Record Financial Payment
+    addPayment({
+       order_id: saleRef,
+       customer_id: batchCustomerId || 'WALK-IN',
+       amount_paid: totalValue,
+       payment_method: batchPaymentMethod,
+       received_by: 'STF-001',
+       paid_at: new Date().toISOString(),
+       notes: `Full payment for batch release ${saleRef}`
+    });
+
+    setBatchSuccess(true);
+    // Removed automatic timeout to allow printing
+  }, [batchCart, batchCustomerId, inventory, createNewOrder, updateInventoryItem, addMovement, addPayment, batchPaymentMethod]);
+
+  const handlePrintReceipt = () => {
+    const total = batchCart.reduce((sum, item) => {
+      const inv = inventory.find(i => i.sku === item.sku);
+      return sum + (inv ? inv.price * item.qty : 0);
+    }, 0);
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const receiptContent = `
+      <html>
+        <head>
+          <title>SUTURA - Official Receipt</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; line-height: 1.5; }
+            .header { text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 30px; }
+            .title { font-size: 24px; font-weight: 900; letter-spacing: -0.02em; }
+            .details { display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+            th { text-align: left; border-bottom: 1px solid #f1f5f9; padding: 10px 0; font-size: 11px; text-transform: uppercase; color: #94a3b8; }
+            td { padding: 15px 0; border-bottom: 1px solid #f8fafc; font-size: 14px; }
+            .total-section { border-top: 2px solid #1e293b; padding-top: 20px; text-align: right; }
+            .total-row { display: flex; justify-content: flex-end; gap: 40px; margin-bottom: 10px; }
+            .total-label { font-weight: 700; color: #64748b; }
+            .total-value { font-weight: 900; font-size: 18px; width: 120px; }
+            .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #94a3b8; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">SUTURA TAILORING</div>
+            <p>Official Sales Receipt</p>
+          </div>
+          <div class="details">
+            <div>
+              <p><strong>Customer:</strong> ${customers.find(c => c.id === batchCustomerId)?.name || 'Walk-In Customer'}</p>
+              <p><strong>Method:</strong> ${batchPaymentMethod}</p>
+            </div>
+            <div style="text-align: right;">
+              <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+              <p><strong>Ref:</strong> SALE-${Date.now().toString().slice(-6)}</p>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Item Description</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th style="text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${batchCart.map(item => {
+                const inv = inventory.find(i => i.sku === item.sku);
+                return `
+                  <tr>
+                    <td><strong>${inv?.item}</strong><br><small style="color: #94a3b8;">${item.sku}</small></td>
+                    <td>${item.qty} ${inv?.unit}</td>
+                    <td>${formatCurrency(inv?.price || 0)}</td>
+                    <td style="text-align: right;">${formatCurrency((inv?.price || 0) * item.qty)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+          <div class="total-section">
+            <div class="total-row">
+              <span class="total-label">Subtotal</span>
+              <span class="total-value">${formatCurrency(total)}</span>
+            </div>
+            <div class="total-row">
+              <span class="total-label">Amount Tendered</span>
+              <span class="total-value">${formatCurrency(batchAmountTendered)}</span>
+            </div>
+            <div class="total-row" style="margin-top: 10px;">
+              <span class="total-label" style="color: #059669;">Change Given</span>
+              <span class="total-value" style="color: #059669;">${formatCurrency(batchAmountTendered - total)}</span>
+            </div>
+          </div>
+          <div class="footer">
+            <p>Thank you for choosing Sutura Tailoring!</p>
+            <p>This is a system-generated receipt.</p>
+          </div>
+          <script>window.print();</script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(receiptContent);
+    printWindow.document.close();
+  };
+
+  const handleItemImageUpload = (e: React.ChangeEvent<HTMLInputElement>, sku: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateInventoryItem(sku, { image: reader.result as string });
+        // Also update viewItem if it's currently open
+        if (viewItem && viewItem.sku === sku) {
+          setViewItem({ ...viewItem, image: reader.result as string });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Derived State
   const materials = useMemo(() => inventory.filter((i) => i.cat !== 'Finished Goods'), [inventory]);
@@ -456,11 +648,11 @@ export default function InventoryPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                    <th className="px-6 py-4">Item & SKU</th>
+                    <th className="px-6 py-4">Material Details</th>
                     <th className="px-6 py-4">Category</th>
-                    <th className="px-6 py-4">Supplier</th>
-                    <th className="px-6 py-4 text-center">Stock (Derived)</th>
-                    <th className="px-6 py-4 text-center">Reorder At</th>
+                    <th className="px-6 py-4">Linked Supplier</th>
+                    <th className="px-6 py-4 text-center">Stock Level</th>
+                    <th className="px-6 py-4 text-center">Reorder Point</th>
                     <th className="px-6 py-4 text-center">Status</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
@@ -486,43 +678,40 @@ export default function InventoryPage() {
                       return (
                         <tr key={item.sku} className="hover:bg-slate-50/50 transition-all group">
                           <td className="px-6 py-5">
-                            <div className="flex items-center gap-4">
+                            <div 
+                              className="flex items-center gap-4 cursor-pointer group/item"
+                              onClick={() => setViewItem(item)}
+                            >
                               {renderAvatar(item.item, 44, item.image)}
                               <div>
-                                <div className="text-[15px] font-bold text-slate-900 leading-none mb-1">{item.item}</div>
+                                <div className="text-[15px] font-bold text-slate-900 leading-none mb-1 group-hover/item:text-indigo-600 transition-colors">{item.item}</div>
                                 <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{item.sku}</div>
-                                {item.location && (
-                                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
-                                    <MapPin size={10} className="text-indigo-400" />
-                                    {item.location}
-                                  </div>
-                                )}
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-5">
-                             <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/50 uppercase tracking-wide">
+                             <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200/50 uppercase tracking-wide">
                                {item.cat}
                              </span>
                           </td>
                           <td className="px-6 py-5">
-                            <span className="text-[12px] font-bold text-indigo-600">{item.supplier_id ? suppliers.find(s => s.id === item.supplier_id)?.name || 'Unlinked' : 'Unlinked'}</span>
+                            <span className="text-[13px] font-bold text-indigo-600">{item.supplier_id ? suppliers.find(s => s.id === item.supplier_id)?.name || 'Unlinked' : 'Unlinked'}</span>
                           </td>
                           <td className="px-6 py-5 text-center">
-                            <div className="text-[15px] font-black text-slate-900">{item.stock}</div>
-                            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.unit}</div>
-                            <div className="text-[9px] text-slate-300 italic mt-0.5">derived</div>
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/60">
+                               <span className="text-[14px] font-black text-slate-900">{item.stock}</span>
+                               <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{item.unit}</span>
+                            </div>
                           </td>
                           <td className="px-6 py-5 text-center">
                             <div className="text-[13px] font-bold text-amber-600">{item.minStock} {item.unit}</div>
                           </td>
                           <td className="px-6 py-5 text-center">
                             <div className="flex flex-col items-center gap-1.5">
-                              <span className={`inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${health.classes}`}>
+                              <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${health.classes}`}>
                                 <div className={`w-1.5 h-1.5 rounded-full ${health.dot}`} />
                                 {health.label}
                               </span>
-                              <span className="text-[10px] text-slate-400 font-bold">{getStatus(item)}</span>
                             </div>
                           </td>
                           <td className="px-6 py-5 text-right">
@@ -599,14 +788,17 @@ export default function InventoryPage() {
                   </>
                 )}
                 
-                <button className="h-10 px-5 bg-white border border-slate-200 rounded-full text-[12px] font-bold text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
-                  <Download size={14} /> Export CSV
-                </button>
+                
                 <button 
                   onClick={() => setIsBatchReleaseModalOpen(true)}
-                  className="h-10 px-6 bg-emerald-600 text-white rounded-full text-[12px] font-black shadow-lg shadow-emerald-600/10 hover:bg-emerald-700 transition-all flex items-center gap-2 active:scale-95"
+                  className="h-10 px-6 bg-emerald-600 text-white rounded-full text-[12px] font-black shadow-lg shadow-emerald-600/10 hover:bg-emerald-700 transition-all flex items-center gap-2 active:scale-95 relative"
                 >
                   <PackageCheck size={14} /> Batch Release
+                  {batchCart.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in duration-300">
+                      {batchCart.length}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -615,11 +807,10 @@ export default function InventoryPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                    <th className="px-6 py-4">Product Name</th>
-                    <th className="px-6 py-4 text-center">Available Units</th>
+                    <th className="px-6 py-4">Product Details</th>
+                    <th className="px-6 py-4 text-center">Stock Level</th>
                     <th className="px-6 py-4">Location</th>
-                    <th className="px-6 py-4">Linked BOM</th>
-                    <th className="px-6 py-4 text-center">Valuation (Price)</th>
+                    <th className="px-6 py-4 text-center">Valuation</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -642,23 +833,22 @@ export default function InventoryPage() {
                     filteredFinishedGoods.map((item) => (
                       <tr key={item.sku} className="hover:bg-slate-50/50 transition-all group">
                         <td className="px-6 py-5">
-                          <div className="flex items-center gap-4">
+                          <div 
+                            className="flex items-center gap-4 cursor-pointer group/item"
+                            onClick={() => setViewItem(item)}
+                          >
                             {renderAvatar(item.item, 44, item.image)}
                             <div>
-                              <div className="text-[15px] font-bold text-slate-900 leading-none mb-1">{item.item}</div>
+                              <div className="text-[15px] font-bold text-slate-900 leading-none mb-1 group-hover/item:text-indigo-600 transition-colors">{item.item}</div>
                               <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{item.sku}</div>
-                              {item.location && (
-                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 flex items-center gap-1.5">
-                                  <MapPin size={10} className="text-indigo-400" />
-                                  {item.location}
-                                </div>
-                              )}
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-5 text-center">
-                          <div className="text-[15px] font-black text-slate-900">{item.stock}</div>
-                          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.unit}</div>
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200/60">
+                             <span className="text-[14px] font-black text-slate-900">{item.stock}</span>
+                             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{item.unit}</span>
+                          </div>
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-1.5 text-[12px] font-bold text-slate-600">
@@ -666,23 +856,21 @@ export default function InventoryPage() {
                             {item.location || '—'}
                           </div>
                         </td>
-                        <td className="px-6 py-5">
-                          {recipes.find(r => r.productId === item.sku) ? (
-                            <div className="inline-flex items-center gap-2 text-[10px] font-bold text-indigo-600 px-3 py-1 bg-indigo-50 rounded-full border border-indigo-100 uppercase tracking-wide">
-                              <Layers size={11} /> BOM Configured
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => { openBOMModal(item.sku); }}
-                              className="inline-flex items-center gap-2 text-[10px] font-bold text-amber-600 px-3 py-1 bg-amber-50 rounded-full border border-amber-100 hover:bg-amber-600 hover:text-white transition-all uppercase tracking-wide active:scale-95"
-                            >
-                              <Plus size={11} /> Set Up BOM
-                            </button>
-                          )}
+                        <td className="px-6 py-5 text-center">
+                           <div className="flex flex-col">
+                             <span className="text-[14px] font-black text-slate-700">{formatCurrency(item.price)}</span>
+                             <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">per {item.unit.replace(/s$/, '')}</span>
+                           </div>
                         </td>
-                        <td className="px-6 py-5 text-center font-bold text-slate-700">{formatCurrency(item.price)}</td>
                         <td className="px-6 py-5 text-right">
                           <div className="flex items-center justify-end gap-2 relative">
+                            <button 
+                              onClick={() => addToBatch(item.sku)}
+                              className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all border ${batchCart.find(i => i.sku === item.sku) ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-900 border-transparent hover:border-slate-200'}`}
+                              title="Add to Batch Release"
+                            >
+                              <Plus size={16} />
+                            </button>
                             <button 
                               onClick={() => setActiveActionRow(activeActionRow === item.sku ? null : item.sku)}
                               className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-all border border-transparent hover:border-slate-200"
@@ -731,7 +919,7 @@ export default function InventoryPage() {
                 <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
                   <Zap size={32} />
                 </div>
-                <h2 className="text-[24px] font-black text-slate-900">Production Assembly Engine</h2>
+                <h2 className="text-[24px] font-black text-slate-900">Production Assembly</h2>
                 <p className="text-[15px] text-slate-500 font-medium max-w-md mx-auto">
                   Follow the steps to convert raw materials into finished garment stock.
                 </p>
@@ -774,44 +962,71 @@ export default function InventoryPage() {
                 {assemblyStep === 1 && (
                   <div className="flex-1 animate-in slide-in-from-right-4 duration-300">
                     <h3 className="text-[16px] font-black text-slate-900 mb-6">1. Configure Target Product</h3>
-                    <div className="bg-slate-50 p-6 rounded-[24px] border border-slate-100 space-y-6">
-                      <div className="flex items-center gap-6">
-                        <div className="relative group shrink-0">
-                          {renderAvatar(targetProduct?.item || 'Product', 80, targetProduct?.image)}
-                          <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                            <Upload size={20} />
-                            <input 
-                              type="file" 
-                              className="hidden" 
-                              onChange={(e) => handleImageUpload(e, (url) => targetProduct && updateInventoryItem(targetProduct.sku, { image: url }))} 
-                            />
-                          </label>
+                    <div className="bg-slate-50/50 p-8 rounded-[40px] border border-slate-100 shadow-inner">
+                      <div className="flex flex-col md:flex-row gap-10">
+                        {/* Left Column: Big Image */}
+                        <div className="w-full md:w-[240px] shrink-0">
+                           <div className="relative group aspect-square rounded-[36px] overflow-hidden bg-white border-4 border-white shadow-xl hover:scale-[1.02] transition-all duration-500">
+                              {targetProduct?.image ? (
+                                <img src={targetProduct.image} alt={targetProduct.item} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50/50">
+                                   <Package size={64} strokeWidth={1} />
+                                   <p className="text-[10px] font-black uppercase tracking-[0.2em] mt-4 text-center px-4">No Product Photo</p>
+                                </div>
+                              )}
+                              <label className="absolute inset-0 flex items-center justify-center bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-[2px]">
+                                 <div className="flex flex-col items-center gap-2 text-white">
+                                    <Camera size={24} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Change Photo</span>
+                                 </div>
+                                 <input 
+                                   type="file" 
+                                   className="hidden" 
+                                   onChange={(e) => handleImageUpload(e, (url) => targetProduct && updateInventoryItem(targetProduct.sku, { image: url }))} 
+                                 />
+                              </label>
+                           </div>
                         </div>
-                        <div className="flex-1">
-                          <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Target Product</label>
-                          <select 
-                            value={assemblyProductId}
-                            onChange={(e) => setAssemblyProductId(e.target.value)}
-                            className="w-full h-14 px-5 rounded-2xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[15px] font-bold shadow-sm appearance-none"
-                          >
-                            {recipes.map(r => {
-                              const p = inventory.find(i => i.sku === r.productId);
-                              return <option key={r.productId} value={r.productId}>{p?.item || r.productId}</option>;
-                            })}
-                          </select>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Batch Quantity</label>
-                        <div className="flex items-center gap-4">
-                          <input
-                            type="number"
-                            value={assemblyQty}
-                            onChange={(e) => setAssemblyQty(Math.max(1, parseInt(e.target.value) || 0))}
-                            min={1}
-                            className="h-14 flex-1 px-5 rounded-2xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[18px] font-black shadow-sm"
-                          />
-                          <span className="text-[14px] font-black text-slate-400 uppercase tracking-widest">Units</span>
+
+                        {/* Right Column: Configuration */}
+                        <div className="flex-1 space-y-8">
+                           <div>
+                              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Target Product for Assembly</label>
+                              <div className="relative">
+                                 <select 
+                                    value={assemblyProductId}
+                                    onChange={(e) => setAssemblyProductId(e.target.value)}
+                                    className="w-full h-16 px-6 rounded-[24px] border border-slate-200 bg-white focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 outline-none transition-all text-[16px] font-bold shadow-sm appearance-none cursor-pointer"
+                                 >
+                                    {recipes.map(r => {
+                                      const p = inventory.find(i => i.sku === r.productId);
+                                      return <option key={r.productId} value={r.productId}>{p?.item || r.productId}</option>;
+                                    })}
+                                 </select>
+                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                    <ChevronRight size={20} className="rotate-90" />
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div>
+                              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Production Batch Quantity</label>
+                              <div className="relative">
+                                 <input
+                                   type="number"
+                                   value={assemblyQty}
+                                   onChange={(e) => setAssemblyQty(Math.max(1, parseInt(e.target.value) || 0))}
+                                   min={1}
+                                   className="h-16 w-full px-6 rounded-[24px] border border-slate-200 bg-white focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 outline-none transition-all text-[28px] font-black shadow-sm"
+                                 />
+                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-l border-slate-200 pl-4 h-6 flex items-center">
+                                       Units
+                                    </span>
+                                 </div>
+                              </div>
+                           </div>
                         </div>
                       </div>
                     </div>
@@ -1414,26 +1629,362 @@ export default function InventoryPage() {
         </div>
       )}
 
+      {/* ── ITEM DETAILS MODAL ── */}
+      {viewItem && (
+        <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-[850px] rounded-[40px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-400">
+            <div className="flex h-[600px]">
+              {/* Left: Image & Quick Actions */}
+              <div className="w-[350px] bg-slate-50 border-r border-slate-100 flex flex-col">
+                 <div className="p-8 flex-1 flex flex-col items-center justify-center">
+                    <div className="relative group">
+                       <div className="w-56 h-56 rounded-[32px] overflow-hidden bg-white border-4 border-white shadow-xl group-hover:scale-105 transition-transform duration-500">
+                          {viewItem.image ? (
+                            <img src={viewItem.image} alt={viewItem.item} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
+                               <Package size={64} strokeWidth={1.5} />
+                               <p className="text-[11px] font-black uppercase tracking-widest mt-4">No Image</p>
+                            </div>
+                          )}
+                       </div>
+                       <label className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all rounded-[32px] cursor-pointer backdrop-blur-[2px]">
+                          <div className="flex flex-col items-center gap-2 text-white">
+                             <Camera size={24} />
+                             <span className="text-[10px] font-black uppercase tracking-widest">Update Image</span>
+                          </div>
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={(e) => handleItemImageUpload(e, viewItem.sku)}
+                          />
+                       </label>
+                    </div>
+
+                    <div className="mt-10 text-center">
+                       <h2 className="text-[24px] font-black text-slate-900 leading-tight">{viewItem.item}</h2>
+                       <p className="text-[12px] font-black text-indigo-500 uppercase tracking-[0.2em] mt-1">{viewItem.sku}</p>
+                    </div>
+                 </div>
+                 
+                 <div className="p-6 bg-white border-t border-slate-100 flex gap-2">
+                    <button 
+                      onClick={() => { setStockInItem(viewItem); setIsStockInModalOpen(true); setViewItem(null); }}
+                      className="flex-1 h-12 bg-slate-900 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all"
+                    >
+                      Restock
+                    </button>
+                    <button 
+                      className="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center hover:bg-slate-200 transition-all"
+                    >
+                      <Printer size={18} />
+                    </button>
+                 </div>
+              </div>
+
+              {/* Right: Detailed Info & History */}
+              <div className="flex-1 flex flex-col bg-white">
+                 <div className="p-8 flex items-center justify-between">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 text-[10px] font-black uppercase tracking-widest">
+                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                       Active Inventory Item
+                    </div>
+                    <button 
+                      onClick={() => setViewItem(null)}
+                      className="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"
+                    >
+                      <X size={20} />
+                    </button>
+                 </div>
+
+                 <div className="px-8 pb-8 flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="grid grid-cols-2 gap-8 mb-10">
+                       <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Current Balance</p>
+                          <p className="text-[24px] font-black text-slate-900">{viewItem.stock} <span className="text-[14px] text-slate-400 font-bold uppercase tracking-tight ml-1">{viewItem.unit}</span></p>
+                       </div>
+                       <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Unit Valuation</p>
+                          <p className="text-[24px] font-black text-slate-900">{formatCurrency(viewItem.price)}</p>
+                       </div>
+                       <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Category</p>
+                          <p className="text-[15px] font-bold text-slate-700">{viewItem.cat}</p>
+                       </div>
+                       <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Stored At</p>
+                          <p className="text-[15px] font-bold text-slate-700 flex items-center gap-2">
+                             <MapPin size={14} className="text-indigo-400" />
+                             {viewItem.location || 'Not Specified'}
+                          </p>
+                       </div>
+                       <div className="col-span-2 pt-4 border-t border-slate-100">
+                          <div className="flex items-center justify-between">
+                             <div>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Production BOM</p>
+                                {recipes.find(r => r.productId === viewItem.sku) ? (
+                                  <p className="text-[14px] font-bold text-indigo-600 flex items-center gap-2">
+                                     <Layers size={14} /> Materials Configured
+                                  </p>
+                                ) : (
+                                  <p className="text-[14px] font-bold text-amber-600 flex items-center gap-2">
+                                     <AlertTriangle size={14} /> Not Configured
+                                  </p>
+                                )}
+                             </div>
+                             {!recipes.find(r => r.productId === viewItem.sku) && (
+                               <button 
+                                 onClick={() => openBOMModal(viewItem.sku)}
+                                 className="h-10 px-6 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-amber-600 hover:text-white transition-all active:scale-95"
+                               >
+                                 Setup Recipe
+                               </button>
+                             )}
+                          </div>
+                       </div>
+                    </div>
+
+                    <div className="space-y-4">
+                       <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-[0.1em] flex items-center gap-2">
+                          <History size={14} className="text-slate-400" />
+                          Recent Movements
+                       </h3>
+                       <div className="space-y-2">
+                          {movements.filter(m => m.itemSku === viewItem.sku).slice(0, 5).map((m, idx) => (
+                             <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <div className="flex items-center gap-3">
+                                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${m.qty > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                                      {m.qty > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+                                   </div>
+                                   <div>
+                                      <p className="text-[13px] font-bold text-slate-900">{m.type}</p>
+                                      <p className="text-[10px] text-slate-400 font-medium">{m.ref}</p>
+                                   </div>
+                                </div>
+                                <div className="text-right">
+                                   <p className={`text-[13px] font-black ${m.qty > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                      {m.qty > 0 ? '+' : ''}{m.qty}
+                                   </p>
+                                   <p className="text-[10px] text-slate-400 font-medium italic">by {m.staff_id}</p>
+                                </div>
+                             </div>
+                          ))}
+                          {movements.filter(m => m.itemSku === viewItem.sku).length === 0 && (
+                            <div className="py-8 text-center border-2 border-dashed border-slate-100 rounded-2xl">
+                               <p className="text-[12px] text-slate-400 font-medium italic">No transactions recorded yet.</p>
+                            </div>
+                          )}
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isBatchReleaseModalOpen && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-[500px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-             <div className="p-10 text-center space-y-4">
-                <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                   <PackageCheck size={40} />
+          <div className="bg-white w-full max-w-[650px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
+             {batchSuccess ? (
+                <div className="p-16 text-center space-y-6">
+                   <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                      <PackageCheck size={40} />
+                   </div>
+                   <h3 className="text-[28px] font-black text-slate-900 leading-tight">Sale Recorded!</h3>
+                   <p className="text-[14px] font-medium text-slate-500 max-w-xs mx-auto mt-2">Inventory updated, payment recorded, and stock movements logged.</p>
+                   <div className="flex flex-col gap-3 max-w-xs mx-auto mt-8">
+                      <button 
+                        onClick={handlePrintReceipt}
+                        className="h-14 w-full bg-slate-900 text-white rounded-2xl flex items-center justify-center gap-3 font-black text-[15px] hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 active:scale-95"
+                      >
+                        <Printer size={20} /> Print Official Receipt
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setBatchSuccess(false);
+                          setBatchCart([]);
+                          setIsBatchReleaseModalOpen(false);
+                          setBatchCustomerId('');
+                          setBatchAmountTendered(0);
+                        }}
+                        className="h-14 w-full bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-[14px] hover:bg-slate-50 transition-all"
+                      >
+                        Done & Close
+                      </button>
+                   </div>
                 </div>
-                <h3 className="text-[24px] font-black text-slate-900">Batch Release Ready</h3>
-                <p className="text-[14px] font-medium text-slate-500 max-w-sm mx-auto leading-relaxed">
-                   This action will release selected finished goods to fulfilling active orders. This workflow module is currently stubbed for the prototype.
-                </p>
-                <div className="pt-6">
-                   <button 
-                     onClick={() => setIsBatchReleaseModalOpen(false)}
-                     className="h-12 px-8 bg-slate-900 text-white rounded-full text-[14px] font-black shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all active:scale-95"
-                   >
-                     Acknowledge
-                   </button>
-                </div>
-             </div>
+             ) : (
+                <>
+                  <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+                    <div>
+                      <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Batch Release & Sale</h2>
+                      <p className="text-[13px] text-slate-500 font-medium">Fulfill customer purchases from finished goods stock.</p>
+                    </div>
+                    <button
+                      onClick={() => setIsBatchReleaseModalOpen(false)}
+                      className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    {/* Customer Selection */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Buying Customer</label>
+                          <select 
+                            value={batchCustomerId}
+                            onChange={(e) => setBatchCustomerId(e.target.value)}
+                            className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-bold appearance-none"
+                          >
+                            <option value="">Select Customer (or Walk-In)</option>
+                            {customers.map(c => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                            <option value="WALK-IN">Walk-In Customer</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Payment Method</label>
+                          <select 
+                            value={batchPaymentMethod}
+                            onChange={(e) => setBatchPaymentMethod(e.target.value)}
+                            className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-bold appearance-none"
+                          >
+                            <option value="Cash">Cash</option>
+                            <option value="GCash">GCash</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Check">Check</option>
+                          </select>
+                        </div>
+                      </div>
+
+                    {/* Cart Items */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                         <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-widest">Selected Items ({batchCart.length})</h3>
+                         {batchCart.length === 0 && <span className="text-[12px] text-rose-500 font-bold italic">No items selected</span>}
+                      </div>
+
+                      {batchCart.map((item, idx) => {
+                        const invItem = inventory.find(i => i.sku === item.sku);
+                        if (!invItem) return null;
+                        return (
+                          <div key={item.sku} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                            <div className="flex items-center gap-3">
+                              {renderAvatar(invItem.item, 40, invItem.image)}
+                              <div>
+                                <p className="text-[14px] font-bold text-slate-900">{invItem.item}</p>
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{invItem.sku}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                               <div className="text-right">
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase">Price</p>
+                                  <p className="text-[14px] font-black text-slate-900">{formatCurrency(invItem.price * item.qty)}</p>
+                               </div>
+                               <div className="flex items-center bg-slate-100 rounded-lg px-2">
+                                  <input 
+                                    type="number" 
+                                    value={item.qty}
+                                    onChange={(e) => updateBatchQty(item.sku, parseInt(e.target.value) || 1)}
+                                    className="w-12 h-9 bg-transparent text-center text-[14px] font-black outline-none"
+                                  />
+                                  <span className="text-[11px] font-bold text-slate-400 uppercase pr-1">{invItem.unit}</span>
+                               </div>
+                               <button 
+                                 onClick={() => removeFromBatch(item.sku)}
+                                 className="text-slate-300 hover:text-rose-500 transition-colors"
+                               >
+                                 <X size={18} />
+                               </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {batchCart.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="p-6 bg-slate-900 text-white rounded-[24px] flex items-center justify-between shadow-xl">
+                           <div>
+                              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Total Transaction Value</p>
+                              <p className="text-[28px] font-black">
+                                 {formatCurrency(batchCart.reduce((sum, item) => {
+                                    const inv = inventory.find(i => i.sku === item.sku);
+                                    return sum + (inv ? inv.price * item.qty : 0);
+                                 }, 0))}
+                              </p>
+                           </div>
+                           <div className="text-right">
+                              <p className="text-[12px] font-bold text-slate-400">Inventory Deduction</p>
+                              <p className="text-[10px] text-slate-500 font-medium tracking-tight">Audit logs will be generated per item.</p>
+                           </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="bg-slate-50 p-6 rounded-[24px] border border-slate-100">
+                              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Amount Tendered</label>
+                              <div className="relative">
+                                 <input 
+                                   type="number"
+                                   value={batchAmountTendered || ''}
+                                   onChange={(e) => setBatchAmountTendered(Number(e.target.value))}
+                                   placeholder="0.00"
+                                   className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[18px] font-black"
+                                 />
+                                 <span className="absolute left-[-1.5rem] top-1/2 -translate-y-1/2 text-[18px] font-black text-slate-300">₱</span>
+                              </div>
+                           </div>
+                           <div className={`p-6 rounded-[24px] border flex flex-col justify-center ${
+                             (batchAmountTendered - batchCart.reduce((sum, item) => {
+                               const inv = inventory.find(i => i.sku === item.sku);
+                               return sum + (inv ? inv.price * item.qty : 0);
+                             }, 0)) >= 0 
+                             ? 'bg-emerald-50 border-emerald-100 text-emerald-900' 
+                             : 'bg-rose-50 border-rose-100 text-rose-900'
+                           }`}>
+                              <p className="text-[11px] font-black uppercase tracking-widest opacity-60">
+                                {batchAmountTendered - batchCart.reduce((sum, item) => {
+                                   const inv = inventory.find(i => i.sku === item.sku);
+                                   return sum + (inv ? inv.price * item.qty : 0);
+                                }, 0) >= 0 ? 'Change to Return' : 'Balance Remaining'}
+                              </p>
+                              <p className="text-[20px] font-black">
+                                 {formatCurrency(Math.abs(batchAmountTendered - batchCart.reduce((sum, item) => {
+                                    const inv = inventory.find(i => i.sku === item.sku);
+                                    return sum + (inv ? inv.price * item.qty : 0);
+                                 }, 0)))}
+                              </p>
+                           </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-8 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                    <button
+                      onClick={() => setIsBatchReleaseModalOpen(false)}
+                      className="px-6 h-12 bg-white border border-slate-200 rounded-full text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={executeBatchRelease}
+                      disabled={batchCart.length === 0 || batchAmountTendered < batchCart.reduce((sum, item) => {
+                        const inv = inventory.find(i => i.sku === item.sku);
+                        return sum + (inv ? inv.price * item.qty : 0);
+                      }, 0)}
+                      className="px-8 h-12 bg-emerald-600 text-white rounded-full text-[14px] font-black shadow-lg shadow-emerald-600/10 hover:bg-emerald-700 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2"
+                    >
+                      <ArrowUpRight size={18} /> Complete Sale & Return Change
+                    </button>
+                  </div>
+                </>
+             )}
           </div>
         </div>
       )}
