@@ -1,317 +1,359 @@
 'use client';
 
-import { 
-  TrendingUp, 
-  ShoppingBag, 
-  Users, 
-  Package, 
-  Calendar, 
-  ArrowUpRight, 
-  ChevronRight,
-  Clock,
-  Sparkles,
-  Search,
-  Plus,
-  AlertCircle,
-  Building2,
-  MousePointer2,
-  ArrowRight,
-  Target,
-  BarChart3,
-  Zap
-} from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { 
+  TrendingUp, Users, ShoppingBag, AlertCircle, 
+  PackageSearch, Calendar, Clock, ChevronRight, 
+  Wallet, Truck, Activity, CheckCircle2, Circle,
+  Scissors, BarChart3, UserCheck, MessageCircle,
+  Plus, Search, Filter, ArrowUpRight, ArrowDownRight,
+  PackageCheck, UserPlus, FileText, Star, Settings2,
+  LayoutGrid, ListFilter, Ruler, PenTool, Layout, PieChart
+} from 'lucide-react';
+import { useERPStore } from '../../store/useERPStore';
+import { resolveOrderState } from '../../logic/orderEngine';
 
-export default function OwnerDashboard() {
-  const [timeframe, setTimeframe] = useState<'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'yearly'>('monthly');
-  const [currentTime, setCurrentTime] = useState(new Date());
+export default function DashboardPage() {
+  const { 
+    staff, 
+    inventory, 
+    purchaseOrders, 
+    suppliers, 
+    payments, 
+    invoices, 
+    orders, 
+    customers,
+    appointments 
+  } = useERPStore();
+  const [mounted, setMounted] = useState(false);
 
-  // Runnable Clock logic
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    // Breaking the synchronous render cycle to avoid cascading render warnings
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
-  const timeframeConfig = {
-    daily: {
-      data: [15, 25, 45, 30, 60, 40, 85, 70, 95, 80, 50, 65],
-      labels: ['May 01', 'May 02', 'May 03', 'May 04', 'May 05', 'May 06', 'May 07', 'May 08', 'May 09', 'May 10', 'May 11', 'May 12']
-    },
-    weekly: {
-      data: [40, 55, 62, 88, 75, 92, 45, 60, 70, 85, 95, 100],
-      labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12']
-    },
-    'bi-weekly': {
-      data: [50, 75, 90, 65, 80, 95, 100, 85, 70, 60, 55, 45],
-      labels: ['BW1', 'BW2', 'BW3', 'BW4', 'BW5', 'BW6', 'BW7', 'BW8', 'BW9', 'BW10', 'BW11', 'BW12']
-    },
-    monthly: {
-      data: [32, 68, 45, 92, 55, 100, 42, 85, 60, 95, 38, 72],
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    },
-    yearly: {
-      data: [45, 60, 55, 75, 80, 85, 90, 95, 100, 92, 88, 98],
-      labels: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026']
-    }
+  if (!mounted) return null;
+
+  // --- 1. BILLING & REPORTS ---
+  const totalRevenue = payments?.reduce((sum, p) => sum + p.amount_paid, 0) || 0;
+  // Fix: statusSnapshot instead of computedStatus
+  const totalInvoiced = invoices?.filter(i => i.statusSnapshot !== 'Draft').reduce((sum, inv) => sum + inv.total_amount, 0) || 0;
+  const accountsReceivable = Math.max(0, totalInvoiced - totalRevenue);
+  const collectionRate = Math.round((totalRevenue / totalInvoiced) * 100) || 0;
+  
+  // --- 2. PRODUCTION ---
+  const activeOrders = orders.filter(o => {
+    const stage = resolveOrderState(o).productionStage;
+    return !['COMPLETED', 'DELIVERED'].includes(stage);
+  });
+
+  const suturaStats = {
+    onHold: activeOrders.filter(o => resolveOrderState(o).productionStage === 'ON_HOLD').length,
+    measurement: activeOrders.filter(o => {
+      const state = resolveOrderState(o);
+      if (state.productionStage !== 'IN_PRODUCTION') return false;
+      return o.tasks.find(t => t.status !== 'Completed')?.title === 'Initial Measurement';
+    }).length,
+    drafting: activeOrders.filter(o => {
+      const state = resolveOrderState(o);
+      if (state.productionStage !== 'IN_PRODUCTION') return false;
+      return o.tasks.find(t => t.status !== 'Completed')?.title === 'Pattern Drafting';
+    }).length,
+    cutting: activeOrders.filter(o => {
+      const state = resolveOrderState(o);
+      if (state.productionStage !== 'IN_PRODUCTION') return false;
+      return o.tasks.find(t => t.status !== 'Completed')?.title === 'Fabric Cutting';
+    }).length,
+    sewing: activeOrders.filter(o => {
+      const state = resolveOrderState(o);
+      if (state.productionStage !== 'IN_PRODUCTION') return false;
+      return o.tasks.find(t => t.status !== 'Completed')?.title === 'Main Sewing';
+    }).length,
+    inspection: activeOrders.filter(o => resolveOrderState(o).productionStage === 'QUALITY_CHECK').length,
+    ironing: activeOrders.filter(o => {
+      const state = resolveOrderState(o);
+      if (state.productionStage !== 'IN_PRODUCTION') return false;
+      return o.tasks.find(t => t.status !== 'Completed')?.title === 'Final Ironing & Prep';
+    }).length,
+    revision: activeOrders.filter(o => resolveOrderState(o).productionStage === 'REVISION_REQUIRED').length,
   };
 
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-10">
-      
-      {/* ── HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-           <h1 className="text-[32px] font-black text-slate-900 tracking-tight leading-none mb-2">Dashboard</h1>
-           <div className="flex items-center gap-2 text-slate-400 font-bold text-[13px] tracking-tight">
-              <Calendar size={14} className="text-indigo-500" />
-              <span>{currentTime.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-              <span className="w-1 h-1 rounded-full bg-slate-300 mx-1" />
-              <Clock size={14} className="text-emerald-500" />
-              <span className="font-black text-slate-600 tabular-nums">
-                {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </span>
-           </div>
-        </div>
+  // --- 4. APPOINTMENTS ---
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayAppointments = appointments
+    .filter(a => a.date === todayStr)
+    // Fix: startTime instead of time
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
+  // --- 5. INVENTORY & SUPPLIERS ---
+  const lowStockItems = inventory.filter(i => i.stock <= i.minStock);
+  const verifiedSuppliers = suppliers.filter(s => s.status === 'Verified' || s.status === 'Preferred').length;
+
+  const formatPHP = (num: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(num);
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-700 pb-20 max-w-[1600px] mx-auto">
+      
+      {/* ── TOP NAVIGATION ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-[32px] font-black text-slate-900 tracking-tight leading-none flex items-center gap-3">
+            Dashboard
+          </h1>
+          <p className="text-[14px] text-slate-500 font-medium mt-2">Welcome back. Monitoring your production pipeline in real-time.</p>
+        </div>
         <div className="flex items-center gap-3">
-          <div className="h-11 bg-white border border-slate-200 rounded-xl px-4 flex items-center gap-3 shadow-sm w-[300px] group focus-within:border-slate-900 transition-all">
-            <Search className="text-slate-300 group-focus-within:text-slate-900 transition-colors" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search records, orders... (⌘K)" 
-              className="bg-transparent border-none outline-none text-[13px] font-medium w-full"
-            />
+          <div className="hidden lg:flex items-center gap-1.5 bg-white border border-slate-200 px-4 py-2.5 rounded-2xl text-[12px] font-black text-slate-400 uppercase tracking-widest">
+            <Clock size={14} className="text-indigo-500" /> {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
-          <button className="h-11 px-4 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-indigo-600 transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10 active:scale-95">
-            <Plus size={16} /> New Order
+          <button className="bg-slate-900 text-white h-12 px-6 rounded-2xl text-[13px] font-black shadow-xl shadow-slate-900/10 hover:bg-indigo-600 transition-all flex items-center gap-2 active:scale-95">
+            <Plus size={18} /> New Transaction
           </button>
         </div>
       </div>
 
-      {/* ── BENTO GRID ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+      {/* ── SYMMETRIC BENTO GRID ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:grid-rows-4 gap-6 min-h-[900px]">
         
-        {/* REVENUE OVERVIEW (8 cols) */}
-        <div className="lg:col-span-8 bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+        {/* 1. BILLING: FINANCIAL COMMAND (2x2) */}
+        <div className="md:col-span-2 md:row-span-2 bg-white border border-slate-200 rounded-[40px] p-10 shadow-sm relative overflow-hidden flex flex-col justify-between group">
+          <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-110 transition-transform duration-1000">
+            <BarChart3 size={240} strokeWidth={1} />
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-2 text-indigo-500 text-[11px] font-black uppercase tracking-[0.2em]">
+                <Wallet size={16} /> Financial Intelligence
+              </div>
+              <div className="flex items-center gap-1 text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full text-[12px] font-black">
+                <ArrowUpRight size={14} /> +18.4%
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-[56px] font-black text-slate-900 tracking-tighter leading-none">
+                {formatPHP(totalRevenue)}
+              </div>
+              <p className="text-[14px] text-slate-400 font-bold uppercase tracking-widest">Gross Revenue (MTD)</p>
+            </div>
+          </div>
+
+          <div className="relative z-10 grid grid-cols-2 gap-8 pt-10 mt-10 border-t border-slate-100">
             <div>
-              <h2 className="text-[18px] font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <BarChart3 size={20} className="text-indigo-500" /> Revenue Pulse
-              </h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[11px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">+12.4%</span>
-                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Growth vs Prev period</span>
+              <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Accounts Receivable</div>
+              <div className="text-[24px] font-black text-slate-900">{formatPHP(accountsReceivable)}</div>
+              <div className="w-full bg-slate-100 h-1 rounded-full mt-3 overflow-hidden">
+                <div className="bg-amber-500 h-full w-[45%]" />
               </div>
             </div>
-
-            <div className="flex items-center bg-slate-50 p-1 rounded-xl border border-slate-100">
-               {(['daily', 'weekly', 'bi-weekly', 'monthly', 'yearly'] as const).map((t) => (
-                 <button
-                   key={t}
-                   onClick={() => setTimeframe(t)}
-                   className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                     timeframe === t 
-                      ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50' 
-                      : 'text-slate-400 hover:text-slate-600'
-                   }`}
-                 >
-                   {t.replace('-', ' ')}
-                 </button>
-               ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="h-[200px] relative px-1 flex items-end gap-3">
-              {/* Grid Lines (Indications) - Moved to z-20 to stay on top */}
-              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none z-20">
-                 <div className="border-t border-slate-100/50 w-full flex justify-end items-start pt-1"><span className="text-[10px] font-bold text-slate-400 -mr-4 bg-white/80 px-1 rounded">100k</span></div>
-                 <div className="border-t border-slate-100/50 w-full flex justify-end items-start pt-1"><span className="text-[10px] font-bold text-slate-400 -mr-4 bg-white/80 px-1 rounded">75k</span></div>
-                 <div className="border-t border-slate-100/50 w-full flex justify-end items-start pt-1"><span className="text-[10px] font-bold text-slate-400 -mr-4 bg-white/80 px-1 rounded">50k</span></div>
-                 <div className="border-t border-slate-100/50 w-full flex justify-end items-start pt-1"><span className="text-[10px] font-bold text-slate-400 -mr-4 bg-white/80 px-1 rounded">25k</span></div>
-                 <div className="w-full h-0"></div>
+            <div>
+              <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Collection Rate</div>
+              <div className="text-[24px] font-black text-slate-900">{collectionRate}%</div>
+              <div className="w-full bg-slate-100 h-1 rounded-full mt-3 overflow-hidden">
+                <div className="bg-indigo-500 h-full" style={{ width: `${collectionRate}%` }} />
               </div>
-
-              {timeframeConfig[timeframe].data.map((h, i) => (
-                <div key={`${timeframe}-${i}`} className="flex-1 h-full flex items-end group relative z-10">
-                  <div 
-                    className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-lg transition-all duration-500 hover:from-indigo-500 hover:to-indigo-300 hover:scale-x-110 origin-bottom shadow-lg shadow-indigo-500/10 cursor-pointer animate-in fade-in slide-in-from-bottom-2"
-                    style={{ height: `${h}%` }}
-                  ></div>
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none transform -translate-y-1 group-hover:translate-y-0">
-                     <div className="bg-slate-900 text-white text-[10px] font-black px-2 py-1 rounded shadow-xl whitespace-nowrap">₱{h}k</div>
-                  </div>
-                </div>
-              ))}
             </div>
-
-            {/* X-AXIS LABELS */}
-            <div className="flex gap-3 px-1">
-               {timeframeConfig[timeframe].labels.map((label, i) => (
-                 <div key={i} className="flex-1 text-center">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter whitespace-nowrap">{label}</span>
-                 </div>
-               ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-6 mt-10 pt-8 border-t border-slate-50">
-             <div>
-               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Active Job Orders</div>
-               <div className="text-[20px] font-black text-slate-900">142 Orders</div>
-             </div>
-             <div>
-               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Order Balance</div>
-               <div className="text-[20px] font-black text-rose-500">₱82,400</div>
-             </div>
-             <div>
-               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Avg Revenue / Suit</div>
-               <div className="text-[20px] font-black text-slate-900">₱18,250</div>
-             </div>
           </div>
         </div>
 
-        {/* FITTING SCHEDULE (4 cols) */}
-        <div className="lg:col-span-4 bg-slate-900 rounded-3xl p-8 text-white flex flex-col shadow-xl shadow-slate-900/10">
+        {/* 2. APPOINTMENTS: FOCUS (1x2) */}
+        <div className="lg:col-span-1 lg:row-span-2 bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm flex flex-col">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-[16px] font-black tracking-tight flex items-center gap-2">
-              <Calendar size={18} className="text-slate-500" /> Schedule
-            </h2>
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">3 Fittings</span>
+            <div className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Scheduling</div>
+            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <Calendar size={16} />
+            </div>
           </div>
-
-          <div className="space-y-6 flex-1">
-             {[
-               { time: '10:30', client: 'Alexander M.', type: 'Suit Fitting' },
-               { time: '14:00', client: 'Elena R.', type: 'Gown Check' },
-               { time: '16:30', client: 'Maria S.', type: 'Adjustment' },
-             ].map((apt, i) => (
-               <div key={i} className="flex gap-4 group cursor-pointer">
-                  <div className="text-slate-500 font-black text-[12px] mt-1">{apt.time}</div>
-                  <div className="flex-1 border-l border-white/10 pl-4">
-                    <div className="text-[14px] font-black group-hover:text-indigo-400 transition-colors">{apt.client}</div>
-                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{apt.type}</div>
-                  </div>
-               </div>
-             ))}
+          <h3 className="text-[20px] font-black text-slate-900 mb-6">Todays Focus</h3>
+          <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar pr-2">
+            {todayAppointments.length === 0 ? (
+              <div className="text-center py-10 opacity-40">
+                <Clock className="mx-auto mb-2" size={32} />
+                <p className="text-[12px] font-bold">No bookings today</p>
+              </div>
+            ) : todayAppointments.slice(0, 4).map(apt => (
+              <div key={apt.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-2 group hover:bg-white hover:border-slate-300 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-black text-slate-900">{apt.startTime}</span>
+                  <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-black rounded-lg uppercase tracking-tighter">{apt.type}</span>
+                </div>
+                <div className="text-[12px] font-bold text-slate-500">{apt.customer}</div>
+              </div>
+            ))}
           </div>
-
-          <button className="w-full h-11 bg-white/10 hover:bg-white hover:text-slate-900 rounded-xl text-[12px] font-black transition-all mt-8">
-            View All fittings
+          <button className="mt-6 w-full py-4 text-[12px] font-black text-slate-400 border border-dashed border-slate-200 rounded-2xl hover:border-slate-900 hover:text-slate-900 transition-all flex items-center justify-center gap-2">
+            View Calendar <ChevronRight size={14} />
           </button>
         </div>
 
-        {/* MATERIAL HEALTH (4 cols) */}
-        <div className="lg:col-span-4 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900 border border-slate-100">
-              <Package size={18} />
-            </div>
-            <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-1 rounded-lg">Low Stock</span>
-          </div>
-          <h3 className="text-[16px] font-black text-slate-900 tracking-tight mb-4">Inventory Alert</h3>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-[12px] font-bold">
-                <span className="text-slate-600">Italian Wool (Navy)</span>
-                <span className="text-rose-600">2.4m</span>
-              </div>
-              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-rose-500 w-[15%]"></div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-[12px] font-bold">
-                <span className="text-slate-600">Silk Lining (Gold)</span>
-                <span className="text-amber-600">8.2m</span>
-              </div>
-              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 w-[45%]"></div>
-              </div>
+        {/* 3. STAFF: TEAM STATUS (1x2) */}
+        <div className="lg:col-span-1 lg:row-span-2 bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <div className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Team Presence</div>
+            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+              <UserCheck size={16} />
             </div>
           </div>
+          <h3 className="text-[20px] font-black text-slate-900 mb-6">Staff Status</h3>
+          <div className="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-2">
+            {[...staff]
+              .sort((a, b) => {
+                const isAOnline = parseInt(a.id.split('-')[1]) % 2 !== 0;
+                const isBOnline = parseInt(b.id.split('-')[1]) % 2 !== 0;
+                if (isAOnline === isBOnline) return 0;
+                return isAOnline ? -1 : 1;
+              })
+              .map((s) => {
+                const isOnline = parseInt(s.id.split('-')[1]) % 2 !== 0;
+                return (
+                  <div key={s.id} className="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:bg-white hover:border-slate-200 transition-all cursor-default">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 font-black text-[11px] shadow-sm">
+                          {s.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                      </div>
+                      <div>
+                        <div className="text-[12px] font-bold text-slate-900">{s.name}</div>
+                        <div className="text-[9px] text-slate-400 font-medium tracking-tight uppercase">{s.roles[0]}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+          <button className="mt-6 w-full py-4 text-[12px] font-black text-slate-400 border border-dashed border-slate-200 rounded-2xl hover:border-slate-900 hover:text-slate-900 transition-all flex items-center justify-center gap-2">
+            Manage Staff <ChevronRight size={14} />
+          </button>
         </div>
 
-        {/* PRODUCTION QUEUE (8 cols) */}
-        <div className="lg:col-span-8 bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
-           <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[16px] font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <Target size={18} className="text-indigo-500" /> Active Production
-              </h2>
-              <button className="text-[12px] font-black text-slate-400 hover:text-slate-900 transition-colors">Manage Queue</button>
-           </div>
+        {/* 4. PRODUCTION ENGINE (2x2) */}
+        <div className="md:col-span-2 md:row-span-2 bg-slate-900 rounded-[40px] p-10 text-white shadow-2xl shadow-slate-900/20 relative overflow-hidden flex flex-col justify-between">
+          <div className="absolute bottom-0 right-0 p-10 opacity-10">
+            <Scissors size={200} strokeWidth={1} />
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-[20px] font-black tracking-tight mb-1 text-white">Production</h3>
+                <p className="text-[13px] text-indigo-300 font-medium tracking-tight">Active Work Orders: {activeOrders.length}</p>
+              </div>
+              <div className="flex items-center gap-2 bg-white/5 p-2 rounded-2xl">
+                 <div className="text-rose-500 flex items-center gap-1.5 text-[11px] font-black bg-rose-500/10 px-3 py-1 rounded-xl">
+                   <AlertCircle size={12} /> {suturaStats.onHold} ON HOLD
+                 </div>
+              </div>
+            </div>
 
-           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-x-10 gap-y-6">
               {[
-                { name: 'Sastre Maria', task: 'Barong', progress: 85 },
-                { name: 'Master Jose', task: '3PC Suit', progress: 42 },
-                { name: 'Sastre Elena', task: 'Evening Gown', progress: 92 },
-                { name: 'Ben', task: 'Shirt', progress: 15 },
-              ].map((staff, i) => (
-                <div key={i} className="p-4 rounded-xl bg-slate-50/50 border border-slate-100">
-                   <div className="text-[13px] font-black text-slate-900 mb-0.5">{staff.name}</div>
-                   <div className="text-[11px] text-slate-500 font-medium mb-4">{staff.task}</div>
-                   <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                     <div className="h-full bg-slate-900" style={{ width: `${staff.progress}%` }}></div>
-                   </div>
+                { label: 'Initial Measurement', val: suturaStats.measurement, icon: <Ruler size={14} />, color: 'bg-blue-500' },
+                { label: 'Pattern Drafting', val: suturaStats.drafting, icon: <PenTool size={14} />, color: 'bg-purple-500' },
+                { label: 'Fabric Cutting', val: suturaStats.cutting, icon: <Scissors size={14} />, color: 'bg-indigo-500' },
+                { label: 'Main Sewing Phase', val: suturaStats.sewing, icon: <Activity size={14} />, color: 'bg-emerald-500' },
+                { label: 'Quality Inspection', val: suturaStats.inspection, icon: <CheckCircle2 size={14} />, color: 'bg-amber-500' },
+                { label: 'Final Ironing & Prep', val: suturaStats.ironing, icon: <Layout size={14} />, color: 'bg-teal-500' },
+              ].map(stage => (
+                <div key={stage.label} className="group">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-1.5 rounded-lg ${stage.color} text-white`}>{stage.icon}</div>
+                      <span className="text-[12px] font-bold text-slate-400 group-hover:text-white transition-colors">{stage.label}</span>
+                    </div>
+                    <span className="text-[16px] font-black">{stage.val}</span>
+                  </div>
+                  <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                    <div className={`${stage.color} h-full transition-all duration-1000`} style={{ width: activeOrders.length > 0 ? `${(stage.val/activeOrders.length)*100}%` : '0%' }} />
+                  </div>
                 </div>
               ))}
-           </div>
-        </div>
-
-        {/* BRANCH PERFORMANCE (4 cols) */}
-        <div className="lg:col-span-4 bg-indigo-600 rounded-3xl p-8 text-white relative overflow-hidden">
-          <div className="relative z-10 h-full flex flex-col justify-between">
-            <div>
-              <h3 className="text-[16px] font-black tracking-tight mb-6 flex items-center gap-2">
-                <Building2 size={18} /> Network Overview
-              </h3>
-              
-              <div className="space-y-6">
-                <div className="p-4 bg-white/10 rounded-2xl border border-white/10">
-                  <div className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-1">Primary HQ</div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[15px] font-black">Sutura Tailoring</span>
-                    <span className="text-[15px] font-black">₱242k</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4 px-2">
-                  <div className="flex items-center justify-between opacity-60">
-                    <span className="text-[13px] font-bold">Makati Branch</span>
-                    <span className="text-[13px] font-black">₱184k</span>
-                  </div>
-                  <div className="flex items-center justify-between opacity-60 border-t border-white/5 pt-4">
-                    <span className="text-[13px] font-bold">BGC Studio</span>
-                    <span className="text-[13px] font-black">₱152k</span>
-                  </div>
-                </div>
-              </div>
             </div>
-
-            <button className="w-full h-11 bg-white/20 hover:bg-white text-white hover:text-indigo-600 rounded-xl text-[12px] font-black transition-all mt-6">
-              Manage All Locations
+          </div>
+          <div className="relative z-10 flex items-center justify-between pt-8 border-t border-white/10 mt-6">
+             <div className="flex items-center gap-3">
+               <span className="text-[11px] text-slate-500 font-black uppercase tracking-widest">Revision Items:</span>
+               <span className="text-[14px] font-black text-rose-400">{suturaStats.revision}</span>
+             </div>
+            <button className="text-[12px] font-black text-white hover:text-indigo-300 flex items-center gap-2 transition-all">
+              Production Workflow <ChevronRight size={14} />
             </button>
           </div>
         </div>
 
-        {/* QUICK ACTIONS (8 cols) */}
-        <div className="lg:col-span-8 flex flex-wrap gap-4">
-           {[
-             { name: 'Inventory Check', icon: <Package size={16} /> },
-             { name: 'Staff Management', icon: <Users size={16} /> },
-             { name: 'Financial Reports', icon: <TrendingUp size={16} /> },
-           ].map((action, i) => (
-             <button 
-               key={i}
-               className="flex-1 min-w-[200px] h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center gap-3 text-slate-600 hover:border-slate-900 hover:text-slate-900 transition-all text-[13px] font-black uppercase tracking-widest shadow-sm"
-             >
-                {action.icon} {action.name}
-             </button>
-           ))}
+        {/* 5. INVENTORY & SUPPLIERS (1x2) */}
+        <div className="lg:col-span-1 lg:row-span-2 bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <div className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Supply Chain</div>
+            <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <Truck size={16} />
+            </div>
+          </div>
+          
+          <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar pr-2">
+            {/* Inventory Alerts */}
+            <div>
+              <h3 className="text-[14px] font-black text-slate-900 mb-3 flex items-center gap-2">
+                <AlertCircle size={14} className="text-rose-500" /> Restock Alerts
+              </h3>
+              <div className="space-y-3">
+                {lowStockItems.slice(0, 3).map(item => (
+                  <div key={item.sku} className="flex items-center justify-between">
+                    <span className="text-[12px] font-bold text-slate-500 truncate max-w-[100px]">{item.item}</span>
+                    <span className="text-[12px] font-black text-rose-600">{item.stock} {item.unit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Verified Suppliers */}
+            <div className="pt-6 border-t border-slate-100">
+              <h3 className="text-[14px] font-black text-slate-900 mb-3 flex items-center gap-2">
+                <Star size={14} className="text-amber-500" /> Key Partners
+              </h3>
+              <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Verified</span>
+                <span className="text-[20px] font-black text-slate-900">{verifiedSuppliers}</span>
+              </div>
+            </div>
+          </div>
+
+          <button className="mt-6 w-full py-4 text-[12px] font-black text-white bg-slate-900 rounded-2xl hover:bg-rose-600 shadow-lg shadow-slate-900/10 transition-all flex items-center justify-center gap-2">
+            Order Supplies <ChevronRight size={16} />
+          </button>
+        </div>
+
+        {/* 6. CUSTOMERS: GROWTH (1x1) */}
+        <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm flex flex-col justify-between group hover:border-emerald-500 transition-all">
+          <div className="flex items-center justify-between">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <Users size={24} />
+            </div>
+            <ArrowUpRight size={20} className="text-emerald-500 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+          </div>
+          <div>
+            <div className="text-[32px] font-black text-slate-900 leading-none">{customers.length}</div>
+            <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">Customers</p>
+          </div>
+        </div>
+
+        {/* 7. REPORTS: EFFICIENCY (1x1) */}
+        <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm flex flex-col justify-between hover:bg-indigo-50/30 transition-all">
+          <div className="flex items-center justify-between">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center">
+              <PieChart size={18} />
+            </div>
+            <div className="text-[20px] font-black text-indigo-600">{collectionRate}%</div>
+          </div>
+          <div className="pt-4 border-t border-slate-100 mt-4">
+             <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+               Collection Efficiency
+             </div>
+          </div>
         </div>
 
       </div>
+
     </div>
   );
 }

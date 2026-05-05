@@ -1,10 +1,89 @@
 [
-  { "id": "ORD-1045", "customer": "Maria Garcia", "garment": "Wedding Gown (Silk)", "price": 45000, "balance": 0, "dueDate": "May 15", "staff": "Isabella", "status": "QC Check", "priority": "High", "progress": 100 },
-  { "id": "ORD-1044", "customer": "Alexander McQueen", "garment": "Bespoke Navy Suit", "price": 32000, "balance": 15000, "dueDate": "May 18", "staff": "Juan", "status": "Sewing", "priority": "Normal", "progress": 65 },
-  { "id": "ORD-1043", "customer": "Elena Rostova", "garment": "Summer Dress", "price": 8500, "balance": 0, "dueDate": "May 10", "staff": "Maria", "status": "Ready", "priority": "Normal", "progress": 100 },
-  { "id": "ORD-1042", "customer": "David Torres", "garment": "3x Linen Shirts", "price": 12000, "balance": 0, "dueDate": "May 22", "staff": "Carlo", "status": "Cutting", "priority": "Low", "progress": 30 },
-  { "id": "ORD-1041", "customer": "Sofia Andres", "garment": "Tuxedo Alteration", "price": 4500, "balance": 1000, "dueDate": "May 08", "staff": "Juan", "status": "Measured", "priority": "Urgent", "progress": 10 },
-  { "id": "ORD-1040", "customer": "James Wilson", "garment": "Evening Coat", "price": 18000, "balance": 0, "dueDate": "May 05", "staff": "Isabella", "status": "Released", "priority": "Normal", "progress": 100 },
-  { "id": "ORD-1039", "customer": "Roberto Gomez", "garment": "Barong Tagalog", "price": 12500, "balance": 5000, "dueDate": "May 12", "staff": "Mike", "status": "Ready", "priority": "High", "progress": 100, "isBlocked": true, "blockReason": "Missing Buttons" },
-  { "id": "ORD-1038", "customer": "Lucia Santos", "garment": "Cocktail Dress", "price": 15000, "balance": 0, "dueDate": "May 11", "staff": "Sarah", "status": "QC Check", "priority": "Normal", "progress": 100, "isRework": true, "reworkReason": "Uneven Hemline" }
+  {
+    "id": "ORD-1045",
+    "customer_id": "CUS-001",
+    "customer": "Maria Santos",
+    "garment": "Wedding Gown (Silk)",
+    "totalValue": 45000,
+    "amountPaid": 45000,
+    "dueDate": "May 15",
+    "staff": "Isabella",
+    "priority": "High",
+    "assigned_tailor_id": "STF-003",
+    "status": "In Production",
+    "tasks": [
+      { "id": "T1", "title": "Initial Measurement", "status": "Completed" },
+      { "id": "T2", "title": "Pattern Drafting", "status": "Completed" },
+      { "id": "T3", "title": "Fabric Cutting", "status": "Completed" },
+      { "id": "T4", "title": "Main Sewing Phase", "status": "In Progress" },
+      { "id": "T5", "title": "Quality Inspection", "status": "Pending" },
+      { "id": "T6", "title": "Final Ironing & Prep", "status": "Pending" }
+    ],
+    "price": 45000,
+    "balance": 0
+  },
+  {
+    "id": "ORD-1048",
+    "customer_id": "CUS-002",
+    "customer": "David Torres",
+    "garment": "Corporate Suit",
+    "totalValue": 12500,
+    "amountPaid": 12500,
+    "dueDate": "May 20",
+    "staff": "Mike",
+    "priority": "Normal",
+    "assigned_tailor_id": "STF-003",
+    "status": "Completed",
+    "inspectionPassed": true,
+    "tasks": [
+      { "id": "T1", "title": "Initial Measurement", "status": "Completed" },
+      { "id": "T2", "title": "Pattern Drafting", "status": "Completed" },
+      { "id": "T3", "title": "Fabric Cutting", "status": "Completed" },
+      { "id": "T4", "title": "Main Sewing", "status": "Completed" }
+    ],
+    "price": 12500,
+    "balance": 0
+  },
+  {
+    "id": "ORD-1049",
+    "customer_id": "CUS-003",
+    "customer": "Elena Gomez",
+    "garment": "Evening Dress",
+    "totalValue": 15000,
+    "amountPaid": 5000,
+    "dueDate": "May 25",
+    "staff": "Isabella",
+    "priority": "Normal",
+    "assigned_tailor_id": "STF-003",
+    "status": "Inspection",
+    "tasks": [
+      { "id": "T1", "title": "Initial Measurement", "status": "Completed" },
+      { "id": "T2", "title": "Pattern Drafting", "status": "Completed" },
+      { "id": "T3", "title": "Fabric Cutting", "status": "Completed" },
+      { "id": "T4", "title": "Main Sewing", "status": "Completed" }
+    ],
+    "price": 15000,
+    "balance": 10000
+  },
+  {
+    "id": "ORD-1050",
+    "customer_id": "CUS-004",
+    "customer": "Jose Rizal",
+    "garment": "Barong Tagalog",
+    "totalValue": 8500,
+    "amountPaid": 4250,
+    "dueDate": "May 28",
+    "staff": "Mike",
+    "priority": "Urgent",
+    "assigned_tailor_id": "STF-003",
+    "status": "For Revision",
+    "inspectionFailed": true,
+    "tasks": [
+      { "id": "T1", "title": "Initial Measurement", "status": "Completed" },
+      { "id": "T2", "title": "Pattern Drafting", "status": "Completed" },
+      { "id": "T3", "title": "Main Sewing", "status": "In Progress" }
+    ],
+    "price": 8500,
+    "balance": 4250
+  }
 ]

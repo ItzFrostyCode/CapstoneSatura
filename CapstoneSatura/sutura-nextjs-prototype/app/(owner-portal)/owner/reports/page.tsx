@@ -10,196 +10,390 @@ import {
   ArrowDownRight,
   Info,
   DollarSign,
-  PieChart
+  PieChart,
+  FileText,
+  AlertCircle,
+  PackageSearch
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useERPStore, Invoice, Payment, StockMovement } from '../../store/useERPStore';
 
 export default function ReportsPage() {
+  const [activeTab, setActiveTab] = useState<'sales' | 'ar' | 'ap' | 'aging' | 'inventory'>('sales');
   const [timeframe, setTimeframe] = useState('This Month');
+  const { payments, invoices, inventory, movements, supplierBills, settlements } = useERPStore();
+
+  const reportTabs = [
+    { id: 'sales' as const, name: 'Sales Report', icon: <TrendingUp size={14} /> },
+    { id: 'ar' as const, name: 'Accounts Receivable', icon: <DollarSign size={14} /> },
+    { id: 'ap' as const, name: 'Accounts Payable', icon: <ArrowDownRight size={14} /> },
+    { id: 'aging' as const, name: 'Aging Report', icon: <AlertCircle size={14} /> },
+    { id: 'inventory' as const, name: 'Inventory Report', icon: <PackageSearch size={14} /> },
+  ];
+
+  const formatPHP = (num: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(num);
+
+  // --- AR & AGING LOGIC ---
+  const enhancedInvoices = useMemo(() => {
+    return invoices.map(inv => {
+      const invPayments = payments.filter(p => p.invoice_id === inv.id);
+      const amountPaid = invPayments.reduce((sum, p) => sum + p.amount_paid, 0);
+      const balance = inv.total_amount - amountPaid;
+      
+      const issueDate = inv.issueDate || new Date().toISOString().split('T')[0];
+      const dueDate = inv.dueDate || new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split('T')[0];
+      
+      let computedStatus: string = inv.statusSnapshot || 'Open';
+      if (computedStatus !== 'Draft') {
+        if (balance <= 0) computedStatus = 'Paid';
+        else if (dueDate < today && balance > 0) computedStatus = 'Past Due';
+        else if (amountPaid > 0 && balance > 0) computedStatus = 'Partial';
+        else computedStatus = 'Open';
+      }
+
+      let agingDays = 0;
+      if (computedStatus === 'Past Due') {
+        const diffTime = Math.abs(new Date(today).getTime() - new Date(dueDate).getTime());
+        agingDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      }
+
+      let agingBucket = 'Current';
+      if (agingDays > 0 && agingDays <= 30) agingBucket = '1-30 Days';
+      else if (agingDays > 30 && agingDays <= 60) agingBucket = '31-60 Days';
+      else if (agingDays > 60) agingBucket = '60+ Days';
+
+      return { ...inv, amountPaid, balance, computedStatus, issueDate, dueDate, agingDays, agingBucket };
+    });
+  }, [invoices, payments]);
+
+  const arInvoices = enhancedInvoices.filter(i => i.computedStatus === 'Open' || i.computedStatus === 'Past Due');
+  const overdueInvoices = enhancedInvoices.filter(i => i.computedStatus === 'Past Due');
+  
+  const totalOutstanding = arInvoices.reduce((sum, i) => sum + i.balance, 0);
+  const totalOverdue = overdueInvoices.reduce((sum, i) => sum + i.balance, 0);
+
+  // --- SALES LOGIC ---
+  const totalRevenue = payments.reduce((sum, p) => sum + p.amount_paid, 0);
+  const paymentMethods = payments.reduce((acc, p) => {
+    acc[p.payment_method] = (acc[p.payment_method] || 0) + p.amount_paid;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // --- INVENTORY LOGIC ---
+  const computedInventory = inventory.map(item => {
+    const itemMovements = movements.filter(m => m.itemSku === item.sku);
+    const computedStock = itemMovements.reduce((sum, m) => sum + m.qty, 0);
+    const isLowStock = computedStock <= item.minStock;
+    return { ...item, computedStock, isLowStock };
+  });
+  
+  const lowStockItems = computedInventory.filter(i => i.isLowStock);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20">
-      
-      {/* ── HEADER ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none">Financial Intelligence</h1>
-          <p className="text-[14px] text-slate-500 font-medium mt-1">Detailed analysis of revenue, material costs, and profitability.</p>
+          <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none">Reports</h1>
+          <p className="text-[14px] text-slate-500 font-medium mt-1">Analyze your business performance with real-time data insights.</p>
         </div>
-        
+
+        {/* ── HEADER ── */}
         <div className="flex items-center gap-3">
-          <div className="flex bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-            {['This Month', 'Last Quarter', 'Yearly'].map((t) => (
-              <button 
-                key={t}
-                onClick={() => setTimeframe(t)}
-                className={`px-4 py-2 rounded-lg text-[12px] font-black transition-all ${
-                  timeframe === t ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-900'
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-          <button className="h-11 px-4 bg-white border border-slate-200 rounded-xl text-slate-900 text-[13px] font-black hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+           <button 
+             onClick={() => {
+               const gcashPayments = payments.filter(p => (p.payment_method === 'GCash' || p.payment_method === 'Bank Transfer') && p.receipt_image);
+               if (gcashPayments.length === 0) {
+                 alert("No receipt images found to export for the selected timeframe.");
+                 return;
+               }
+               alert(`Exporting ${gcashPayments.length} receipt images to 'gcash_bank_receipts_${new Date().toISOString().split('T')[0]}.zip' organized by date folders.`);
+             }}
+             className="h-11 px-4 bg-white border border-slate-200 rounded-xl text-slate-900 text-[13px] font-black hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
+           >
+            <Download size={16} /> Export Receipts
+          </button>
+           <button className="h-11 px-4 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-slate-800 transition-all flex items-center gap-2 shadow-sm">
             <Download size={16} /> Export PDF
           </button>
         </div>
-      </div>
-
-      {/* ── HIGH-LEVEL METRICS ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Gross Revenue', value: '₱1,242,000', change: '+12.5%', trend: 'up' },
-          { label: 'Material COGS', value: '₱482,000', change: '+2.4%', trend: 'up' },
-          { label: 'Net Profit', value: '₱760,000', change: '+18.2%', trend: 'up' },
-          { label: 'Profit Margin', value: '61.2%', change: '+3.1%', trend: 'up' },
-        ].map((m, i) => (
-          <div key={i} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-             <div className="relative z-10">
-               <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">{m.label}</div>
-               <div className="text-[24px] font-black text-slate-900 mb-2">{m.value}</div>
-               <div className={`text-[11px] font-black inline-flex items-center gap-1 px-2 py-0.5 rounded-lg ${
-                 m.trend === 'up' ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'
-               }`}>
-                 {m.trend === 'up' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                 {m.change}
-               </div>
-             </div>
-          </div>
+    </div>
+      <div className="flex flex-wrap bg-white p-1.5 rounded-full w-max gap-1 border border-slate-200 shadow-sm">
+        {reportTabs.map((tab) => (
+          <button 
+            key={tab.id} 
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-full text-[12px] font-black transition-all uppercase tracking-widest whitespace-nowrap ${
+              activeTab === tab.id 
+                ? 'bg-slate-900 text-white shadow-md' 
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            {tab.icon} {tab.name}
+          </button>
         ))}
       </div>
 
-      {/* ── REVENUE VS COGS TRACKING (Custom SVG Chart) ── */}
-      <div className="bg-white border border-slate-200 rounded-[32px] p-10 shadow-sm">
-         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-            <div>
-               <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Revenue vs COGS Tracking</h2>
-               <p className="text-[13px] text-slate-400 font-medium mt-1">Daily consumption trajectory and revenue generation.</p>
-            </div>
-            <div className="flex items-center gap-6">
-               <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Revenue</span>
-               </div>
-               <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Material COGS</span>
-               </div>
-            </div>
-         </div>
-
-         <div className="relative h-[350px] w-full">
-            {/* Grid Lines */}
-            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
-               {[0, 1, 2, 3].map((l) => (
-                 <div key={l} className="w-full h-px bg-slate-50 border-t border-dashed border-slate-200"></div>
-               ))}
-            </div>
-
-            {/* SVG Chart Lines */}
-            <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 1300 350">
-               {/* COGS Line (Grey) */}
-               <path 
-                 d="M0,300 L100,280 L200,290 L300,260 L400,275 L500,250 L600,265 L700,240 L800,255 L900,230 L1000,245 L1100,220 L1200,235 L1300,210" 
-                 fill="none" 
-                 stroke="#CBD5E1" 
-                 strokeWidth="4" 
-                 strokeLinecap="round" 
-                 style={{ vectorEffect: 'non-scaling-stroke' }}
-               />
-               {/* Revenue Line (Indigo) */}
-               <path 
-                 d="M0,280 L100,220 L200,240 L300,180 L400,200 L500,140 L600,160 L700,100 L800,120 L900,60 L1000,80 L1100,20 L1200,40 L1300,10" 
-                 fill="none" 
-                 stroke="#4F46E5" 
-                 strokeWidth="5" 
-                 strokeLinecap="round"
-                 style={{ vectorEffect: 'non-scaling-stroke' }}
-               />
-            </svg>
-
-            {/* Tooltip Overlay (Mock) */}
-            <div className="absolute left-[60%] top-[10%] group cursor-pointer">
-               <div className="w-4 h-4 bg-indigo-600 border-4 border-white rounded-full shadow-lg scale-150 relative z-20"></div>
-               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
-                  <div className="bg-slate-900 text-white p-3 rounded-xl shadow-2xl whitespace-nowrap">
-                     <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">May 24, 2026</div>
-                     <div className="flex items-center gap-4">
-                        <div>
-                           <div className="text-[10px] text-slate-500">Revenue</div>
-                           <div className="text-[14px] font-black">₱84,200</div>
-                        </div>
-                        <div className="w-px h-8 bg-white/10"></div>
-                        <div>
-                           <div className="text-[10px] text-slate-500">COGS</div>
-                           <div className="text-[14px] font-black">₱22,400</div>
-                        </div>
+      {/* ── CONTENT AREA ── */}
+      <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
+        
+        {/* SALES REPORT */}
+        {activeTab === 'sales' && (
+          <div className="space-y-8 animate-in fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Realized Revenue</div>
+                <div className="text-[32px] font-black text-slate-900 leading-none">{formatPHP(totalRevenue)}</div>
+                <div className="text-[12px] text-slate-500 mt-2 font-medium">Based on {payments.length} recorded payments</div>
+              </div>
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 col-span-2">
+                 <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">Revenue by Payment Method</div>
+                 <div className="flex items-center gap-8">
+                   {Object.entries(paymentMethods).map(([method, amount]) => (
+                     <div key={method}>
+                       <div className="text-[14px] font-bold text-slate-700">{method}</div>
+                       <div className="text-[20px] font-black text-emerald-600">{formatPHP(amount as number)}</div>
                      </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-
-         {/* X-Axis Labels */}
-         <div className="flex justify-between mt-8 px-2">
-            {['MAY 01', 'MAY 10', 'MAY 20', 'MAY 30'].map((d) => (
-              <span key={d} className="text-[11px] font-black text-slate-400 tracking-widest">{d}</span>
-            ))}
-         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-         {/* Top Categories */}
-         <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
-            <h3 className="text-[18px] font-black text-slate-900 tracking-tight mb-8">Revenue by Service</h3>
-            <div className="space-y-6">
-               {[
-                 { name: 'Bespoke Suits', value: '₱582,000', percentage: 45, color: 'bg-indigo-600' },
-                 { name: 'Gowns & Formals', value: '₱342,000', percentage: 28, color: 'bg-violet-500' },
-                 { name: 'Barong Tagalog', value: '₱212,000', percentage: 17, color: 'bg-sky-400' },
-                 { name: 'Alterations', value: '₱106,000', percentage: 10, color: 'bg-slate-400' },
-               ].map((cat, i) => (
-                 <div key={i} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                       <span className="text-[13px] font-bold text-slate-600">{cat.name}</span>
-                       <span className="text-[13px] font-black text-slate-900">{cat.value}</span>
-                    </div>
-                    <div className="h-2 bg-slate-50 rounded-full overflow-hidden">
-                       <div className={`h-full ${cat.color}`} style={{ width: `${cat.percentage}%` }}></div>
-                    </div>
+                   ))}
                  </div>
-               ))}
-            </div>
-         </div>
-
-         {/* Profitability Index */}
-         <div className="bg-slate-900 rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] -mr-32 -mt-32"></div>
-            <h3 className="text-[18px] font-black tracking-tight mb-8">Profitability Index</h3>
-            
-            <div className="flex items-center justify-center h-[200px] relative">
-               <div className="w-40 h-40 rounded-full border-[12px] border-white/5 flex items-center justify-center">
-                  <div className="text-center">
-                     <div className="text-[32px] font-black leading-none">61.2%</div>
-                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">Avg Margin</div>
-                  </div>
-               </div>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-8">
-               <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                  <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Target</div>
-                  <div className="text-[16px] font-black">65.0%</div>
-               </div>
-               <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                  <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Status</div>
-                  <div className="text-[16px] font-black text-emerald-400">On Track</div>
-               </div>
+            <div>
+              <h3 className="text-[16px] font-black text-slate-900 mb-4">Payment Ledger</h3>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50">
+                    <th className="px-4 py-3 rounded-tl-lg">Date</th>
+                    <th className="px-4 py-3">Receipt ID</th>
+                    <th className="px-4 py-3">Invoice / Order</th>
+                    <th className="px-4 py-3">Method</th>
+                    <th className="px-4 py-3">Reference No.</th>
+                    <th className="px-4 py-3 text-right rounded-tr-lg">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {payments.map(p => (
+                    <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 text-[13px] font-medium text-slate-600">{new Date(p.paid_at).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-[13px] font-bold text-slate-900">{p.id}</td>
+                      <td className="px-4 py-3 text-[13px] text-slate-500">{p.invoice_id} / {p.order_id}</td>
+                      <td className="px-4 py-3 text-[13px] font-bold text-slate-600">{p.payment_method}</td>
+                      <td className="px-4 py-3 text-[12px] font-mono text-slate-500">{p.reference_number || '—'}</td>
+                      <td className="px-4 py-3 text-[14px] font-black text-emerald-600 text-right">+{formatPHP(p.amount_paid)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-         </div>
+          </div>
+        )}
+
+        {/* ACCOUNTS RECEIVABLE REPORT */}
+        {activeTab === 'ar' && (
+          <div className="space-y-8 animate-in fade-in">
+             <div className="flex items-center gap-6 p-6 bg-amber-50 border border-amber-100 rounded-2xl">
+               <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+                 <DollarSign size={24} />
+               </div>
+               <div>
+                 <div className="text-[12px] font-black text-amber-600 uppercase tracking-widest">Total Outstanding Accounts Receivable</div>
+                 <div className="text-[32px] font-black text-slate-900 leading-none mt-1">{formatPHP(totalOutstanding)}</div>
+               </div>
+             </div>
+
+             <div>
+               <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50">
+                    <th className="px-4 py-3">Customer</th>
+                    <th className="px-4 py-3">Invoice</th>
+                    <th className="px-4 py-3">Due Date</th>
+                    <th className="px-4 py-3 text-right">Total</th>
+                    <th className="px-4 py-3 text-right">Paid</th>
+                    <th className="px-4 py-3 text-right">Balance</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {arInvoices.map(inv => (
+                    <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 text-[13px] font-bold text-slate-900">{inv.customer}</td>
+                      <td className="px-4 py-3 text-[13px] font-medium text-slate-500">{inv.id}</td>
+                      <td className="px-4 py-3 text-[13px] font-medium text-slate-600">{new Date(inv.dueDate).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-[13px] font-medium text-slate-600 text-right">{formatPHP(inv.total_amount)}</td>
+                      <td className="px-4 py-3 text-[13px] font-medium text-emerald-600 text-right">{formatPHP(inv.amountPaid)}</td>
+                      <td className="px-4 py-3 text-[14px] font-black text-amber-600 text-right">{formatPHP(inv.balance)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+             </div>
+          </div>
+        )}
+
+        {/* AGING REPORT */}
+        {activeTab === 'aging' && (
+          <div className="space-y-8 animate-in fade-in">
+             <div className="flex items-center gap-6 p-6 bg-rose-50 border border-rose-100 rounded-2xl">
+               <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center">
+                 <AlertCircle size={24} />
+               </div>
+               <div>
+                 <div className="text-[12px] font-black text-rose-600 uppercase tracking-widest">Total Overdue</div>
+                 <div className="text-[32px] font-black text-slate-900 leading-none mt-1">{formatPHP(totalOverdue)}</div>
+               </div>
+             </div>
+
+             <div>
+               <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50">
+                    <th className="px-4 py-3">Customer / Invoice</th>
+                    <th className="px-4 py-3">Due Date</th>
+                    <th className="px-4 py-3">Days Overdue</th>
+                    <th className="px-4 py-3">Aging Bucket</th>
+                    <th className="px-4 py-3 text-right">Balance Due</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {overdueInvoices.length === 0 && (
+                    <tr><td colSpan={5} className="p-8 text-center text-slate-500">No overdue invoices.</td></tr>
+                  )}
+                  {overdueInvoices.map(inv => (
+                    <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="text-[13px] font-bold text-slate-900">{inv.customer}</div>
+                        <div className="text-[11px] text-slate-500">{inv.id}</div>
+                      </td>
+                      <td className="px-4 py-3 text-[13px] font-medium text-slate-600">{new Date(inv.dueDate).toLocaleDateString()}</td>
+                      <td className="px-4 py-3 text-[13px] font-black text-rose-600">{inv.agingDays} days</td>
+                      <td className="px-4 py-3 text-[12px] font-bold text-slate-700">
+                        <span className="bg-slate-200 px-2 py-1 rounded-md">{inv.agingBucket}</span>
+                      </td>
+                      <td className="px-4 py-3 text-[14px] font-black text-rose-600 text-right">{formatPHP(inv.balance)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+             </div>
+          </div>
+        )}
+
+        {/* INVENTORY REPORT */}
+        {activeTab === 'inventory' && (
+          <div className="space-y-8 animate-in fade-in">
+             {lowStockItems.length > 0 && (
+               <div className="p-6 bg-rose-50 border border-rose-200 rounded-2xl">
+                 <h3 className="text-[14px] font-black text-rose-700 flex items-center gap-2 mb-4"><AlertCircle size={18}/> Low Stock Alerts</h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                   {lowStockItems.map(item => (
+                     <div key={item.sku} className="bg-white p-4 rounded-xl border border-rose-100 flex items-center justify-between">
+                       <div>
+                         <div className="text-[13px] font-bold text-slate-900">{item.item}</div>
+                         <div className="text-[11px] text-slate-500">{item.sku}</div>
+                       </div>
+                       <div className="text-right">
+                         <div className="text-[16px] font-black text-rose-600">{item.computedStock} {item.unit}</div>
+                         <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Min: {item.minStock}</div>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+
+             <div>
+               <h3 className="text-[16px] font-black text-slate-900 mb-4">Stock Levels (Computed from Movements Ledger)</h3>
+               <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50">
+                    <th className="px-4 py-3">SKU</th>
+                    <th className="px-4 py-3">Item Name</th>
+                    <th className="px-4 py-3">Category</th>
+                    <th className="px-4 py-3 text-right">Unit Cost</th>
+                    <th className="px-4 py-3 text-right">Computed Stock</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {computedInventory.map(item => (
+                    <tr key={item.sku} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 text-[13px] font-bold text-slate-500">{item.sku}</td>
+                      <td className="px-4 py-3 text-[13px] font-bold text-slate-900">{item.item}</td>
+                      <td className="px-4 py-3 text-[12px] font-medium text-slate-600">{item.cat}</td>
+                      <td className="px-4 py-3 text-[13px] font-medium text-slate-600 text-right">{formatPHP(item.cost)}</td>
+                      <td className="px-4 py-3 text-[14px] font-black text-right">
+                        <span className={item.computedStock <= item.minStock ? 'text-rose-600' : 'text-slate-900'}>
+                          {item.computedStock} {item.unit}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+             </div>
+          </div>
+        )}
+
+        {/* ACCOUNTS PAYABLE (AP) REPORT */}
+        {activeTab === 'ap' && (
+          <div className="space-y-8 animate-in fade-in">
+             <div className="flex items-center gap-6 p-6 bg-slate-50 border border-slate-200 rounded-2xl">
+               <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center">
+                 <ArrowDownRight size={24} />
+               </div>
+               <div>
+                 <div className="text-[12px] font-black text-slate-500 uppercase tracking-widest">Total Outstanding Accounts Payable</div>
+                 <div className="text-[32px] font-black text-slate-900 leading-none">{formatPHP(supplierBills.reduce((sum, b) => sum + b.balance, 0))}</div>
+               </div>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div>
+                 <h3 className="text-[16px] font-black text-slate-900 mb-4 flex items-center gap-2">
+                   <FileText size={18} className="text-slate-400" /> Recent Supplier Bills
+                 </h3>
+                 <div className="space-y-3">
+                   {supplierBills.slice(0, 5).map(bill => (
+                     <div key={bill.id} className="p-4 rounded-xl border border-slate-100 bg-white shadow-sm flex items-center justify-between">
+                       <div>
+                         <div className="text-[14px] font-black text-slate-900">{bill.supplier_name}</div>
+                         <div className="text-[11px] text-slate-500 font-medium">{bill.id} • Due {bill.due_date}</div>
+                       </div>
+                       <div className="text-right">
+                         <div className="text-[14px] font-black text-slate-900">{formatPHP(bill.amount)}</div>
+                         <div className={`text-[10px] font-bold uppercase ${bill.balance > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                           {bill.balance > 0 ? `Bal: ${formatPHP(bill.balance)}` : 'Fully Settled'}
+                         </div>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+
+               <div>
+                 <h3 className="text-[16px] font-black text-slate-900 mb-4 flex items-center gap-2">
+                   <ArrowUpRight size={18} className="text-emerald-500" /> Settlement Ledger
+                 </h3>
+                 <div className="space-y-3">
+                   {settlements.slice(0, 5).map(set => (
+                     <div key={set.id} className="p-4 rounded-xl border border-emerald-50 bg-emerald-50/30 shadow-sm flex items-center justify-between">
+                       <div>
+                         <div className="text-[14px] font-black text-slate-900">{set.supplier_name}</div>
+                         <div className="text-[11px] text-slate-500 font-medium">{set.bill_id} • {set.method}</div>
+                       </div>
+                       <div className="text-right">
+                         <div className="text-[14px] font-black text-emerald-600">-{formatPHP(set.amount_paid)}</div>
+                         <div className="text-[10px] text-slate-400 font-medium italic">{new Date(set.paid_at).toLocaleDateString()}</div>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             </div>
+          </div>
+        )}
+
       </div>
-
     </div>
   );
 }

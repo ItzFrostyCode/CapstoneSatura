@@ -1,5 +1,5 @@
 [
-  { 
+  {
     "id": "APT-1024",
     "customer": "Alexander McQueen",
     "email": "alexander@mcqueen.com",
@@ -10,11 +10,10 @@
     "startTime": "10:00",
     "duration": 60,
     "status": "Confirmed",
-    "branch": "Makati Central",
     "staff": "Maria Garcia",
     "reason": "Initial fitting for bespoke tuxedo. Needs adjustment on shoulders."
   },
-  { 
+  {
     "id": "APT-1025",
     "customer": "Elena Rostova",
     "email": "elena.r@gmail.com",
@@ -25,11 +24,10 @@
     "startTime": "14:30",
     "duration": 45,
     "status": "Pending",
-    "branch": "BGC Premium",
     "staff": "Joshua Arabejo",
     "reason": "Wedding gown design consultation. Interested in silk and lace combinations."
   },
-  { 
+  {
     "id": "APT-1026",
     "customer": "Maria Santos",
     "email": "msantos@outlook.com",
@@ -40,11 +38,10 @@
     "startTime": "11:00",
     "duration": 30,
     "status": "Confirmed",
-    "branch": "Makati Central",
     "staff": "Juan Reyes",
     "reason": "Final check for the corporate blazer. Ready for pickup."
   },
-  { 
+  {
     "id": "APT-1027",
     "customer": "James Jacob",
     "email": "jjacob@tech.com",
@@ -55,11 +52,10 @@
     "startTime": "09:00",
     "duration": 45,
     "status": "Confirmed",
-    "branch": "Makati Central",
     "staff": "Maria Garcia",
     "reason": "New client measurement session for a summer suit collection."
   },
-  { 
+  {
     "id": "APT-1028",
     "customer": "Jerome Bell",
     "email": "jbell@design.io",
@@ -70,7 +66,6 @@
     "startTime": "11:30",
     "duration": 60,
     "status": "Delayed",
-    "branch": "Makati Central",
     "staff": "Juan Reyes",
     "reason": "Adjusting sleeve length and waist taper for linen shirt."
   }

@@ -11,10 +11,10 @@ export default function Home() {
         <a href="/register" className="bg-black text-white px-8 py-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
           Register Business
         </a>
-        <a href="/login" className="bg-white text-black px-8 py-4 rounded-lg font-semibold border border-gray-200 hover:bg-gray-50 transition-colors">
+        <a href="/login-gateway" className="bg-white text-black px-8 py-4 rounded-lg font-semibold border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm">
           Shop Owner Login
         </a>
-        <a href="/admin/dashboard" className="bg-gray-900 text-white px-8 py-4 rounded-lg font-semibold border border-gray-700 hover:bg-gray-800 transition-colors">
+        <a href="/admin/login" className="bg-gray-900 text-white px-8 py-4 rounded-lg font-semibold border border-gray-700 hover:bg-gray-800 transition-colors">
           Admin Portal
         </a>
         <a href="/customer/designs" className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-emerald-700 transition-colors">

@@ -1,38 +1,114 @@
 [
-  { 
-    "id": "CUS-001", 
-    "name": "Maria Santos", 
-    "email": "maria.s@example.com", 
+  {
+    "id": "CUST-001",
+    "name": "James Brown",
+    "email": "james@gmail.com",
     "phone": "+63 917 111 2222",
-    "lastOrder": "Oct 24, 2026", 
-    "status": "Measurements Complete", 
-    "ordersCount": 5
+    "address": "123 Rizal St., Makati City",
+    "notes": "Prefers slim-fit cuts. VIP client since 2023.",
+    "type": "Individual",
+    "is_active": true,
+    "style_preferences": "Prefers standard notched lapels and 2-button closure. Always requests extra reinforcement in the crotch area of pants.",
+    "posture_tags": ["Sloping Shoulders", "Prominent Chest"]
   },
-  { 
-    "id": "CUS-002", 
-    "name": "Carlos Reyes", 
-    "email": "carlos.r@example.com", 
+  {
+    "id": "CUST-002",
+    "name": "Arthur Taylor",
+    "email": "arthur@gmail.com",
     "phone": "+63 920 333 4444",
-    "lastOrder": "Oct 22, 2026", 
-    "status": "Pending Fitting", 
-    "ordersCount": 2
+    "address": "456 Bonifacio Ave., BGC, Taguig",
+    "notes": "Corporate account — always requests express service.",
+    "type": "Individual",
+    "is_active": true
   },
-  { 
-    "id": "CUS-003", 
-    "name": "Elena Cruz", 
-    "email": "elena.c@example.com", 
+  {
+    "id": "CUST-003",
+    "name": "Matthew Johnson",
+    "email": "matt@gmail.com",
     "phone": "+63 918 555 6666",
-    "lastOrder": "Sep 15, 2026", 
-    "status": "Ready for Pickup", 
-    "ordersCount": 12
+    "address": "789 Katipunan Ave., Quezon City",
+    "notes": "Recurring customer for Barong Tagalog orders.",
+    "type": "Individual",
+    "is_active": true
   },
-  { 
-    "id": "CUS-004", 
-    "name": "David Lee", 
-    "email": "d.lee@example.com", 
+  {
+    "id": "CUST-004",
+    "name": "Wei Chen",
+    "email": "weichen@gmail.com",
     "phone": "+63 905 777 8888",
-    "lastOrder": "Aug 01, 2026", 
-    "status": "Measurements Outdated", 
-    "ordersCount": 1
+    "address": "22 China St., Binondo, Manila",
+    "notes": "Wedding gown client. Strict May 15 deadline.",
+    "type": "Individual",
+    "is_active": true
+  },
+  {
+    "id": "CUST-005",
+    "name": "Jump Amend",
+    "email": "jump@gmail.com",
+    "phone": "+63 921 999 0000",
+    "address": "11 Mabini St., Ermita, Manila",
+    "notes": "",
+    "type": "Individual",
+    "is_active": true
+  },
+  {
+    "id": "CUST-006",
+    "name": "Ravi Patel",
+    "email": "ravipatel@gmail.com",
+    "phone": "+63 912 121 3434",
+    "address": "88 Malate Blvd., Manila",
+    "notes": "Referred by CUST-002.",
+    "type": "Individual",
+    "is_active": true
+  },
+  {
+    "id": "CUST-007",
+    "name": "David Smith",
+    "email": "david@gmail.com",
+    "phone": "+63 916 565 7878",
+    "address": "33 Shaw Blvd., Mandaluyong",
+    "notes": "Handles bulk office uniform orders for his company.",
+    "type": "Corporate",
+    "is_active": true
+  },
+  {
+    "id": "CUS-001",
+    "name": "Maria Santos",
+    "email": "maria.s@example.com",
+    "phone": "+63 917 111 2222",
+    "address": "14 Mabuhay St., Pasig City",
+    "notes": "Wedding gown client.",
+    "type": "Individual",
+    "is_active": true
+  },
+  {
+    "id": "CUS-002",
+    "name": "David Torres",
+    "email": "d.torres@example.com",
+    "phone": "+63 920 333 4444",
+    "address": "7 Ortigas Ave., Pasig City",
+    "notes": "Corporate suit, prefers charcoal grey.",
+    "type": "Individual",
+    "is_active": true
+  },
+  {
+    "id": "CUS-003",
+    "name": "Elena Gomez",
+    "email": "elena.g@example.com",
+    "phone": "+63 918 555 6666",
+    "address": "55 Buendia Ave., Makati",
+    "notes": "Evening dress for gala event.",
+    "type": "Individual",
+    "is_active": true
+  },
+  {
+    "id": "CUS-004",
+    "name": "Jose Rizal",
+    "email": "j.rizal@example.com",
+    "phone": "+63 905 777 8888",
+    "address": "1 Bonifacio St., Calamba, Laguna",
+    "notes": "Barong Tagalog — urgent delivery.",
+    "type": "Individual",
+    "is_active": true
   }
 ]

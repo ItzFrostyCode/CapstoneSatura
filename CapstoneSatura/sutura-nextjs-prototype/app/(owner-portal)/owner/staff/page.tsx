@@ -1,496 +1,348 @@
 'use client';
 
-import { 
-  Users2, 
-  Plus, 
-  Mail, 
-  Shield, 
-  CheckCircle2, 
-  MoreVertical, 
-  Search, 
-  Filter, 
-  ChevronRight,
-  ShieldAlert,
-  ShieldCheck,
-  Phone,
-  Clock,
-  Calendar,
-  X,
-  FileText,
-  Activity,
-  User,
-  Settings,
-  Briefcase,
-  Scissors
-} from 'lucide-react';
-import { useState } from 'react';
-import teamMembersData from '@/data/staff.json';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Users, Plus, Search, ShieldCheck, Mail, Phone, MoreVertical, X, Check, Lock, UserCog, User } from 'lucide-react';
+import { useERPStore, Staff, StaffRole } from '../../store/useERPStore';
 
-interface StaffMember {
-  name: string;
-  role: string;
-  email: string;
-  phone: string;
-  status: string;
-  avatar: string;
-  color: string;
+const ROLE_PERMISSIONS: Record<StaffRole, Record<string, boolean | 'usage-only'>> = {
+  Admin: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
+  Sales: { customers: true, orders: true, measurements: true, appointments: true, inventory: false, suppliers: false, billing: true, reports: false },
+  Tailor: { customers: false, orders: true, measurements: true, appointments: false, inventory: 'usage-only', suppliers: false, billing: false, reports: false },
+  Inventory: { customers: false, orders: false, measurements: false, appointments: false, inventory: true, suppliers: true, billing: false, reports: false }
+};
+
+const MODULE_LABELS = {
+  customers: 'Customers',
+  orders: 'Orders',
+  measurements: 'Measurements',
+  appointments: 'Appointments',
+  inventory: 'Inventory',
+  suppliers: 'Suppliers',
+  billing: 'Billing & Payments',
+  reports: 'Reports & Analytics'
+};
+
+function getRoleBadge(role: StaffRole) {
+  switch (role) {
+    case 'Admin': return 'bg-rose-50 text-rose-700 border-rose-100';
+    case 'Sales': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+    case 'Tailor': return 'bg-amber-50 text-amber-700 border-amber-100';
+    case 'Inventory': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    default: return 'bg-slate-50 text-slate-700 border-slate-200';
+  }
 }
 
-export default function TeamManagement() {
+export default function StaffPage() {
+  const { staff, addStaff } = useERPStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
-  const [drawerTab, setDrawerTab] = useState('overview');
-  const [activeTab, setActiveTab] = useState('Users');
-  const [isRolesModalOpen, setIsRolesModalOpen] = useState(false);
-  const [isAddStaffModalOpen, setIsAddStaffModalOpen] = useState(false);
+  const [roleFilter, setRoleFilter] = useState<'All' | StaffRole>('All');
   
-  const teamMembers = teamMembersData as StaffMember[];
-
-  const systemUsersCount = teamMembers.filter(m => m.role === 'Staff' || m.role === 'Shop Owner').length;
-  const tailoringTeamCount = teamMembers.filter(m => m.role === 'Measure' || m.role === 'Cutting' || m.role === 'Sewing' || m.role === 'QC Check').length;
-
-  const stats = [
-    { label: "Total Staff", val: teamMembers.length.toString(), trend: "Active", color: "indigo" },
-    { label: "On Duty Today", val: (teamMembers.length - 2).toString(), trend: "Normal", color: "emerald" },
-    { label: "System Users", val: systemUsersCount.toString(), trend: "Admin", color: "amber" },
-    { label: "Tailoring Team", val: tailoringTeamCount.toString(), trend: "Production", color: "sky" },
-  ];
-
-  const filteredMembers = teamMembers.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         member.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         member.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    if (activeTab === 'Users') {
-      return matchesSearch && (member.role === 'Shop Owner' || member.role === 'Staff');
-    }
-    return matchesSearch && (member.role === 'Measure' || member.role === 'Cutting' || member.role === 'Sewing' || member.role === 'QC Check');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newStaff, setNewStaff] = useState<Partial<Staff> & { password?: string }>({
+    name: '', email: '', phone: '', roles: ['Sales'], hasSystemAccess: true, status: 'Active', password: ''
   });
 
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('onboarding') === 'true') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsModalOpen(true);
+    }
+  }, [searchParams]);
+
+  const filteredStaff = useMemo(() => 
+    staff.filter(s => 
+      (roleFilter === 'All' || s.roles.includes(roleFilter)) &&
+      (s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.staffCode.toLowerCase().includes(searchQuery.toLowerCase()))
+    ), [staff, searchQuery, roleFilter]
+  );
+
+  const handleAddStaff = () => {
+    if (!newStaff.name || !newStaff.roles || newStaff.roles.length === 0) return;
+    
+    // In a real app, password would be sent to an auth service.
+    // For the store, we drop the password since it shouldn't be in local state.
+    const { password, ...staffData } = newStaff;
+    
+    addStaff(staffData as Omit<Staff, 'id' | 'staffCode'>);
+    setIsModalOpen(false);
+    setNewStaff({ name: '', email: '', phone: '', roles: ['Sales'], hasSystemAccess: true, status: 'Active', password: '' });
+  };
+
+  const toggleRole = (r: StaffRole) => {
+    setNewStaff(prev => {
+      const currentRoles = prev.roles || [];
+      const newRoles = currentRoles.includes(r) 
+        ? currentRoles.filter(x => x !== r) 
+        : [...currentRoles, r];
+      return { ...prev, roles: newRoles };
+    });
+  };
+
+  // Merge permissions from all selected roles
+  const currentPermissions = (newStaff.roles || []).reduce((acc, role) => {
+    const perms = ROLE_PERMISSIONS[role];
+    Object.keys(perms).forEach(k => {
+      if (perms[k] === true) acc[k] = true;
+      if (perms[k] === 'usage-only' && acc[k] !== true) acc[k] = 'usage-only';
+    });
+    return acc;
+  }, {} as Record<string, boolean | 'usage-only'>);
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      
-      {/* ── HEADER ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <div className="space-y-0 animate-in fade-in duration-500 max-w-[1200px] mx-auto pb-20">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none">Staff Directory</h1>
-          <p className="text-[14px] text-slate-500 font-medium mt-1">Manage your tailoring team and administrative permissions.</p>
+          <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none">Staff</h1>
+          <p className="text-[14px] text-slate-500 font-medium mt-1">Manage employees and role-based access control (RBAC).</p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsRolesModalOpen(true)}
-            className="bg-white text-slate-600 h-11 px-5 rounded-xl text-[13px] font-bold border border-slate-200 hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
-          >
-            <ShieldAlert size={16} /> Roles & Permissions
-          </button>
-          <button 
-            onClick={() => setIsAddStaffModalOpen(true)}
-            className="bg-slate-900 text-white h-11 px-6 rounded-xl text-[13px] font-black hover:bg-indigo-600 transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2"
-          >
-            <Plus size={18} /> Add New Staff
-          </button>
-        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="h-10 px-4 bg-slate-900 text-white rounded-xl flex items-center gap-2 text-[13px] font-bold hover:bg-indigo-600 transition-all shadow-sm"
+        >
+          <Plus size={16} /> Add Staff
+        </button>
       </div>
 
-      {/* ── KPI GRID ── */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {stats.map((kpi, i) => (
-          <div key={i} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-[12px] font-bold text-slate-500">{kpi.label}</span>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${kpi.trend === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-500'}`}>
-                {kpi.trend}
-              </span>
-            </div>
-            <div className="text-[28px] font-black text-slate-900 tracking-tight">{kpi.val}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Secondary Navigation Tabs */}
-      <div className="flex flex-wrap bg-slate-100/80 p-1.5 rounded-full w-max gap-1 border border-slate-200/50">
+      {/* STATS */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
         {[
-          { id: 'Users', name: 'System Users', icon: <ShieldCheck size={14} /> },
-          { id: 'Employees', name: 'Tailoring Employees', icon: <Scissors size={14} /> },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2.5 px-6 py-2.5 rounded-full text-[12px] font-black transition-all uppercase tracking-widest whitespace-nowrap ${
-              activeTab === tab.id 
-                ? 'bg-white text-slate-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] border border-slate-200/50' 
-                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/50'
-            }`}
-          >
-            {tab.icon} {tab.name}
-          </button>
+          { label: 'Total Staff', val: staff.length, color: 'indigo' },
+          { label: 'System Users', val: staff.filter(s => s.hasSystemAccess).length, color: 'emerald' },
+          { label: 'Production Only', val: staff.filter(s => !s.hasSystemAccess).length, color: 'amber' },
+          { label: 'Admins', val: staff.filter(s => s.roles.includes('Admin')).length, color: 'rose' },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
+            <div className="text-[28px] font-black text-slate-900">{stat.val}</div>
+          </div>
         ))}
       </div>
 
-
-      {/* ── MAIN CONTENT ── */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        
-        {/* Integrated Search/Filter Bar */}
-        <div className="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative group flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" size={16} />
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search staff by name, role or email..." 
-              className="h-10 w-full pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium outline-none focus:bg-white focus:border-slate-900 transition-all"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button className="h-10 px-4 bg-white border border-slate-200 rounded-xl flex items-center gap-2 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-all">
-              <Filter size={16} /> All Roles
+      {/* FILTER & SEARCH */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          {['All', 'Admin', 'Sales', 'Tailor', 'Inventory'].map(role => (
+            <button
+              key={role}
+              onClick={() => setRoleFilter(role as 'All' | StaffRole)}
+              className={`px-4 py-2 rounded-xl text-[12px] font-bold border transition-all ${roleFilter === role ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}
+            >
+              {role}
             </button>
-            <button className="h-10 px-4 bg-white border border-slate-200 rounded-xl flex items-center gap-2 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-all">
-              <Settings size={16} /> Configure
-            </button>
-          </div>
+          ))}
         </div>
-
-        {/* Staff Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                <th className="px-6 py-4">Member Identity</th>
-                <th className="px-6 py-4">Role</th>
-                <th className="px-6 py-4">Contact</th>
-                <th className="px-6 py-4">Email Address</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {filteredMembers.map((member, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-all group">
-                  <td className="px-6 py-5">
-                    <div>
-                      <div className="text-[15px] font-black text-slate-900 leading-none mb-1">{member.name}</div>
-                      <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">STF-2023-{i+1}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                     <div className="flex items-center gap-2.5">
-                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                         member.role === 'Shop Owner' ? 'bg-amber-50 text-amber-600' : 
-                         member.role === 'Measure' ? 'bg-emerald-50 text-emerald-600' :
-                         member.role === 'Cutting' ? 'bg-rose-50 text-rose-600' :
-                         member.role === 'Sewing' ? 'bg-indigo-50 text-indigo-600' :
-                         member.role === 'QC Check' ? 'bg-sky-50 text-sky-600' :
-                         'bg-slate-50 text-slate-600'
-                       }`}>
-                         <ShieldCheck size={16} />
-                       </div>
-                       <span className="text-[14px] font-bold text-slate-700">{member.role}</span>
-                     </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-[14px] font-medium text-slate-500">{member.phone}</span>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-[14px] font-medium text-slate-500">{member.email}</span>
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => setSelectedStaff(member)}
-                        className="h-9 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 text-[12px] font-bold hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-sm"
-                      >
-                        Manage
-                      </button>
-                      <button className="h-9 w-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors shadow-sm">
-                        <MoreVertical size={16}/>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
-          <p className="text-[12px] text-slate-500 font-medium">Showing <span className="font-bold text-slate-900">{filteredMembers.length}</span> members in organization</p>
-          <div className="flex items-center gap-2">
-            <button className="h-9 px-4 rounded-lg bg-white border border-slate-200 text-[12px] font-bold text-slate-400 cursor-not-allowed">Previous</button>
-            <button className="h-9 px-4 rounded-lg bg-white border border-slate-200 text-[12px] font-bold text-slate-900 hover:bg-slate-50 transition-colors">Next <ChevronRight size={14} className="inline ml-1"/></button>
-          </div>
+        <div className="relative w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+          <input 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+            type="text" 
+            placeholder="Search staff..." 
+            className="h-10 w-full pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-[13px] outline-none focus:border-slate-900 transition-all" 
+          />
         </div>
       </div>
 
-      {/* ── STAFF DETAIL DRAWER ── */}
-      {selectedStaff && (
-        <>
-          <div 
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110] animate-in fade-in duration-300"
-            onClick={() => setSelectedStaff(null)}
-          />
-          <div className="fixed top-0 right-0 w-full max-w-[600px] h-full bg-white z-[120] shadow-2xl animate-in slide-in-from-right duration-500 flex flex-col">
-            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-black text-[24px]">
-                  {selectedStaff.name.charAt(0)}
-                </div>
-                <div>
-                  <h2 className="text-[22px] font-black text-slate-900 tracking-tight leading-none">{selectedStaff.name}</h2>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">{selectedStaff.role}</span>
-                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">ID: STF-2023-01</span>
+      {/* TABLE */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+              <th className="px-6 py-4">Employee</th>
+              <th className="px-6 py-4">Roles</th>
+              <th className="px-6 py-4">System Access</th>
+              <th className="px-6 py-4">Contact</th>
+              <th className="px-6 py-4 text-center">Status</th>
+              <th className="px-6 py-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {filteredStaff.map(s => (
+              <tr key={s.id} className="hover:bg-slate-50/50 transition-all">
+                <td className="px-6 py-4">
+                  <div className="text-[14px] font-bold text-slate-900">{s.name}</div>
+                  <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{s.staffCode}</div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex flex-wrap gap-1.5">
+                    {s.roles.map(role => (
+                      <span key={role} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-widest ${getRoleBadge(role)}`}>
+                        {role === 'Admin' ? <ShieldCheck size={12} /> : <UserCog size={12} />}
+                        {role}
+                      </span>
+                    ))}
                   </div>
-                </div>
-              </div>
-              <button onClick={() => setSelectedStaff(null)} className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"><X size={20}/></button>
-            </div>
+                </td>
+                <td className="px-6 py-4">
+                  {s.hasSystemAccess ? (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                      <Lock size={12} /> Login Enabled
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+                      <User size={12} /> Production Only
+                    </span>
+                  )}
+                </td>
+                <td className="px-6 py-4">
+                  {s.email && <div className="text-[12px] text-slate-600 flex items-center gap-2"><Mail size={12} /> {s.email}</div>}
+                  {s.phone && <div className="text-[12px] text-slate-600 flex items-center gap-2 mt-1"><Phone size={12} /> {s.phone}</div>}
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-widest ${s.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                    {s.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <button className="h-9 w-9 rounded-lg bg-white border border-slate-200 inline-flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors shadow-sm">
+                    <MoreVertical size={15} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-            <div className="flex px-8 border-b border-slate-100 bg-slate-50/30">
-              {['overview', 'activity', 'permissions'].map((tab) => (
-                <button 
-                  key={tab}
-                  onClick={() => setDrawerTab(tab)}
-                  className={`h-14 px-6 text-[13px] font-black uppercase tracking-widest transition-all relative ${drawerTab === tab ? 'text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  {tab}
-                  {drawerTab === tab && <div className="absolute bottom-0 left-0 w-full h-1 bg-slate-900 rounded-t-full" />}
+      {/* ADD STAFF MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-[850px] max-h-[90vh] overflow-y-auto rounded-[24px] shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-300 flex">
+            
+            {/* Form Section */}
+            <div className="flex-1 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-[20px] font-black text-slate-900 leading-tight">Add New Staff</h2>
+                  <p className="text-[13px] text-slate-500 font-medium">Assign a role to determine their permissions.</p>
+                </div>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-xl text-slate-400">
+                  <X size={20} />
                 </button>
-              ))}
-            </div>
+              </div>
 
-            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8">
-              {drawerTab === 'overview' && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                      <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Email Address</div>
-                      <div className="text-[14px] font-bold text-slate-900">{selectedStaff.email}</div>
-                    </div>
-                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                      <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Phone Number</div>
-                      <div className="text-[14px] font-bold text-slate-900">+63 912 345 6789</div>
-                    </div>
+              <div className="space-y-6">
+                
+                {/* Basic Info */}
+                <div>
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Full Name</label>
+                  <input type="text" value={newStaff.name} onChange={e => setNewStaff({...newStaff, name: e.target.value})} className="h-10 w-full px-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none focus:border-indigo-500 focus:bg-white transition-all" />
+                </div>
+                
+                <div>
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Phone Number</label>
+                  <input type="text" value={newStaff.phone} onChange={e => setNewStaff({...newStaff, phone: e.target.value})} className="h-10 w-full px-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] outline-none focus:border-indigo-500 focus:bg-white transition-all" />
+                </div>
+
+                {/* Multiple Roles Selection */}
+                <div className="pt-4 border-t border-slate-100">
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Roles & Access</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['Admin', 'Sales', 'Tailor', 'Inventory'].map(role => {
+                      const isSelected = newStaff.roles?.includes(role as StaffRole);
+                      return (
+                        <button
+                          key={role}
+                          onClick={() => toggleRole(role as StaffRole)}
+                          className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${isSelected ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200 hover:border-slate-300'}`}
+                        >
+                          {/* Checkbox style */}
+                          <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
+                            {isSelected && <Check size={12} className="text-white" />}
+                          </div>
+                          <div className={`text-[13px] font-bold ${isSelected ? 'text-indigo-900' : 'text-slate-700'}`}>{role}</div>
+                        </button>
+                      );
+                    })}
                   </div>
+                  {newStaff.roles?.length === 0 && (
+                    <p className="text-[11px] text-rose-500 font-bold mt-2">Please select at least one role.</p>
+                  )}
+                </div>
 
-                  <div className="space-y-4">
-                    <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                      <Briefcase size={16} className="text-slate-400" /> Professional Details
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between p-4 rounded-xl border border-slate-100 bg-white">
-                        <span className="text-[13px] font-medium text-slate-500">Employment Type</span>
-                        <span className="text-[13px] font-black text-slate-900">Full-Time / Bespoke</span>
-                      </div>
-                      <div className="flex justify-between p-4 rounded-xl border border-slate-100 bg-white">
-                        <span className="text-[13px] font-medium text-slate-500">Joined Date</span>
-                        <span className="text-[13px] font-black text-slate-900">Oct 20, 2023</span>
-                      </div>
-                      <div className="flex justify-between p-4 rounded-xl border border-slate-100 bg-white">
-                        <span className="text-[13px] font-medium text-slate-500">Assigned Branch</span>
-                        <span className="text-[13px] font-black text-slate-900">Main Headquarters</span>
-                      </div>
-                    </div>
+                {/* System Access Toggle */}
+                <div className="pt-4 border-t border-slate-100 flex items-center gap-3">
+                  <button 
+                    onClick={() => setNewStaff({...newStaff, hasSystemAccess: !newStaff.hasSystemAccess})}
+                    className={`w-10 h-6 rounded-full p-1 transition-all flex ${newStaff.hasSystemAccess ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'}`}
+                  >
+                    <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
+                  </button>
+                  <div>
+                    <div className="text-[13px] font-bold text-slate-900">System Access (Can Login)</div>
+                    <div className="text-[11px] text-slate-500">Disable for production-only staff.</div>
                   </div>
+                </div>
 
-                  <div className="space-y-4">
-                    <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                      <Activity size={16} className="text-slate-400" /> Performance Metrics
-                    </h3>
+                {/* Conditional Login Credentials */}
+                {newStaff.hasSystemAccess && (
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-4 animate-in slide-in-from-top-2 fade-in duration-300">
+                    <div className="text-[11px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5"><Lock size={12}/> Login Credentials</div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-5 rounded-2xl border border-slate-100 bg-emerald-50/30">
-                        <div className="text-[24px] font-black text-emerald-600">98%</div>
-                        <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Task Accuracy</div>
+                      <div>
+                        <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email Address</label>
+                        <input type="email" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} className="h-10 w-full px-3 bg-white border border-slate-200 rounded-xl text-[14px] outline-none focus:border-indigo-500 transition-all" />
                       </div>
-                      <div className="p-5 rounded-2xl border border-slate-100 bg-indigo-50/30">
-                        <div className="text-[24px] font-black text-indigo-600">12</div>
-                        <div className="text-[11px] font-bold text-indigo-800 uppercase tracking-wider">Orders Today</div>
+                      <div>
+                        <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Temporary Password</label>
+                        <input type="password" value={newStaff.password} onChange={e => setNewStaff({...newStaff, password: e.target.value})} placeholder="••••••••" className="h-10 w-full px-3 bg-white border border-slate-200 rounded-xl text-[14px] outline-none focus:border-indigo-500 transition-all" />
                       </div>
                     </div>
                   </div>
-                </>
-              )}
+                )}
+              </div>
 
-              {drawerTab === 'activity' && (
-                <div className="space-y-6">
-                  {[
-                    { action: 'Completed Job Order', target: 'ORD-1024', time: '2 hours ago', icon: <CheckCircle2 size={16}/> },
-                    { action: 'Updated Measurements', target: 'CUST-201', time: '5 hours ago', icon: <FileText size={16}/> },
-                    { action: 'Logged in to Dashboard', target: 'HQ Terminal', time: '8 hours ago', icon: <Clock size={16}/> },
-                  ].map((act, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
-                        {act.icon}
-                      </div>
-                      <div className="pt-1">
-                        <div className="text-[14px] font-bold text-slate-900">{act.action}</div>
-                        <div className="text-[12px] text-slate-500 font-medium">Target: <span className="text-slate-700 font-bold">{act.target}</span> · {act.time}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="p-8 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <button className="px-6 h-11 rounded-xl text-[13px] font-black text-rose-600 hover:bg-rose-50 transition-all flex items-center gap-2">
-                Deactivate Member
-              </button>
-              <div className="flex gap-3">
-                <button className="px-6 h-11 rounded-xl bg-white border border-slate-200 text-[13px] font-bold text-slate-600 hover:bg-slate-50 transition-all">Send Message</button>
-                <button className="px-6 h-11 rounded-xl bg-slate-900 text-white text-[13px] font-black hover:bg-indigo-600 transition-all">Update Access</button>
+              <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end gap-3">
+                <button onClick={() => setIsModalOpen(false)} className="h-10 px-6 text-[13px] font-bold text-slate-500 hover:text-slate-900 transition-colors">Cancel</button>
+                <button 
+                  onClick={handleAddStaff} 
+                  disabled={!newStaff.name || newStaff.roles?.length === 0}
+                  className="h-10 px-6 rounded-xl bg-slate-900 text-white text-[13px] font-bold hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Save Staff
+                </button>
               </div>
             </div>
-          </div>
-        </>
-      )}
-      {/* ── ROLES & PERMISSIONS MODAL ── */}
-      {isRolesModalOpen && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-[600px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-              <div>
-                <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Roles & Privileges</h2>
-                <p className="text-[13px] text-slate-500 font-medium">Configure access levels for each department.</p>
+
+            {/* RBAC Matrix Section (Read-only Visualizer) */}
+            <div className="w-[320px] bg-slate-50 border-l border-slate-200 p-8 shrink-0">
+              <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">RBAC Permissions</div>
+              <h3 className="text-[18px] font-black text-slate-900 mb-6">
+                {newStaff.roles && newStaff.roles.length > 0 ? newStaff.roles.join(' + ') : 'No Access'}
+              </h3>
+              
+              <div className="space-y-3">
+                {Object.entries(MODULE_LABELS).map(([key, label]) => {
+                  const permission = currentPermissions[key];
+                  
+                  return (
+                    <div key={key} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+                      <span className="text-[13px] font-bold text-slate-700">{label}</span>
+                      {permission === true ? (
+                        <span className="bg-emerald-100 text-emerald-700 p-1 rounded-md"><Check size={14} /></span>
+                      ) : permission === 'usage-only' ? (
+                        <span className="bg-amber-100 text-amber-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-md">Usage Only</span>
+                      ) : (
+                        <span className="bg-rose-50 text-rose-300 p-1 rounded-md"><X size={14} /></span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              <button onClick={() => setIsRolesModalOpen(false)} className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"><X size={20}/></button>
-            </div>
-            
-            <div className="p-8 space-y-6">
-              {[
-                { role: 'Shop Owner', desc: 'Full administrative access to all branches and financials.', icon: <Shield size={18} /> },
-                { role: 'Staff', desc: 'Standard access to orders, measurements, and production.', icon: <Users2 size={18} /> },
-                { role: 'Measure', desc: 'Specialized access to client measurements and body profiling.', icon: <FileText size={18} /> },
-                { role: 'Cutting', desc: 'Access to fabric inventory and pattern drafting tasks.', icon: <Scissors size={18} /> },
-                { role: 'Sewing', desc: 'Focus on production timeline and garment construction.', icon: <Zap size={18} /> },
-                { role: 'QC Check', desc: 'Final quality assurance and order release permissions.', icon: <ClipboardCheck size={18} /> },
-              ].map((r, i) => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 hover:border-indigo-100 transition-all group cursor-pointer bg-white">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                      {r.icon}
-                    </div>
-                    <div>
-                      <div className="text-[14px] font-black text-slate-900">{r.role}</div>
-                      <p className="text-[12px] text-slate-500 font-medium">{r.desc}</p>
-                    </div>
-                  </div>
-                  <ChevronRight size={16} className="text-slate-300 group-hover:text-indigo-600 transition-colors" />
-                </div>
-              ))}
+
+              <div className="mt-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+                <p className="text-[11px] text-indigo-700 font-medium">
+                  <strong>Principle of Least Privilege:</strong> Permissions are combined from all selected roles to grant appropriate access.
+                </p>
+              </div>
             </div>
 
-            <div className="p-8 border-t border-slate-100 bg-slate-50 flex justify-end">
-              <button onClick={() => setIsRolesModalOpen(false)} className="px-8 h-12 bg-slate-900 text-white rounded-xl text-[14px] font-black shadow-lg shadow-slate-900/10 hover:bg-slate-800 transition-all">Save Configuration</button>
-            </div>
           </div>
         </div>
       )}
-
-      {/* ── ADD NEW STAFF MODAL ── */}
-      {isAddStaffModalOpen && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-[550px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-              <div>
-                <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Add New Staff</h2>
-                <p className="text-[13px] text-slate-500 font-medium">Invite a new member to your tailoring team.</p>
-              </div>
-              <button onClick={() => setIsAddStaffModalOpen(false)} className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"><X size={20}/></button>
-            </div>
-            
-            <div className="p-8 space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Full Name</label>
-                  <input type="text" placeholder="e.g. Juan Dela Cruz" className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Email Address</label>
-                    <input type="email" placeholder="email@example.com" className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Temporary Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium" />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Assign Primary Role</label>
-                  <select className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium appearance-none">
-                    <option>Shop Owner</option>
-                    <option>Staff</option>
-                    <option>Measure</option>
-                    <option>Cutting</option>
-                    <option>Sewing</option>
-                    <option>QC Check</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-indigo-50 border border-indigo-100 flex gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
-                  <ShieldCheck size={20} />
-                </div>
-                <div>
-                  <h4 className="text-[14px] font-black text-indigo-900">Access Permissions</h4>
-                  <p className="text-[12px] text-indigo-700/70 font-medium leading-relaxed mt-0.5">Permissions are automatically assigned based on the role. You can customize them later in the Manage section.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-8 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setIsAddStaffModalOpen(false)} className="px-6 h-12 bg-white border border-slate-200 rounded-xl text-[14px] font-bold text-slate-600 hover:bg-slate-50 transition-all">Cancel</button>
-              <button onClick={() => setIsAddStaffModalOpen(false)} className="px-8 h-12 bg-slate-900 text-white rounded-xl text-[14px] font-black shadow-lg shadow-slate-900/10 hover:bg-slate-800 transition-all">Add Member</button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
-  );
-}
-
-function Zap({ size, className }: { size: number, className?: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M13 2 L3 14 12 14 11 22 21 10 12 10 13 2 Z" />
-    </svg>
-  );
-}
-
-function ClipboardCheck({ size, className }: { size: number, className?: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-      className={className}
-    >
-      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-      <path d="m9 14 2 2 4-4" />
-    </svg>
   );
 }

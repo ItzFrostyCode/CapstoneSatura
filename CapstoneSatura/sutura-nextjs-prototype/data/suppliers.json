@@ -1,0 +1,47 @@
+[
+  {
+    "id": "SUP-001",
+    "name": "Premium Fabrics Inc.",
+    "email": "orders@premiumfabrics.com",
+    "contact": "Elena Cruz",
+    "phone": "+63 917 555 8888",
+    "address": "Unit 4B, Divisoria Textile Hub, Manila",
+    "category": "Wholesale Fabrics",
+    "items": ["FAB-NAV-001", "FAB-WHT-002"],
+    "leadTime": "3-5 days",
+    "payment_terms": "Net 30",
+    "rating": "4.9",
+    "status": "Verified",
+    "is_active": true
+  },
+  {
+    "id": "SUP-002",
+    "name": "QC Garment Supplies",
+    "email": "wholesale@qcgarments.com",
+    "contact": "Ricardo Santos",
+    "phone": "+63 920 123 4567",
+    "address": "88 Evangelista St., Quiapo, Manila",
+    "category": "Buttons & Zippers",
+    "items": ["ZIP-BLK-005", "BTN-SIL-012"],
+    "leadTime": "1-2 days",
+    "payment_terms": "COD",
+    "rating": "4.5",
+    "status": "Active",
+    "is_active": true
+  },
+  {
+    "id": "SUP-003",
+    "name": "Textile World Manila",
+    "email": "sales@textileworld.ph",
+    "contact": "Maria Clara",
+    "phone": "+63 918 765 4321",
+    "address": "3rd Floor, Tutuban Center, Caloocan",
+    "category": "Premium Silk & Thread",
+    "items": ["THR-NAV-022", "LBL-SUT-001"],
+    "leadTime": "5-7 days",
+    "payment_terms": "Net 15",
+    "rating": "4.9",
+    "status": "Preferred",
+    "is_active": true
+  }
+]

@@ -146,10 +146,10 @@ export default function DashboardLayout({
                     </div>
                     <div className="max-h-[500px] overflow-y-auto">
                       {[
-                        { cat: "Inventory", title: "Material Shortage", msg: "Premium Silk is below 2m threshold at Makati.", type: "alert", time: "2m ago" },
+                        { cat: "Inventory", title: "Material Shortage", msg: "Premium Silk is below 2m threshold.", type: "alert", time: "2m ago" },
                         { cat: "Orders", title: "Delayed Fitting", msg: "Elena Rostova (Fitting) is 15m overdue.", type: "warning", time: "15m ago" },
                         { cat: "Billing", title: "Subscription Renewing", msg: "Pro Plan will auto-renew on May 24, 2026.", type: "info", time: "2h ago" },
-                        { cat: "Branches", title: "Branch Milestone", msg: "BGC Branch exceeded weekly revenue target.", type: "success", time: "5h ago" },
+                        { cat: "Workshop", title: "Production Milestone", msg: "Main workshop exceeded weekly output target.", type: "success", time: "5h ago" },
                         { cat: "Customers", title: "New Profile", msg: "Alexander McQueen registered via portal.", type: "info", time: "1d ago" },
                         { cat: "Reports", title: "EOM Report Ready", msg: "April Operational Audit is ready for review.", type: "success", time: "2d ago" },
                       ].map((n, i) => (
@@ -205,7 +205,10 @@ export default function DashboardLayout({
                       </button>
                     </div>
                     <div className="border-t border-slate-50 mt-1 pt-1">
-                      <button className="w-full flex items-center gap-3 px-4 py-2 text-[13px] font-black text-rose-600 hover:bg-rose-50 transition-colors">
+                      <button 
+                        onClick={() => window.location.href = '/'}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-[13px] font-black text-rose-600 hover:bg-rose-50 transition-colors"
+                      >
                         <LogOut size={16} /> Sign Out
                       </button>
                     </div>

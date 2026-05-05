@@ -25,41 +25,40 @@ import {
   Menu
 } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
-import appointmentsData from '@/data/appointments_extended.json';
+import { useERPStore, Appointment } from '../../store/useERPStore';
 
-// Types
-interface Appointment {
-  id: string;
-  customer: string;
-  email: string;
-  phone: string;
-  type: string;
-  category: string;
-  date: string;
-  startTime: string;
-  duration: number;
-  status: string;
-  branch: string;
-  staff: string;
-  reason: string;
-}
+const normalizeStatus = (status: string) => {
+  const s = status.toLowerCase();
+  if (s === 'pending') return 'Scheduled';
+  if (s === 'delayed') return 'No Show';
+  if (s === 'confirmed') return 'Confirmed';
+  if (s === 'completed') return 'Completed';
+  if (s === 'cancelled') return 'Cancelled';
+  if (s === 'no show') return 'No Show';
+  return 'Scheduled'; // fallback
+};
 
 export default function AppointmentsPage() {
+  const { appointments, addAppointment, updateAppointmentStatus } = useERPStore();
+
   const [selectedDate, setSelectedDate] = useState(new Date('2026-10-28')); // Fixed date for demo
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<(Appointment & { normalizedStatus: string }) | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [visibleStaff, setVisibleStaff] = useState<string[]>(['Maria Garcia', 'Joshua Arabejo', 'Juan Reyes']);
+  
+  const allStatuses = ['Scheduled', 'Confirmed', 'Completed', 'Cancelled', 'No Show'];
+  const [visibleStatuses, setVisibleStatuses] = useState<string[]>(allStatuses);
+  
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Form State
   const [newApt, setNewApt] = useState({
     customer: '',
-    type: 'First Fitting',
+    type: 'Fitting',
     date: '2026-10-28',
-    startTime: '10:00',
-    staff: 'Maria Garcia',
-    branch: 'Makati Central'
+    time: '10:00',
+    staff: 'Maria Garcia'
   });
 
   // Constants
@@ -96,6 +95,17 @@ export default function AppointmentsPage() {
     return colors[staff] || 'bg-slate-100 text-slate-700 border-slate-200';
   };
 
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case 'Scheduled': return { badge: 'bg-blue-100 text-blue-700', cardOpacity: 'opacity-100' };
+      case 'Confirmed': return { badge: 'bg-emerald-100 text-emerald-700', cardOpacity: 'opacity-100' };
+      case 'Completed': return { badge: 'bg-slate-200 text-slate-700', cardOpacity: 'opacity-60 grayscale' };
+      case 'Cancelled': return { badge: 'bg-rose-100 text-rose-700', cardOpacity: 'opacity-50 grayscale' };
+      case 'No Show': return { badge: 'bg-orange-100 text-orange-700', cardOpacity: 'opacity-80' };
+      default: return { badge: 'bg-slate-100 text-slate-700', cardOpacity: 'opacity-100' };
+    }
+  };
+
   const calculatePosition = (startTime: string, duration: number) => {
     const [h, m] = startTime.split(':').map(Number);
     const startOffset = (h - 8) * HOUR_HEIGHT + (m / 60) * HOUR_HEIGHT;
@@ -115,25 +125,99 @@ export default function AppointmentsPage() {
     );
   };
 
+  const toggleStatus = (status: string) => {
+    setVisibleStatuses(prev => 
+      prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
+    );
+  };
+
+  const handleEmptySlotClick = (date: string, hour: number) => {
+    const formattedHour = `${hour.toString().padStart(2, '0')}:00`;
+    setNewApt(prev => ({ ...prev, date, time: formattedHour, customer: '' }));
+    setIsCreateModalOpen(true);
+  };
+
+  const handleReschedule = () => {
+    if (selectedAppointment) {
+      setNewApt({
+        customer: selectedAppointment.customer,
+        type: selectedAppointment.type,
+        date: selectedAppointment.date,
+        time: selectedAppointment.startTime,
+        staff: selectedAppointment.staff
+      });
+      setIsModalOpen(false);
+      setIsCreateModalOpen(true);
+    }
+  };
+
+  const renderModalActions = (status: string) => {
+    if (!selectedAppointment) return null;
+
+    switch (status) {
+      case 'Scheduled':
+        return (
+          <>
+            <button onClick={() => { updateAppointmentStatus(selectedAppointment.id, 'Cancelled'); setIsModalOpen(false); }} className="px-4 h-10 text-[13px] font-bold text-rose-600 hover:bg-rose-50 rounded-md transition-all">Cancel Apt</button>
+            <button onClick={handleReschedule} className="px-4 h-10 text-[13px] font-bold text-slate-600 hover:bg-slate-50 rounded-md transition-all">Reschedule</button>
+            <button onClick={() => { updateAppointmentStatus(selectedAppointment.id, 'Confirmed'); setIsModalOpen(false); }} className="px-6 h-10 bg-indigo-600 text-white rounded-md font-black text-[13px] hover:bg-indigo-700 transition-all shadow-md">Confirm</button>
+          </>
+        );
+      case 'Confirmed':
+        return (
+          <>
+            <button onClick={handleReschedule} className="px-4 h-10 text-[13px] font-bold text-slate-600 hover:bg-slate-50 rounded-md transition-all">Reschedule</button>
+            <button onClick={() => { updateAppointmentStatus(selectedAppointment.id, 'Completed'); setIsModalOpen(false); }} className="px-6 h-10 bg-emerald-600 text-white rounded-md font-black text-[13px] hover:bg-emerald-700 transition-all shadow-md">Mark Completed</button>
+          </>
+        );
+      case 'No Show':
+        return (
+          <>
+            <button onClick={handleReschedule} className="px-4 h-10 text-[13px] font-bold text-slate-600 hover:bg-slate-50 rounded-md transition-all">Reschedule</button>
+            <button onClick={() => { updateAppointmentStatus(selectedAppointment.id, 'Completed'); setIsModalOpen(false); }} className="px-6 h-10 bg-emerald-600 text-white rounded-md font-black text-[13px] hover:bg-emerald-700 transition-all shadow-md">Mark Completed</button>
+          </>
+        );
+      case 'Completed':
+      case 'Cancelled':
+      default:
+        return (
+          <button onClick={() => setIsModalOpen(false)} className="px-6 h-10 bg-slate-900 text-white rounded-md font-black text-[13px] hover:bg-slate-800 transition-all shadow-md">Close</button>
+        );
+    }
+  };
+
+  const mappedAppointments = useMemo(() => {
+    return appointments.map(apt => ({
+      ...apt,
+      normalizedStatus: normalizeStatus(apt.status)
+    }));
+  }, [appointments]);
+
   return (
-    <div className="flex h-[calc(100vh-140px)] -m-10 bg-white">
-      
+    <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none">Appointments</h1>
+          <p className="text-[14px] text-slate-500 font-medium mt-1">Schedule and manage customer fittings and consultations.</p>
+        </div>
+        <button 
+          onClick={() => {
+            setNewApt(prev => ({ ...prev, customer: '', date: formatDate(selectedDate), time: '10:00' }));
+            setIsCreateModalOpen(true);
+          }}
+          className="bg-slate-900 text-white h-11 px-6 rounded-2xl flex items-center gap-2 text-[13px] font-black hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95"
+        >
+          <Plus size={18} /> New Appointment
+        </button>
+      </div>
+      <div className="flex h-[calc(100vh-280px)] bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
       {/* ── LEFT SIDEBAR ── */}
       <aside className="w-64 border-r border-slate-200 flex flex-col p-4 space-y-8 shrink-0 overflow-y-auto custom-scrollbar">
-        {/* Create Button */}
-        <button 
-          onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-200 rounded-full shadow-md hover:shadow-lg transition-all text-slate-700 group"
-        >
-          <Plus size={24} className="text-indigo-600 transition-transform group-hover:rotate-90" />
-          <span className="text-[14px] font-bold">Create</span>
-          <ChevronDown size={14} className="ml-auto text-slate-400" />
-        </button>
 
         {/* Mini Calendar Mockup */}
         <div className="space-y-4 px-2">
            <div className="flex items-center justify-between">
-             <span className="text-[13px] font-bold text-slate-900">January 2026</span>
+             <span className="text-[13px] font-bold text-slate-900">October 2026</span>
              <div className="flex gap-1">
                <button className="p-1 hover:bg-slate-100 rounded-full"><ChevronLeft size={16} /></button>
                <button className="p-1 hover:bg-slate-100 rounded-full"><ChevronRight size={16} /></button>
@@ -171,6 +255,29 @@ export default function AppointmentsPage() {
             ))}
           </div>
         </div>
+
+        {/* Status Filters */}
+        <div className="space-y-4 px-2 border-t border-slate-100 pt-6">
+          <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Status</h3>
+          <div className="space-y-2">
+            {allStatuses.map(status => (
+              <label key={status} className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative flex items-center">
+                  <input 
+                    type="checkbox" 
+                    checked={visibleStatuses.includes(status)}
+                    onChange={() => toggleStatus(status)}
+                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${getStatusStyles(status).badge.split(' ')[0]}`}></span>
+                  <span className="text-[13px] font-medium text-slate-600 group-hover:text-slate-900 transition-colors">{status}</span>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
       </aside>
 
       {/* ── MAIN CONTENT ── */}
@@ -180,7 +287,7 @@ export default function AppointmentsPage() {
         <header className="h-16 border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-4">
             <button className="p-2 hover:bg-slate-100 rounded-full text-slate-500"><Menu size={20} /></button>
-            <h2 className="text-[18px] font-bold text-slate-900 ml-2">January 2026</h2>
+            <h2 className="text-[18px] font-bold text-slate-900 ml-2">October 2026</h2>
             <div className="flex items-center gap-1 ml-4 border border-slate-200 rounded-md p-1">
               <button className="p-1 hover:bg-slate-100 rounded text-slate-600"><ChevronLeft size={18} /></button>
               <button className="px-3 py-1 text-[13px] font-bold text-slate-700 hover:bg-slate-100 rounded">Today</button>
@@ -236,39 +343,64 @@ export default function AppointmentsPage() {
               <div className="flex-1 grid grid-cols-7 border-l border-slate-200 relative">
                 {/* Horizontal Grid Lines */}
                 {hours.map((h) => (
-                  <div key={h} className="absolute left-0 right-0 border-b border-slate-100" style={{ top: `${(h - 8 + 1) * HOUR_HEIGHT}px` }}></div>
+                  <div key={`h-line-${h}`} className="absolute left-0 right-0 border-b border-slate-100" style={{ top: `${(h - 8 + 1) * HOUR_HEIGHT}px` }}></div>
                 ))}
                 
                 {/* Vertical Grid Lines */}
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="absolute top-0 bottom-0 border-r border-slate-100" style={{ left: `${(i + 1) * (100 / 7)}%` }}></div>
+                  <div key={`v-line-${i}`} className="absolute top-0 bottom-0 border-r border-slate-100 pointer-events-none" style={{ left: `${(i + 1) * (100 / 7)}%` }}></div>
                 ))}
 
                 {/* Current Time Line Indicator */}
-                <div className="absolute left-0 right-0 z-20 flex items-center" style={{ top: `${getCurrentTimePosition()}px` }}>
+                <div className="absolute left-0 right-0 z-20 flex items-center pointer-events-none" style={{ top: `${getCurrentTimePosition()}px` }}>
                    <div className="w-3 h-3 bg-rose-500 rounded-full -ml-1.5 shadow-sm"></div>
                    <div className="flex-1 h-px bg-rose-500"></div>
                 </div>
 
-                {/* Appointment Cards */}
+                {/* Day Columns (for empty slot clicking) */}
                 {weekDays.map((date, colIdx) => {
                   const dateStr = formatDate(date);
-                  const dayAppointments = appointmentsData.filter(a => a.date === dateStr && visibleStaff.includes(a.staff));
+                  const dayAppointments = mappedAppointments.filter(a => 
+                    a.date === dateStr && 
+                    visibleStaff.includes(a.staff) &&
+                    visibleStatuses.includes(a.normalizedStatus)
+                  );
                   
                   return (
-                    <div key={colIdx} className="relative h-full">
-                      {dayAppointments.map((apt) => (
+                    <div key={`col-${colIdx}`} className="relative h-full z-0 group">
+                      {/* Clickable Empty Slots for this day */}
+                      {hours.map((h) => (
                         <div 
-                          key={apt.id}
-                          onClick={() => { setSelectedAppointment(apt); setIsModalOpen(true); }}
-                          className={`absolute left-0.5 right-1.5 p-2 rounded-md border-l-4 cursor-pointer transition-all hover:shadow-lg hover:z-10 overflow-hidden ${getStaffColor(apt.staff)} shadow-sm`}
-                          style={calculatePosition(apt.startTime, apt.duration)}
-                        >
-                          <div className="text-[12px] font-black leading-tight truncate">{apt.customer}</div>
-                          <div className="text-[10px] font-bold opacity-80 mt-1 truncate">{apt.startTime} - {apt.category}</div>
-                          <div className="text-[9px] opacity-60 mt-0.5 italic">{apt.staff}</div>
-                        </div>
+                          key={`empty-${colIdx}-${h}`} 
+                          onClick={() => handleEmptySlotClick(dateStr, h)}
+                          className="absolute left-0 right-0 cursor-pointer transition-colors hover:bg-indigo-50/40"
+                          style={{ top: `${(h - 8) * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
+                        ></div>
                       ))}
+
+                      {/* Appointment Cards */}
+                      {dayAppointments.map((apt) => {
+                        const statusStyle = getStatusStyles(apt.normalizedStatus);
+                        return (
+                          <div 
+                            key={apt.id}
+                            onClick={() => { setSelectedAppointment(apt); setIsModalOpen(true); }}
+                            className={`absolute left-0.5 right-1.5 p-2 rounded-md border-l-4 cursor-pointer transition-all hover:shadow-lg hover:z-10 overflow-hidden ${getStaffColor(apt.staff)} shadow-sm ${statusStyle.cardOpacity} ${apt.normalizedStatus === 'Cancelled' ? 'line-through opacity-50' : ''}`}
+                            style={calculatePosition(apt.startTime, apt.duration)}
+                          >
+                            <div className="flex justify-between items-start gap-1">
+                              <div className="text-[12px] font-black leading-tight truncate">{apt.customer}</div>
+                              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-sm shrink-0 uppercase tracking-wider ${statusStyle.badge}`}>
+                                {apt.normalizedStatus}
+                              </span>
+                            </div>
+                            <div className="text-[10px] font-bold opacity-80 mt-1 truncate">{apt.startTime} - {apt.category}</div>
+                            <div className="text-[9px] opacity-60 mt-0.5 flex justify-between">
+                              <span className="italic">{apt.staff}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })}
@@ -277,6 +409,7 @@ export default function AppointmentsPage() {
           </div>
         </div>
       </div>
+    </div>
 
       {/* ── CREATE APPOINTMENT MODAL ── */}
       {isCreateModalOpen && (
@@ -292,32 +425,54 @@ export default function AppointmentsPage() {
              <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
                 <div className="flex flex-col gap-2">
                   <label className="text-[14px] font-medium text-slate-900">Customer</label>
-                  <select className="w-full h-[44px] px-4 bg-white border border-slate-200 rounded-lg text-[15px] outline-none focus:border-slate-900 transition-all appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236B7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22%3E%3C/path%3E%3C/svg%3E')] bg-no-repeat bg-[position:right_16px_center] bg-[length:16px]">
-                    <option>Select Customer...</option>
-                    <option>Alexander McQueen</option>
-                    <option>Maria Santos</option>
-                    <option>John Doe</option>
+                  <select 
+                    value={newApt.customer}
+                    onChange={(e) => setNewApt({...newApt, customer: e.target.value})}
+                    className="w-full h-[44px] px-4 bg-white border border-slate-200 rounded-lg text-[15px] outline-none focus:border-slate-900 transition-all appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236B7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22%3E%3C/path%3E%3C/svg%3E')] bg-no-repeat bg-[position:right_16px_center] bg-[length:16px]"
+                  >
+                    <option value="">Select Customer...</option>
+                    <option value="Alexander McQueen">Alexander McQueen</option>
+                    <option value="Maria Santos">Maria Santos</option>
+                    <option value="John Doe">John Doe</option>
+                    <option value="Elena Rostova">Elena Rostova</option>
+                    <option value="James Jacob">James Jacob</option>
+                    <option value="Jerome Bell">Jerome Bell</option>
                   </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
                     <label className="text-[14px] font-medium text-slate-900">Date</label>
-                    <input type="date" className="w-full h-[44px] px-4 bg-white border border-slate-200 rounded-lg text-[15px] outline-none focus:border-slate-900 transition-all" />
+                    <input 
+                      type="date" 
+                      value={newApt.date}
+                      onChange={(e) => setNewApt({...newApt, date: e.target.value})}
+                      className="w-full h-[44px] px-4 bg-white border border-slate-200 rounded-lg text-[15px] outline-none focus:border-slate-900 transition-all" 
+                    />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-[14px] font-medium text-slate-900">Time</label>
-                    <input type="time" className="w-full h-[44px] px-4 bg-white border border-slate-200 rounded-lg text-[15px] outline-none focus:border-slate-900 transition-all" />
+                    <input 
+                      type="time" 
+                      value={newApt.time}
+                      onChange={(e) => setNewApt({...newApt, time: e.target.value})}
+                      className="w-full h-[44px] px-4 bg-white border border-slate-200 rounded-lg text-[15px] outline-none focus:border-slate-900 transition-all" 
+                    />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label className="text-[14px] font-medium text-slate-900">Appointment Type</label>
-                  <select className="w-full h-[44px] px-4 bg-white border border-slate-200 rounded-lg text-[15px] outline-none focus:border-slate-900 transition-all appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236B7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22%3E%3C/path%3E%3C/svg%3E')] bg-no-repeat bg-[position:right_16px_center] bg-[length:16px]">
-                    <option>Fitting</option>
-                    <option>Consultation</option>
-                    <option>Pick-up</option>
-                    <option>Other</option>
+                  <select 
+                    value={newApt.type}
+                    onChange={(e) => setNewApt({...newApt, type: e.target.value})}
+                    className="w-full h-[44px] px-4 bg-white border border-slate-200 rounded-lg text-[15px] outline-none focus:border-slate-900 transition-all appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236B7280%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22%3E%3C/path%3E%3C/svg%3E')] bg-no-repeat bg-[position:right_16px_center] bg-[length:16px]"
+                  >
+                    <option value="Fitting">Fitting</option>
+                    <option value="Consultation">Consultation</option>
+                    <option value="Pick-up">Pick-up</option>
+                    <option value="Measurement Session">Measurement Session</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
@@ -340,7 +495,28 @@ export default function AppointmentsPage() {
                   Cancel
                 </button>
                 <button 
-                  onClick={() => setIsCreateModalOpen(false)} 
+                  onClick={() => {
+                    if (!newApt.customer) {
+                      alert('Please select a customer first.');
+                      return;
+                    }
+
+                    addAppointment({
+                      customer: newApt.customer,
+                      email: '', // Add proper email based on customer selection in real app
+                      phone: '',
+                      type: newApt.type,
+                      category: newApt.type,
+                      date: newApt.date,
+                      startTime: newApt.time,
+                      duration: 60,
+                      status: 'Scheduled',
+                      staff: newApt.staff,
+                      reason: 'New appointment scheduled from portal.',
+                    });
+
+                    setIsCreateModalOpen(false);
+                  }} 
                   className="px-5 h-[44px] bg-slate-900 text-white rounded-lg text-[15px] font-semibold hover:bg-slate-800 transition-all shadow-sm"
                 >
                   Save Appointment
@@ -370,12 +546,17 @@ export default function AppointmentsPage() {
 
             {/* Modal Body */}
             <div className="p-8 space-y-8">
-              <div className="flex items-start gap-4">
-                 <div className="w-4 h-4 mt-1.5 rounded-sm bg-indigo-500"></div>
-                 <div>
-                   <h2 className="text-[24px] font-black text-slate-900 leading-tight">{selectedAppointment.customer}</h2>
-                   <p className="text-[14px] text-slate-600 font-medium mt-1">{selectedAppointment.date} • {selectedAppointment.startTime}</p>
+              <div className="flex items-start justify-between gap-4">
+                 <div className="flex items-start gap-4">
+                   <div className="w-4 h-4 mt-1.5 rounded-sm bg-indigo-500"></div>
+                   <div>
+                     <h2 className="text-[24px] font-black text-slate-900 leading-tight">{selectedAppointment.customer}</h2>
+                     <p className="text-[14px] text-slate-600 font-medium mt-1">{selectedAppointment.date} • {selectedAppointment.startTime}</p>
+                   </div>
                  </div>
+                 <span className={`text-[11px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${getStatusStyles(selectedAppointment.normalizedStatus).badge}`}>
+                   {selectedAppointment.normalizedStatus}
+                 </span>
               </div>
 
               <div className="space-y-5 pl-8">
@@ -386,12 +567,8 @@ export default function AppointmentsPage() {
                     <div className="text-[11px] opacity-60">Assigned Expert</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-slate-600">
-                  <MapPin size={18} />
-                  <span className="text-[13px] font-medium">{selectedAppointment.branch}</span>
-                </div>
                 <div className="flex items-start gap-4 text-slate-600">
-                  <Menu size={18} className="mt-1" />
+                  <Menu size={18} className="mt-1 shrink-0" />
                   <p className="text-[13px] font-medium leading-relaxed italic text-slate-500">&quot;{selectedAppointment.reason}&quot;</p>
                 </div>
                 <div className="flex items-center gap-4 text-slate-600">
@@ -402,18 +579,7 @@ export default function AppointmentsPage() {
 
               {/* Actions */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                <button 
-                  className="px-6 h-10 text-[13px] font-bold text-slate-600 hover:bg-slate-50 rounded-md transition-all"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="px-8 h-10 bg-indigo-600 text-white rounded-md font-black text-[13px] hover:bg-indigo-700 transition-all shadow-md"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Confirm
-                </button>
+                {renderModalActions(selectedAppointment.normalizedStatus)}
               </div>
             </div>
           </div>

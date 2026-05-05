@@ -8,9 +8,9 @@ export default function Finance() {
   ];
 
   const transactions = [
-    { id: 'TXN-8902', client: 'Maria Santos', date: 'Oct 24, 2026', amount: '₱45,000', status: 'Paid' },
-    { id: 'TXN-8901', client: 'Carlos Reyes', date: 'Oct 22, 2026', amount: '₱60,000', status: 'Pending' },
-    { id: 'TXN-8900', client: 'Elena Cruz', date: 'Sep 15, 2026', amount: '₱35,000', status: 'Paid' },
+    { id: 'TXN-8902', customer: 'Maria Santos', date: 'Oct 24, 2026', amount: '₱45,000', status: 'Paid' },
+    { id: 'TXN-8901', customer: 'Carlos Reyes', date: 'Oct 22, 2026', amount: '₱60,000', status: 'Pending' },
+    { id: 'TXN-8900', customer: 'Elena Cruz', date: 'Sep 15, 2026', amount: '₱35,000', status: 'Paid' },
   ];
 
   return (
@@ -63,7 +63,7 @@ export default function Finance() {
             <thead>
               <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
                 <th className="px-8 py-4">Transaction ID</th>
-                <th className="px-8 py-4">Client</th>
+                <th className="px-8 py-4">Customer</th>
                 <th className="px-8 py-4">Date</th>
                 <th className="px-8 py-4 text-right">Amount</th>
                 <th className="px-8 py-4 text-right">Status</th>
@@ -73,7 +73,7 @@ export default function Finance() {
               {transactions.map((txn) => (
                 <tr key={txn.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-8 py-5 text-[13px] font-black text-slate-900">{txn.id}</td>
-                  <td className="px-8 py-5 text-[14px] font-bold text-slate-600">{txn.client}</td>
+                  <td className="px-8 py-5 text-[14px] font-bold text-slate-600">{txn.customer}</td>
                   <td className="px-8 py-5 text-[13px] text-slate-500 font-medium">{txn.date}</td>
                   <td className="px-8 py-5 text-[14px] font-black text-slate-900 text-right">{txn.amount}</td>
                   <td className="px-8 py-5 text-right">

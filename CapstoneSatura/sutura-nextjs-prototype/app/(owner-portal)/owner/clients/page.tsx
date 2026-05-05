@@ -28,10 +28,15 @@ interface Customer {
   name: string;
   email: string;
   phone: string;
-  lastOrder: string;
-  status: string;
-  ordersCount: number;
+  lastOrder?: string;
+  status?: string;
+  ordersCount?: number;
   address?: string;
+  notes?: string;
+  type?: string;
+  is_active?: boolean;
+  style_preferences?: string;
+  posture_tags?: string[];
   tier?: string;
   fitProfile?: 'Male' | 'Female';
 }
@@ -144,7 +149,7 @@ export default function CustomersPage() {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
 
-  const customers = customersData as Customer[];
+  const customers = (customersData as unknown) as Customer[];
 
   const filteredCustomers = customers.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -160,7 +165,7 @@ export default function CustomersPage() {
   );
 
   const kpis = [
-    { label: 'Total Clients', val: filteredCustomers.length.toString(), icon: <Users size={20} className="text-slate-500" /> },
+    { label: 'Total Customers', val: filteredCustomers.length.toString(), icon: <Users size={20} className="text-slate-500" /> },
     { label: 'Today\'s Appointments', val: filteredAppointments.length.toString(), icon: <Calendar size={20} className="text-slate-500" /> },
   ];
 
@@ -216,7 +221,7 @@ export default function CustomersPage() {
       {/* Secondary Navigation Tabs */}
       <div className="flex flex-wrap bg-slate-100/80 p-1.5 rounded-full w-max gap-1 mb-6 border border-slate-200/50">
         {[
-          { id: 'directory', name: 'Client Directory', icon: <Users size={14} /> },
+          { id: 'directory', name: 'Customer Directory', icon: <Users size={14} /> },
           { id: 'measurements', name: 'Measurements', icon: <Ruler size={14} /> },
           { id: 'appointments', name: 'Appointments', icon: <Calendar size={14} /> },
         ].map((tab) => (
@@ -238,7 +243,7 @@ export default function CustomersPage() {
         <div className="flex items-center gap-4">
           <h2 className="text-[18px] font-black text-slate-900 tracking-tight whitespace-nowrap">
             {activeTab === 'directory'
-              ? 'Client Directory'
+              ? 'Customer Directory'
               : activeTab === 'measurements'
                 ? 'Measurement Archive'
                 : 'Appointments'}
@@ -668,7 +673,7 @@ export default function CustomersPage() {
                   <span className="text-[11px] font-black text-slate-900">CUST-101</span>
                   <span className="w-1 h-1 rounded-full bg-slate-300 mx-1" />
                   <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    Active Client
+                    Active Customer
                   </span>
                 </div>
               </div>
@@ -1248,7 +1253,7 @@ export default function CustomersPage() {
                       <table className="w-full text-left border-collapse min-w-[1000px]">
                         <thead>
                           <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                            <th className="p-4 border-b border-slate-100 w-[180px]">Client Name</th>
+                            <th className="p-4 border-b border-slate-100 w-[180px]">Customer Name</th>
                             <th className="p-4 border-b border-slate-100 w-[120px]">Entry Mode</th>
                             {MEASUREMENT_FIELDS[subType].map((field) => (
                               <th key={field} className="p-4 border-b border-slate-100">

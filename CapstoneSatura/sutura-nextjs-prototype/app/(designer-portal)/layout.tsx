@@ -147,6 +147,29 @@ export default function DashboardLayout({
                   </div>
                   <ChevronDown size={14} className={`text-slate-300 transition-transform ${isUserMenuOpen ? 'rotate-180 text-slate-900' : ''}`} />
                 </button>
+
+                {isUserMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)}></div>
+                    <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100 overflow-hidden">
+                      <div className="px-5 py-3 border-b border-slate-50 bg-slate-50/50">
+                        <div className="text-[14px] font-black text-slate-900">Marc Jacobs</div>
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Lead Designer</div>
+                      </div>
+                      <div className="p-2 space-y-1">
+                        <Link href="/designer/profile" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                          <Settings size={16} /> Profile Settings
+                        </Link>
+                        <button 
+                          onClick={() => window.location.href = '/'}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-rose-600 hover:bg-rose-50 transition-all"
+                        >
+                          <LogOut size={16} /> Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
