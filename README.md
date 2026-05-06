@@ -1,6 +1,3 @@
-
 npm install
-
-cd CapstoneSatura
-cd sutura-nextjs-prototype
+cd sutura-clean-nextjs-prototype
 npm run dev

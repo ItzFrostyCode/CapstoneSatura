@@ -1,0 +1,491 @@
+// SUTURA ERP - Normalized Database Schema
+// Based on: NORMALIZED_DATABASE_SCHEMA.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- A. Core Shop Tables ---
+
+model User {
+  id            String    @id @default(cuid())
+  role          UserRole  @default(CUSTOMER)
+  name          String
+  email         String    @unique
+  passwordHash  String
+  status        AccountStatus @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  shopsOwned    Shop[]
+  branchMembers BranchMember[]
+  customers     Customer[]
+  createdOrders Order[]           @relation("OrderCreator")
+  assignedOrders Order[]          @relation("OrderAssignee")
+  statusHistory OrderStatusHistory[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  payments      Payment[]
+  recordedMeasurements CustomerMeasurement[] @relation("MeasurementRecorder")
+  inventoryMovements InventoryMovement[]
+  requestedPurchaseOrders PurchaseOrder[]
+}
+
+enum UserRole {
+  ADMIN
+  OWNER
+  STAFF
+  CUSTOMER
+  DESIGNER
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Subscription {
+  id           String    @id @default(cuid())
+  planName     String
+  planLevel    PlanLevel @default(BASIC)
+  status       SubscriptionStatus @default(PENDING)
+  maxBranches  Int
+  maxStaff     Int
+  startDate    DateTime
+  endDate      DateTime
+  price        Decimal   @db.Decimal(10, 2)
+
+  shops        Shop[]
+}
+
+enum PlanLevel {
+  BASIC
+  PRO
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model Shop {
+  id              String   @id @default(cuid())
+  ownerUserId     String
+  owner           User     @relation(fields: [ownerUserId], references: [id])
+  subscriptionId  String
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+  shopName        String
+  businessName    String
+  businessType    String
+  status          ShopStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+
+  branches        ShopBranch[]
+  customers       Customer[]
+  orders          Order[]
+  inventoryItems  InventoryItem[]
+  suppliers       Supplier[]
+  purchaseOrders  PurchaseOrder[]
+  invoices        Invoice[]
+}
+
+enum ShopStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}
+
+// --- B. Multi-branch Tables ---
+
+model ShopBranch {
+  id            String   @id @default(cuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id])
+  branchName    String
+  branchCode    String   @unique
+  address       String
+  contactNo     String
+  isMain        Boolean  @default(false)
+  managerUserId String?
+  status        BranchStatus @default(ACTIVE)
+  createdAt     DateTime @default(now())
+
+  members       BranchMember[]
+  measurements  CustomerMeasurement[]
+  orders        Order[]
+  inventory     BranchInventory[]
+  movements     InventoryMovement[]
+  purchaseOrders PurchaseOrder[]
+  invoices      Invoice[]
+  notifications Notification[]
+}
+
+enum BranchStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+model BranchMember {
+  id            String   @id @default(cuid())
+  branchId      String
+  branch        ShopBranch @relation(fields: [branchId], references: [id])
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  branchRole    BranchRole
+  status        Boolean  @default(true) // active/inactive
+  assignedAt    DateTime @default(now())
+
+  permissions   BranchPermission[]
+}
+
+enum BranchRole {
+  MANAGER
+  TAILOR
+  HELPER
+  CASHIER
+  INVENTORY
+}
+
+model BranchPermission {
+  id              String   @id @default(cuid())
+  branchMemberId  String
+  member          BranchMember @relation(fields: [branchMemberId], references: [id])
+  permissionCode  String
+  canView         Boolean  @default(false)
+  canCreate       Boolean  @default(false)
+  canUpdate       Boolean  @default(false)
+  canDelete       Boolean  @default(false)
+}
+
+// --- C. Customer and Measurement Tables ---
+
+model Customer {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  userId      String?  // nullable if walk-in
+  user        User?    @relation(fields: [userId], references: [id])
+  fullName    String
+  email       String?
+  phone       String
+  address     String?
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  measurements CustomerMeasurement[]
+  orders       Order[]
+}
+
+model CustomerMeasurement {
+  id                String   @id @default(cuid())
+  customerId        String
+  customer          Customer @relation(fields: [customerId], references: [id])
+  branchId          String
+  branch            ShopBranch @relation(fields: [branchId], references: [id])
+  recordedByUserId  String
+  recorder          User     @relation("MeasurementRecorder", fields: [recordedByUserId], references: [id])
+  recordedAt        DateTime @default(now())
+  
+  neck              Decimal? @db.Decimal(5, 2)
+  chest             Decimal? @db.Decimal(5, 2)
+  waist             Decimal? @db.Decimal(5, 2)
+  hip               Decimal? @db.Decimal(5, 2)
+  shoulder          Decimal? @db.Decimal(5, 2)
+  sleeve            Decimal? @db.Decimal(5, 2)
+  length            Decimal? @db.Decimal(5, 2)
+  
+  postureNotes      String?
+  status            MeasurementStatus @default(DRAFT)
+  versionNo         Int      @default(1)
+}
+
+enum MeasurementStatus {
+  DRAFT
+  CONFIRMED
+  SUPERSEDED
+  ARCHIVED
+}
+
+// --- D. Orders and Workflow Tables ---
+
+model Order {
+  id              String   @id @default(cuid())
+  shopId          String
+  shop            Shop     @relation(fields: [shopId], references: [id])
+  branchId        String
+  branch          ShopBranch @relation(fields: [branchId], references: [id])
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id])
+  createdByUserId String
+  creator         User     @relation("OrderCreator", fields: [createdByUserId], references: [id])
+  assignedStaffId String?
+  assignee        User?    @relation("OrderAssignee", fields: [assignedStaffId], references: [id])
+  
+  orderType       OrderType @default(BESPOKE)
+  sourceType      SourceType @default(WALK_IN)
+  status          OrderStatus @default(DRAFT)
+  
+  totalAmount     Decimal  @db.Decimal(10, 2)
+  balance         Decimal  @db.Decimal(10, 2)
+  dueDate         DateTime
+  createdAt       DateTime @default(now())
+
+  items           OrderItem[]
+  history         OrderStatusHistory[]
+  invoice         Invoice?
+}
+
+enum OrderType {
+  BESPOKE
+  PREMADE
+  ALTERATION
+}
+
+enum SourceType {
+  WALK_IN
+  ONLINE
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  ACCEPTED
+  IN_PRODUCTION
+  FOR_FITTING
+  READY_FOR_PICKUP
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+}
+
+model OrderItem {
+  id            String   @id @default(cuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  garmentName   String
+  quantity      Int
+  unitPrice     Decimal  @db.Decimal(10, 2)
+  notes         String?
+}
+
+model OrderStatusHistory {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id])
+  status          OrderStatus
+  changedByUserId String
+  user            User     @relation(fields: [changedByUserId], references: [id])
+  changedAt       DateTime @default(now())
+  notes           String?
+}
+
+// --- E. Inventory and Supplier Tables ---
+
+model InventoryItem {
+  id            String   @id @default(cuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id])
+  sku           String   @unique
+  itemName      String
+  category      String
+  unit          String
+  reorderLevel  Decimal  @db.Decimal(10, 2)
+  status        InventoryStatus @default(ACTIVE)
+
+  branchInventory BranchInventory[]
+  movements       InventoryMovement[]
+  poItems         PurchaseOrderItem[]
+}
+
+enum InventoryStatus {
+  ACTIVE
+  LOW_STOCK
+  OUT_OF_STOCK
+  ARCHIVED
+}
+
+model BranchInventory {
+  id              String   @id @default(cuid())
+  branchId        String
+  branch          ShopBranch @relation(fields: [branchId], references: [id])
+  inventoryItemId String
+  item            InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  onHandQty       Decimal  @db.Decimal(10, 2)
+  reservedQty     Decimal  @db.Decimal(10, 2)
+  availableQty    Decimal  @db.Decimal(10, 2)
+  lowStockFlag    Boolean  @default(false)
+  lastUpdated     DateTime @updatedAt
+}
+
+model InventoryMovement {
+  id              String   @id @default(cuid())
+  branchId        String
+  branch          ShopBranch @relation(fields: [branchId], references: [id])
+  inventoryItemId String
+  item            InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  movementType    MovementType
+  quantity        Decimal  @db.Decimal(10, 2)
+  referenceType   String?
+  referenceId     String?
+  movedByUserId   String
+  user            User     @relation(fields: [movedByUserId], references: [id])
+  createdAt       DateTime @default(now())
+}
+
+enum MovementType {
+  IN
+  OUT
+  RESERVE
+  RELEASE
+  ADJUST
+}
+
+model Supplier {
+  id              String   @id @default(cuid())
+  shopId          String
+  shop            Shop     @relation(fields: [shopId], references: [id])
+  supplierName    String
+  contactPerson   String?
+  phone           String?
+  email           String?
+  address         String?
+  status          Boolean  @default(true)
+
+  purchaseOrders  PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id                String   @id @default(cuid())
+  shopId            String
+  shop              Shop     @relation(fields: [shopId], references: [id])
+  branchId          String?
+  branch            ShopBranch? @relation(fields: [branchId], references: [id])
+  supplierId        String
+  supplier          Supplier @relation(fields: [supplierId], references: [id])
+  requestedByUserId String
+  requester         User     @relation(fields: [requestedByUserId], references: [id])
+  status            POStatus @default(DRAFT)
+  requestedAt       DateTime @default(now())
+
+  items             PurchaseOrderItem[]
+}
+
+enum POStatus {
+  DRAFT
+  FOR_APPROVAL
+  APPROVED
+  SENT
+  PARTIAL_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+model PurchaseOrderItem {
+  id              String   @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  inventoryItemId String
+  item            InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantity        Decimal  @db.Decimal(10, 2)
+  unitCost        Decimal  @db.Decimal(10, 2)
+  receivedQty     Decimal  @db.Decimal(10, 2) @default(0)
+}
+
+// --- F. Billing Tables ---
+
+model Invoice {
+  id            String   @id @default(cuid())
+  shopId        String
+  shop          Shop     @relation(fields: [shopId], references: [id])
+  branchId      String
+  branch        ShopBranch @relation(fields: [branchId], references: [id])
+  orderId       String   @unique
+  order         Order    @relation(fields: [orderId], references: [id])
+  invoiceNo     String   @unique
+  subtotal      Decimal  @db.Decimal(10, 2)
+  discount      Decimal  @db.Decimal(10, 2) @default(0)
+  tax           Decimal  @db.Decimal(10, 2) @default(0)
+  totalAmount   Decimal  @db.Decimal(10, 2)
+  status        InvoiceStatus @default(UNPAID)
+  issuedAt      DateTime @default(now())
+  dueDate       DateTime
+
+  payments      Payment[]
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  VOID
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id])
+  amount          Decimal  @db.Decimal(10, 2)
+  method          PaymentMethod
+  referenceNo     String?
+  status          PaymentStatus @default(PENDING)
+  paidAt          DateTime @default(now())
+  receivedByUserId String
+  receiver        User     @relation(fields: [receivedByUserId], references: [id])
+}
+
+enum PaymentMethod {
+  CASH
+  GCASH
+  MAYA
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REFUNDED
+}
+
+// --- G. Shared System Tables ---
+
+model Notification {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  branchId      String?
+  branch        ShopBranch? @relation(fields: [branchId], references: [id])
+  type          String
+  message       String
+  status        NotificationStatus @default(UNREAD)
+  scheduledAt   DateTime?
+  sentAt        DateTime?
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  SENT
+  FAILED
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String
+  module      String
+  entityId    String?
+  createdAt   DateTime @default(now())
+}

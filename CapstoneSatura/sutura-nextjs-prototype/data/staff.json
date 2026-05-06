@@ -1,6 +1,0 @@
-[
-  { "id": "STF-001", "staffCode": "STF-ADMIN", "name": "Joshua Arabejo", "roles": ["Admin"], "hasSystemAccess": true, "phone": "+63 917 111 2222", "email": "joshua@sutura.com", "status": "Active" },
-  { "id": "STF-002", "staffCode": "STF-SALES", "name": "Maria Santos", "roles": ["Sales", "Tailor"], "hasSystemAccess": true, "phone": "+63 918 333 4444", "email": "maria@sutura.com", "status": "Active" },
-  { "id": "STF-003", "staffCode": "STF-TLR1", "name": "Mang Ben", "roles": ["Tailor"], "hasSystemAccess": false, "phone": "+63 919 555 6666", "email": "", "status": "Active" },
-  { "id": "STF-004", "staffCode": "STF-INV1", "name": "Carlos Diaz", "roles": ["Inventory"], "hasSystemAccess": true, "phone": "+63 920 777 8888", "email": "carlos@sutura.com", "status": "Inactive" }
-]
