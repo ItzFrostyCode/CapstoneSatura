@@ -7,6 +7,7 @@ import { OverviewTab } from './tabs/OverviewTab';
 import { OrdersTab } from './tabs/OrdersTab';
 import { MeasurementsTab } from './tabs/MeasurementsTab';
 import { AppointmentsTab } from './tabs/AppointmentsTab';
+import { HistoryTab } from './tabs/HistoryTab';
 
 interface CustomerProfileProps {
   customer: Customer;
@@ -155,6 +156,8 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
             customerName={customer.name}
           />
         )}
+
+        {profileTab === 'history' && <HistoryTab customerId={customer.id} />}
       </div>
     </div>
   );
