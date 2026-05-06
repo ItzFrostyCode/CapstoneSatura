@@ -255,6 +255,96 @@ export const INITIAL_ORDERS: Order[] = [
     "due_date": "2026-05-15T16:11:14.660Z",
     "created_at": "2026-04-28T16:11:14.660Z",
     "inspection_passed": true
+  },
+  {
+    "id": "ORD-HIST-001",
+    "shop_id": "SHOP-001",
+    "branch_id": "BRN-001",
+    "customer_id": "CUST-001",
+    "created_by_user_id": "STF-001",
+    "order_type": "BESPOKE",
+    "source_type": "WALK_IN",
+    "status": "COMPLETED",
+    "priority": "Normal",
+    "total_amount": 15000,
+    "due_date": "2025-12-15T10:00:00Z",
+    "created_at": "2025-11-20T10:00:00Z",
+    "inspection_passed": true
+  },
+  {
+    "id": "ORD-HIST-002",
+    "shop_id": "SHOP-001",
+    "branch_id": "BRN-001",
+    "customer_id": "CUST-002",
+    "created_by_user_id": "STF-002",
+    "order_type": "BESPOKE",
+    "source_type": "WALK_IN",
+    "status": "COMPLETED",
+    "priority": "Normal",
+    "total_amount": 12000,
+    "due_date": "2026-01-10T10:00:00Z",
+    "created_at": "2025-12-05T10:00:00Z",
+    "inspection_passed": true
+  },
+  {
+    "id": "ORD-HIST-003",
+    "shop_id": "SHOP-001",
+    "branch_id": "BRN-001",
+    "customer_id": "CUST-003",
+    "created_by_user_id": "STF-004",
+    "order_type": "ALTERATION",
+    "source_type": "WALK_IN",
+    "status": "COMPLETED",
+    "priority": "Normal",
+    "total_amount": 2500,
+    "due_date": "2026-02-15T10:00:00Z",
+    "created_at": "2026-02-01T10:00:00Z",
+    "inspection_passed": true
+  },
+  {
+    "id": "ORD-HIST-004",
+    "shop_id": "SHOP-001",
+    "branch_id": "BRN-001",
+    "customer_id": "CUST-004",
+    "created_by_user_id": "STF-005",
+    "order_type": "BESPOKE",
+    "source_type": "WALK_IN",
+    "status": "COMPLETED",
+    "priority": "High",
+    "total_amount": 45000,
+    "due_date": "2026-03-20T10:00:00Z",
+    "created_at": "2026-02-25T10:00:00Z",
+    "inspection_passed": true
+  },
+  {
+    "id": "ORD-HIST-005",
+    "shop_id": "SHOP-001",
+    "branch_id": "BRN-001",
+    "customer_id": "CUST-005",
+    "created_by_user_id": "STF-006",
+    "order_type": "BESPOKE",
+    "source_type": "WALK_IN",
+    "status": "COMPLETED",
+    "priority": "Normal",
+    "total_amount": 28000,
+    "due_date": "2026-01-30T10:00:00Z",
+    "created_at": "2025-12-28T10:00:00Z",
+    "inspection_passed": true
+  },
+  {
+    "id": "ORD-HIST-006",
+    "shop_id": "SHOP-001",
+    "branch_id": "BRN-001",
+    "customer_id": "CUST-006",
+    "created_by_user_id": "STF-001",
+    "order_type": "BULK",
+    "source_type": "WALK_IN",
+    "status": "COMPLETED",
+    "priority": "Normal",
+    "total_amount": 8500,
+    "due_date": "2026-03-05T10:00:00Z",
+    "created_at": "2026-02-15T10:00:00Z",
+    "inspection_passed": true
   }
 ];
 
@@ -265,7 +355,13 @@ export const INITIAL_JOB_ORDER_ITEMS: JobOrderItem[] = [
   { "id": "JOI-103", "job_order_id": "ORD-1054", "garment_name": "Linen Shorts", "quantity": 1, "unit_price": 1850, "line_total": 1850 },
   { "id": "JOI-104", "job_order_id": "ORD-1055", "garment_name": "Velvet Dinner Jacket", "quantity": 1, "unit_price": 35164, "line_total": 35164 },
   { "id": "JOI-140", "job_order_id": "ORD-1091", "garment_name": "Wedding Gown (Silk)", "quantity": 1, "unit_price": 38924, "line_total": 38924 },
-  { "id": "JOI-141", "job_order_id": "ORD-1092", "garment_name": "Corporate Polo (Batch)", "quantity": 16, "unit_price": 850, "line_total": 13600 }
+  { "id": "JOI-141", "job_order_id": "ORD-1092", "garment_name": "Corporate Polo (Batch)", "quantity": 16, "unit_price": 850, "line_total": 13600 },
+  { "id": "JOI-HIST-001", "job_order_id": "ORD-HIST-001", "garment_name": "Standard Suit", "quantity": 1, "unit_price": 15000, "line_total": 15000 },
+  { "id": "JOI-HIST-002", "job_order_id": "ORD-HIST-002", "garment_name": "Premium Cotton Shirt", "quantity": 3, "unit_price": 4000, "line_total": 12000 },
+  { "id": "JOI-HIST-003", "job_order_id": "ORD-HIST-003", "garment_name": "Alteration Bundle", "quantity": 1, "unit_price": 2500, "line_total": 2500 },
+  { "id": "JOI-HIST-004", "job_order_id": "ORD-HIST-004", "garment_name": "Bespoke Silk Gown", "quantity": 1, "unit_price": 45000, "line_total": 45000 },
+  { "id": "JOI-HIST-005", "job_order_id": "ORD-HIST-005", "garment_name": "Traditional Filipiniana", "quantity": 1, "unit_price": 28000, "line_total": 28000 },
+  { "id": "JOI-HIST-006", "job_order_id": "ORD-HIST-006", "garment_name": "Event Polo T-Shirts", "quantity": 10, "unit_price": 850, "line_total": 8500 }
 ];
 
 export const INITIAL_PRODUCTION_TASKS: ProductionTask[] = [
@@ -347,5 +443,47 @@ export const INITIAL_APPOINTMENTS: Appointment[] = [
     status: 'Confirmed',
     staff: 'Juan Reyes',
     reason: 'Final check for the corporate blazer.'
+  },
+  {
+    id: 'APT-HIST-001',
+    customer: 'James Brown',
+    email: 'james@gmail.com',
+    phone: '+63 917 111 2222',
+    type: 'Initial Consultation',
+    category: 'Consultation',
+    date: '2025-11-15',
+    startTime: '10:00',
+    duration: 30,
+    status: 'Completed',
+    staff: 'Elena Cruz',
+    reason: 'Initial consultation for bespoke suit.'
+  },
+  {
+    id: 'APT-HIST-002',
+    customer: 'Alexander McQueen',
+    email: 'alex@mcqueen.com',
+    phone: '0918-123-4567',
+    type: 'Measurement Session',
+    category: 'Measurement',
+    date: '2026-02-10',
+    startTime: '14:00',
+    duration: 45,
+    status: 'Completed',
+    staff: 'Maria Santos',
+    reason: 'Taking measurements for the bespoke gown.'
+  },
+  {
+    id: 'APT-HIST-003',
+    customer: 'Wei Chen',
+    email: 'weichen@gmail.com',
+    phone: '+63 905 777 8888',
+    type: 'Sample Review',
+    category: 'Consultation',
+    date: '2026-02-05',
+    startTime: '09:30',
+    duration: 60,
+    status: 'Completed',
+    staff: 'Isabella Garcia',
+    reason: 'Reviewing polo shirt fabric samples for bulk order.'
   }
 ];
