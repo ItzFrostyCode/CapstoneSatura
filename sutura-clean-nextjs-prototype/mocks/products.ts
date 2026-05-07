@@ -23,7 +23,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     unit_of_measure: 'YARDS',
     reorder_qty: 10,
     is_active: true,
-    unit_cost: 850
+    unit_cost: 850,
+    supplier_id: 'SUPP-001'
   },
   {
     id: 'INV-002',
@@ -40,7 +41,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     unit_of_measure: 'YARDS',
     reorder_qty: 5,
     is_active: true,
-    unit_cost: 1200
+    unit_cost: 1200,
+    supplier_id: 'SUPP-003'
   },
   {
     id: 'INV-003',
@@ -82,7 +84,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     is_active: true,
     unit_cost: 15,
     price: 15,
-    location: 'Shelf B-2'
+    location: 'Shelf B-2',
+    supplier_id: 'SUPP-004'
   },
   {
     id: 'INV-005',
@@ -101,7 +104,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     is_active: true,
     unit_cost: 450,
     price: 450,
-    location: 'Rack A-1'
+    location: 'Rack A-1',
+    supplier_id: 'SUPP-003'
   },
   {
     id: 'INV-006',
@@ -120,7 +124,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     is_active: true,
     unit_cost: 12,
     price: 12,
-    location: 'Drawer 4'
+    location: 'Drawer 4',
+    supplier_id: 'SUPP-002'
   },
   {
     id: 'INV-007',
@@ -158,7 +163,8 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     is_active: true,
     unit_cost: 120,
     price: 120,
-    location: 'Bin 3'
+    location: 'Bin 3',
+    supplier_id: 'SUPP-002'
   }
 ];
 

@@ -107,7 +107,7 @@ export default function DashboardPage() {
              <h1 className="text-[36px] font-black text-slate-900 tracking-tight leading-none">Dashboard</h1>
           </div>
           <p className="text-[15px] text-slate-500 font-bold uppercase tracking-[0.1em] flex items-center gap-2">
-            Executive Oversight <span className="w-1 h-1 rounded-full bg-slate-300" /> Multi-Branch Network Health
+            Oversight <span className="w-1 h-1 rounded-full bg-slate-300" /> Multi-Branch Network Health
           </p>
         </div>
 
@@ -190,7 +190,7 @@ export default function DashboardPage() {
           <div className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm h-full">
             <div className="flex items-center gap-3 text-rose-500 mb-8">
                <Activity size={24} />
-               <h3 className="text-[18px] font-black text-slate-900 uppercase tracking-tight">Executive Alerts</h3>
+               <h3 className="text-[18px] font-black text-slate-900 uppercase tracking-tight">Alerts</h3>
             </div>
 
             <div className="space-y-4">

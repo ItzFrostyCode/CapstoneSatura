@@ -30,6 +30,36 @@ export const INITIAL_SUPPLIERS: Supplier[] = [
     address: 'New York, USA',
     lead_time_days: 14,
     is_active: true
+  },
+  {
+    id: 'SUPP-003',
+    shop_id: 'SHOP-001',
+    supplier_name: 'Manila Silk & Textiles',
+    name: 'Manila Silk & Textiles',
+    contact_person: 'Carmela Roxas',
+    contact: 'Carmela Roxas',
+    email: 'contact@manilasilk.ph',
+    phone: '+63 2 8123 4567',
+    status: 'Preferred',
+    category: 'Fabric',
+    address: 'Binondo, Manila',
+    lead_time_days: 7,
+    is_active: true
+  },
+  {
+    id: 'SUPP-004',
+    shop_id: 'SHOP-001',
+    supplier_name: 'Global Zipper Solutions',
+    name: 'Global Zipper Solutions',
+    contact_person: 'Chen Wei',
+    contact: 'Chen Wei',
+    email: 'info@globalzippers.com',
+    phone: '+86 21 6543 2100',
+    status: 'Verified',
+    category: 'Accessories',
+    address: 'Shanghai, China',
+    lead_time_days: 21,
+    is_active: true
   }
 ];
 

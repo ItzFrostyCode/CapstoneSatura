@@ -111,6 +111,7 @@ export const AppointmentModals: React.FC<AppointmentModalsProps> = ({
                     <option value="Consultation">Consultation</option>
                     <option value="Pick-up">Pick-up</option>
                     <option value="Measurement Session">Measurement Session</option>
+                    <option value="Order- Release">Order Release</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>

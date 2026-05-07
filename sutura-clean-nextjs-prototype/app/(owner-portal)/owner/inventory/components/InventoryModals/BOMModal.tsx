@@ -54,7 +54,7 @@ export function BOMModal({
   const handleBOMProductChange = (productId: string) => {
     setBomProductId(productId);
     const existing = recipes.find(r => r.productId === productId);
-    setBomMaterials(existing ? existing.materials.map((m: any) => ({ ...m })) : []);
+    setBomMaterials(existing ? existing.materials.map((m: { sku: string; qty: number }) => ({ ...m })) : []);
   };
 
   return (
@@ -119,12 +119,12 @@ export function BOMModal({
                 const selectedMat = materials.find(m => m.sku === mat.sku);
                 return (
                   <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 bg-white shadow-sm hover:border-indigo-200 transition-all group animate-in slide-in-from-top-2 duration-300">
-                    <div className="flex flex-1 items-center gap-4 mr-4">
+                    <div className="flex flex-1 items-center gap-4 mr-4 min-w-0">
                       <button onClick={() => handleRemoveBOMMaterial(i)} className="text-rose-400 hover:text-rose-600 p-1 shrink-0 transition-colors">
                         <X size={16} />
                       </button>
                       {selectedMat ? renderAvatar(selectedMat.item || '', 36, selectedMat.image) : <div className="w-9 h-9 rounded-xl bg-slate-100" />}
-                      <div className="flex-1 flex flex-col">
+                      <div className="flex-1 flex flex-col min-w-0">
                         <select
                           value={mat.sku}
                           onChange={(e) => handleUpdateBOMMaterial(i, 'sku', e.target.value)}
@@ -143,7 +143,7 @@ export function BOMModal({
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 shrink-0">
                       <input
                         type="number"
                         value={mat.qty || ''}
@@ -153,7 +153,7 @@ export function BOMModal({
                         placeholder="Qty"
                         className="w-20 h-9 px-2 bg-slate-50 border border-slate-100 rounded-lg text-center text-[14px] font-black text-slate-900 outline-none focus:border-indigo-400 transition-all"
                       />
-                      <span className="text-[12px] font-bold text-slate-400 uppercase w-8 text-left">{selectedMat ? selectedMat.unit || selectedMat.unit_of_measure : '-'}</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase w-16 tracking-widest">{selectedMat ? selectedMat.unit || selectedMat.unit_of_measure : '-'}</span>
                     </div>
                   </div>
                 );
