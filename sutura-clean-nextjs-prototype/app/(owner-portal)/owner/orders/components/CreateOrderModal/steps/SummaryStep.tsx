@@ -5,11 +5,12 @@ import { OrderFormData } from '../../../../../../../types/orderFormData';
 
 interface SummaryStepProps {
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
   selectedCustomer: Customer | undefined;
   selectedTemplate: GarmentTemplate | null;
   measurementProfiles: MeasurementProfile[];
   totalPrice: number;
+  financials: Record<string, number>;
   staff: Staff[];
 }
 
@@ -20,6 +21,7 @@ export const SummaryStep: React.FC<SummaryStepProps> = ({
   selectedTemplate,
   measurementProfiles,
   totalPrice,
+  financials,
   staff
 }) => {
   const profile = measurementProfiles.find(p => p.id === formData.measurementProfileId);

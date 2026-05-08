@@ -1,15 +1,20 @@
 import React from 'react';
 import { Activity, Check, AlertTriangle, TrendingUp, DollarSign } from 'lucide-react';
 import { InventoryAnalysis, GarmentTemplate } from '@/types/erp';
+import { OrderFormData } from '@/types/orderFormData';
 
 interface FabricAnalysisStepProps {
   fabricAnalysis: InventoryAnalysis | null;
   selectedTemplate: GarmentTemplate | null;
+  formData: OrderFormData;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
 }
 
 export const FabricAnalysisStep: React.FC<FabricAnalysisStepProps> = ({
   fabricAnalysis,
-  selectedTemplate
+  selectedTemplate,
+  formData,
+  setFormData
 }) => {
   if (!fabricAnalysis) return null;
 
@@ -22,12 +27,24 @@ export const FabricAnalysisStep: React.FC<FabricAnalysisStepProps> = ({
         <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
           <Activity size={14}/> Smart Inventory Analysis
         </h3>
-        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${isOk ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-          {isOk ? 'Stock Secured' : 'Action Required'}
-        </span>
+        {!formData.isCustomerProvidedFabric && (
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${isOk ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+            {isOk ? 'Stock Secured' : 'Action Required'}
+          </span>
+        )}
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
+      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-4 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => setFormData((p: OrderFormData) => ({ ...p, isCustomerProvidedFabric: !p.isCustomerProvidedFabric }))}>
+        <div className={`w-6 h-6 rounded flex items-center justify-center border-2 transition-colors mt-0.5 ${formData.isCustomerProvidedFabric ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300 bg-white'}`}>
+          {formData.isCustomerProvidedFabric && <Check size={14} className="text-white" />}
+        </div>
+        <div className="flex-1">
+          <h4 className="text-[14px] font-black text-slate-900 leading-none mb-1">Customer-Provided Fabric (CMT Mode)</h4>
+          <p className="text-[12px] text-slate-500 font-medium">Check this if the customer is bringing their own material. The system will bypass fabric inventory deduction and only charge for labor/trim.</p>
+        </div>
+      </div>
+
+      <div className={`grid grid-cols-12 gap-6 transition-opacity duration-300 ${formData.isCustomerProvidedFabric ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
         {/* Main Analysis Card */}
         <div className="col-span-12 p-8 bg-white border border-slate-100 rounded-[40px] shadow-sm space-y-8 relative overflow-hidden">
           <div className="flex justify-between items-start">

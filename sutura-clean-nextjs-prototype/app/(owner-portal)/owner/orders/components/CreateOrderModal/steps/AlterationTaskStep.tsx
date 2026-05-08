@@ -4,7 +4,7 @@ import { OrderFormData, AlterationTask } from '../../../../../../../types/orderF
 
 interface AlterationTaskStepProps {
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
 }
 
 export const AlterationTaskStep: React.FC<AlterationTaskStepProps> = ({

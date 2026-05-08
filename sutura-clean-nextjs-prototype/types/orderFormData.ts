@@ -70,6 +70,8 @@ export interface OrderFormData {
   branchId: string;
   isRush: boolean;
   rushFeeAmount: number;
+  customizationFee: number;
+  discount: number;
   notes: string;
   alterationDetails: AlterationDetails;
   swatchImages: string[];
@@ -77,6 +79,7 @@ export interface OrderFormData {
   externalLinks: ExternalLink[];
   fabricWidth: number;
   fabricName: string;
+  isCustomerProvidedFabric: boolean;
   taskAssignments: Record<string, string>;
   estimatedCompletionDate: string;
 }

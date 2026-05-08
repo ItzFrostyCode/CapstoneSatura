@@ -27,6 +27,8 @@ interface CustomerProfileProps {
   setNewPostureTag: (tag: string) => void;
   onAddCustomTag: () => void;
   onRecordFitting: (profile: MeasurementProfile) => void;
+  onEditProfile: (profile: MeasurementProfile) => void;
+  onDeleteProfile: (profileId: string) => void;
   postureTags: string[];
 }
 
@@ -48,6 +50,8 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
   setNewPostureTag,
   onAddCustomTag,
   onRecordFitting,
+  onEditProfile,
+  onDeleteProfile,
   postureTags
 }) => {
   const customerOrders = orders.filter(o => o.customer_id === customer.id);
@@ -146,6 +150,8 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
             profiles={measurementProfiles}
             customerId={customer.id}
             onRecordFitting={onRecordFitting}
+            onEditProfile={onEditProfile}
+            onDeleteProfile={onDeleteProfile}
             unit="Inches"
           />
         )}

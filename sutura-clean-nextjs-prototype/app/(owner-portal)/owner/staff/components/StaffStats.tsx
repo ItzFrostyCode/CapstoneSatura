@@ -13,7 +13,7 @@ export const StaffStats: React.FC<StaffStatsProps> = ({ staff, orders }) => {
     { label: 'Total Team', val: staff.length, sub: 'Employees' },
     { 
       label: 'High Workload', 
-      val: staff.filter(s => orders.filter(o => o.assigned_tailor_id === s.id && o.status !== 'COMPLETED' && o.status !== 'CANCELLED' && o.status !== 'DELIVERED').length > 3).length, 
+      val: staff.filter(s => orders.filter(o => o.assigned_tailor_id === s.id && o.status !== 'RELEASED' && o.status !== 'CANCELLED').length > 3).length, 
       sub: '> 3 active orders' 
     },
     { 

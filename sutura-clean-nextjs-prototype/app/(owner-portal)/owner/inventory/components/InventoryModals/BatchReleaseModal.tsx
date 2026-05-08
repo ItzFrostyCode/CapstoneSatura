@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, PackageCheck, Info, User, CheckCircle2, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { X, PackageCheck, Info, User, CheckCircle2, ChevronRight, ArrowUpRight, Package } from 'lucide-react';
 import { InventoryItem, Customer } from '@/store/useERPStore';
 
 interface BatchReleaseModalProps {
@@ -40,7 +40,7 @@ export function BatchReleaseModal({
 
   if (!isOpen) return null;
 
-  const totalValuation = batchCart.reduce((sum, i) => sum + (i.price || 0) * (i.stock || 0), 0);
+  const totalValuation = batchCart.reduce((sum, i) => sum + (i.price || i.unit_price || 0) * (i.stock || 0), 0);
   const totalUnits = batchCart.reduce((sum, i) => sum + (i.stock || 0), 0);
 
   return (
@@ -120,21 +120,33 @@ export function BatchReleaseModal({
               </div>
 
               <div className="space-y-3">
-                 {batchCart.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-[20px] shadow-sm">
-                       <div className="flex items-center gap-3">
-                          {renderAvatar(item.item || item.item_name || '', 40, item.image)}
-                          <div>
-                             <p className="text-[14px] font-bold text-slate-900">{item.item || item.item_name}</p>
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.sku}</p>
-                          </div>
+                 {batchCart.length === 0 ? (
+                    <div className="p-10 border-2 border-dashed border-slate-100 rounded-[28px] flex flex-col items-center justify-center text-center space-y-3 bg-slate-50/50">
+                       <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-slate-300">
+                          <Package size={24} />
                        </div>
-                       <div className="text-right">
-                          <p className="text-[16px] font-black text-slate-900">{item.stock} Units</p>
-                          <p className="text-[11px] font-bold text-emerald-600">₱{((item.price || 0) * (item.stock || 0)).toLocaleString()}</p>
+                       <div>
+                          <p className="text-[14px] font-bold text-slate-900">Release Cart is Empty</p>
+                          <p className="text-[12px] text-slate-500 font-medium">Add items from the Finished Goods table first.</p>
                        </div>
                     </div>
-                 ))}
+                 ) : (
+                    batchCart.map((item, idx) => (
+                       <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-[20px] shadow-sm">
+                          <div className="flex items-center gap-3">
+                             {renderAvatar(item.item || item.item_name || '', 40, item.image)}
+                             <div>
+                                <p className="text-[14px] font-bold text-slate-900">{item.item || item.item_name}</p>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.sku}</p>
+                             </div>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-[16px] font-black text-slate-900">{item.stock} Units</p>
+                             <p className="text-[11px] font-bold text-emerald-600">₱{((item.price || item.unit_price || 0) * (item.stock || 0)).toLocaleString()}</p>
+                          </div>
+                       </div>
+                    ))
+                 )}
               </div>
            </div>
 

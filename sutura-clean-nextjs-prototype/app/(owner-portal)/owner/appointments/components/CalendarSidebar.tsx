@@ -28,7 +28,7 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
       {/* Mini Calendar Mockup */}
       <div className="space-y-4 px-2">
         <div className="flex items-center justify-between">
-          <span className="text-[13px] font-bold text-slate-900">October 2026</span>
+          <span className="text-[13px] font-bold text-slate-900">May 2026</span>
           <div className="flex gap-1">
             <button className="p-1 hover:bg-slate-100 rounded-full transition-colors"><ChevronLeft size={16} /></button>
             <button className="p-1 hover:bg-slate-100 rounded-full transition-colors"><ChevronRight size={16} /></button>
@@ -41,7 +41,7 @@ export const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
           {Array.from({ length: 31 }, (_, i) => (
             <button 
               key={i} 
-              className={`text-[11px] font-medium w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all ${i+1 === 28 ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600'}`}
+              className={`text-[11px] font-medium w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 transition-all ${i+1 === 7 ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600'}`}
             >
               {i + 1}
             </button>

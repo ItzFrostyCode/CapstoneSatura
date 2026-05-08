@@ -8,7 +8,7 @@ interface PersonnelAssignmentStepProps {
   currentBranch: ShopBranch | null;
   selectedTemplate: GarmentTemplate | null;
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
 }
 
 export const PersonnelAssignmentStep: React.FC<PersonnelAssignmentStepProps> = ({

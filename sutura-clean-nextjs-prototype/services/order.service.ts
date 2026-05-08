@@ -9,7 +9,7 @@ export const OrderService = {
     const state = resolveOrderState(order);
     return {
       ...state,
-      isOverdue: new Date(order.dueDate || '').getTime() < new Date().getTime() && state.productionStage !== 'COMPLETED',
+      isOverdue: new Date(order.dueDate || '').getTime() < new Date().getTime() && state.productionStage !== 'RELEASED',
       daysUntilDue: Math.ceil((new Date(order.dueDate || '').getTime() - new Date().getTime()) / (1000 * 3600 * 24)),
     };
   },
@@ -26,7 +26,7 @@ export const OrderService = {
    */
   canRelease(order: JobOrder) {
     const state = resolveOrderState(order);
-    return state.productionStage === 'COMPLETED' && state.isFullyPaid;
+    return state.productionStage === 'READY_FOR_RELEASE' && state.isFullyPaid;
   },
 
   /**

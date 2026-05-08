@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { X, ArrowRightLeft, Building2, Package, AlertTriangle, CheckCircle2, ClipboardList } from 'lucide-react';
+import { X, ArrowRightLeft, Building2, Package, AlertTriangle, CheckCircle2, ClipboardList, ChevronDown } from 'lucide-react';
 import { useERPStore } from '@/store/useERPStore';
 import { InventoryItem, ShopBranch } from '@/types/erp';
 
@@ -16,8 +16,7 @@ export function StockTransferModal({ isOpen, onClose, renderAvatar }: StockTrans
     inventory, 
     inventoryStock, 
     branches, 
-    transferStock,
-    session 
+    transferStock
   } = useERPStore();
 
   const [step, setStep] = useState(1);
@@ -100,42 +99,57 @@ export function StockTransferModal({ isOpen, onClose, renderAvatar }: StockTrans
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Source (Sender)</label>
-                  <select 
-                    value={transferForm.source_branch_id}
-                    onChange={e => setTransferForm(p => ({...p, source_branch_id: e.target.value}))}
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-[14px] font-bold focus:bg-white focus:border-slate-900 outline-none transition-all"
-                  >
-                    {branches?.map(b => <option key={b.id} value={b.id}>{b.branchName} ({b.branch_type})</option>)}
-                  </select>
+                  <div className="relative">
+                    <select 
+                      value={transferForm.source_branch_id}
+                      onChange={e => setTransferForm(p => ({...p, source_branch_id: e.target.value}))}
+                      className="w-full h-12 px-4 pr-10 rounded-xl border border-slate-200 bg-slate-50 text-[14px] font-bold focus:bg-white focus:border-slate-900 outline-none transition-all appearance-none cursor-pointer"
+                    >
+                      {branches?.map(b => <option key={b.id} value={b.id}>{b.branchName} ({b.branch_type})</option>)}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <ChevronDown size={16} />
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Destination (Receiver)</label>
-                  <select 
-                    value={transferForm.destination_branch_id}
-                    onChange={e => setTransferForm(p => ({...p, destination_branch_id: e.target.value}))}
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-[14px] font-bold focus:border-slate-900 outline-none transition-all"
-                  >
-                    <option value="" disabled>Select Target Branch</option>
-                    {branches?.filter(b => b.id !== transferForm.source_branch_id).map(b => (
-                      <option key={b.id} value={b.id}>{b.branchName} ({b.branch_type})</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select 
+                      value={transferForm.destination_branch_id}
+                      onChange={e => setTransferForm(p => ({...p, destination_branch_id: e.target.value}))}
+                      className="w-full h-12 px-4 pr-10 rounded-xl border border-slate-200 bg-white text-[14px] font-bold focus:border-slate-900 outline-none transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="" disabled>Select Target Branch</option>
+                      {branches?.filter(b => b.id !== transferForm.source_branch_id).map(b => (
+                        <option key={b.id} value={b.id}>{b.branchName} ({b.branch_type})</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <ChevronDown size={16} />
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Item Selection */}
               <div>
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Select Item to Transfer</label>
-                <select 
-                  value={transferForm.inventory_item_id}
-                  onChange={e => setTransferForm(p => ({...p, inventory_item_id: e.target.value}))}
-                  className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-[14px] font-bold focus:border-slate-900 outline-none transition-all"
-                >
-                  <option value="" disabled>Choose material or product</option>
-                  {inventory.map(i => (
-                    <option key={i.id} value={i.id}>{i.item_name || i.item}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select 
+                    value={transferForm.inventory_item_id}
+                    onChange={e => setTransferForm(p => ({...p, inventory_item_id: e.target.value}))}
+                    className="w-full h-12 px-4 pr-10 rounded-xl border border-slate-200 bg-white text-[14px] font-bold focus:border-slate-900 outline-none transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Choose material or product</option>
+                    {inventory.map(i => (
+                      <option key={i.id} value={i.id}>{i.item_name || i.item}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                    <ChevronDown size={16} />
+                  </div>
+                </div>
               </div>
 
               {selectedItem && (
@@ -175,16 +189,21 @@ export function StockTransferModal({ isOpen, onClose, renderAvatar }: StockTrans
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Movement Reason</label>
-                  <select 
-                    value={transferForm.reason}
-                    onChange={e => setTransferForm(p => ({...p, reason: e.target.value as any}))}
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-[14px] font-bold focus:border-slate-900 outline-none transition-all"
-                  >
-                    <option value="BRANCH_REQUISITION">Branch Requisition</option>
-                    <option value="LOW_STOCK">Replenishment</option>
-                    <option value="HQ_REBALANCING">Inventory Balance</option>
-                    <option value="MANUAL_TRANSFER">Manual Override</option>
-                  </select>
+                  <div className="relative">
+                    <select 
+                      value={transferForm.reason}
+                      onChange={e => setTransferForm(p => ({...p, reason: e.target.value as any}))}
+                      className="w-full h-12 px-4 pr-10 rounded-xl border border-slate-200 bg-white text-[14px] font-bold focus:border-slate-900 outline-none transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="BRANCH_REQUISITION">Branch Requisition</option>
+                      <option value="LOW_STOCK">Replenishment</option>
+                      <option value="HQ_REBALANCING">Inventory Balance</option>
+                      <option value="MANUAL_TRANSFER">Manual Override</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <ChevronDown size={16} />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -219,7 +238,7 @@ export function StockTransferModal({ isOpen, onClose, renderAvatar }: StockTrans
                 </div>
                 <div className="p-6 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {renderAvatar(selectedItem.item_name || selectedItem.item || '', 40, selectedItem.image_url)}
+                    {renderAvatar(selectedItem.item_name || selectedItem.item || '', 40)}
                     <div>
                       <div className="text-[14px] font-black text-slate-900">{selectedItem.item_name || selectedItem.item}</div>
                       <div className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{selectedItem.sku}</div>

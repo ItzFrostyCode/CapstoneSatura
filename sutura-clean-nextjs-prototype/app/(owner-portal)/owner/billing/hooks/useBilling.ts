@@ -164,7 +164,7 @@ export function useBilling() {
 
     return [
       { label: "Cash Collected", val: formatPHP(totalRevenue), trend: "Cash In", color: "indigo" },
-      { label: "Outstanding AR", val: formatPHP(outstanding), trend: "Unpaid Balance", color: "amber" },
+      { label: "Customer Balances", val: formatPHP(outstanding), trend: "Unpaid Balance", color: "amber" },
       { label: "Paid This Month", val: formatPHP(paidThisMonth), trend: "Current Period", color: "emerald" },
       { label: "Drafted", val: formatPHP(drafted), trend: "Pending Approval", color: "sky" },
     ];

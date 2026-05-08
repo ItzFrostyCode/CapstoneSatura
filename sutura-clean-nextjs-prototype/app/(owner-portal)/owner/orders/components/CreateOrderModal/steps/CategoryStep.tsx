@@ -8,17 +8,18 @@ interface CategoryStepProps {
 
 export const CategoryStep: React.FC<CategoryStepProps> = ({ onSelect }) => {
   const categories = [
-    { id: 'BESPOKE' as OrderType, icon: <User />, label: 'Custom Tailoring', desc: 'Bespoke one-of-a-kind garment', color: 'bg-indigo-600' },
-    { id: 'BULK' as OrderType, icon: <Users />, label: 'Bulk Production', desc: 'Uniforms, corporate, teams', color: 'bg-amber-500' },
-    { id: 'ALTERATION' as OrderType, icon: <Scissors />, label: 'Alteration Service', desc: 'Adjustments, repairs & resizing', color: 'bg-rose-500' },
-    { id: 'READY_MADE' as OrderType, icon: <Shirt />, label: 'Ready-made Sale', desc: 'Instant inventory checkout', color: 'bg-emerald-500' }
+    { id: 'BESPOKE' as OrderType, icon: <User />, label: 'Custom Tailoring (Pasadya)', desc: 'Bespoke / one-of-a-kind garment', color: 'bg-indigo-600' },
+    { id: 'BULK' as OrderType, icon: <Users />, label: 'Bulk Order (Uniforms)', desc: 'Group orders, teams, or corporate', color: 'bg-amber-500' },
+    { id: 'ALTERATION' as OrderType, icon: <Scissors />, label: 'Repair & Alterations', desc: 'Adjustments, resizing, or patching', color: 'bg-rose-500' },
+    { id: 'READY_MADE' as OrderType, icon: <Shirt />, label: 'Ready-to-Wear (RTW)', desc: 'Instant sale from available stock', color: 'bg-emerald-500' }
   ];
 
   return (
     <div className="space-y-8 animate-in fade-in zoom-in-95 duration-300">
       <div className="text-center space-y-2">
+        <h3 className="text-[12px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-2">Production Type Selection</h3>
         <h3 className="text-2xl font-black text-slate-900">What type of order is this?</h3>
-        <p className="text-slate-400 text-[14px]">Select a production workflow to continue</p>
+        <p className="text-slate-400 text-[14px] font-medium">Select a production workflow to continue</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

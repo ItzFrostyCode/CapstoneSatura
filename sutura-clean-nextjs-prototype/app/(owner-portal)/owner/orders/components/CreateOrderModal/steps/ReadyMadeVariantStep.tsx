@@ -6,7 +6,7 @@ import { OrderFormData } from '@/types/orderFormData';
 interface ReadyMadeVariantStepProps {
   inventory: InventoryItem[];
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
 }
 
 export const ReadyMadeVariantStep: React.FC<ReadyMadeVariantStepProps> = ({

@@ -18,7 +18,7 @@ export default function ReportsPage() {
   const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   
-  const { payments, invoices, inventory, movements, supplierBills, settlements } = useERPStore();
+  const { payments, invoices, inventory, movements, supplierBills, settlements, orders, productionDiscrepancies } = useERPStore();
 
   const reportTabs = [
     { id: 'sales' as const, name: 'Sales Report', icon: <TrendingUp size={14} /> },
@@ -102,11 +102,15 @@ export default function ReportsPage() {
   
   const lowStockItems = computedInventory.filter(i => i.isLowStock);
 
+  // --- DISCREPANCY LOGIC ---
+  const recentWaste = movements.filter(m => m.movement_type === 'ADJUSTMENT_OUT' || m.movement_type === 'DAMAGE');
+  const recentRework = productionDiscrepancies?.filter(d => d.discrepancy_type === 'EXTRA_LABOR') || [];
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none">Reports</h1>
+          <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none">Shop Reports</h1>
           <p className="text-[14px] text-slate-500 font-medium mt-1">Analyze your business performance with real-time data insights.</p>
         </div>
 
@@ -158,7 +162,7 @@ export default function ReportsPage() {
               <Download size={16} /> Export Receipts
             </button>
             <button className="h-11 px-4 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-slate-800 transition-all flex items-center gap-2 shadow-sm">
-              <Download size={16} /> Export PDF
+              <Download size={16} /> Download Summary
             </button>
           </div>
         </div>
@@ -207,6 +211,37 @@ export default function ReportsPage() {
                  </div>
               </div>
             </div>
+
+            {/* PROFIT WARNINGS */}
+            {(() => {
+              const ordersWithLoss = orders.filter(o => 
+                o.actual_production_cost && o.actual_production_cost > ((o.total_bom_cost || 0) + (o.total_labor_cost || 0))
+              );
+              
+              if (ordersWithLoss.length === 0) return null;
+              
+              return (
+                <div className="p-6 bg-rose-50 border border-rose-200 rounded-2xl">
+                  <h3 className="text-[14px] font-black text-rose-700 flex items-center gap-2 mb-4"><AlertCircle size={18}/> Orders with Profit Warnings (Cost Overruns)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {ordersWithLoss.slice(0, 3).map(order => (
+                      <div key={order.id} className="bg-white p-4 rounded-xl border border-rose-100 flex items-center justify-between shadow-sm">
+                        <div>
+                          <div className="text-[13px] font-bold text-slate-900">{order.items?.[0]?.garment_name || 'Custom Garment'}</div>
+                          <div className="text-[11px] text-slate-500">{order.id}</div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="text-[16px] font-black text-rose-600">
+                            -₱{((order.actual_production_cost || 0) - ((order.total_bom_cost || 0) + (order.total_labor_cost || 0))).toLocaleString()}
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Lost Margin</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             <div>
               <h3 className="text-[16px] font-black text-slate-900 mb-4">Payment Ledger</h3>
@@ -359,8 +394,32 @@ export default function ReportsPage() {
                </div>
              )}
 
+             {/* INVENTORY LOSS SUMMARY */}
+             {recentWaste.length > 0 && (
+               <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl mt-6">
+                 <h3 className="text-[14px] font-black text-amber-700 flex items-center gap-2 mb-4"><AlertCircle size={18}/> Recent Material Waste & Adjustments</h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                   {recentWaste.slice(0, 3).map(move => {
+                     const item = inventory.find(i => i.id === move.inventory_item_id);
+                     return (
+                       <div key={move.id} className="bg-white p-4 rounded-xl border border-amber-100 flex items-center justify-between shadow-sm">
+                         <div>
+                           <div className="text-[13px] font-bold text-slate-900">{item?.item_name || move.inventory_item_id}</div>
+                           <div className="text-[11px] text-slate-500 line-clamp-1">{move.reference_type || 'Manual Adjustment'}</div>
+                         </div>
+                         <div className="text-right shrink-0">
+                           <div className="text-[16px] font-black text-rose-600">-{move.qty}</div>
+                           <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{new Date(move.created_at || '').toLocaleDateString()}</div>
+                         </div>
+                       </div>
+                     );
+                   })}
+                 </div>
+               </div>
+             )}
+
              <div className="overflow-x-auto">
-               <h3 className="text-[16px] font-black text-slate-900 mb-4">Stock Levels (Computed from Movements Ledger)</h3>
+               <h3 className="text-[16px] font-black text-slate-900 mb-4">Stock Levels (System Stock vs Ledger)</h3>
                <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50">
@@ -368,7 +427,7 @@ export default function ReportsPage() {
                     <th className="px-4 py-3">Item Name</th>
                     <th className="px-4 py-3">Category</th>
                     <th className="px-4 py-3 text-right">Unit Cost</th>
-                    <th className="px-4 py-3 text-right">Computed Stock</th>
+                    <th className="px-4 py-3 text-right">System Stock</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">

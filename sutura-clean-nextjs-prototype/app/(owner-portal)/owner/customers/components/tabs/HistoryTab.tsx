@@ -101,7 +101,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ customerId }) => {
           <CheckCircle2 size={32} />
         </div>
         <p className="font-black text-[16px] text-slate-600">No History Records</p>
-        <p className="text-[13px] font-medium max-w-[280px] text-center mt-1">This customer hasn't had any interactions recorded yet.</p>
+        <p className="text-[13px] font-medium max-w-[280px] text-center mt-1">This customer hasnt had any interactions recorded yet.</p>
       </div>
     );
   }

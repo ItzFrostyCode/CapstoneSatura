@@ -8,7 +8,7 @@ interface CustomerStepProps {
   customers: Customer[];
   measurementProfiles: MeasurementProfile[];
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
   showAddCustomer: boolean;
   setShowAddCustomer: (val: boolean) => void;
   newCustomer: NewCustomerForm;

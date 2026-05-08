@@ -57,6 +57,7 @@ export function StockInModal({
                 type="number"
                 value={stockInForm.qty || ''}
                 onChange={e => setStockInForm(p => ({...p, qty: Number(e.target.value)}))}
+                onFocus={e => e.target.select()}
                 className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-black"
                 placeholder="0"
               />
@@ -67,6 +68,7 @@ export function StockInModal({
                 type="number"
                 value={stockInForm.cost || ''}
                 onChange={e => setStockInForm(p => ({...p, cost: Number(e.target.value)}))}
+                onFocus={e => e.target.select()}
                 className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-black"
                 placeholder="0.00"
               />

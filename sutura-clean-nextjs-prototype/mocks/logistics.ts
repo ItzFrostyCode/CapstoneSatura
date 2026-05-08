@@ -14,6 +14,7 @@ export const INITIAL_SUPPLIERS: Supplier[] = [
     category: 'Fabric',
     address: 'Milan, Italy',
     lead_time_days: 30,
+    payment_terms: 'Net 60',
     is_active: true
   },
   {
@@ -29,6 +30,7 @@ export const INITIAL_SUPPLIERS: Supplier[] = [
     category: 'Accessories',
     address: 'New York, USA',
     lead_time_days: 14,
+    payment_terms: 'Net 30',
     is_active: true
   },
   {
@@ -44,6 +46,7 @@ export const INITIAL_SUPPLIERS: Supplier[] = [
     category: 'Fabric',
     address: 'Binondo, Manila',
     lead_time_days: 7,
+    payment_terms: 'Net 15',
     is_active: true
   },
   {
@@ -59,6 +62,7 @@ export const INITIAL_SUPPLIERS: Supplier[] = [
     category: 'Accessories',
     address: 'Shanghai, China',
     lead_time_days: 21,
+    payment_terms: 'Net 30',
     is_active: true
   }
 ];

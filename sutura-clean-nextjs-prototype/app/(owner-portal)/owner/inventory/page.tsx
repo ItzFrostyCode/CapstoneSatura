@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -11,9 +11,27 @@ import {
   Package,
   TrendingDown,
   ArrowRightLeft,
+  Truck,
 } from 'lucide-react';
 
-import { useERPStore, InventoryItem } from '@/store/useERPStore';
+import { useERPStore } from '@/store/useERPStore';
+import { 
+  InventoryItem, 
+  InventoryMovement,
+  Order, 
+  JobOrderItem, 
+  Customer, 
+  Staff, 
+  Supplier, 
+  PurchaseOrder,
+  Appointment
+} from '@/types/erp';
+
+declare global {
+  interface Window {
+    openNewItemModal?: (category?: string) => void;
+  }
+}
 
 // Modular Components
 import { InventoryStats } from './components/InventoryStats';
@@ -21,7 +39,9 @@ import { MaterialsTable } from './components/MaterialsTable';
 import { FinishedGoodsTable } from './components/FinishedGoodsTable';
 import { ProductionAssembly, BOMRecipe } from './components/ProductionAssembly';
 import { MovementHistory } from './components/MovementHistory';
+import { InventoryWorkflowGuide } from './components/InventoryWorkflowGuide';
 import { InventoryItemDetail } from './components/InventoryItemDetail';
+import { InventoryCommandCenter } from './components/InventoryCommandCenter';
 
 // Modals
 import { NewItemModal } from './components/InventoryModals/NewItemModal';
@@ -67,29 +87,39 @@ const renderAvatar = (name: string, size: number = 40, imageUrl?: string) => {
 
 export default function InventoryPage() {
   const {
-    inventory,
-    movements,
-    recipes,
-    staff,
-    suppliers,
-    customers,
-    addMovement,
-    updateInventoryItem,
-    addInventoryItem,
-    saveRecipe,
-    recordBatchRelease
+    inventory, movements, recipes, staff, suppliers, customers,
+    orders, jobOrderItems, updateOrderStatus,
+    purchaseOrders, appointments,
+    addMovement, updateInventoryItem, addInventoryItem, saveRecipe, recordBatchRelease
   } = useERPStore();
 
-  const [activeTab, setActiveTab] = useState<'materials' | 'finished' | 'assembly' | 'history' | 'low_stock' | 'transfers'>('materials');
+  // Active JOs = orders that are still being made
+  const activeJobOrders = orders.filter((o: Order) =>
+    o.status === 'IN_PRODUCTION' || o.status === 'ALTERATIONS'
+  );
+
+  const [activeTab, setActiveTab] = useState<'materials' | 'finished' | 'assembly' | 'history' | 'low_stock'>('materials');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Low Stock' | 'Out of Stock'>('All');
   
   // Modal States
   const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
+  const [itemModalCategory, setItemModalCategory] = useState<string | undefined>(undefined);
+  
+  useEffect(() => {
+    window.openNewItemModal = (category?: string) => {
+      setItemModalCategory(category);
+      setIsNewItemModalOpen(true);
+    };
+    return () => {
+      delete window.openNewItemModal;
+    };
+  }, []);
   const [isBOMModalOpen, setIsBOMModalOpen] = useState(false);
   const [isMovementModalOpen, setIsMovementModalOpen] = useState(false);
   const [isBatchReleaseModalOpen, setIsBatchReleaseModalOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [movementMode, setMovementMode] = useState<'in' | 'out'>('in');
   
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [viewingItem, setViewingItem] = useState<InventoryItem | null>(null);
@@ -104,11 +134,16 @@ export default function InventoryPage() {
   const [batchReleaseJobOrder, setBatchReleaseJobOrder] = useState('');
   const [batchReleaseCustomerId, setBatchReleaseCustomerId] = useState('');
   const [batchReleasePayment, setBatchReleasePayment] = useState('Paid');
+  const [batchCart, setBatchCart] = useState<InventoryItem[]>([]);
 
   // Assembly State
   const [assemblyStep, setAssemblyStep] = useState(1);
   const [assemblyProductId, setAssemblyProductId] = useState('');
   const [assemblyQty, setAssemblyQty] = useState(1);
+  const [assemblySizes, setAssemblySizes] = useState<Record<string, number>>({ S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
+  const [selectedJoId, setSelectedJoId] = useState<string | null>(null);
+  const [quickSaleQty, setQuickSaleQty] = useState(1);
+  const [quickSaleCustomer, setQuickSaleCustomer] = useState('');
   const [assemblySuccess, setAssemblySuccess] = useState(false);
 
   // Filtered Data
@@ -138,6 +173,11 @@ export default function InventoryPage() {
     addInventoryItem(itemData);
   };
 
+  // Initialize default product if none selected (Done during render to avoid cascading effects)
+  if (!assemblyProductId && recipes.length > 0) {
+    setAssemblyProductId(recipes[0].productId);
+  }
+
   interface MovementData {
     itemSku: string;
     type: 'RECEIVE' | 'ISSUE' | 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT' | 'TRANSFER_IN' | 'TRANSFER_OUT';
@@ -161,62 +201,138 @@ export default function InventoryPage() {
     });
 
     addMovement({
-      itemSku: data.itemSku,
+      inventory_item_id: data.itemSku,
       qty: qtyChange,
-      type: data.type === 'RECEIVE' ? 'Stock In' : 
-            data.type === 'ISSUE' ? 'Stock Out' : 
-            data.type === 'ADJUSTMENT_IN' || data.type === 'ADJUSTMENT_OUT' ? 'Adjustment' : 'Production',
-      ref: `${data.referenceType}: ${data.referenceId || 'Manual'}`,
-      staff_id: 'STF-001', // Mock admin
+      movement_type: data.type === 'RECEIVE' ? 'RECEIVE' : 
+             data.type === 'ISSUE' ? 'ISSUE' : 
+             data.type === 'ADJUSTMENT_IN' ? 'ADJUSTMENT_IN' : 
+             data.type === 'ADJUSTMENT_OUT' ? 'ADJUSTMENT_OUT' : 'PRODUCTION',
+      reference_id: `${data.referenceType}: ${data.referenceId || 'Manual'}`,
+      performed_by_user_id: 'STF-001', // Mock admin
     });
   };
 
-  const handleSaveBOM = () => {
-    saveRecipe({ productId: bomProductId, materials: bomMaterials });
-    setIsBOMModalOpen(false);
-  };
 
+  // FIX 1: Bulk Production — uses summed sizes for real material deduction
   const handleExecuteAssembly = () => {
     const recipe = recipes.find(r => r.productId === assemblyProductId);
     if (!recipe) return;
 
-    recipe.materials.forEach((mat: { sku: string, qty: number }) => {
+    // Sum all sizes for total qty
+    const totalQty = Object.values(assemblySizes).reduce((a, b) => a + b, 0);
+    if (totalQty === 0) return;
+
+    // Deduct raw materials based on total qty (only for Fabrics)
+    recipe.materials.forEach((mat: { sku: string; qty: number }) => {
       const invItem = inventory.find(i => i.sku === mat.sku);
       if (invItem) {
-        updateInventoryItem(mat.sku, { stock: (invItem.stock || 0) - (mat.qty * assemblyQty) });
-        addMovement({
-          itemSku: mat.sku,
-          qty: -(mat.qty * assemblyQty),
-          type: 'Production',
-          ref: `Assembly: ${assemblyProductId}`,
-          staff_id: 'STF-001',
+        const isFabric = invItem.category?.toLowerCase() === 'fabric' || invItem.cat?.toLowerCase() === 'fabric';
+        if (isFabric) {
+          updateInventoryItem(mat.sku, { stock: Math.max(0, (invItem.stock || 0) - (mat.qty * totalQty)) });
+          addMovement({ 
+            inventory_item_id: mat.sku, 
+            qty: -(mat.qty * totalQty), 
+            movement_type: 'PRODUCTION', 
+            reference_id: `Bulk: ${assemblyProductId}`, 
+            performed_by_user_id: 'STF-001' 
+          });
+        }
+      }
+    });
+
+    // Add to finished goods stock
+    const targetProduct = inventory.find(i => i.sku === assemblyProductId);
+    if (targetProduct) {
+      updateInventoryItem(assemblyProductId, { stock: (targetProduct.stock || 0) + totalQty });
+      addMovement({ 
+        inventory_item_id: assemblyProductId, 
+        qty: totalQty, 
+        movement_type: 'PRODUCTION', 
+        reference_id: `Produced: ${Object.entries(assemblySizes).filter(([,v]) => v > 0).map(([k,v]) => `${v}${k}`).join(', ')}`, 
+        performed_by_user_id: 'STF-001' 
+      });
+    }
+
+    setAssemblySizes({ S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
+    setAssemblySuccess(true);
+    setTimeout(() => { setAssemblySuccess(false); setActiveTab('finished'); }, 2000);
+  };
+
+  // FIX 2: Job Order Fulfillment — marks real order as COMPLETED, deducts materials
+  const handleFulfillJO = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const items = jobOrderItems.filter(i => i.job_order_id === orderId);
+    const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
+
+    // Deduct from any matched finished goods or raw materials via recipe
+    items.forEach(item => {
+      const matchedFG = inventory.find(i =>
+        (i.item_name || i.item || '').toLowerCase().includes(item.garment_name.toLowerCase().split(' ')[0])
+        && (i.cat === 'Finished Goods' || i.item_type === 'FINISHED_GOOD')
+      );
+      if (matchedFG && (matchedFG.stock || 0) > 0) {
+        updateInventoryItem(matchedFG.sku, { stock: Math.max(0, (matchedFG.stock || 0) - item.quantity) });
+        addMovement({ 
+          inventory_item_id: matchedFG.sku, 
+          qty: -item.quantity, 
+          movement_type: 'ISSUE', 
+          reference_id: `JO Fulfilled: ${orderId}`, 
+          performed_by_user_id: 'STF-001' 
         });
       }
     });
 
-    const targetProduct = inventory.find(i => i.sku === assemblyProductId);
-    if (targetProduct) {
-      updateInventoryItem(assemblyProductId, { stock: (targetProduct.stock || 0) + assemblyQty });
-      addMovement({
-        itemSku: assemblyProductId,
-        qty: assemblyQty,
-        type: 'Production',
-        ref: 'Assembly Completion',
-        staff_id: 'STF-001',
-      });
-    }
+    // Mark the order as COMPLETED
+    updateOrderStatus(orderId, 'RELEASED');
 
+    addMovement({ 
+      inventory_item_id: 'N/A', 
+      qty: totalQty, 
+      movement_type: 'PRODUCTION', 
+      reference_id: `JO Completed: ${orderId} — ${items.map(i => i.garment_name).join(', ')}`, 
+      performed_by_user_id: 'STF-001' 
+    });
+
+    setSelectedJoId(null);
     setAssemblySuccess(true);
-    setTimeout(() => {
-      setAssemblySuccess(false);
-      setAssemblyStep(1);
-    }, 2000);
+    setTimeout(() => { setAssemblySuccess(false); setActiveTab('finished'); }, 2000);
+  };
+
+  // FIX 3: Quick Sale — deducts stock from finished goods, logs sale
+  const handleQuickSale = (itemSku: string) => {
+    const item = inventory.find(i => i.sku === itemSku);
+    if (!item || (item.stock || 0) < quickSaleQty) return;
+
+    updateInventoryItem(itemSku, { stock: (item.stock || 0) - quickSaleQty });
+    addMovement({ 
+      inventory_item_id: itemSku, 
+      qty: -quickSaleQty, 
+      movement_type: 'RELEASE', 
+      reference_id: `Sale: ${quickSaleCustomer || 'Walk-in'}`, 
+      performed_by_user_id: 'STF-001' 
+    });
+
+    setQuickSaleQty(1);
+    setQuickSaleCustomer('');
+    setAssemblySuccess(true);
+    setTimeout(() => { setAssemblySuccess(false); }, 2000);
   };
 
   const handleBatchReleaseConfirm = () => {
-    recordBatchRelease(batchReleaseCustomerId, batchReleaseJobOrder, finishedGoods, batchReleasePayment);
+    recordBatchRelease(batchReleaseCustomerId, batchReleaseJobOrder, batchCart, batchReleasePayment);
     setIsBatchReleaseModalOpen(false);
     setBatchReleaseStep(1);
+    setBatchCart([]); // Clear cart after release
+  };
+
+  const handleToggleBatchItem = (item: InventoryItem) => {
+    setBatchCart(prev => {
+      const exists = prev.find(i => i.sku === item.sku);
+      if (exists) return prev.filter(i => i.sku !== item.sku);
+      return [...prev, item];
+    });
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
@@ -235,8 +351,10 @@ export default function InventoryPage() {
     const missing: { name: string, needed: number, avail: number, unit: string }[] = [];
     recipe.materials.forEach((req: { sku: string, qty: number }) => {
       const item = inventory.find(inv => inv.sku === req.sku);
+      const isFabric = item?.category?.toLowerCase() === 'fabric' || item?.cat?.toLowerCase() === 'fabric';
       const needed = req.qty * assemblyQty;
-      if (!item || (item.stock || 0) < needed) {
+      
+      if (isFabric && (!item || (item.stock || 0) < needed)) {
         missing.push({ name: item?.item || req.sku, needed, avail: item?.stock || 0, unit: item?.unit || '' });
       }
     });
@@ -244,87 +362,106 @@ export default function InventoryPage() {
   }, [assemblyProductId, assemblyQty, inventory, recipes]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20">
+    <div className="space-y-3 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4">
-        <div>
-          <h1 className="text-[32px] font-black text-slate-900 tracking-tight flex items-center gap-3">
-            Inventory
-          </h1>
-          <p className="text-slate-500 font-medium mt-1">Manage raw materials, production recipes, and movements.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <div>
+            <h1 className="text-[22px] font-black text-slate-900 tracking-tight flex items-center gap-3">
+              Inventory
+            </h1>
+            <p className="text-[12px] text-slate-500 font-medium">Buy materials → Produce garments → Store finished goods → Release to customer.</p>
+          </div>
+          <div className="relative flex-1 max-w-md ml-0 md:ml-6">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input 
+              type="text"
+              placeholder="Search SKU, name, or material..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-11 pl-11 pr-4 bg-slate-50 border-2 border-slate-50 rounded-2xl text-[13px] font-bold outline-none focus:border-indigo-600/20 focus:bg-white transition-all placeholder:text-slate-400"
+            />
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button 
             onClick={() => setIsNewItemModalOpen(true)}
-            className="h-12 px-6 bg-white border border-slate-200 rounded-xl text-[14px] font-black text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
+            className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-black text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
           >
-            <Plus size={18} /> New Item
+            <Plus size={16} /> New Item
           </button>
-          <button 
-            onClick={() => setIsBOMModalOpen(true)}
-            className="h-12 px-6 bg-white border border-slate-200 rounded-xl text-[14px] font-black text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
-          >
-            <Layers size={18} /> BOM Setup
-          </button>
+
           <button 
             onClick={() => setIsTransferModalOpen(true)}
-            className="h-12 px-6 bg-indigo-600 text-white rounded-xl text-[14px] font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all flex items-center gap-2 active:scale-95"
+            className="h-10 px-4 bg-indigo-600 text-white rounded-xl text-[13px] font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all flex items-center gap-2 active:scale-95"
           >
-            <ArrowRightLeft size={18} /> Internal Transfer
+            <ArrowRightLeft size={16} /> Internal Transfer
           </button>
           <button 
             onClick={() => { setSelectedItem(null); setIsMovementModalOpen(true); }}
-            className="h-12 px-6 bg-slate-900 text-white rounded-xl text-[14px] font-black shadow-lg shadow-slate-900/10 hover:bg-slate-800 transition-all flex items-center gap-2 active:scale-95"
+            className="h-10 px-4 bg-slate-900 text-white rounded-xl text-[13px] font-black shadow-lg shadow-slate-900/10 hover:bg-slate-800 transition-all flex items-center gap-2 active:scale-95"
           >
-            <History size={18} /> Stock Movement
+            <History size={16} /> Stock Movement
           </button>
         </div>
       </div>
+
+      {/* Connected Intelligence Bar */}
+      <InventoryCommandCenter
+        inventory={inventory}
+        orders={orders}
+        jobOrderItems={jobOrderItems}
+        customers={customers}
+        appointments={appointments || []}
+        suppliers={suppliers}
+        purchaseOrders={purchaseOrders}
+        onTabChange={(tab) => setActiveTab(tab)}
+      />
 
       {/* Stats Section */}
       <InventoryStats 
         stats={[
           { label: 'Raw Materials', value: materials.length.toString(), color: 'indigo', sub: 'Available SKUs', filter: 'All' },
           { label: 'Finished Units', value: finishedGoods.reduce((sum, i) => sum + (i.stock || 0), 0).toString(), color: 'emerald', sub: 'Ready for Release', filter: 'All' },
-          { label: 'Low Stock', value: inventory.filter(i => getStatus(i) === 'Low Stock').length.toString(), color: 'amber', sub: 'Watch List', filter: 'Low Stock' },
-          { label: 'Out of Stock', value: inventory.filter(i => getStatus(i) === 'Out of Stock').length.toString(), color: 'rose', sub: 'Critical', filter: 'Out of Stock' },
+          { label: 'Low', value: inventory.filter(i => getStatus(i) === 'Low Stock').length.toString(), color: 'amber', sub: 'Watch List', filter: 'Low Stock' },
+          { label: 'Out', value: inventory.filter(i => getStatus(i) === 'Out of Stock').length.toString(), color: 'rose', sub: 'Critical', filter: 'Out of Stock' },
         ]}
-        statusFilter={statusFilter}
-        onFilterChange={setStatusFilter}
-        onTabChange={setActiveTab}
       />
-
-      {/* Navigation Tabs */}
-      <div className="flex flex-wrap bg-slate-100/80 p-1.5 rounded-full w-max gap-1 mx-4 border border-slate-200/50">
-        {( [
-          { id: 'materials', name: 'Raw Materials', icon: <Database size={14} /> },
-          { id: 'finished', name: 'Finished Goods', icon: <Package size={14} /> },
-          { id: 'assembly', name: 'Production', icon: <Zap size={14} /> },
-          { id: 'history', name: 'Movement History', icon: <History size={14} /> },
-          { id: 'transfers', name: 'Internal Transfers', icon: <ArrowRightLeft size={14} /> },
-          { id: 'low_stock', name: 'Low Stock', icon: <TrendingDown size={14} /> }
-        ] as const).map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-2.5 rounded-full text-[13px] font-black transition-all flex items-center gap-2 ${
-              activeTab === tab.id ? 'bg-white shadow-md text-slate-900' : 'text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            {tab.icon} {tab.name}
-          </button>
-        ))}
-      </div>
 
       {/* Main Content Area */}
       <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden mx-4">
+        {/* INTEGRATED NAVIGATION TABS */}
+        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30">
+          <div className="flex flex-wrap bg-slate-200/50 p-1 rounded-xl w-max gap-1 border border-slate-200/50">
+            {( [
+              { id: 'materials', name: 'Raw Materials', icon: <Database size={14} /> },
+              { id: 'finished', name: 'Finished Goods', icon: <Package size={14} /> },
+              { id: 'assembly', name: 'Production', icon: <Zap size={14} /> },
+              { id: 'history', name: 'Stock History', icon: <History size={14} /> },
+              { id: 'low_stock', name: 'Low Stock', icon: <TrendingDown size={14} /> },
+            ] as const).map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`h-8 px-4 rounded-lg text-[11px] font-black transition-all flex items-center gap-2 ${
+                  activeTab === tab.id 
+                    ? 'bg-white shadow-sm text-slate-900 ring-1 ring-slate-200/50' 
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
+                }`}
+              >
+                {tab.icon} 
+                <span className="whitespace-nowrap uppercase tracking-widest">{tab.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {activeTab === 'materials' && (
           <MaterialsTable 
             materials={filteredMaterials}
             suppliers={suppliers}
             onViewItem={setViewingItem}
-            onMovement={(item) => { setSelectedItem(item); setIsMovementModalOpen(true); }}
-            renderAvatar={renderAvatar}
+            onMovement={(item, mode) => { setSelectedItem(item); setMovementMode(mode); setIsMovementModalOpen(true); }}
             activeActionRow={activeActionRow}
             setActiveActionRow={setActiveActionRow}
           />
@@ -335,64 +472,81 @@ export default function InventoryPage() {
             finishedGoods={filteredFinished}
             onViewItem={setViewingItem}
             onOpenBatchRelease={() => setIsBatchReleaseModalOpen(true)}
-            onMovement={(item) => { setSelectedItem(item); setIsMovementModalOpen(true); }}
-            batchCartCount={finishedGoods.filter(i => (i.stock || 0) > 0).length}
-            renderAvatar={renderAvatar}
+            onMovement={(item, mode) => { setSelectedItem(item); setMovementMode(mode); setIsMovementModalOpen(true); }}
+            onToggleBatchItem={handleToggleBatchItem}
+            batchCart={batchCart}
+            batchCartCount={batchCart.length}
             activeActionRow={activeActionRow}
             setActiveActionRow={setActiveActionRow}
           />
         )}
 
         {activeTab === 'assembly' && (
-          <ProductionAssembly 
-            assemblyStep={assemblyStep}
-            setAssemblyStep={setAssemblyStep}
-            assemblyProductId={assemblyProductId}
-            setAssemblyProductId={setAssemblyProductId}
-            assemblyQty={assemblyQty}
-            setAssemblyQty={setAssemblyQty}
-            assemblySuccess={assemblySuccess}
-            targetProduct={inventory.find(i => i.sku === assemblyProductId) || null}
-            selectedRecipe={recipes.find(r => r.productId === assemblyProductId) || null}
-            inventory={inventory}
-            recipes={recipes}
-            onExecute={handleExecuteAssembly}
-            onImageUpload={handleImageUpload}
-            updateInventoryItem={updateInventoryItem}
-            assemblyValidation={assemblyValidation}
-          />
+            <ProductionAssembly 
+              assemblyProductId={assemblyProductId}
+              setAssemblyProductId={setAssemblyProductId}
+              assemblyQty={assemblyQty}
+              setAssemblyQty={setAssemblyQty}
+              assemblySizes={assemblySizes}
+              setAssemblySizes={setAssemblySizes}
+              assemblySuccess={assemblySuccess}
+              inventory={inventory}
+              recipes={recipes}
+              activeJobOrders={activeJobOrders}
+              jobOrderItems={jobOrderItems}
+              customers={customers}
+              selectedJoId={selectedJoId}
+              setSelectedJoId={setSelectedJoId}
+              quickSaleQty={quickSaleQty}
+              setQuickSaleQty={setQuickSaleQty}
+              quickSaleCustomer={quickSaleCustomer}
+              setQuickSaleCustomer={setQuickSaleCustomer}
+              onExecute={handleExecuteAssembly}
+              onFulfillJO={handleFulfillJO}
+              onQuickSale={handleQuickSale}
+              updateInventoryItem={updateInventoryItem}
+              onSaveRecipe={saveRecipe}
+              assemblyValidation={assemblyValidation}
+              movements={movements}
+            />
         )}
 
         {activeTab === 'history' && (
           <MovementHistory movements={movements} staff={staff} inventory={inventory} />
         )}
 
-        {activeTab === 'transfers' && (
-          <div className="p-12 text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto"><ArrowRightLeft size={32} /></div>
-            <div>
-              <h3 className="text-[18px] font-black text-slate-900">Branch Logistics History</h3>
-              <p className="text-[13px] text-slate-500 max-w-[400px] mx-auto mt-2">Internal stock movements between branches are logged here for cross-branch audit purposes.</p>
-            </div>
-            <button 
-              onClick={() => setIsTransferModalOpen(true)}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-[13px] font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all inline-flex items-center gap-2"
-            >
-              <Plus size={16} /> New Internal Transfer
-            </button>
-          </div>
-        )}
-
         {activeTab === 'low_stock' && (
-          <MaterialsTable 
-            materials={lowStockItems}
-            suppliers={suppliers}
-            onViewItem={setViewingItem}
-            onMovement={(item) => { setSelectedItem(item); setIsMovementModalOpen(true); }}
-            renderAvatar={renderAvatar}
-            activeActionRow={activeActionRow}
-            setActiveActionRow={setActiveActionRow}
-          />
+          <div className="animate-in slide-in-from-bottom-2 duration-500">
+            <div className="px-6 py-4 border-b border-slate-100">
+              <p className="text-[12px] text-slate-500 italic font-medium">Items running low across all categories. Restock immediately to avoid production delays.</p>
+            </div>
+            <MaterialsTable 
+              materials={lowStockItems.filter(i => i.item_type !== 'FINISHED_GOOD' && i.cat !== 'Finished Goods')}
+              suppliers={suppliers}
+              onViewItem={setViewingItem}
+              onMovement={(item, mode) => { setSelectedItem(item); setMovementMode(mode); setIsMovementModalOpen(true); }}
+              activeActionRow={activeActionRow}
+              setActiveActionRow={setActiveActionRow}
+            />
+            {lowStockItems.filter(i => i.item_type === 'FINISHED_GOOD' || i.cat === 'Finished Goods').length > 0 && (
+              <>
+                <div className="px-6 py-3 border-t border-b border-amber-100 bg-amber-50/50">
+                  <p className="text-[11px] font-black text-amber-600 uppercase tracking-widest">Finished Goods — Low or Out of Stock</p>
+                </div>
+                <FinishedGoodsTable
+                  finishedGoods={lowStockItems.filter(i => i.item_type === 'FINISHED_GOOD' || i.cat === 'Finished Goods')}
+                  onViewItem={setViewingItem}
+                  onOpenBatchRelease={() => setIsBatchReleaseModalOpen(true)}
+                  onMovement={(item, mode) => { setSelectedItem(item); setMovementMode(mode); setIsMovementModalOpen(true); }}
+                  onToggleBatchItem={handleToggleBatchItem}
+                  batchCart={batchCart}
+                  batchCartCount={batchCart.length}
+                  activeActionRow={activeActionRow}
+                  setActiveActionRow={setActiveActionRow}
+                />
+              </>
+            )}
+          </div>
         )}
       </div>
 
@@ -401,28 +555,17 @@ export default function InventoryPage() {
         isOpen={isNewItemModalOpen}
         onClose={() => setIsNewItemModalOpen(false)}
         onSave={handleNewItemSave}
-      />
-
-      <BOMModal 
-        isOpen={isBOMModalOpen}
-        onClose={() => setIsBOMModalOpen(false)}
-        bomProductId={bomProductId}
-        setBomProductId={setBomProductId}
-        bomMaterials={bomMaterials}
-        setBomMaterials={setBomMaterials}
-        finishedGoods={finishedGoods}
-        materials={materials}
-        recipes={recipes}
-        onSave={handleSaveBOM}
-        renderAvatar={renderAvatar}
+        defaultCategory={itemModalCategory}
       />
 
       <StockMovementModal 
+        key={`movement-${isMovementModalOpen}-${selectedItem?.sku || 'none'}`}
         isOpen={isMovementModalOpen}
         onClose={() => setIsMovementModalOpen(false)}
         inventory={inventory}
         onConfirm={handleMovementConfirm}
         initialItem={selectedItem}
+        mode={movementMode}
         renderAvatar={renderAvatar}
       />
 
@@ -437,7 +580,7 @@ export default function InventoryPage() {
         setBatchReleaseCustomerId={setBatchReleaseCustomerId}
         batchReleasePayment={batchReleasePayment}
         setBatchReleasePayment={setBatchReleasePayment}
-        batchCart={finishedGoods.filter(i => (i.stock || 0) > 0)}
+        batchCart={batchCart}
         customers={customers}
         onConfirm={handleBatchReleaseConfirm}
         renderAvatar={renderAvatar}
@@ -450,6 +593,7 @@ export default function InventoryPage() {
 
       {viewingItem && (
         <InventoryItemDetail 
+          key={viewingItem.id || viewingItem.sku}
           item={viewingItem}
           onClose={() => setViewingItem(null)}
           movements={movements}

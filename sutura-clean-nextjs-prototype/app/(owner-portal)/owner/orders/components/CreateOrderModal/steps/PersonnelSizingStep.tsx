@@ -4,7 +4,7 @@ import { OrderFormData, BulkMember } from '@/types/orderFormData';
 
 interface PersonnelSizingStepProps {
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
   showBulkImport: boolean;
   setShowBulkImport: (val: boolean) => void;
   bulkImportText: string;

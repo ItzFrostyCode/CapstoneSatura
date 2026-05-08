@@ -5,7 +5,7 @@ import { OrderFormData } from '@/types/orderFormData';
 
 interface BulkStep1Props {
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
 }
 
 export const BulkStep1: React.FC<BulkStep1Props> = ({

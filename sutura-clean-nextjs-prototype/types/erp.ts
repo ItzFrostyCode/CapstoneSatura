@@ -18,10 +18,9 @@ export type OrderType = 'BESPOKE' | 'BULK' | 'ALTERATION' | 'READY_MADE';
 export type BulkSizingStrategy = 'STANDARD' | 'CUSTOM' | 'HYBRID';
 export type SourceType = 'WALK_IN' | 'ONLINE';
 export type OrderStatus =
-  | 'DRAFT' | 'PENDING' | 'ACCEPTED'
-  | 'IN_PRODUCTION' | 'QUALITY_CHECK' | 'FOR_FITTING'
-  | 'FOR_REVISION' | 'READY_FOR_PICKUP'
-  | 'COMPLETED' | 'CANCELLED' | 'ON_HOLD' | 'DELIVERED';
+  | 'PENDING_QUOTE' | 'WAITING_FOR_DOWN_PAYMENT' | 'IN_PRODUCTION'
+  | 'READY_FOR_FITTING' | 'ALTERATIONS' | 'READY_FOR_RELEASE'
+  | 'RELEASED' | 'CANCELLED' | 'ON_HOLD';
 
 export type TaskStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed' | 'Blocked' | 'For Revision';
 
@@ -38,7 +37,7 @@ export type MovementType =
   | 'RECEIVE' | 'RESERVE' | 'RELEASE' | 'ISSUE'
   | 'TRANSFER_OUT' | 'TRANSFER_IN'
   | 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT'
-  | 'DAMAGE';
+  | 'DAMAGE' | 'PRODUCTION';
 export type ReservationStatus = 'ACTIVE' | 'PARTIALLY_RELEASED' | 'RELEASED' | 'CANCELLED';
 
 export interface InventoryAnalysis {
@@ -108,10 +107,12 @@ export interface ShopBranch {
   manager_id?: string;
 }
 
+export type StaffRole = 'Owner' | 'Admin' | 'Manager' | 'Sales' | 'Tailor' | 'Inventory';
+
 export interface Staff {
   id: string;
   name: string;
-  roles: string[];
+  roles: StaffRole[];
   status: 'Online' | 'Offline' | 'Active' | 'Inactive' | string;
   branch_id?: string;
   staffCode?: string;
@@ -205,9 +206,12 @@ export interface Appointment {
   date: string;
   startTime: string;
   duration: number;
-  status: 'Scheduled' | 'Confirmed' | 'Completed' | 'Cancelled' | 'No Show';
+  status: 'Pending Review' | 'Scheduled' | 'Rescheduled' | 'Completed' | 'Cancelled' | 'No Show';
   staff: string;
+  source: 'Online' | 'Walk-in';
+  branch_id?: string;
   reason?: string;
+  notes?: string;
 }
 
 
@@ -236,6 +240,7 @@ export interface Order {
   // Garment context (order-level, not per-item)
   fabric_name?: string;
   fabric_width?: number;
+  is_customer_provided_fabric?: boolean;
   measurement_profile_id?: string;
 
   // Alteration-specific details
@@ -254,6 +259,23 @@ export interface Order {
   // Bulk-specific
   bulk_sizing_strategy?: BulkSizingStrategy;
   bulk_members?: BulkOrderMember[];
+
+  // -- PRICING & COSTING --
+  base_amount?: number;
+  rush_fee?: number;
+  customization_fee?: number;
+  discount?: number;
+  
+  total_bom_cost?: number;
+  total_labor_cost?: number;
+  total_production_cost?: number;
+  profit_margin?: number; // Baseline expected margin
+
+  // -- ACTUAL COSTING (Updates during production from Discrepancies) --
+  actual_bom_cost?: number;
+  actual_labor_cost?: number;
+  actual_production_cost?: number;
+  actual_profit_margin?: number;
 
   total_amount: number;
   balance?: number;                 // Cached derived value; source of truth = payments[]
@@ -301,6 +323,12 @@ export interface JobOrderItem {
   quantity: number;
   unit_price: number;
   line_total: number;
+  
+  // -- COSTING per item --
+  bom_cost?: number;
+  labor_cost?: number;
+  cmt_discount?: number;
+
   notes?: string;
 }
 
@@ -369,11 +397,33 @@ export interface BulkOrderMember {
   status: 'PENDING' | 'IN_PRODUCTION' | 'COMPLETED';
 }
 
+export type DiscrepancyType = 'MATERIAL_WASTE' | 'DEFECTIVE_MATERIAL' | 'EXTRA_LABOR' | 'UNPLANNED_ALTERATION';
+
+export interface ProductionDiscrepancy {
+  id: string;
+  job_order_id: string;
+  reported_by_user_id: string;
+  discrepancy_type: DiscrepancyType;
+  
+  // For Material Variances
+  inventory_item_id?: string;
+  qty_wasted?: number;
+  financial_impact: number; // The computed loss
+  
+  // For Labor Variances
+  task_id?: string;
+  
+  reason: string;
+  logged_at: string;
+}
+
 export interface GarmentTemplate {
   id: string;
   name: string;
   category: string;
   base_price: number;
+  cmt_price?: number;            // Price if customer provides fabric
+  estimated_labor_cost?: number; // Standard piece-rate pay
   fabric_sku: string;
   fabric_per_unit: number;
   requires_measurement: boolean;

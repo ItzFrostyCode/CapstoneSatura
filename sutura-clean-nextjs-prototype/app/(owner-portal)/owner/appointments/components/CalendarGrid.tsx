@@ -23,6 +23,15 @@ interface CalendarGridProps {
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const HOUR_HEIGHT = 100; // Increased from 60 to 100 for "zoom" effect
 
+const formatTime = (timeStr: string) => {
+  if (!timeStr) return '';
+  const [hours, minutes] = timeStr.split(':');
+  const h = parseInt(hours);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hh = h % 12 || 12;
+  return `${hh}:${minutes} ${ampm}`;
+};
+
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
   hours,
   weekDays,
@@ -103,6 +112,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
               const dateStr = formatDate(date);
               const dayAppointments = mappedAppointments.filter(a => 
                 a.date === dateStr && 
+                a.status !== 'Pending Review' &&
                 (staff.find(s => s.name === a.staff)?.id ? visibleStaffIds.includes(staff.find(s => s.name === a.staff)!.id) : true) &&
                 visibleStatuses.includes(a.normalizedStatus)
               );
@@ -136,7 +146,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                           </span>
                         </div>
                         <div className="text-[11px] font-black text-slate-700/70 mt-1.5 flex items-center gap-1.5 uppercase tracking-tighter">
-                          {apt.startTime} <span className="opacity-30">•</span> {apt.type}
+                          {formatTime(apt.startTime)} <span className="opacity-30">•</span> {apt.type}
                         </div>
                         <div className="text-[10px] font-bold text-slate-500 mt-2 flex items-center gap-1.5">
                           <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40"></div>

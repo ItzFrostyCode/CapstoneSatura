@@ -6,7 +6,7 @@ import { OrderFormData } from '@/types/orderFormData';
 interface ReadyMadeStep1Props {
   inventory: InventoryItem[];
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
   pushNotification: (msg: string, type: 'success' | 'error' | 'info') => void;
 }
 

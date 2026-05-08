@@ -12,6 +12,7 @@ import {
   AssetType,
   InventoryAnalysis
 } from '@/types/erp';
+import { OrderFormData } from '@/types/orderFormData';
 import { 
   X, ChevronRight, ChevronLeft, Check, 
   
@@ -64,7 +65,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
   } = useERPStore();
 
   const [step, setStep] = useState(0);
-  const [formData, setFormData] = useState(() => ({
+  const [formData, setFormData] = useState<OrderFormData>(() => ({
     orderType: 'BESPOKE' as OrderType,
     variantId: '', // Added for Ready-Made
     bulkSizingStrategy: 'STANDARD' as BulkSizingStrategy,
@@ -85,6 +86,8 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
     branchId: currentBranch?.id || 'BRN-001',
     isRush: false,
     rushFeeAmount: 1500,
+    customizationFee: 0,
+    discount: 0,
     notes: '',
     alterationDetails: {
       itemDescription: '',
@@ -102,6 +105,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
     externalLinks: [] as { label: string, url: string }[],
     fabricWidth: 60,
     fabricName: '',
+    isCustomerProvidedFabric: false,
     taskAssignments: {} as Record<string, string>,
     estimatedCompletionDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   }));
@@ -152,15 +156,42 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
       : { status: 'SHORTAGE', needed, available, shortage: needed - available };
   }, [selectedTemplate, totalQuantity, inventory]);
 
-  const totalPrice = useMemo(() => {
+  const financials = useMemo(() => {
+    let baseAmount = 0;
+    let bomCost = 0;
+    let laborCost = 0;
+
     if (formData.orderType === 'ALTERATION') {
-      return formData.alterationDetails.tasks.reduce((sum, t) => sum + t.price, 0) + (formData.isRush ? formData.rushFeeAmount : 0);
+      baseAmount = formData.alterationDetails.tasks.reduce((sum, t) => sum + t.price, 0);
+    } else if (formData.orderType === 'READY_MADE') {
+      baseAmount = (selectedProduct?.unit_price || 1500) * totalQuantity;
+      bomCost = (selectedProduct?.unit_cost || 0) * totalQuantity;
+    } else if (selectedTemplate) {
+      baseAmount = formData.isCustomerProvidedFabric 
+        ? (selectedTemplate.cmt_price || selectedTemplate.base_price * 0.7) * totalQuantity 
+        : selectedTemplate.base_price * totalQuantity;
+      
+      laborCost = (selectedTemplate.estimated_labor_cost || 0) * totalQuantity;
+      
+      if (!formData.isCustomerProvidedFabric) {
+        const fabric = inventory.find(i => i.sku.trim().toUpperCase() === selectedTemplate.fabric_sku.trim().toUpperCase());
+        bomCost = (fabric?.unit_cost || 0) * (selectedTemplate.fabric_per_unit * totalQuantity);
+      }
     }
-    if (formData.orderType === 'READY_MADE') {
-      return (selectedProduct?.unit_price || 1500) * totalQuantity;
-    }
-    return selectedTemplate ? (selectedTemplate.base_price * totalQuantity) + (formData.isRush ? formData.rushFeeAmount : 0) : 0;
-  }, [formData.orderType, formData.alterationDetails.tasks, selectedTemplate, selectedProduct, totalQuantity, formData.isRush, formData.rushFeeAmount]);
+
+    const rushFee = formData.isRush ? formData.rushFeeAmount : 0;
+    const customizationFee = formData.customizationFee || 0;
+    const discount = formData.discount || 0;
+
+    const totalSellingPrice = (baseAmount + rushFee + customizationFee) - discount;
+    const totalProductionCost = bomCost + laborCost;
+    const profitMargin = totalSellingPrice > 0 ? ((totalSellingPrice - totalProductionCost) / totalSellingPrice) * 100 : 0;
+
+    return {
+      baseAmount, rushFee, customizationFee, discount, totalSellingPrice,
+      totalBomCost: bomCost, totalLaborCost: laborCost, totalProductionCost, profitMargin
+    };
+  }, [formData, selectedTemplate, selectedProduct, totalQuantity, inventory]);
 
   // Handlers
   const handleAddCustomer = () => {
@@ -205,8 +236,8 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
   const handleFinalSubmit = () => {
     const isReadyMade = formData.orderType === 'READY_MADE';
     const finalStatus = isReadyMade 
-      ? (formData.deposit >= totalPrice ? 'COMPLETED' : 'READY_FOR_PICKUP')
-      : (formData.deposit >= (totalPrice * 0.5) ? 'IN_PRODUCTION' : 'ON_HOLD');
+      ? (formData.deposit >= financials.totalSellingPrice ? 'COMPLETED' : 'READY_FOR_PICKUP')
+      : (formData.deposit >= (financials.totalSellingPrice * 0.5) ? 'IN_PRODUCTION' : 'ON_HOLD');
 
     const itemUnitPrice = isReadyMade ? (selectedProduct?.unit_price || 0) : (formData.orderType === 'ALTERATION' ? 0 : (selectedTemplate?.base_price || 0));
     const itemGarmentName = isReadyMade ? (selectedProduct?.item_name || 'Product') : (formData.orderType === 'ALTERATION' ? formData.alterationDetails.itemDescription : (selectedTemplate?.name || 'Custom'));
@@ -225,9 +256,20 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
       source_type: 'WALK_IN',
       status: finalStatus,
       priority: formData.isRush ? 'High' : 'Normal',
-      total_amount: totalPrice,
+      fabric_name: formData.fabricName,
+      fabric_width: formData.fabricWidth,
+      is_customer_provided_fabric: formData.isCustomerProvidedFabric,
+      base_amount: financials.baseAmount,
+      rush_fee: financials.rushFee,
+      customization_fee: financials.customizationFee,
+      discount: financials.discount,
+      total_amount: financials.totalSellingPrice,
+      total_bom_cost: financials.totalBomCost,
+      total_labor_cost: financials.totalLaborCost,
+      total_production_cost: financials.totalProductionCost,
+      profit_margin: financials.profitMargin,
       amount_paid: formData.deposit,
-      balance: totalPrice - formData.deposit,
+      balance: financials.totalSellingPrice - formData.deposit,
       due_date: formData.estimatedCompletionDate,
       estimated_completion_date: formData.estimatedCompletionDate,
       created_at: new Date().toISOString(),
@@ -240,7 +282,9 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
         garment_template_id: formData.garmentTemplateId, 
         quantity: totalQuantity, 
         unit_price: itemUnitPrice,
-        line_total: itemUnitPrice * totalQuantity
+        line_total: itemUnitPrice * totalQuantity,
+        bom_cost: financials.totalBomCost,
+        labor_cost: financials.totalLaborCost
       }],
       tasks: isReadyMade ? [] : (formData.orderType === 'ALTERATION' ? formData.alterationDetails.tasks.map(t => t.title) : (selectedTemplate?.default_tasks || [])).map((t: string, idx: number) => ({ 
         id: `T-${idx + 1}`, 
@@ -253,7 +297,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
       notes: formData.notes
     };
 
-    // --- Record Inventory Deduction for Ready-Made ---
+    // --- Record Inventory Deduction ---
     if (isReadyMade && formData.garmentTemplateId) {
       recordInventoryTransaction(
         formData.garmentTemplateId, 
@@ -263,6 +307,19 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
         newOrderId, 
         formData.variantId
       );
+    } else if (!isReadyMade && formData.orderType !== 'ALTERATION' && !formData.isCustomerProvidedFabric && selectedTemplate) {
+      // Find the fabric item ID based on the template's SKU
+      const fabric = inventory.find(i => i.sku.trim().toUpperCase() === selectedTemplate.fabric_sku.trim().toUpperCase());
+      if (fabric) {
+        const needed = selectedTemplate.fabric_per_unit * totalQuantity;
+        recordInventoryTransaction(
+          fabric.id,
+          'RESERVE', // Reserve the fabric for this job order
+          needed,
+          `Fabric reservation for ${newOrderId}`,
+          newOrderId
+        );
+      }
     }
 
     createNewOrder(mainOrder as Order);
@@ -366,7 +423,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
           {step === 5 && (
             formData.orderType === 'ALTERATION'
               ? <AlterationMaterialsStep inventory={inventory} formData={formData} setFormData={setFormData} />
-              : <FabricAnalysisStep fabricAnalysis={fabricAnalysis} selectedTemplate={selectedTemplate} />
+              : <FabricAnalysisStep fabricAnalysis={fabricAnalysis} selectedTemplate={selectedTemplate} formData={formData} setFormData={setFormData} />
           )}
 
           {step === 6 && (
@@ -375,9 +432,9 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
               : <DesignFabricStep formData={formData} setFormData={setFormData} onFileChange={handleFileChange} onAddDesignAsset={(type) => setFormData(p => ({...p, designAssets: [...p.designAssets, { type: type as AssetType, notes: '' }]}))} onAddExternalLink={() => setFormData(p => ({...p, externalLinks: [...p.externalLinks, { label: 'Link', url: '' }]}))} />
           )}
 
-          {step === 7 && <PaymentStep formData={formData} setFormData={setFormData} selectedTemplate={selectedTemplate || null} totalPrice={totalPrice} />}
+          {step === 7 && <PaymentStep formData={formData} setFormData={setFormData} selectedTemplate={selectedTemplate || null} totalPrice={financials.totalSellingPrice} financials={financials} />}
           {step === 9 && <PersonnelAssignmentStep staff={staff} currentBranch={currentBranch} selectedTemplate={selectedTemplate || null} formData={formData} setFormData={setFormData} />}
-          {step === 10 && <SummaryStep formData={formData} setFormData={setFormData} selectedCustomer={selectedCustomer} selectedTemplate={selectedTemplate || null} measurementProfiles={measurementProfiles} totalPrice={totalPrice} staff={staff} />}
+          {step === 10 && <SummaryStep formData={formData} setFormData={setFormData} selectedCustomer={selectedCustomer} selectedTemplate={selectedTemplate || null} measurementProfiles={measurementProfiles} totalPrice={financials.totalSellingPrice} financials={financials} staff={staff} />}
         </div>
 
         {/* Footer */}

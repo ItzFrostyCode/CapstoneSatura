@@ -36,6 +36,7 @@ interface CustomerModalsProps {
   measValues: Record<string, string>;
   setMeasValues: (values: Record<string, string>) => void;
   handleSaveMeasurement: () => void;
+  selectedEditMeasurement: MeasurementProfile | null;
   selectedCustomer: Customer | undefined;
   garmentTypes: string[];
   upperFields: string[];
@@ -69,6 +70,7 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
   measValues,
   setMeasValues,
   handleSaveMeasurement,
+  selectedEditMeasurement,
   selectedCustomer,
   garmentTypes,
   upperFields,
@@ -176,7 +178,9 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
           <div className="bg-white w-full max-w-[1000px] rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
-                <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Measurement Profile</h2>
+                <h2 className="text-[24px] font-black text-slate-900 tracking-tight">
+                  {selectedEditMeasurement ? 'Edit Measurement Profile' : 'New Measurement Profile'}
+                </h2>
                 <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-1">{selectedCustomer?.name}</p>
               </div>
               <button onClick={() => setIsAddMeasurementModalOpen(false)} className="w-10 h-10 rounded-xl hover:bg-white flex items-center justify-center text-slate-400 transition-colors"><X size={20} /></button>
@@ -280,7 +284,9 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
               </div>
             </div>
             <div className="p-8 bg-slate-50 border-t border-slate-100">
-               <button onClick={handleSaveMeasurement} className="w-full h-14 bg-slate-900 text-white rounded-[24px] font-black text-[15px] hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95">Record Measurement Profile</button>
+               <button onClick={handleSaveMeasurement} className="w-full h-14 bg-slate-900 text-white rounded-[24px] font-black text-[15px] hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95">
+                 {selectedEditMeasurement ? 'Update Profile' : 'Record Measurement Profile'}
+               </button>
             </div>
           </div>
         </div>
@@ -327,7 +333,7 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
               </div>
             </div>
             <div className="p-8 bg-slate-50 border-t border-slate-100">
-               <button onClick={handleSaveFitting} className="w-full h-14 bg-indigo-600 text-white rounded-[24px] font-black text-[15px] hover:bg-slate-900 transition-all shadow-xl active:scale-95">Record Revision {activeProfile ? `(V${(parseInt(activeProfile.version_no.replace('V', '')) || 1) + 1})` : ''}</button>
+               <button onClick={handleSaveFitting} className="w-full h-14 bg-indigo-600 text-white rounded-[24px] font-black text-[15px] hover:bg-slate-900 transition-all shadow-xl active:scale-95">Record Update {activeProfile ? `(V${(parseInt(activeProfile.version_no.replace('V', '')) || 1) + 1})` : ''}</button>
             </div>
           </div>
         </div>

@@ -8,12 +8,15 @@ import { Payment, ProductionTask, TaskStatus } from '@/types/erp';
 
 export type PaymentStatus = 'UNPAID' | 'PARTIAL' | 'PAID_FULL';
 export type ProductionStage =
-  | 'ON_HOLD'
+  | 'PENDING_QUOTE'
+  | 'WAITING_FOR_DP'
   | 'IN_PRODUCTION'
-  | 'QUALITY_CHECK'
-  | 'REVISION_REQUIRED'
-  | 'COMPLETED'
-  | 'DELIVERED';
+  | 'READY_FOR_FITTING'
+  | 'ALTERATIONS'
+  | 'READY_FOR_RELEASE'
+  | 'RELEASED'
+  | 'CANCELLED'
+  | 'ON_HOLD';
 
 // Re-export so consumers can use from engine or types
 export type { TaskStatus };
@@ -84,15 +87,21 @@ export function getProductionStage(input: OrderEngineInput): ProductionStage {
   const paymentStatus = getPaymentStatus(input);
   const tasks = input.tasks ?? [];
   const allTasksDone = tasks.length > 0 && tasks.every(t => t.status === 'Completed' || (t.status as string) === 'Completed');
+  const hasActiveTasks = tasks.some(t => t.status === 'Pending' || t.status === 'In Progress' || t.status === 'Assigned' || t.status === 'For Revision');
+  
   const failed = input.inspection_failed || input.inspectionFailed;
   const passed = input.inspection_passed || input.inspectionPassed;
 
-  if (paymentStatus === 'UNPAID') return 'ON_HOLD';
-  if (failed) return 'REVISION_REQUIRED';
+  if (paymentStatus === 'UNPAID') return 'WAITING_FOR_DP';
+  
+  // Rework Loop: If there are active tasks, it MUST be in production, even if it failed a past inspection
+  if (hasActiveTasks && failed) return 'IN_PRODUCTION';
+
+  if (failed) return 'ALTERATIONS';
   if (passed) {
-    return paymentStatus === 'PAID_FULL' ? 'COMPLETED' : 'QUALITY_CHECK';
+    return paymentStatus === 'PAID_FULL' ? 'READY_FOR_RELEASE' : 'READY_FOR_FITTING';
   }
-  if (allTasksDone) return 'QUALITY_CHECK';
+  if (allTasksDone) return 'READY_FOR_FITTING';
   return 'IN_PRODUCTION';
 }
 
@@ -139,12 +148,15 @@ export function resolveOrderState(input: OrderEngineInput) {
 
 export function getStageExplanation(stage: ProductionStage): string {
   const explanations: Record<ProductionStage, string> = {
-    ON_HOLD: 'Waiting for initial downpayment to begin production.',
+    PENDING_QUOTE: 'Drafting initial measurements and quote.',
+    WAITING_FOR_DP: 'Waiting for initial downpayment to begin tailoring.',
     IN_PRODUCTION: 'Order is currently in the tailoring phase.',
-    QUALITY_CHECK: 'Production tasks complete. Final quality inspection ongoing.',
-    REVISION_REQUIRED: 'Issues detected during inspection. Order is back for revision.',
-    COMPLETED: 'Order ready for release and delivery.',
-    DELIVERED: 'Order successfully handed over to customer.',
+    READY_FOR_FITTING: 'Tailoring tasks complete. Ready for fitting.',
+    ALTERATIONS: 'Issues detected during fitting. Order is back for alterations.',
+    READY_FOR_RELEASE: 'Order ready for pickup and release.',
+    RELEASED: 'Order successfully handed over to customer.',
+    CANCELLED: 'Order cancelled.',
+    ON_HOLD: 'Order is on hold.',
   };
   return explanations[stage];
 }
@@ -154,12 +166,15 @@ export function getDisplayLabel(state: PaymentStatus | ProductionStage | string)
     UNPAID: 'Unpaid',
     PARTIAL: 'Partial Payment',
     PAID_FULL: 'Paid Full',
+    PENDING_QUOTE: 'Pending Quote',
+    WAITING_FOR_DP: 'Waiting for DP',
+    IN_PRODUCTION: 'In Tailoring',
+    READY_FOR_FITTING: 'Ready for Fitting',
+    ALTERATIONS: 'Alterations',
+    READY_FOR_RELEASE: 'Ready for Release',
+    RELEASED: 'Released',
+    CANCELLED: 'Cancelled',
     ON_HOLD: 'On Hold',
-    IN_PRODUCTION: 'In Production',
-    QUALITY_CHECK: 'Inspection',
-    REVISION_REQUIRED: 'For Revision',
-    COMPLETED: 'Completed',
-    DELIVERED: 'Delivered',
   };
   return labels[state] ?? state;
 }

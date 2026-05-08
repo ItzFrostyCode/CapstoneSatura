@@ -13,10 +13,14 @@ export interface CustomerSlice {
   addMeasurementProfile: (profile: Partial<MeasurementProfile>) => MeasurementProfile;
   addAppointment: (appointment: Partial<Appointment>) => void;
   addFittingSession: (session: Partial<FittingSession>) => void;
+  updateAppointment: (id: string, updates: Partial<Appointment>) => void;
   updateAppointmentStatus: (id: string, status: Appointment['status']) => void;
+  deleteAppointment: (id: string) => void;
+  updateMeasurementProfile: (id: string, updates: Partial<MeasurementProfile>) => void;
+  deleteMeasurementProfile: (id: string) => void;
 }
 
-export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> = (set) => ({
+export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> = (set, get) => ({
   customers: INITIAL_CUSTOMERS,
   measurementProfiles: INITIAL_MEASUREMENTS,
   appointments: INITIAL_APPOINTMENTS,
@@ -53,13 +57,32 @@ export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> 
     });
     return newObj as unknown as MeasurementProfile;
   },
-  addAppointment: (appointment: Partial<Appointment>) => set((state) => ({
-    appointments: [{ id: `APT-${Date.now()}`, status: 'Scheduled', ...appointment } as Appointment, ...state.appointments]
+  updateMeasurementProfile: (id: string, updates: Partial<MeasurementProfile>) => set((state) => ({
+    measurementProfiles: state.measurementProfiles.map((p) => (p.id === id ? { ...p, ...updates } : p))
   })),
+  deleteMeasurementProfile: (id: string) => set((state) => ({
+    measurementProfiles: state.measurementProfiles.filter((p) => p.id !== id)
+  })),
+  addAppointment: (appointment: Partial<Appointment>) => {
+    set((state) => ({
+      appointments: [{ id: `APP-${Date.now()}`, status: 'Pending Review', source: 'Walk-in', ...appointment } as Appointment, ...state.appointments]
+    }));
+    get().pushNotification('Appointment request received and added to review queue.', 'info');
+  },
   addFittingSession: (session: Partial<FittingSession>) => set((state) => ({
     fittingSessions: [{ id: `FIT-${Date.now()}`, status: 'Scheduled', ...session } as FittingSession, ...state.fittingSessions]
   })),
-  updateAppointmentStatus: (id, status) => set((state) => ({
-    appointments: state.appointments.map(a => a.id === id ? { ...a, status } : a)
+  updateAppointment: (id, updates) => set((state) => ({
+    appointments: state.appointments.map(a => a.id === id ? { ...a, ...updates } : a)
+  })),
+  updateAppointmentStatus: (id, status) => {
+    set((state) => ({
+      appointments: state.appointments.map(a => a.id === id ? { ...a, status } : a)
+    }));
+    const msg = status === 'Scheduled' ? 'Appointment approved and added to schedule.' : `Appointment status updated to ${status}.`;
+    get().pushNotification(msg, 'success');
+  },
+  deleteAppointment: (id) => set((state) => ({
+    appointments: state.appointments.filter(a => a.id !== id)
   })),
 });

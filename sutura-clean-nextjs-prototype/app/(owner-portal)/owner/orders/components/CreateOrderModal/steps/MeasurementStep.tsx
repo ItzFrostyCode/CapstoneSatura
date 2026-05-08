@@ -5,7 +5,7 @@ import { OrderFormData } from '../../../../../../../types/orderFormData';
 
 interface MeasurementStepProps {
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
   filteredMeasurements: MeasurementProfile[];
 }
 

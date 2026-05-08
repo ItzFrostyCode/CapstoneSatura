@@ -215,30 +215,45 @@ export default function SuppliersPage() {
         ))}
       </div>
 
-      <div className="flex items-center gap-2 mb-8 bg-slate-100/50 p-1.5 rounded-full w-fit border border-slate-200/60">
-        {[
-          { id: 'directory' as NavTab, label: 'Supplier Directory', icon: <Building2 size={14} /> },
-          { id: 'purchase-orders' as NavTab, label: 'Purchase Orders', icon: <FileText size={14} /> },
-          { id: 'receiving' as NavTab, label: 'Receiving (Goods Intake)', icon: <PackageCheck size={14} /> },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setNavTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-2.5 text-[12px] font-bold rounded-full transition-all duration-300 ${navTab === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'}`}
-          >
-            {tab.icon}{tab.label}
-          </button>
-        ))}
-      </div>
+      {/* MASTER PROCUREMENT CONTAINER */}
+      <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden">
+        {/* INTEGRATED HEADER: SEARCH (LEFT) & TABS (RIGHT) */}
+        <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between gap-8">
+          {/* SEARCH (LEFT) */}
+          <div className="relative max-w-sm w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+            <input 
+              value={searchQuery} 
+              onChange={e => setSearchQuery(e.target.value)} 
+              type="text" 
+              placeholder="Search suppliers..." 
+              className="h-10 w-full pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-slate-900 transition-all shadow-sm" 
+            />
+          </div>
+
+          {/* TABS (RIGHT) */}
+          <div className="flex items-center gap-1.5 bg-slate-200/50 p-1 rounded-xl w-fit border border-slate-200/60 shadow-inner">
+            {[
+              { id: 'directory' as NavTab, label: 'Supplier Directory', icon: <Building2 size={14} /> },
+              { id: 'purchase-orders' as NavTab, label: 'Supplier Orders', icon: <FileText size={14} /> },
+              { id: 'receiving' as NavTab, label: 'Delivery Confirmation', icon: <PackageCheck size={14} /> },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setNavTab(tab.id)}
+                className={`flex items-center gap-2 px-6 py-2 text-[11px] font-black rounded-lg transition-all duration-300 uppercase tracking-widest ${navTab === tab.id ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'}`}
+              >
+                {tab.icon}{tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* TAB CONTENT */}
 
       {navTab === 'directory' && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100">
-            <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} type="text" placeholder="Search suppliers..." className="h-10 w-full pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:bg-white focus:border-slate-900 transition-all" />
-            </div>
-          </div>
+        <>
+          <div className="pt-2"></div>
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
@@ -277,13 +292,13 @@ export default function SuppliersPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </>
       )}
 
       {navTab === 'purchase-orders' && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-            <h3 className="text-[14px] font-black text-slate-900 tracking-tight flex items-center gap-2"><ClipboardList size={16} className="text-slate-400" /> Active Procurement Logs</h3>
+        <>
+          <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+            <h3 className="text-[13px] font-black text-slate-900 tracking-widest uppercase flex items-center gap-2"><ClipboardList size={16} className="text-slate-400" /> Active Supplier Orders</h3>
             <button onClick={() => setIsCreatePOOpen(true)} className="h-9 px-4 bg-slate-900 text-white rounded-full text-[12px] font-bold flex items-center gap-2 hover:bg-indigo-600 transition-all">
               <Plus size={14} /> Create New PO
             </button>
@@ -294,8 +309,7 @@ export default function SuppliersPage() {
                 <th className="px-6 py-4">PO ID</th>
                 <th className="px-6 py-4">Supplier</th>
                 <th className="px-6 py-4 text-center">Items</th>
-                <th className="px-6 py-4 text-right">Total Amount</th>
-                <th className="px-6 py-4 text-right">Payables</th>
+                <th className="px-6 py-4">Destination</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -304,6 +318,7 @@ export default function SuppliersPage() {
               {purchaseOrders.map(po => {
                 const itemsCount = purchaseOrderItems.filter(i => i.purchase_order_id === po.id).length;
                 const payable = po.total_amount - (po.amount_paid || 0);
+                const branch = branches?.find(b => b.id === po.branch_id);
                 return (
                   <tr key={po.id} className="hover:bg-slate-50/50 transition-all">
                     <td className="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">{po.id}</td>
@@ -313,6 +328,11 @@ export default function SuppliersPage() {
                     <td className="px-6 py-4 text-right">
                       <div className={`text-[13px] font-black ${payable > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                         {payable > 0 ? formatCurrency(payable) : 'Settled'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                        <MapPin size={10} className="text-slate-400" /> {branch?.branchName || 'Main'}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -330,25 +350,24 @@ export default function SuppliersPage() {
               })}
             </tbody>
           </table>
-        </div>
+        </>
       )}
 
       {navTab === 'receiving' && (
-        <div className="space-y-4">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
-              <div>
-                <h3 className="text-[14px] font-black text-slate-900 tracking-tight">Pending Inbound Shipments</h3>
-                <p className="text-[11px] text-slate-500 font-medium">Verify physical goods against purchase orders to update inventory.</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <select value={deliveryFilter} onChange={e => setDeliveryFilter(e.target.value)} className="h-9 px-4 rounded-full border border-slate-200 text-[12px] font-bold outline-none focus:border-slate-900 transition-all bg-white shadow-sm">
-                  <option value="All">All Inbound</option>
-                  <option value="SENT">Sent / Ordered</option>
-                  <option value="PARTIAL_RECEIVED">Partial Shipments</option>
-                </select>
-              </div>
+        <>
+          <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+            <div>
+              <h3 className="text-[13px] font-black text-slate-900 tracking-widest uppercase">Pending Inbound Shipments</h3>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Verify physical goods against purchase orders to update inventory.</p>
             </div>
+            <div className="flex items-center gap-2">
+              <select value={deliveryFilter} onChange={e => setDeliveryFilter(e.target.value)} className="h-9 px-4 rounded-xl border border-slate-200 text-[11px] font-black outline-none focus:border-slate-900 transition-all bg-white shadow-sm">
+                <option value="All">All Inbound</option>
+                <option value="SENT">Sent / Ordered</option>
+                <option value="PARTIAL_RECEIVED">Partial Shipments</option>
+              </select>
+            </div>
+          </div>
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
@@ -407,9 +426,9 @@ export default function SuppliersPage() {
                 })}
               </tbody>
             </table>
-          </div>
-        </div>
+        </>
       )}
+    </div>
 
       {selectedSupplier && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedSupplier(null)}>
@@ -529,7 +548,7 @@ export default function SuppliersPage() {
               {detailTab === 'po-history' && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[16px] font-black text-slate-900 tracking-tight">Procurement Timeline</h3>
+                    <h3 className="text-[16px] font-black text-slate-900 tracking-tight">Supplier Orders Timeline</h3>
                   </div>
                   <div className="space-y-4">
                     {purchaseOrders.filter(po => po.supplier_id === selectedSupplier.id).map(po => {
@@ -571,7 +590,7 @@ export default function SuppliersPage() {
 
               {detailTab === 'receiving-history' && (
                 <div className="space-y-4">
-                  <h3 className="text-[16px] font-black text-slate-900 tracking-tight">Goods Receiving Ledger</h3>
+                  <h3 className="text-[16px] font-black text-slate-900 tracking-tight">Delivery Confirmation Ledger</h3>
                   <div className="grid gap-4">
                     {goodsReceipts.filter(gr => {
                       const po = purchaseOrders.find(p => p.id === gr.purchase_order_id);
@@ -592,7 +611,7 @@ export default function SuppliersPage() {
                           </div>
                           <div className="text-right">
                             <div className="text-[12px] font-bold text-slate-900">{new Date(gr.received_at).toLocaleDateString()}</div>
-                            <div className="text-[11px] text-slate-400 font-medium italic mt-1 max-w-[200px] truncate">{gr.notes || 'No discrepancy notes.'}</div>
+                            <div className="text-[11px] text-slate-400 font-medium italic mt-1 max-w-[200px] truncate">{gr.notes || 'No quality issues noted.'}</div>
                           </div>
                         </div>
                       );
@@ -624,10 +643,10 @@ export default function SuppliersPage() {
                   </div>
                   <div className="bg-indigo-900 text-white p-8 rounded-[32px] shadow-lg relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 opacity-10"><BarChart3 size={120} /></div>
-                    <h4 className="text-[18px] font-black mb-2 flex items-center gap-2 relative z-10"><PackageCheck size={20} /> Audit-Ready Procurement</h4>
+                    <h4 className="text-[18px] font-black mb-2 flex items-center gap-2 relative z-10"><PackageCheck size={20} /> Audit-Ready Supplier Orders</h4>
                     <p className="text-indigo-100 text-[14px] leading-relaxed max-w-xl relative z-10">
                       Sutura enforces immutable record-keeping. Every receipt for <strong>{selectedSupplier.supplier_name || selectedSupplier.name}</strong> is cross-verified with branch inventory stocks and financial ledger. 
-                      Partial deliveries are flagged for discrepancy follow-ups automatically.
+                      Partial deliveries are flagged for issue follow-ups automatically.
                     </p>
                   </div>
                 </div>
@@ -735,22 +754,56 @@ export default function SuppliersPage() {
                 <div className="space-y-6">
                   <div className="grid gap-6">
                     <div>
-                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Destination Branch</label>
-                      <div className="grid grid-cols-2 gap-3">
-                        {branches?.map(b => (
-                          <button
-                            key={b.id}
-                            onClick={() => setReceiptForm(p => ({...p, branch_id: b.id}))}
-                            className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${receiptForm.branch_id === b.id ? 'border-indigo-600 bg-indigo-50/50 text-indigo-900' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'}`}
-                          >
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${receiptForm.branch_id === b.id ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400'}`}><Building2 size={14} /></div>
-                            <div className="text-left">
-                              <div className="text-[13px] font-black leading-none mb-1">{b.branchName}</div>
-                              <div className="text-[10px] font-bold uppercase tracking-widest opacity-60">{b.branch_type}</div>
-                            </div>
-                          </button>
-                        ))}
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block">Destination Branch</label>
+                        {receiptForm.branch_id !== receiptPO.branch_id ? (
+                          <span className="text-[9px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full uppercase animate-pulse">Diverted Shipment</span>
+                        ) : (
+                          <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full uppercase">Target Destination</span>
+                        )}
                       </div>
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        {branches?.map(b => {
+                          const isTarget = b.id === receiptPO.branch_id;
+                          const isSelected = receiptForm.branch_id === b.id;
+                          
+                          return (
+                            <button
+                              key={b.id}
+                              onClick={() => setReceiptForm(p => ({...p, branch_id: b.id}))}
+                              className={`relative flex items-center gap-3 p-4 rounded-2xl border-2 transition-all 
+                                ${isSelected ? 'border-indigo-600 bg-indigo-50/50 text-indigo-900 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200'}
+                              `}
+                            >
+                              {isTarget && (
+                                <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-sm ring-2 ring-white uppercase tracking-tighter">
+                                  Original Requester
+                                </div>
+                              )}
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400'}`}><Building2 size={14} /></div>
+                              <div className="text-left">
+                                <div className="text-[13px] font-black leading-none mb-1">{b.branchName}</div>
+                                <div className="text-[10px] font-bold uppercase tracking-widest opacity-60 flex items-center gap-1">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${b.branch_type === 'MAIN' ? 'bg-indigo-400' : 'bg-slate-400'}`} />
+                                  {b.branch_type}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {receiptForm.branch_id !== receiptPO.branch_id && (
+                        <div className="animate-in slide-in-from-top-2 duration-300">
+                          <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1.5 block">Reason for Redirection</label>
+                          <textarea 
+                            value={receiptForm.notes}
+                            onChange={e => setReceiptForm(p => ({...p, notes: e.target.value}))}
+                            placeholder="Why is this being diverted? (e.g. Branch closed due to weather)"
+                            className="w-full h-20 p-3 rounded-xl border-2 border-rose-100 bg-rose-50/30 text-[12px] font-medium focus:bg-white focus:border-rose-300 outline-none transition-all resize-none"
+                          />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Inspector / Received By</label>
@@ -764,7 +817,7 @@ export default function SuppliersPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Discrepancy / Quality Notes</label>
+                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Quality / Receiving Issues Notes</label>
                       <textarea 
                         value={receiptForm.notes} 
                         onChange={e => setReceiptForm(p => ({...p, notes: e.target.value}))}

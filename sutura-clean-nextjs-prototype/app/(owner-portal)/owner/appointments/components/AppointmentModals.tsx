@@ -21,7 +21,7 @@ interface AppointmentModalsProps {
   customers: Customer[];
   staff: Staff[];
   handleSaveAppointment: () => void;
-  selectedAppointment: (Appointment & { normalizedStatus: string }) | null;
+  selectedAppointment: Appointment | null;
   isDetailsModalOpen: boolean;
   setIsDetailsModalOpen: (open: boolean) => void;
   getStatusStyles: (status: string) => { badge: string; cardOpacity: string };
@@ -51,8 +51,12 @@ export const AppointmentModals: React.FC<AppointmentModalsProps> = ({
              {/* Header */}
              <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
-                  <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Schedule Appointment</h2>
-                  <p className="text-[12px] text-slate-500 font-bold uppercase tracking-widest mt-1">Book a new session</p>
+                  <h2 className="text-[20px] font-black text-slate-900 tracking-tight">
+                    {selectedAppointment && isCreateModalOpen ? 'Reschedule Appointment' : 'Schedule Appointment'}
+                  </h2>
+                  <p className="text-[12px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                    {selectedAppointment && isCreateModalOpen ? 'Modify the existing time slot' : 'Book a new session'}
+                  </p>
                 </div>
                 <button onClick={() => setIsCreateModalOpen(false)} className="w-10 h-10 hover:bg-white rounded-xl flex items-center justify-center text-slate-400 transition-all"><X size={20}/></button>
              </div>
@@ -111,7 +115,7 @@ export const AppointmentModals: React.FC<AppointmentModalsProps> = ({
                     <option value="Consultation">Consultation</option>
                     <option value="Pick-up">Pick-up</option>
                     <option value="Measurement Session">Measurement Session</option>
-                    <option value="Order- Release">Order Release</option>
+                    <option value="Order Release">Order Release</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
@@ -193,9 +197,9 @@ export const AppointmentModals: React.FC<AppointmentModalsProps> = ({
                      </div>
                    </div>
                  </div>
-                 <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest border border-current/10 ${getStatusStyles(selectedAppointment.normalizedStatus).badge}`}>
-                   {selectedAppointment.normalizedStatus}
-                 </span>
+                  <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest border border-current/10 ${getStatusStyles(selectedAppointment.status).badge}`}>
+                    {selectedAppointment.status}
+                  </span>
               </div>
 
               <div className="space-y-6 pl-9">
@@ -226,7 +230,7 @@ export const AppointmentModals: React.FC<AppointmentModalsProps> = ({
 
               {/* Actions */}
               <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
-                {renderModalActions(selectedAppointment.normalizedStatus)}
+                {renderModalActions(selectedAppointment.status)}
               </div>
             </div>
           </div>

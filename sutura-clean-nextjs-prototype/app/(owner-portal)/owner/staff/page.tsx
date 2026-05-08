@@ -5,12 +5,12 @@ import { useSearchParams } from 'next/navigation';
 import { Plus, Search } from 'lucide-react';
 import { useERPStore, Staff, StaffRole } from '@/store/useERPStore';
 
-// Sub-components
 import { StaffStats } from './components/StaffStats';
 import { StaffTable } from './components/StaffTable';
 import { StaffModals } from './components/StaffModals';
 
-const ROLE_PERMISSIONS: Record<StaffRole, Record<string, boolean | 'usage-only'>> = {
+const ROLE_PERMISSIONS: Record<string, Record<string, boolean | 'usage-only'>> = {
+  Owner: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
   Admin: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
   Manager: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
   Sales: { customers: true, orders: true, measurements: true, appointments: true, inventory: false, suppliers: false, billing: true, reports: false },
@@ -37,6 +37,7 @@ export default function StaffPage() {
   const searchParams = useSearchParams();
   const onboardingParam = searchParams.get('onboarding');
   const [isModalOpen, setIsModalOpen] = useState(onboardingParam === 'true');
+  const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
   const [newStaff, setNewStaff] = useState<Partial<Staff> & { password?: string }>({
     name: '', email: '', phone: '', roles: ['Tailor'], hasSystemAccess: true, status: 'Active', password: '', specialization: ''
   });
@@ -54,19 +55,42 @@ export default function StaffPage() {
       return;
     }
     
-    const staffData = { ...newStaff };
-    delete staffData.password;
-    addStaff(staffData as Omit<Staff, 'id' | 'staffCode'>);
+    if (editingStaffId) {
+      // Handle Update
+      useERPStore.setState(state => ({
+        staff: state.staff.map(s => s.id === editingStaffId ? { ...s, ...newStaff } : s)
+      }));
+      pushNotification('Staff information updated successfully.', 'success');
+    } else {
+      // Handle Create
+      const staffData = { ...newStaff };
+      delete staffData.password;
+      addStaff(staffData as Omit<Staff, 'id' | 'staffCode'>);
+      pushNotification('New staff member added successfully.', 'success');
+    }
+    
     setIsModalOpen(false);
+    setEditingStaffId(null);
     setNewStaff({ name: '', email: '', phone: '', roles: ['Tailor'], hasSystemAccess: true, status: 'Active', password: '', specialization: '' });
-    pushNotification('New staff member added successfully.', 'success');
   };
 
   const handleUpdateStaff = (id: string, data: Partial<Staff>) => {
-    useERPStore.setState(state => ({
-      staff: state.staff.map(s => s.id === id ? { ...s, ...data } : s)
-    }));
-    pushNotification('Staff information updated.', 'info');
+    // If we are passing partial data from the table (like inline updates)
+    if (Object.keys(data).length > 0 && !data.name) {
+      useERPStore.setState(state => ({
+        staff: state.staff.map(s => s.id === id ? { ...s, ...data } : s)
+      }));
+      pushNotification('Staff information updated.', 'info');
+      return;
+    }
+
+    // Otherwise, this is coming from the modal for a full edit
+    const existing = staff.find(s => s.id === id);
+    if (existing) {
+      setEditingStaffId(id);
+      setNewStaff({ ...existing, password: '' });
+      setIsModalOpen(true);
+    }
   };
 
   const toggleRole = (r: StaffRole) => {
@@ -107,36 +131,15 @@ export default function StaffPage() {
 
       <StaffStats staff={staff} orders={orders} />
 
-      {/* FILTER & SEARCH */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl w-max border border-slate-200/50 overflow-x-auto max-w-full">
-          {['All', 'Admin', 'Manager', 'Sales', 'Tailor', 'Inventory'].map(role => (
-            <button
-              key={role}
-              onClick={() => setRoleFilter(role as 'All' | StaffRole)}
-              className={`px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${roleFilter === role ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              {role}
-            </button>
-          ))}
-        </div>
-        <div className="relative w-full md:w-80 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" size={16} />
-          <input 
-            value={searchQuery} 
-            onChange={e => setSearchQuery(e.target.value)} 
-            type="text" 
-            placeholder="Search by name or code..." 
-            className="h-11 w-full pl-11 pr-4 bg-white border border-slate-200 rounded-2xl text-[13px] font-bold outline-none focus:border-indigo-500 transition-all shadow-sm" 
-          />
-        </div>
-      </div>
-
       <StaffTable 
         staff={filteredStaff} 
         orders={orders} 
         branches={branches}
         onUpdateStaff={handleUpdateStaff}
+        roleFilter={roleFilter}
+        setRoleFilter={setRoleFilter}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
 
       <StaffModals 

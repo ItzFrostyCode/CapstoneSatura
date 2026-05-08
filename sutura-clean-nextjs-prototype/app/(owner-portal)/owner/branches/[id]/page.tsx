@@ -35,11 +35,28 @@ export default function BranchWorkspacePage() {
     branchInvoices.reduce((acc, inv) => acc + (inv.status === 'UNPAID' || inv.status === 'PARTIAL' ? inv.total_amount : 0), 0)
   , [branchInvoices]);
 
-  const activeOrdersCount = branchOrders.filter(o => !['COMPLETED', 'CANCELLED', 'DELIVERED'].includes(o.status)).length;
+  const activeOrdersCount = branchOrders.filter(o => !['RELEASED', 'CANCELLED'].includes(o.status)).length;
   const delayedOrders = branchOrders.filter(o => {
     const due = new Date(o.due_date);
-    return due < new Date() && !['COMPLETED', 'CANCELLED', 'DELIVERED'].includes(o.status);
+    return due < new Date() && !['RELEASED', 'CANCELLED'].includes(o.status);
   }).length;
+
+  // ── MOCK DATA GENERATION (STABILIZED) ──
+  const operationalMetrics = useMemo(() => {
+    return ['Bespoke Suits', 'Bulk Uniforms', 'Alterations'].map(cat => ({
+      cat,
+      items: Math.floor(Math.random() * 20) + 5,
+      days: Math.floor(Math.random() * 5) + 3
+    }));
+  }, []);
+
+  const inventoryValueData = useMemo(() => {
+    return ['Fabrics', 'Trims', 'Boutique Items', 'Finished Goods'].map(cat => ({
+      cat,
+      value: Math.floor(Math.random() * 500000 + 100000),
+      percent: Math.floor(Math.random() * 60) + 20
+    }));
+  }, []);
 
   if (!branch) return <div>Branch not found</div>;
 
@@ -282,7 +299,7 @@ export default function BranchWorkspacePage() {
           <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between">
               <div>
-                <h3 className="text-[18px] font-black text-slate-900 uppercase tracking-tight">Production Pipeline</h3>
+                <h3 className="text-[18px] font-black text-slate-900 uppercase tracking-tight">Tailoring Progress</h3>
                 <p className="text-[12px] text-slate-500 font-bold uppercase tracking-widest mt-1">High-level bottleneck monitoring</p>
               </div>
             </div>
@@ -297,11 +314,11 @@ export default function BranchWorkspacePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {['Bespoke Suits', 'Bulk Uniforms', 'Alterations'].map(cat => (
-                  <tr key={cat} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-8 py-6 font-black text-slate-900">{cat}</td>
-                    <td className="px-8 py-6 text-[14px] font-bold text-slate-600">{Math.floor(Math.random() * 20) + 5} Items</td>
-                    <td className="px-8 py-6 text-[14px] font-bold text-slate-600">{Math.floor(Math.random() * 5) + 3} Days</td>
+                {operationalMetrics.map(metric => (
+                  <tr key={metric.cat} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-8 py-6 font-black text-slate-900">{metric.cat}</td>
+                    <td className="px-8 py-6 text-[14px] font-bold text-slate-600">{metric.items} Items</td>
+                    <td className="px-8 py-6 text-[14px] font-bold text-slate-600">{metric.days} Days</td>
                     <td className="px-8 py-6">
                       <span className="px-3 py-1 rounded-lg bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest border border-amber-100">Fabric Delay</span>
                     </td>
@@ -386,14 +403,14 @@ export default function BranchWorkspacePage() {
             <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
               <h3 className="text-[18px] font-black text-slate-900 uppercase tracking-tight mb-8">Stock Value Distribution</h3>
               <div className="space-y-6">
-                {['Fabrics', 'Trims', 'Boutique Items', 'Finished Goods'].map(cat => (
-                  <div key={cat}>
+                {inventoryValueData.map(data => (
+                  <div key={data.cat}>
                     <div className="flex justify-between text-[13px] font-black mb-2 uppercase tracking-widest">
-                      <span className="text-slate-600">{cat}</span>
-                      <span className="text-slate-900">₱{Math.floor(Math.random() * 500000 + 100000).toLocaleString()}</span>
+                      <span className="text-slate-600">{data.cat}</span>
+                      <span className="text-slate-900">₱{data.value.toLocaleString()}</span>
                     </div>
                     <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-slate-900 rounded-full" style={{ width: `${Math.floor(Math.random() * 60) + 20}%` }} />
+                      <div className="h-full bg-slate-900 rounded-full" style={{ width: `${data.percent}%` }} />
                     </div>
                   </div>
                 ))}

@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Package, Shield, Truck, Info } from 'lucide-react';
+import { X, Package, Shield, Truck, Info, ChevronDown } from 'lucide-react';
 import { InventoryItem, ItemType } from '@/types/erp';
 
 interface NewItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (item: Partial<InventoryItem>) => void;
+  defaultCategory?: string;
 }
 
 const CATEGORIES = [
@@ -24,13 +25,13 @@ const ITEM_TYPES: { value: ItemType; label: string }[] = [
   { value: 'OTHER', label: 'Other / Accessory' },
 ];
 
-export function NewItemModal({ isOpen, onClose, onSave }: NewItemModalProps) {
+export function NewItemModal({ isOpen, onClose, onSave, defaultCategory }: NewItemModalProps) {
   const [form, setForm] = useState({
     item_name: '',
     sku: '',
-    category: 'Fabric',
-    item_type: 'FABRIC' as ItemType,
-    unit_of_measure: 'Meters',
+    category: defaultCategory || 'Fabric',
+    item_type: (defaultCategory === 'Finished Goods' ? 'FINISHED_GOOD' : 'FABRIC') as ItemType,
+    unit_of_measure: defaultCategory === 'Finished Goods' ? 'Pcs' : 'Meters',
     reorder_level: 5,
     location: '',
     supplier_id: '',
@@ -117,25 +118,60 @@ export function NewItemModal({ isOpen, onClose, onSave }: NewItemModalProps) {
                   </div>
                   <div>
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Category</label>
-                    <select
-                      value={form.category}
-                      onChange={e => setForm({ ...form, category: e.target.value })}
-                      className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium appearance-none"
-                    >
-                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={form.category}
+                        onChange={e => {
+                          const newCat = e.target.value;
+                          let newItemType = form.item_type;
+                          let newUnit = form.unit_of_measure;
+                          
+                          if (newCat === 'Finished Goods') {
+                            newItemType = 'FINISHED_GOOD';
+                            newUnit = 'Pcs';
+                          } else if (['Fabric', 'Lining', 'Trim'].includes(newCat)) {
+                            newItemType = 'FABRIC';
+                            newUnit = 'Meters';
+                          } else if (newCat === 'Button') {
+                            newItemType = 'BUTTON';
+                            newUnit = 'Pcs';
+                          } else if (newCat === 'Thread') {
+                            newItemType = 'THREAD';
+                            newUnit = 'Rolls';
+                          }
+
+                          setForm({ 
+                            ...form, 
+                            category: newCat, 
+                            item_type: newItemType,
+                            unit_of_measure: newUnit 
+                          });
+                        }}
+                        className="w-full h-12 px-4 pr-10 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium appearance-none cursor-pointer"
+                      >
+                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <ChevronDown size={16} />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Item Type</label>
-                    <select
-                      value={form.item_type}
-                      onChange={e => setForm({ ...form, item_type: e.target.value as ItemType })}
-                      className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium appearance-none"
-                    >
-                      {ITEM_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={form.item_type}
+                        onChange={e => setForm({ ...form, item_type: e.target.value as ItemType })}
+                        className="w-full h-12 px-4 pr-10 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium appearance-none cursor-pointer"
+                      >
+                        {ITEM_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <ChevronDown size={16} />
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Unit of Measure</label>
@@ -145,7 +181,8 @@ export function NewItemModal({ isOpen, onClose, onSave }: NewItemModalProps) {
                       value={form.unit_of_measure}
                       onChange={e => setForm({ ...form, unit_of_measure: e.target.value })}
                       placeholder="Meters, Pcs, Yards..."
-                      className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium"
+                      disabled={form.category === 'Finished Goods'}
+                      className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-medium disabled:opacity-60 disabled:bg-slate-100 cursor-not-allowed"
                     />
                   </div>
                 </div>

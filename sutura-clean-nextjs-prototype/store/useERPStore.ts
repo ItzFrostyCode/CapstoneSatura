@@ -8,7 +8,7 @@ import { Staff, Supplier, PurchaseOrder, InventoryItem } from '@/types/erp';
 
 // Re-export all domain types so consumers can import from one place
 export type {
-  User, Shop, ShopBranch, Order, Staff, Customer,
+  User, Shop, ShopBranch, Order, Staff, Customer, StaffRole,
   MeasurementProfile, Appointment, FittingSession,
   GarmentTemplate, OrderStatusLog, OrderInspection,
   JobOrderItem, ProductionTask,
@@ -27,12 +27,12 @@ export type {
 // POItem is an alias for PurchaseOrderItem fields used in old suppliers page
 export type POItem = { sku: string; qty: number; cost: number };
 export type StockMovement = import('@/types/erp').InventoryMovement;
-export type StaffRole = string;
+
 
 // Combine all slices into a single Root Store (Zustand Slices Pattern)
 export type ERPStore = OrderSlice & InventorySlice & CustomerSlice & SessionSlice & SupplierSlice & {
   addStaff: (staff: Omit<Staff, 'id' | 'staffCode'>) => void;
-  updateAppointmentStatus: (id: string, status: 'Scheduled' | 'Confirmed' | 'Completed' | 'Cancelled' | 'No Show') => void;
+  updateAppointmentStatus: (id: string, status: 'Pending Review' | 'Scheduled' | 'Rescheduled' | 'Completed' | 'Cancelled' | 'No Show') => void;
   pushNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
 };
 

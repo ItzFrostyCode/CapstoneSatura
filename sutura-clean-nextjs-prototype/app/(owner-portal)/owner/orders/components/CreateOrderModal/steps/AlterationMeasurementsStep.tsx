@@ -4,7 +4,7 @@ import { OrderFormData, AlterationMeasurement } from '../../../../../../../types
 
 interface AlterationMeasurementsStepProps {
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
 }
 
 export const AlterationMeasurementsStep: React.FC<AlterationMeasurementsStepProps> = ({

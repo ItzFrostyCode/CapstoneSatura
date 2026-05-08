@@ -15,14 +15,6 @@ interface BOMRecipe {
   materials: { sku: string; qty: number }[];
 }
 
-interface LegacyMovement {
-  itemSku: string;
-  type: 'Stock In' | 'Stock Out' | 'Adjustment' | 'Production';
-  qty: number;
-  ref: string;
-  staff_id?: string;
-}
-
 export interface InventorySlice {
   // Normalized tables
   inventory: InventoryItem[];
@@ -39,7 +31,7 @@ export interface InventorySlice {
   // Actions
   addInventoryItem: (item: Partial<InventoryItem>) => void;
   updateInventoryItem: (skuOrId: string, updates: Partial<InventoryItem>) => void;
-  addMovement: (mov: LegacyMovement) => void;
+  addMovement: (mov: Partial<InventoryMovement>) => void;
   saveRecipe: (recipe: BOMRecipe) => void;
   executeAssembly: (productId: string, qty: number, performedBy: string) => void;
 
@@ -127,29 +119,34 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
   }),
 
   // ── Normalized actions ─────────────────────────────────────────
-  adjustStock: (branchId, itemId, qty, type, performedBy) => set((state) => {
-    const movement: InventoryMovement = {
-      id: `MOV-${Date.now()}`,
-      shop_id: 'SHOP-001', branch_id: branchId, inventory_item_id: itemId,
-      movement_type: type, qty,
-      reference_type: 'ADJUSTMENT', reference_id: `ADJ-${Date.now()}`,
-      performed_by_user_id: performedBy ?? 'STF-001',
-      created_at: new Date().toISOString(),
-    };
-    const delta = type === 'ADJUSTMENT_IN' ? qty : -qty;
-    const updatedStock = state.inventoryStock.map(s =>
-      s.branch_id === branchId && s.inventory_item_id === itemId
-        ? { ...s, on_hand_qty: s.on_hand_qty + delta, available_qty: s.available_qty + delta, updated_at: new Date().toISOString() }
-        : s
-    );
-    const newMovements = [...state.inventoryMovements, movement];
-    return { 
-      inventoryMovements: newMovements, 
-      inventoryTransactions: newMovements,
-      movements: newMovements,
-      inventoryStock: updatedStock 
-    };
-  }),
+
+  adjustStock: (branchId, itemId, qty, type, performedBy) => {
+    set((state) => {
+      const movement: InventoryMovement = {
+        id: `MOV-${Date.now()}`,
+        shop_id: 'SHOP-001', branch_id: branchId, inventory_item_id: itemId,
+        movement_type: type, qty,
+        reference_type: 'ADJUSTMENT', reference_id: `ADJ-${Date.now()}`,
+        performed_by_user_id: performedBy ?? 'STF-001',
+        created_at: new Date().toISOString(),
+      };
+      const delta = type === 'ADJUSTMENT_IN' ? qty : -qty;
+      const updatedStock = state.inventoryStock.map(s =>
+        s.branch_id === branchId && s.inventory_item_id === itemId
+          ? { ...s, on_hand_qty: s.on_hand_qty + delta, available_qty: s.available_qty + delta, updated_at: new Date().toISOString() }
+          : s
+      );
+      const newMovements = [...state.inventoryMovements, movement];
+      return { 
+        inventoryMovements: newMovements, 
+        inventoryTransactions: newMovements,
+        movements: newMovements,
+        inventoryStock: updatedStock
+      };
+    });
+    
+    get().pushNotification(`Stock successfully adjusted. Inventory and audit logs updated.`, 'success');
+  },
 
   // ── Legacy / Page-specific Actions ─────────────────────────────
   addInventoryItem: (item) => set((state) => ({
@@ -180,19 +177,22 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
   })),
 
   addMovement: (mov) => set((state) => {
-    const item = state.inventory.find(i => i.sku === mov.itemSku || i.id === mov.itemSku);
+    const targetItem = state.inventory.find(i => 
+      i.sku === mov.inventory_item_id || i.id === mov.inventory_item_id
+    );
+    
     const movement: InventoryMovement = {
-      id: `MOV-${Date.now()}`,
-      shop_id: 'SHOP-001',
-      branch_id: 'BRN-001',
-      inventory_item_id: item?.id || mov.itemSku,
-      movement_type: mov.type === 'Stock In' ? 'RECEIVE' : 'ISSUE',
-      qty: Math.abs(mov.qty),
-      reference_type: mov.type,
-      reference_id: mov.ref,
-      performed_by_user_id: mov.staff_id || 'STF-001',
+      id: `MOV-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      shop_id: mov.shop_id || 'SHOP-001',
+      branch_id: mov.branch_id || 'BRN-001',
+      inventory_item_id: targetItem?.id || mov.inventory_item_id || 'N/A',
+      movement_type: mov.movement_type || 'ADJUSTMENT_IN',
+      qty: mov.qty || 0,
+      reference_type: mov.reference_type || 'MANUAL',
+      reference_id: mov.reference_id || 'N/A',
+      performed_by_user_id: mov.performed_by_user_id || 'STF-001',
       created_at: new Date().toISOString(),
-      notes: mov.ref,
+      notes: mov.notes || mov.reference_id || '',
     };
     const newMovements = [movement, ...state.inventoryMovements];
     return { 
@@ -215,9 +215,14 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
     const updatedInventory = state.inventory.map(item => {
       // Add to finished good
       if (item.sku === productId) return { ...item, stock: (item.stock || 0) + qty };
-      // Deduct from materials
+      // Deduct from materials (Only strictly track Fabric; Consumables are loosely tracked)
       const material = recipe.materials.find((m) => m.sku === item.sku);
-      if (material) return { ...item, stock: (item.stock || 0) - (material.qty * qty) };
+      if (material) {
+        const isFabric = item.category?.toLowerCase() === 'fabric' || item.cat?.toLowerCase() === 'fabric';
+        if (isFabric) {
+          return { ...item, stock: (item.stock || 0) - (material.qty * qty) };
+        }
+      }
       return item;
     });
 
@@ -286,99 +291,106 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
     };
   }),
 
-  receiveStock: (branchId, itemId, qty, unitCost, referenceId, supplierId, performedBy) => set((state) => {
-    const movement: InventoryMovement = {
-      id: `MOV-${Date.now()}`,
-      shop_id: 'SHOP-001', branch_id: branchId, inventory_item_id: itemId,
-      movement_type: 'RECEIVE', qty, unit_cost: unitCost,
-      reference_type: 'GOODS_RECEIPT', reference_id: referenceId,
-      supplier_id: supplierId,
-      performed_by_user_id: performedBy ?? 'STF-001',
-      created_at: new Date().toISOString(),
-    };
-    const updatedStock = state.inventoryStock.map(s =>
-      s.branch_id === branchId && s.inventory_item_id === itemId
-        ? { ...s, on_hand_qty: s.on_hand_qty + qty, available_qty: s.available_qty + qty, updated_at: new Date().toISOString() }
-        : s
-    );
-    // Also update legacy stock field
-    const updatedInventory = state.inventory.map(item =>
-      item.id === itemId ? { ...item, stock: (item.stock ?? 0) + qty } : item
-    );
-    const newMovements = [...state.inventoryMovements, movement];
-    return {
-      inventoryMovements: newMovements,
-      inventoryTransactions: newMovements,
-      movements: newMovements,
-      inventoryStock: updatedStock,
-      inventory: updatedInventory,
-    };
-  }),
-  
-  transferStock: (transferData) => set((state) => {
-    const transferId = `TRSF-${Date.now().toString().slice(-4)}`;
-    const now = new Date().toISOString();
-    
-    const transfer: StockTransfer = {
-      id: transferId,
-      status: 'COMPLETED',
-      created_at: now,
-      completed_at: now,
-      ...transferData
-    };
-
-    // 1. Log TRANSFER_OUT from source
-    const outMovement: InventoryMovement = {
-      id: `MOV-OUT-${Date.now()}`,
-      shop_id: transfer.shop_id,
-      branch_id: transfer.source_branch_id,
-      inventory_item_id: transfer.inventory_item_id,
-      movement_type: 'TRANSFER_OUT',
-      qty: transfer.qty,
-      reference_type: 'STOCK_TRANSFER',
-      reference_id: transferId,
-      performed_by_user_id: transfer.performed_by_user_id,
-      created_at: now
-    };
-
-    // 2. Log TRANSFER_IN to destination
-    const inMovement: InventoryMovement = {
-      id: `MOV-IN-${Date.now() + 1}`,
-      shop_id: transfer.shop_id,
-      branch_id: transfer.destination_branch_id,
-      inventory_item_id: transfer.inventory_item_id,
-      movement_type: 'TRANSFER_IN',
-      qty: transfer.qty,
-      reference_type: 'STOCK_TRANSFER',
-      reference_id: transferId,
-      performed_by_user_id: transfer.performed_by_user_id,
-      created_at: now
-    };
-
-    // 3. Update Stocks
-    const updatedStock = state.inventoryStock.map(s => {
-      // Deduct from source
-      if (s.branch_id === transfer.source_branch_id && s.inventory_item_id === transfer.inventory_item_id) {
-        return { ...s, on_hand_qty: s.on_hand_qty - transfer.qty, available_qty: s.available_qty - transfer.qty, updated_at: now };
-      }
-      // Add to destination
-      if (s.branch_id === transfer.destination_branch_id && s.inventory_item_id === transfer.inventory_item_id) {
-        return { ...s, on_hand_qty: s.on_hand_qty + transfer.qty, available_qty: s.available_qty + transfer.qty, updated_at: now };
-      }
-      return s;
+  receiveStock: (branchId, itemId, qty, unitCost, referenceId, supplierId, performedBy) => {
+    set((state) => {
+      const movement: InventoryMovement = {
+        id: `MOV-${Date.now()}`,
+        shop_id: 'SHOP-001',
+        branch_id: branchId,
+        inventory_item_id: itemId,
+        movement_type: 'RECEIVE',
+        qty,
+        unit_cost: unitCost,
+        reference_type: 'PURCHASE_ORDER',
+        reference_id: referenceId,
+        supplier_id: supplierId,
+        performed_by_user_id: performedBy ?? 'STF-001',
+        created_at: new Date().toISOString(),
+      };
+      const updatedStock = state.inventoryStock.map(s =>
+        s.branch_id === branchId && s.inventory_item_id === itemId
+          ? { ...s, on_hand_qty: s.on_hand_qty + qty, available_qty: s.available_qty + qty, updated_at: new Date().toISOString() }
+          : s
+      );
+      // Also update legacy stock field
+      const updatedInventory = state.inventory.map(item =>
+        item.id === itemId ? { ...item, stock: (item.stock ?? 0) + qty } : item
+      );
+      const newMovements = [...state.inventoryMovements, movement];
+      return {
+        inventoryMovements: newMovements,
+        inventoryTransactions: newMovements,
+        movements: newMovements,
+        inventoryStock: updatedStock,
+        inventory: updatedInventory,
+      };
     });
+    get().pushNotification(`Stock received: +${qty} units added to branch inventory.`, 'success');
+  },
 
-    const newMovements = [...state.inventoryMovements, outMovement, inMovement];
+  transferStock: (transferData) => {
+    set((state) => {
+      const transferId = `TRSF-${Date.now().toString().slice(-4)}`;
+      const now = new Date().toISOString();
+      
+      const transfer: StockTransfer = {
+        id: transferId,
+        status: 'COMPLETED',
+        created_at: now,
+        completed_at: now,
+        ...transferData
+      };
 
-    return {
-      stockTransfers: [transfer, ...state.stockTransfers],
-      inventoryMovements: newMovements,
-      inventoryStock: updatedStock,
-      // Update legacy aliases
-      movements: newMovements,
-      inventoryTransactions: newMovements
-    };
-  }),
+      // 1. Log TRANSFER_OUT from source
+      const outMovement: InventoryMovement = {
+        id: `MOV-OUT-${Date.now()}`,
+        shop_id: transfer.shop_id,
+        branch_id: transfer.source_branch_id,
+        inventory_item_id: transfer.inventory_item_id,
+        movement_type: 'TRANSFER_OUT',
+        qty: transfer.qty,
+        reference_type: 'STOCK_TRANSFER',
+        reference_id: transferId,
+        performed_by_user_id: transfer.performed_by_user_id,
+        created_at: now
+      };
+
+      // 2. Log TRANSFER_IN to destination
+      const inMovement: InventoryMovement = {
+        id: `MOV-IN-${Date.now() + 1}`,
+        shop_id: transfer.shop_id,
+        branch_id: transfer.destination_branch_id,
+        inventory_item_id: transfer.inventory_item_id,
+        movement_type: 'TRANSFER_IN',
+        qty: transfer.qty,
+        reference_type: 'STOCK_TRANSFER',
+        reference_id: transferId,
+        performed_by_user_id: transfer.performed_by_user_id,
+        created_at: now
+      };
+
+      // 3. Update stock for both branches
+      const updatedStock = state.inventoryStock.map(s => {
+        if (s.branch_id === transfer.source_branch_id && s.inventory_item_id === transfer.inventory_item_id) {
+          return { ...s, on_hand_qty: s.on_hand_qty - transfer.qty, available_qty: s.available_qty - transfer.qty, updated_at: now };
+        }
+        if (s.branch_id === transfer.destination_branch_id && s.inventory_item_id === transfer.inventory_item_id) {
+          return { ...s, on_hand_qty: s.on_hand_qty + transfer.qty, available_qty: s.available_qty + transfer.qty, updated_at: now };
+        }
+        return s;
+      });
+
+      const allMovements = [outMovement, inMovement, ...state.inventoryMovements];
+      return {
+        inventoryStock: updatedStock,
+        inventoryMovements: allMovements,
+        inventoryTransactions: allMovements,
+        movements: allMovements,
+        stockTransfers: [transfer, ...state.stockTransfers]
+      };
+    });
+    get().pushNotification('Inter-branch stock transfer completed successfully.', 'success');
+  },
   
   recordBatchRelease: (customerId, jobOrderId, items, paymentStatus) => set((state) => {
     // 1. Deduct stock from each item in the batch

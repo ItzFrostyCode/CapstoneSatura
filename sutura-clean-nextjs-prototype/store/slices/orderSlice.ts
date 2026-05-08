@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { Order, OrderStatus, OrderStatusLog, GarmentTemplate, JobOrderItem, ProductionTask, Payment, TaskStatus, OrderInspection, Invoice } from '@/types/erp';
+import { Order, OrderStatus, OrderStatusLog, GarmentTemplate, JobOrderItem, ProductionTask, Payment, TaskStatus, OrderInspection, Invoice, ProductionDiscrepancy } from '@/types/erp';
 import {
   INITIAL_ORDERS, INITIAL_TEMPLATES, INITIAL_JOB_ORDER_ITEMS,
   INITIAL_PRODUCTION_TASKS, INITIAL_PAYMENTS, INITIAL_INVOICES
@@ -16,14 +16,17 @@ export interface OrderSlice {
   orderStatusLogs: OrderStatusLog[];
   garmentTemplates: GarmentTemplate[];
   invoices: Invoice[];
+  productionDiscrepancies: ProductionDiscrepancy[];
 
   // Actions
   createNewOrder: (order: Partial<Order>, items?: Partial<JobOrderItem>[], tasks?: string[]) => void;
+  logProductionDiscrepancy: (discrepancy: Omit<ProductionDiscrepancy, 'id' | 'logged_at'>) => void;
   updateOrderStatus: (orderId: string, status: OrderStatus, notes?: string) => void;
   recordPayment: (orderId: string, amount: number, receivedBy: string, method?: string, ref?: string, image?: string) => void;
   recordInspection: (orderId: string, failed: boolean, staffId: string, notes?: string) => void;
   addGarmentTemplate: (template: Partial<GarmentTemplate>) => void;
   updateTaskStatus: (orderId: string, taskId: string, status: TaskStatus) => void;
+  addProductionTask: (orderId: string, title: string, assignedTo: string) => void;
   createInvoice: (invoice: Partial<Invoice>) => void;
   recordInvoicePayment: (invoiceId: string, amount: number, method: string, receivedBy: string, ref?: string, notes?: string, image?: string, date?: string) => void;
   addPayment: (payment: { 
@@ -51,6 +54,7 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
   orderStatusLogs: [],
   garmentTemplates: INITIAL_TEMPLATES,
   invoices: INITIAL_INVOICES,
+  productionDiscrepancies: [],
 
   // ── Selector: join normalized tables onto Order for UI ──────
   getEnrichedOrder: (orderId) => {
@@ -68,6 +72,7 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
       balance: Math.max(0, order.total_amount - amountPaid),
       inspection_passed: inspection?.passed === true,
       inspection_failed: inspection?.passed === false,
+      discrepancies: state.productionDiscrepancies.filter(d => d.job_order_id === orderId),
     };
   },
 
@@ -85,6 +90,7 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
         balance: Math.max(0, order.total_amount - amountPaid),
         inspection_passed: inspection?.passed === true,
         inspection_failed: inspection?.passed === false,
+        discrepancies: state.productionDiscrepancies.filter(d => d.job_order_id === order.id),
       };
     });
   },
@@ -103,7 +109,7 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
     const newOrder: Order = {
       shop_id: 'SHOP-001',
       branch_id: 'BRN-001',
-      status: 'PENDING',
+      status: 'PENDING_QUOTE',
       priority: 'Normal',
       total_amount: 0,
       created_at: new Date().toISOString(),
@@ -131,7 +137,7 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
     const initialLog: OrderStatusLog = {
       id: `LOG-${Date.now()}`,
       order_id: newOrderId,
-      new_status: 'PENDING',
+      new_status: 'PENDING_QUOTE',
       changed_by: 'SYSTEM',
       changed_at: new Date().toISOString(),
       remarks: 'Order created via Job Order Wizard.',
@@ -145,62 +151,110 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
     };
   }),
 
-  updateOrderStatus: (orderId, status, notes) => set((state) => {
-    const order = state.orders.find(o => o.id === orderId);
-    const log: OrderStatusLog = {
-      id: `LOG-${Date.now()}`,
-      order_id: orderId,
-      previous_status: order?.status,
-      new_status: status,
-      changed_by: 'SYSTEM',
-      changed_at: new Date().toISOString(),
-      remarks: notes ?? `Status updated to ${status}`,
-    };
-    return {
-      orders: state.orders.map(o => o.id === orderId ? { ...o, status } : o),
-      orderStatusLogs: [log, ...state.orderStatusLogs],
-    };
-  }),
+  logProductionDiscrepancy: (discrepancy) => {
+    set((state) => {
+      const newDiscrepancy: ProductionDiscrepancy = {
+        ...discrepancy,
+        id: `DISC-${Date.now()}`,
+        logged_at: new Date().toISOString()
+      };
+      
+      const order = state.orders.find(o => o.id === discrepancy.job_order_id);
+      let updatedOrders = state.orders;
+      if (order) {
+        const actualBom = (order.actual_bom_cost ?? order.total_bom_cost ?? 0) + (discrepancy.discrepancy_type === 'MATERIAL_WASTE' || discrepancy.discrepancy_type === 'DEFECTIVE_MATERIAL' ? discrepancy.financial_impact : 0);
+        const actualLabor = (order.actual_labor_cost ?? order.total_labor_cost ?? 0) + (discrepancy.discrepancy_type === 'EXTRA_LABOR' || discrepancy.discrepancy_type === 'UNPLANNED_ALTERATION' ? discrepancy.financial_impact : 0);
+        const actualProd = actualBom + actualLabor;
+        const actualMargin = order.total_amount > 0 ? ((order.total_amount - actualProd) / order.total_amount) * 100 : 0;
+        
+        updatedOrders = state.orders.map(o => o.id === order.id ? {
+          ...o,
+          actual_bom_cost: actualBom,
+          actual_labor_cost: actualLabor,
+          actual_production_cost: actualProd,
+          actual_profit_margin: Number(actualMargin.toFixed(2))
+        } : o);
+      }
 
-  recordPayment: (orderId, amount, receivedBy, method = 'CASH', ref, image) => set((state) => {
-    const payment: Payment = {
-      id: `PAY-${Date.now()}`,
-      job_order_id: orderId,
-      received_by_user_id: receivedBy,
-      amount,
-      payment_method: method,
-      reference_no: ref,
-      receipt_image: image,
-      paid_at: new Date().toISOString(),
-      status: 'CONFIRMED',
-    };
-    return { payments: [payment, ...state.payments] };
-  }),
+      return {
+        productionDiscrepancies: [newDiscrepancy, ...state.productionDiscrepancies],
+        orders: updatedOrders
+      };
+    });
+    
+    get().pushNotification(`Production issue logged. Production cost and margin updated.`, 'warning');
+  },
 
-  recordInspection: (orderId, failed, staffId, notes) => set((state) => {
-    const inspection: OrderInspection = {
-      id: `INS-${Date.now()}`,
-      job_order_id: orderId,
-      passed: !failed,
-      inspected_by_user_id: staffId,
-      inspected_at: new Date().toISOString(),
-      notes,
-    };
-    const newStatus: OrderStatus = failed ? 'FOR_REVISION' : 'READY_FOR_PICKUP';
-    const log: OrderStatusLog = {
-      id: `LOG-${Date.now()}`,
-      order_id: orderId,
-      new_status: newStatus,
-      changed_by: staffId,
-      changed_at: new Date().toISOString(),
-      remarks: failed ? `FAILED INSPECTION: ${notes}` : `PASSED INSPECTION: ${notes}`,
-    };
-    return {
-      orderInspections: [inspection, ...state.orderInspections],
-      orders: state.orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o),
-      orderStatusLogs: [log, ...state.orderStatusLogs],
-    };
-  }),
+  updateOrderStatus: (orderId, status, notes) => {
+    set((state) => {
+      const order = state.orders.find(o => o.id === orderId);
+      const log: OrderStatusLog = {
+        id: `LOG-${Date.now()}`,
+        order_id: orderId,
+        previous_status: order?.status,
+        new_status: status,
+        changed_by: 'SYSTEM',
+        changed_at: new Date().toISOString(),
+        remarks: notes ?? `Status updated to ${status}`,
+      };
+      return {
+        orders: state.orders.map(o => o.id === orderId ? { ...o, status } : o),
+        orderStatusLogs: [log, ...state.orderStatusLogs],
+      };
+    });
+  },
+
+  recordPayment: (orderId, amount, receivedBy, method = 'CASH', ref, image) => {
+    set((state) => {
+      const payment: Payment = {
+        id: `PAY-${Date.now()}`,
+        job_order_id: orderId,
+        received_by_user_id: receivedBy,
+        amount,
+        payment_method: method,
+        reference_no: ref,
+        receipt_image: image,
+        paid_at: new Date().toISOString(),
+        status: 'CONFIRMED',
+      };
+      return { payments: [payment, ...state.payments] };
+    });
+    
+    get().pushNotification(`Payment of ₱${amount.toLocaleString()} posted successfully via ${method}.`, 'success');
+  },
+
+  recordInspection: (orderId, failed, staffId, notes) => {
+    set((state) => {
+      const inspection: OrderInspection = {
+        id: `INS-${Date.now()}`,
+        job_order_id: orderId,
+        passed: !failed,
+        inspected_by_user_id: staffId,
+        inspected_at: new Date().toISOString(),
+        notes,
+      };
+      const newStatus: OrderStatus = failed ? 'ALTERATIONS' : 'READY_FOR_RELEASE';
+      const log: OrderStatusLog = {
+        id: `LOG-${Date.now()}`,
+        order_id: orderId,
+        new_status: newStatus,
+        changed_by: staffId,
+        changed_at: new Date().toISOString(),
+        remarks: failed ? `FAILED INSPECTION: ${notes}` : `PASSED INSPECTION: ${notes}`,
+      };
+      return {
+        orderInspections: [inspection, ...state.orderInspections],
+        orders: state.orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o),
+        orderStatusLogs: [log, ...state.orderStatusLogs],
+      };
+    });
+    
+    if (failed) {
+      get().pushNotification(`Quality Check FAILED. Order sent to Rework / Alterations.`, 'error');
+    } else {
+      get().pushNotification(`Quality Check PASSED. Order is now ready for Handover & Release.`, 'success');
+    }
+  },
 
   addGarmentTemplate: (template) => set((state) => ({
     garmentTemplates: [{ id: `TMP-${Date.now()}`, ...template } as GarmentTemplate, ...state.garmentTemplates],
@@ -211,6 +265,17 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
       t.id === taskId && t.job_order_id === orderId ? { ...t, status } : t
     ),
   })),
+
+  addProductionTask: (orderId, title, assignedTo) => set((state) => {
+    const newTask: ProductionTask = {
+      id: `TSK-${Date.now()}`,
+      job_order_id: orderId,
+      title,
+      status: 'Pending',
+      assigned_staff_id: assignedTo,
+    };
+    return { productionTasks: [...state.productionTasks, newTask] };
+  }),
 
   createInvoice: (invoice) => set((state) => ({
     invoices: [{

@@ -6,7 +6,7 @@ import { OrderFormData } from '@/types/orderFormData';
 
 interface DesignFabricStepProps {
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddDesignAsset: (type: string) => void;
   onAddExternalLink: () => void;

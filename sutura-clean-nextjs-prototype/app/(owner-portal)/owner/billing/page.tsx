@@ -98,7 +98,7 @@ export default function BillingPage() {
               onClick={() => setActiveTab('settlements')}
               className={`px-6 py-2 rounded-lg text-[13px] font-black transition-all ${activeTab === 'settlements' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              Settlements
+              Payments
             </button>
           </div>
 

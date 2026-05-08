@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Plus, ShieldCheck, MapPin, Layers } from 'lucide-react';
+import { X, Plus, ShieldCheck, MapPin, Layers, Lock, Unlock, Edit3 } from 'lucide-react';
 import { InventoryItem } from '@/store/useERPStore';
 import { BOMRecipe } from '../ProductionAssembly';
 
@@ -32,10 +32,18 @@ export function BOMModal({
   onSave,
   renderAvatar
 }: BOMModalProps) {
+  const [isEditMode, setIsEditMode] = React.useState(false);
+
+  // Reset edit mode when product changes
+  React.useEffect(() => {
+    const hasRecipe = recipes.find(r => r.productId === bomProductId);
+    setIsEditMode(!hasRecipe); // Default to edit mode if NEW recipe, otherwise locked
+  }, [bomProductId, recipes]);
 
   if (!isOpen) return null;
 
   const handleUpdateBOMMaterial = (index: number, field: 'sku' | 'qty', value: string | number) => {
+    if (!isEditMode) return;
     setBomMaterials(prev => {
       const next = [...prev];
       next[index] = { ...next[index], [field]: value };
@@ -44,10 +52,12 @@ export function BOMModal({
   };
 
   const handleRemoveBOMMaterial = (index: number) => {
+    if (!isEditMode) return;
     setBomMaterials(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleAddBOMMaterial = () => {
+    if (!isEditMode) return;
     setBomMaterials(prev => [...prev, { sku: materials[0]?.sku || '', qty: 1 }]);
   };
 
@@ -55,6 +65,7 @@ export function BOMModal({
     setBomProductId(productId);
     const existing = recipes.find(r => r.productId === productId);
     setBomMaterials(existing ? existing.materials.map((m: { sku: string; qty: number }) => ({ ...m })) : []);
+    setIsEditMode(!existing);
   };
 
   return (
@@ -70,12 +81,26 @@ export function BOMModal({
               <p className="text-[13px] text-slate-500 font-medium">Define material recipes for your premade production lines.</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            {bomProductId && (
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`flex items-center gap-2 px-4 h-10 rounded-full text-[12px] font-black transition-all border ${
+                  isEditMode 
+                    ? 'bg-amber-50 text-amber-600 border-amber-200' 
+                    : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                }`}
+              >
+                {isEditMode ? <><Unlock size={14} /> Unlocked (Editing)</> : <><Lock size={14} /> Locked (View Mode)</>}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
@@ -92,7 +117,8 @@ export function BOMModal({
                 <select
                   value={bomProductId}
                   onChange={(e) => handleBOMProductChange(e.target.value)}
-                  className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-bold appearance-none shadow-sm"
+                  disabled={isEditMode && bomMaterials.length > 0}
+                  className={`w-full h-12 px-4 rounded-xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[14px] font-bold appearance-none shadow-sm ${isEditMode && bomMaterials.length > 0 ? 'cursor-not-allowed opacity-70 bg-slate-50' : ''}`}
                 >
                   <option value="" disabled>Select Finished Good</option>
                   {finishedGoods.map(fg => (
@@ -120,15 +146,18 @@ export function BOMModal({
                 return (
                   <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 bg-white shadow-sm hover:border-indigo-200 transition-all group animate-in slide-in-from-top-2 duration-300">
                     <div className="flex flex-1 items-center gap-4 mr-4 min-w-0">
-                      <button onClick={() => handleRemoveBOMMaterial(i)} className="text-rose-400 hover:text-rose-600 p-1 shrink-0 transition-colors">
-                        <X size={16} />
-                      </button>
+                      {isEditMode && (
+                        <button onClick={() => handleRemoveBOMMaterial(i)} className="text-rose-400 hover:text-rose-600 p-1 shrink-0 transition-colors">
+                          <X size={16} />
+                        </button>
+                      )}
                       {selectedMat ? renderAvatar(selectedMat.item || '', 36, selectedMat.image) : <div className="w-9 h-9 rounded-xl bg-slate-100" />}
                       <div className="flex-1 flex flex-col min-w-0">
                         <select
                           value={mat.sku}
                           onChange={(e) => handleUpdateBOMMaterial(i, 'sku', e.target.value)}
-                          className="w-full h-8 bg-transparent border-none outline-none text-[14px] font-bold text-slate-700 appearance-none"
+                          disabled={!isEditMode}
+                          className={`w-full h-8 bg-transparent border-none outline-none text-[14px] font-bold text-slate-700 appearance-none ${!isEditMode ? 'cursor-not-allowed opacity-70' : ''}`}
                         >
                           <option value="" disabled>Select Material</option>
                           {materials.map(m => (
@@ -148,10 +177,11 @@ export function BOMModal({
                         type="number"
                         value={mat.qty || ''}
                         onChange={(e) => handleUpdateBOMMaterial(i, 'qty', Number(e.target.value))}
+                        disabled={!isEditMode}
                         step="0.1"
                         min="0.1"
                         placeholder="Qty"
-                        className="w-20 h-9 px-2 bg-slate-50 border border-slate-100 rounded-lg text-center text-[14px] font-black text-slate-900 outline-none focus:border-indigo-400 transition-all"
+                        className={`w-20 h-9 px-2 bg-slate-50 border border-slate-100 rounded-lg text-center text-[14px] font-black text-slate-900 outline-none focus:border-indigo-400 transition-all ${!isEditMode ? 'cursor-not-allowed opacity-70' : ''}`}
                       />
                       <span className="text-[10px] font-black text-slate-400 uppercase w-16 tracking-widest">{selectedMat ? selectedMat.unit || selectedMat.unit_of_measure : '-'}</span>
                     </div>
@@ -159,12 +189,14 @@ export function BOMModal({
                 );
               })}
 
-              <button 
-                onClick={handleAddBOMMaterial}
-                className="w-full h-14 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-[13px] font-bold text-slate-400 hover:text-slate-900 hover:border-slate-400 hover:bg-slate-50 transition-all"
-              >
-                <Plus size={18} /> Add Material to Recipe
-              </button>
+              {isEditMode && (
+                <button 
+                  onClick={handleAddBOMMaterial}
+                  className="w-full h-14 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-[13px] font-bold text-slate-400 hover:text-slate-900 hover:border-slate-400 hover:bg-slate-50 transition-all"
+                >
+                  <Plus size={18} /> Add Material to Recipe
+                </button>
+              )}
             </div>
           </div>
 
@@ -188,7 +220,7 @@ export function BOMModal({
           </button>
           <button
             onClick={onSave}
-            disabled={bomMaterials.length === 0 || !bomProductId}
+            disabled={!isEditMode || bomMaterials.length === 0 || !bomProductId}
             className="px-10 h-12 bg-slate-900 text-white rounded-full text-[14px] font-black shadow-lg shadow-slate-900/10 hover:bg-slate-800 disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2"
           >
             Save BOM Recipe

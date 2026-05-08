@@ -123,7 +123,7 @@ export default function BranchManagementPage() {
             const branchStaffCount = staff.filter(s => s.branch_id === branch.id).length;
             const branchActiveOrders = orders.filter(o => 
               o.branch_id === branch.id && 
-              !['COMPLETED', 'CANCELLED', 'DELIVERED'].includes(o.status)
+              !['RELEASED', 'CANCELLED'].includes(o.status)
             ).length;
 
             return (
@@ -156,7 +156,7 @@ export default function BranchManagementPage() {
                 const branchStaffCount = staff.filter(s => s.branch_id === branch.id).length;
                 const branchActiveOrders = orders.filter(o => 
                   o.branch_id === branch.id && 
-                  !['COMPLETED', 'CANCELLED', 'DELIVERED'].includes(o.status)
+                  !['RELEASED', 'CANCELLED'].includes(o.status)
                 ).length;
 
                 return (

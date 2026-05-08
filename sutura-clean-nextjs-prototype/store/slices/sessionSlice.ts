@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { User, Shop, ShopBranch, ERPNotification, Staff, PlanLevel, AuditLog } from '@/types/erp';
+import { User, Shop, ShopBranch, ERPNotification, Staff, PlanLevel, AuditLog, Subscription } from '@/types/erp';
 import { INITIAL_SHOPS, INITIAL_BRANCHES, INITIAL_STAFF } from '@/mocks/mockData';
 import { ERPStore } from '../useERPStore';
 

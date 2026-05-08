@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, ClipboardList, TrendingDown } from 'lucide-react';
+import { X, ClipboardList, TrendingDown, ChevronDown } from 'lucide-react';
 import { InventoryItem } from '@/store/useERPStore';
 
 interface AdjustStockModalProps {
@@ -56,6 +56,7 @@ export function AdjustStockModal({
               <div className="relative">
                  <input
                    type="number"
+                   onFocus={e => e.target.select()}
                    value={adjustForm.qty || ''}
                    onChange={e => setAdjustForm(p => ({...p, qty: Number(e.target.value)}))}
                    max={item.stock || 0}
@@ -68,17 +69,22 @@ export function AdjustStockModal({
             </div>
             <div>
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Adjustment Reason</label>
-              <select
-                value={adjustForm.reason}
-                onChange={e => setAdjustForm(p => ({...p, reason: e.target.value}))}
-                className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[13px] font-bold appearance-none cursor-pointer"
-              >
-                <option value="Damaged Material">Damaged / Defective</option>
-                <option value="Inventory Count Correction">Count Correction</option>
-                <option value="Sample Usage">Sample Usage</option>
-                <option value="Rework Deduction">Rework Deduction</option>
-                <option value="Expired Stock">Expired Stock</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={adjustForm.reason}
+                  onChange={e => setAdjustForm(p => ({...p, reason: e.target.value}))}
+                  className="w-full h-11 px-4 pr-10 rounded-xl border border-slate-200 bg-white focus:border-slate-900 outline-none transition-all text-[13px] font-bold appearance-none cursor-pointer"
+                >
+                  <option value="Damaged Material">Damaged / Defective</option>
+                  <option value="Inventory Count Correction">Count Correction</option>
+                  <option value="Sample Usage">Sample Usage</option>
+                  <option value="Rework Deduction">Rework Deduction</option>
+                  <option value="Expired Stock">Expired Stock</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                  <ChevronDown size={16} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

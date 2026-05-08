@@ -69,8 +69,12 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
             <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-[24px] font-black text-slate-900 leading-tight tracking-tight">Add New Staff</h2>
-                  <p className="text-[13px] text-slate-500 font-medium mt-1">Assign a role and skills to determine access and workload.</p>
+                  <h2 className="text-[24px] font-black text-slate-900 leading-tight tracking-tight">
+                    {newStaff.id ? 'Edit Staff Member' : 'Add New Staff'}
+                  </h2>
+                  <p className="text-[13px] text-slate-500 font-medium mt-1">
+                    {newStaff.id ? 'Update staff roles, contact info, and account access.' : 'Assign a role and skills to determine access and workload.'}
+                  </p>
                 </div>
                 <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 hover:bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 transition-colors">
                   <X size={20} />
@@ -139,7 +143,32 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                       return (
                         <button
                           key={role}
-                          onClick={() => toggleRole(role as StaffRole)}
+                          onClick={() => {
+                            const currentRoles = newStaff.roles || [];
+                            let nextRoles: StaffRole[] = [];
+                            
+                            if (role === 'Manager') {
+                              // If selecting manager, remove all other roles
+                              nextRoles = isSelected ? [] : ['Manager'];
+                            } else if (role === 'Admin') {
+                              // Admin can be combined with others, but not with manager
+                              if (currentRoles.includes('Manager')) {
+                                nextRoles = [role as StaffRole];
+                              } else {
+                                nextRoles = isSelected 
+                                  ? currentRoles.filter(r => r !== role)
+                                  : [...currentRoles, role as StaffRole];
+                              }
+                            } else {
+                              // Standard roles (Sales, Tailor, Inventory)
+                              // Remove manager if it was there
+                              const filtered = currentRoles.filter(r => r !== 'Manager');
+                              nextRoles = isSelected
+                                ? filtered.filter(r => r !== role)
+                                : [...filtered, role as StaffRole];
+                            }
+                            setNewStaff({ ...newStaff, roles: nextRoles });
+                          }}
                           className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${isSelected ? 'bg-indigo-50 border-indigo-500 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}`}
                         >
                           <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
@@ -195,7 +224,7 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                   disabled={!newStaff.name || newStaff.roles?.length === 0}
                   className="h-12 px-8 rounded-[18px] bg-slate-900 text-white text-[14px] font-black hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl shadow-slate-900/10 active:scale-95"
                 >
-                  Create Staff Account
+                  {newStaff.id ? 'Save Changes' : 'Create Staff Account'}
                 </button>
               </div>
             </div>

@@ -43,7 +43,8 @@ const FULL_BODY_FIELDS = [
 export default function CustomersPage() {
   const { 
     customers, measurementProfiles, fittingSessions, orders, appointments, staff,
-    addCustomer, updateCustomer, addMeasurementProfile, addFittingSession, pushNotification
+    addCustomer, updateCustomer, addMeasurementProfile, addFittingSession, pushNotification,
+    updateMeasurementProfile, deleteMeasurementProfile
   } = useERPStore();
   const router = useRouter();
 
@@ -55,6 +56,7 @@ export default function CustomersPage() {
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
   const [selectedEditCustomer, setSelectedEditCustomer] = useState<Customer | null>(null);
   const [isAddMeasurementModalOpen, setIsAddMeasurementModalOpen] = useState(false);
+  const [selectedEditMeasurement, setSelectedEditMeasurement] = useState<MeasurementProfile | null>(null);
   const [isAddFittingModalOpen, setIsAddFittingModalOpen] = useState(false);
   const [activeProfileForFitting, setActiveProfileForFitting] = useState<string | null>(null);
 
@@ -122,7 +124,51 @@ export default function CustomersPage() {
     addMeasurementProfile({ ...measForm, customer_id: selectedCustomerId, ...dynamicMetrics });
     setIsAddMeasurementModalOpen(false);
     setMeasValues({});
+    setMeasForm({
+      profile_name: '', garment_category: 'Upper Wear', garment_type: 'Suit', fit_preference: 'Regular', measurement_unit: 'Inches', version_no: 'V1', status: 'DRAFT'
+    });
     pushNotification('Professional measurement profile created.', 'success');
+  };
+
+  const handleEditMeasurement = (profile: MeasurementProfile) => {
+    setSelectedEditMeasurement(profile);
+    setMeasForm({
+      profile_name: profile.profile_name,
+      garment_category: profile.garment_category,
+      garment_type: profile.garment_type,
+      fit_preference: profile.fit_preference,
+      measurement_unit: profile.measurement_unit,
+      version_no: profile.version_no,
+      status: profile.status
+    });
+    
+    const initial: Record<string, string> = {};
+    const fields = profile.garment_category === 'Upper Wear' ? UPPER_FIELDS : profile.garment_category === 'Lower Wear' ? LOWER_FIELDS : FULL_BODY_FIELDS;
+    fields.forEach(f => {
+      const key = f.toLowerCase().replace(/ /g, '_');
+      const val = (profile as unknown as Record<string, unknown>)[key];
+      if (val !== undefined && val !== null) initial[f] = String(val);
+    });
+    setMeasValues(initial);
+    setIsAddMeasurementModalOpen(true);
+  };
+
+  const handleUpdateMeasurement = () => {
+    if (!selectedEditMeasurement) return;
+    const dynamicMetrics: Record<string, number> = {};
+    Object.entries(measValues).forEach(([key, val]) => {
+      const fieldKey = key.toLowerCase().replace(/ /g, '_');
+      dynamicMetrics[fieldKey] = parseFloat(val);
+    });
+
+    updateMeasurementProfile(selectedEditMeasurement.id, { ...measForm, ...dynamicMetrics });
+    setIsAddMeasurementModalOpen(false);
+    setSelectedEditMeasurement(null);
+    setMeasValues({});
+    setMeasForm({
+      profile_name: '', garment_category: 'Upper Wear', garment_type: 'Suit', fit_preference: 'Regular', measurement_unit: 'Inches', version_no: 'V1', status: 'DRAFT'
+    });
+    pushNotification('Measurement profile updated.', 'success');
   };
 
   const handleSaveFitting = () => {
@@ -140,18 +186,34 @@ export default function CustomersPage() {
     });
 
     const currentV = parseInt(activeProfile.version_no.replace('V', '')) || 1;
+    
+    // 2. Create a NEW versioned profile instead of overwriting the old one
+    const newProfileId = `MEAS-${Date.now()}`;
+    const newProfile = {
+      ...activeProfile,
+      ...updatedMetrics,
+      id: newProfileId,
+      version_no: `V${currentV + 1}`,
+      status: 'PENDING_FITTING' as MeasurementStatus,
+      is_current: true,
+      recorded_at: new Date().toISOString()
+    };
+
     useERPStore.setState((state) => ({
-      measurementProfiles: state.measurementProfiles.map(m => 
-        m.id === activeProfileForFitting 
-          ? { ...m, ...updatedMetrics, version_no: `V${currentV + 1}`, status: 'PENDING_FITTING' as MeasurementStatus } as MeasurementProfile
-          : m
-      )
+      measurementProfiles: [
+        newProfile,
+        ...state.measurementProfiles.map(m => 
+          m.id === activeProfileForFitting 
+            ? { ...m, is_current: false, status: 'SUPERSEDED' as MeasurementStatus }
+            : m
+        )
+      ]
     }));
 
     setIsAddFittingModalOpen(false);
     setFittingForm({ adjustment_notes: '', next_fitting_date: '', handled_by_staff_id: 'STF-001' });
     setFittingMetrics({});
-    pushNotification(`Revision V${currentV + 1} recorded successfully.`, 'success');
+    pushNotification(`Revision V${currentV + 1} recorded successfully. Measurement history preserved.`, 'success');
   };
 
   return (
@@ -183,6 +245,11 @@ export default function CustomersPage() {
           newPostureTag={newPostureTag}
           setNewPostureTag={setNewPostureTag}
           onAddCustomTag={handleAddCustomTag}
+          onEditProfile={handleEditMeasurement}
+          onDeleteProfile={(id) => {
+            deleteMeasurementProfile(id);
+            pushNotification('Measurement profile deleted.', 'info');
+          }}
           onRecordFitting={(profile) => {
              setActiveProfileForFitting(profile.id);
              const initial: Record<string, string> = {};
@@ -214,7 +281,8 @@ export default function CustomersPage() {
         setMeasForm={setMeasForm}
         measValues={measValues}
         setMeasValues={setMeasValues}
-        handleSaveMeasurement={handleSaveMeasurement}
+        handleSaveMeasurement={selectedEditMeasurement ? handleUpdateMeasurement : handleSaveMeasurement}
+        selectedEditMeasurement={selectedEditMeasurement}
         selectedCustomer={selectedCustomer}
         garmentTypes={GARMENT_TYPES}
         upperFields={UPPER_FIELDS}

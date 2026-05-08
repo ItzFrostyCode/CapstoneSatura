@@ -7,7 +7,7 @@ import { OrderFormData } from '../../../../../../../types/orderFormData';
 interface GarmentTemplateStepProps {
   garmentTemplates: GarmentTemplate[];
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
   showAddGarment: boolean;
   setShowAddGarment: (val: boolean) => void;
   newGarment: NewGarmentForm;

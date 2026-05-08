@@ -6,7 +6,7 @@ import { OrderFormData, AlterationMaterial } from '../../../../../../../types/or
 interface AlterationMaterialsStepProps {
   inventory: InventoryItem[];
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
 }
 
 export const AlterationMaterialsStep: React.FC<AlterationMaterialsStepProps> = ({

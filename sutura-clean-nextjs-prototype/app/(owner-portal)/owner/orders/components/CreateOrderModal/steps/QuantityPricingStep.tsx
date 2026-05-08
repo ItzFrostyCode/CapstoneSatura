@@ -1,10 +1,13 @@
 import React from 'react';
 import { Hash } from 'lucide-react';
 
+import { OrderFormData } from '@/types/orderFormData';
+import { GarmentTemplate } from '@/types/erp';
+
 interface QuantityPricingStepProps {
-  formData: any;
-  setFormData: (val: any) => void;
-  selectedTemplate: any;
+  formData: OrderFormData;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
+  selectedTemplate: GarmentTemplate | null;
   totalQuantity: number;
 }
 

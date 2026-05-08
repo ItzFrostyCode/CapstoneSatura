@@ -6,16 +6,18 @@ import { OrderFormData } from '../../../../../../../types/orderFormData';
 
 interface PaymentStepProps {
   formData: OrderFormData;
-  setFormData: (val: OrderFormData) => void;
+  setFormData: React.Dispatch<React.SetStateAction<OrderFormData>>;
   selectedTemplate: GarmentTemplate | null;
   totalPrice: number;
+  financials: Record<string, number>;
 }
 
 export const PaymentStep: React.FC<PaymentStepProps> = ({
   formData,
   setFormData,
   selectedTemplate,
-  totalPrice
+  totalPrice,
+  financials
 }) => {
   const { inventory } = useERPStore();
   const isReadyMade = formData.orderType === 'READY_MADE';
@@ -83,13 +85,27 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
                   <span className="font-bold text-slate-300">
                     {displayName} (x{formData.quantity})
                   </span>
-                  <span className="font-black">₱{totalPrice.toLocaleString()}</span>
+                  <span className="font-black">₱{financials.baseAmount.toLocaleString()}</span>
                 </div>
 
-                {formData.isRush && (
+                {financials.rushFee > 0 && (
                   <div className="flex justify-between items-center text-[14px] text-amber-400">
                     <span className="font-bold flex items-center gap-2"><Zap size={14}/> Priority Rush Surcharge</span>
-                    <span className="font-black">+ ₱{formData.rushFeeAmount.toLocaleString()}</span>
+                    <span className="font-black">+ ₱{financials.rushFee.toLocaleString()}</span>
+                  </div>
+                )}
+
+                {financials.customizationFee > 0 && (
+                  <div className="flex justify-between items-center text-[14px] text-indigo-400">
+                    <span className="font-bold">Customization Fee</span>
+                    <span className="font-black">+ ₱{financials.customizationFee.toLocaleString()}</span>
+                  </div>
+                )}
+
+                {financials.discount > 0 && (
+                  <div className="flex justify-between items-center text-[14px] text-emerald-400">
+                    <span className="font-bold">Discount Applied</span>
+                    <span className="font-black">- ₱{financials.discount.toLocaleString()}</span>
                   </div>
                 )}
               </div>
