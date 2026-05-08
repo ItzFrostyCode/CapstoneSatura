@@ -90,7 +90,7 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
     <>
       {/* Add Customer Modal */}
       {isAddCustomerModalOpen && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-500 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[500px] rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Register Customer</h2>
@@ -132,7 +132,7 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
 
       {/* Edit Customer Modal */}
       {selectedEditCustomer && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-500 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[500px] rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Edit Customer Details</h2>
@@ -174,7 +174,7 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
 
       {/* Add Measurement Modal */}
       {isAddMeasurementModalOpen && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-500 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[1000px] rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
@@ -294,7 +294,7 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
 
       {/* Add Fitting Modal */}
       {isAddFittingModalOpen && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-500 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[900px] rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Record Fitting Adjustment</h2>

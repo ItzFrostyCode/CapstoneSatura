@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function PremadeDesigns() {
   return (
     <main className="min-h-screen bg-gray-50 p-12">
@@ -11,7 +13,7 @@ export default function PremadeDesigns() {
             <div className="bg-gray-200 h-64 rounded-lg mb-4 flex items-center justify-center text-gray-400">Image Placeholder</div>
             <h3 className="font-bold text-lg">Midnight Silk Gala</h3>
             <p className="text-sm text-gray-500 mb-4">Available in standard and custom sizing.</p>
-            <a href="/customer/shops/product/123" className="block text-center w-full bg-black text-white py-2 rounded-lg font-semibold">View Details</a>
+            <Link href="/customer/shops/product/123" className="block text-center w-full bg-black text-white py-2 rounded-lg font-semibold">View Details</Link>
           </div>
         ))}
       </div>

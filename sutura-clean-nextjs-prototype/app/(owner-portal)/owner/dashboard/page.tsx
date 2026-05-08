@@ -39,6 +39,7 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -65,7 +66,7 @@ export default function DashboardPage() {
 
   // Mock branch data for widget
   const mockBranchData = useMemo(() => {
-    const data: any = {};
+    const data: Record<string, { revenue: number; target: number }> = {};
     branches.forEach(b => {
       data[b.id] = { revenue: totalRevenue / branches.length, target: 50000 };
     });
@@ -76,14 +77,14 @@ export default function DashboardPage() {
 
   const pulseActivities = useMemo(() => {
     const statusActivities = (orderStatusLogs || []).map(log => ({
-      type: 'STATUS',
+      type: 'STATUS' as const,
       title: 'Workflow Advancement',
       desc: log.remarks || `Order ${log.order_id} moved to ${log.new_status}`,
       time: new Date(log.changed_at).toLocaleString(),
       rawTime: new Date(log.changed_at).getTime()
     }));
     const paymentActivities = (payments || []).map(p => ({
-      type: 'PAYMENT',
+      type: 'PAYMENT' as const,
       title: 'Cash Receipt',
       desc: `₱${p.amount.toLocaleString()} received`,
       time: new Date(p.paid_at).toLocaleString(),
@@ -136,7 +137,7 @@ export default function DashboardPage() {
               {/* Appointments List */}
               <div className="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-[16px] font-black text-slate-900">Today's Schedule</h3>
+                  <h3 className="text-[16px] font-black text-slate-900">Today&apos;s Schedule</h3>
                   <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
                     {todaySchedule.length} Fittings
                   </span>

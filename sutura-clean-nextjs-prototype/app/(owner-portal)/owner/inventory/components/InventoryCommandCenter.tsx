@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import {
   AlertTriangle, Package, Users, Calendar, ShoppingBag,
-  Truck, TrendingUp, Clock, ChevronRight, ArrowUpRight,
-  Zap, CheckCircle2, XCircle, BarChart3, Link2
+  Truck, ChevronRight, ArrowUpRight,
+  Zap, CheckCircle2, XCircle, BarChart3
 } from 'lucide-react';
 import { InventoryItem, Order, JobOrderItem, Customer, Appointment, Supplier, PurchaseOrder } from '@/store/useERPStore';
 
@@ -43,7 +43,6 @@ export function InventoryCommandCenter({
 
   const totalInventoryValue = inventory.reduce((sum, i) => sum + (i.stock || 0) * (i.unit_cost || 0), 0);
 
-  const finishedGoods = inventory.filter(i => i.cat === 'Finished Goods' || i.item_type === 'FINISHED_GOOD');
 
   // Appointments in next 7 days that are Scheduled (need materials prepped)
   const upcomingFittings = appointments.filter(a => {

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Mail, Phone, MoreVertical, X, Lock } from 'lucide-react';
+import { Mail, Phone, MoreVertical, Lock } from 'lucide-react';
 import { Staff, StaffRole, Order } from '@/store/useERPStore';
 
 interface StaffTableProps {
@@ -10,7 +10,7 @@ interface StaffTableProps {
   branches: import('@/types/erp').ShopBranch[];
   onUpdateStaff: (id: string, data: Partial<Staff>) => void;
   roleFilter: string;
-  setRoleFilter: (role: any) => void;
+  setRoleFilter: (role: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
 }
@@ -41,7 +41,7 @@ export const StaffTable: React.FC<StaffTableProps> = ({
           {['All', 'Admin', 'Manager', 'Sales', 'Tailor', 'Inventory'].map(role => (
             <button
               key={role}
-              onClick={() => setRoleFilter(role as any)}
+              onClick={() => setRoleFilter(role)}
               className={`px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${roleFilter === role ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-900'}`}
             >
               {role}

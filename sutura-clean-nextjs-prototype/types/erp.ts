@@ -38,6 +38,7 @@ export type MovementType =
   | 'TRANSFER_OUT' | 'TRANSFER_IN'
   | 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT'
   | 'DAMAGE' | 'PRODUCTION';
+export type MovementReferenceType = 'PO' | 'JO' | 'Manual' | 'Transfer' | 'Damage Report' | 'Inventory Count' | 'Sale';
 export type ReservationStatus = 'ACTIVE' | 'PARTIALLY_RELEASED' | 'RELEASED' | 'CANCELLED';
 
 export interface InventoryAnalysis {
@@ -283,6 +284,7 @@ export interface Order {
   estimated_completion_date?: string;
   created_at: string;
   notes?: string;
+  discrepancies?: ProductionDiscrepancy[];
 
   // ── DENORMALIZED ARRAYS (kept for UI layer compatibility)
   // These are populated by the store selector/derived state.

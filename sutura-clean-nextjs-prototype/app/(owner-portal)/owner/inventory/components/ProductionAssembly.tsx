@@ -11,10 +11,8 @@ import {
   Layers, 
   ShoppingBag, 
   Users, 
-  ClipboardList, 
   ArrowRight,
   Search,
-  ShoppingCart,
   TrendingUp,
   Tag,
   Minus,
@@ -31,11 +29,11 @@ export interface BOMRecipe {
 
 interface ProductionAssemblyProps {
   assemblyProductId: string;
-  setAssemblyProductId: (id: string) => void;
+  setAssemblyProductId: React.Dispatch<React.SetStateAction<string>>;
   assemblyQty: number;
-  setAssemblyQty: (qty: number) => void;
+  setAssemblyQty: React.Dispatch<React.SetStateAction<number>>;
   assemblySizes: Record<string, number>;
-  setAssemblySizes: (sizes: Record<string, number>) => void;
+  setAssemblySizes: React.Dispatch<React.SetStateAction<Record<string, number>>>;
   assemblySuccess: boolean;
   inventory: InventoryItem[];
   recipes: BOMRecipe[];
@@ -43,11 +41,11 @@ interface ProductionAssemblyProps {
   jobOrderItems: JobOrderItem[];
   customers: Customer[];
   selectedJoId: string | null;
-  setSelectedJoId: (id: string | null) => void;
+  setSelectedJoId: React.Dispatch<React.SetStateAction<string | null>>;
   quickSaleQty: number;
-  setQuickSaleQty: (qty: number) => void;
+  setQuickSaleQty: React.Dispatch<React.SetStateAction<number>>;
   quickSaleCustomer: string;
-  setQuickSaleCustomer: (name: string) => void;
+  setQuickSaleCustomer: React.Dispatch<React.SetStateAction<string>>;
   onExecute: () => void;
   onFulfillJO: (orderId: string) => void;
   onQuickSale: (itemSku: string) => void;
@@ -106,7 +104,6 @@ export function ProductionAssembly({
   const [newStyleBOM, setNewStyleBOM] = useState<Array<{ sku: string; qty: number }>>([]);
   const [tempMatSku, setTempMatSku] = useState('');
   const [tempMatQty, setTempMatQty] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
   const [quickSaleItemSku, setQuickSaleItemSku] = useState('');
   const [isRegisterCustomerModalOpen, setIsRegisterCustomerModalOpen] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', gender: 'Male', email: '' });
@@ -609,7 +606,7 @@ export function ProductionAssembly({
 
       {/* Register New Style Modal */}
       {isNewStyleModalOpen && (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-250 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[500px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 bg-slate-50/50">
               <h3 className="text-[20px] font-black text-slate-900 tracking-tight">Register New Garment Style</h3>
@@ -741,7 +738,7 @@ export function ProductionAssembly({
 
       {/* Register Customer Modal */}
       {isRegisterCustomerModalOpen && (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-250 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[450px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
@@ -797,7 +794,7 @@ export function ProductionAssembly({
 
       {/* Digital Receipt Modal */}
       {showReceipt && lastTransaction && (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-250 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[400px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 text-center bg-emerald-50 border-b border-emerald-100">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -834,7 +831,7 @@ export function ProductionAssembly({
         </div>
       )}
       {assemblySuccess && (
-        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-[300] bg-emerald-600 text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-2xl animate-in slide-in-from-top-10 duration-500">
+        <div className="fixed top-10 left-1/2 -translate-x-1/2 z-300 bg-emerald-600 text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-2xl animate-in slide-in-from-top-10 duration-500">
           <CheckCircle2 size={24} />
           <span className="text-[15px] font-black uppercase tracking-widest">Entry Recorded Successfully!</span>
         </div>

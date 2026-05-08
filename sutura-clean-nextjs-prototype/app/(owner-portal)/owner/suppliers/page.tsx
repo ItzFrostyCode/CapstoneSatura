@@ -7,9 +7,7 @@ import {
   MapPin, User, ArrowRight, PackageOpen, ClipboardList, Info
 } from 'lucide-react';
 import { 
-  useERPStore, Supplier, PurchaseOrder, InventoryItem, 
-  PurchaseOrderItem, GoodsReceipt, GoodsReceiptItem,
-  SupplierItem
+  useERPStore, Supplier, PurchaseOrder
 } from '../../../../store/useERPStore';
 
 type NavTab = 'directory' | 'purchase-orders' | 'receiving';
@@ -79,7 +77,6 @@ export default function SuppliersPage() {
 
   const [blacklistTarget, setBlacklistTarget] = useState<Supplier | null>(null);
 
-  const panelRef = useRef<HTMLDivElement>(null);
 
   const getSupplierName = (id: string) => suppliers.find(s => s.id === id)?.supplier_name || suppliers.find(s => s.id === id)?.name || id;
   const getInventoryItemName = (id: string) => inventory.find(i => i.id === id)?.item_name || inventory.find(i => i.id === id)?.item || id;
@@ -431,7 +428,7 @@ export default function SuppliersPage() {
     </div>
 
       {selectedSupplier && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedSupplier(null)}>
+        <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setSelectedSupplier(null)}>
           <div className="bg-white w-full max-w-[980px] h-[92vh] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-10 py-8 border-b border-slate-100 bg-slate-50/30">
               <div className="flex items-center gap-4">
@@ -669,7 +666,7 @@ export default function SuppliersPage() {
       )}
 
       {receiptPO && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-[640px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
             <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
               <div>
@@ -1067,7 +1064,7 @@ export default function SuppliersPage() {
       )}
 
       {blacklistTarget && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-300 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[400px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-10 text-center">
               <div className="w-20 h-20 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-6"><AlertCircle size={40} /></div>

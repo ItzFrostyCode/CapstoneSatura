@@ -87,7 +87,7 @@ export function AppointmentSidePanel({
             <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Customer Message / Reason</label>
               <p className="text-[14px] text-slate-700 font-medium leading-relaxed italic">
-                "{appointment.reason || 'No additional notes provided.'}"
+                &quot;{appointment.reason || 'No additional notes provided.'}&quot;
               </p>
             </div>
           </section>
@@ -179,7 +179,7 @@ export function AppointmentSidePanel({
             <div>
               <p className="text-[13px] text-amber-900 font-bold">Reviewer Tip</p>
               <p className="text-[12px] text-amber-700/80 font-medium leading-relaxed">
-                Check the customer's history. Regular customers or those with urgent fitting needs should be prioritized for early slots.
+                Check the customer&apos;s history. Regular customers or those with urgent fitting needs should be prioritized for early slots.
               </p>
             </div>
           </div>

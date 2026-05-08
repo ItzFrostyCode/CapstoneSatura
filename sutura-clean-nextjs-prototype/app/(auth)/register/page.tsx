@@ -43,7 +43,7 @@ export default function Register() {
           
           <div className="mb-8">
             <h2 className="text-4xl font-semibold mb-2 tracking-tight text-gray-900">Register Business</h2>
-            <p className="text-gray-500 text-base">Provide your shop's legal details to get started.</p>
+            <p className="text-gray-500 text-base">Provide your shop&apos;s legal details to get started.</p>
           </div>
 
           <div className="bg-gray-50 border-[1.5px] border-gray-200 p-3 rounded-xl mb-6 flex items-center justify-between">
@@ -115,7 +115,7 @@ export default function Register() {
                 </div>
                 <div className="w-full p-4 border-2 border-dashed border-gray-200 rounded-xl text-center cursor-pointer transition-all bg-gray-50 hover:border-gray-900 flex flex-col items-center gap-2">
                   <Building2 className="text-gray-500 w-5 h-5" />
-                  <div className="text-xs font-bold text-gray-900">Mayor's Permit</div>
+                  <div className="text-xs font-bold text-gray-900">Mayor&apos;s Permit</div>
                   <span className="text-[10px] text-gray-500">Current Year</span>
                 </div>
                 <div className="w-full p-4 border-2 border-dashed border-gray-200 rounded-xl text-center cursor-pointer transition-all bg-gray-50 hover:border-gray-900 flex flex-col items-center gap-2">

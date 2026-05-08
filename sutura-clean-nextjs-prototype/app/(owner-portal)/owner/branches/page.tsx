@@ -218,7 +218,7 @@ export default function BranchManagementPage() {
 
       {/* ── ADD BRANCH MODAL ── */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-10">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-6 sm:p-10">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsAddModalOpen(false)} />
           
           <div className="relative w-full max-w-2xl bg-white rounded-[40px] shadow-2xl shadow-slate-900/20 overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500">
@@ -347,7 +347,7 @@ export default function BranchManagementPage() {
                 </button>
                 <button 
                   type="submit"
-                  className="flex-[2] h-14 bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+                  className="flex-2 h-14 bg-slate-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
                 >
                   Authorize & Create Branch
                 </button>

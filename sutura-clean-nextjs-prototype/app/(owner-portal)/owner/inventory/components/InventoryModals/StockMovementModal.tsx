@@ -2,13 +2,26 @@
 
 import React, { useState, useMemo } from 'react';
 import { X, ArrowUpRight, ArrowDownLeft, AlertCircle, HelpCircle, CheckCircle2, ChevronRight, ChevronDown, ArrowRight } from 'lucide-react';
-import { InventoryItem, MovementType } from '@/types/erp';
+import { InventoryItem, MovementType, MovementReferenceType } from '@/types/erp';
+import { LucideIcon } from 'lucide-react';
+
+export interface StockMovementData {
+  type: MovementType;
+  itemSku: string;
+  qty: number;
+  unitCost: number;
+  referenceType: string;
+  referenceId: string;
+  notes: string;
+  timestamp: string;
+  performedBy: string;
+}
 
 interface StockMovementModalProps {
   isOpen: boolean;
   onClose: () => void;
   inventory: InventoryItem[];
-  onConfirm: (data: any) => void;
+  onConfirm: (data: StockMovementData) => void;
   initialItem?: InventoryItem | null;
   mode: 'in' | 'out';
   renderAvatar: (name: string, size?: number, imageUrl?: string) => React.ReactNode;
@@ -16,7 +29,7 @@ interface StockMovementModalProps {
 
 type Step = 'form' | 'preview';
 
-const MOVEMENT_TYPES: { value: MovementType; label: string; icon: any; color: string; description: string }[] = [
+const MOVEMENT_TYPES: { value: MovementType; label: string; icon: LucideIcon; color: string; description: string }[] = [
   { value: 'RECEIVE', label: 'Stock Reception', icon: ArrowDownLeft, color: 'emerald', description: 'Restocking, supplier delivery, or initial stock.' },
   { value: 'ISSUE', label: 'Stock Issue', icon: ArrowUpRight, color: 'rose', description: 'Used for production or general reduction.' },
   { value: 'ADJUSTMENT_IN', label: 'Inventory Correction (+)', icon: ArrowDownLeft, color: 'amber', description: 'Correction (increase).' },

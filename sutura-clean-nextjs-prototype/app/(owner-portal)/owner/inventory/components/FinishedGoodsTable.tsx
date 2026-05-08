@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MapPin, PackageCheck, MoreVertical, Eye, Archive, Package, ArrowRightLeft, CheckCircle, AlertTriangle, PackageX, Plus, Minus } from 'lucide-react';
+import { PackageCheck, MoreVertical, Eye, Archive, Package, CheckCircle, AlertTriangle, PackageX, Plus, Minus } from 'lucide-react';
 import { InventoryItem } from '@/store/useERPStore';
 
 interface FinishedGoodsTableProps {
@@ -192,8 +192,8 @@ export function FinishedGoodsTable({
 
                       {activeActionRow === item.sku && (
                         <>
-                          <div className="fixed inset-0 z-[60]" onClick={() => setActiveActionRow(null)}></div>
-                          <div className="absolute top-full mt-2 right-0 z-[70] w-48 bg-white border border-slate-200 rounded-xl shadow-2xl py-1 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+                          <div className="fixed inset-0 z-60" onClick={() => setActiveActionRow(null)}></div>
+                          <div className="absolute top-full mt-2 right-0 z-70 w-48 bg-white border border-slate-200 rounded-xl shadow-2xl py-1 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
                              <button onClick={(e) => { e.stopPropagation(); onViewItem(item); setActiveActionRow(null); }} className="w-full px-4 py-2 text-left text-[13px] font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2"><Eye size={14} /> View Details</button>
                              <div className="h-px bg-slate-100 my-1"></div>
                              <button className="w-full px-4 py-2 text-left text-[13px] font-medium text-rose-600 hover:bg-rose-50 flex items-center gap-2" onClick={(e) => e.stopPropagation()}><Archive size={14} /> Archive Item</button>

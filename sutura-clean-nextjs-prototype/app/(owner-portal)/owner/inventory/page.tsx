@@ -46,7 +46,7 @@ import { InventoryCommandCenter } from './components/InventoryCommandCenter';
 // Modals
 import { NewItemModal } from './components/InventoryModals/NewItemModal';
 import { BOMModal } from './components/InventoryModals/BOMModal';
-import { StockMovementModal } from './components/InventoryModals/StockMovementModal';
+import { StockMovementModal, StockMovementData } from './components/InventoryModals/StockMovementModal';
 import { BatchReleaseModal } from './components/InventoryModals/BatchReleaseModal';
 import { StockTransferModal } from './components/InventoryModals/StockTransferModal';
 
@@ -178,16 +178,7 @@ export default function InventoryPage() {
     setAssemblyProductId(recipes[0].productId);
   }
 
-  interface MovementData {
-    itemSku: string;
-    type: 'RECEIVE' | 'ISSUE' | 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT' | 'TRANSFER_IN' | 'TRANSFER_OUT';
-    qty: number;
-    unitCost?: number;
-    referenceType: string;
-    referenceId?: string;
-  }
-
-  const handleMovementConfirm = (data: MovementData) => {
+  const handleMovementConfirm = (data: StockMovementData) => {
     const item = inventory.find(i => i.sku === data.itemSku);
     if (!item) return;
 
@@ -203,10 +194,7 @@ export default function InventoryPage() {
     addMovement({
       inventory_item_id: data.itemSku,
       qty: qtyChange,
-      movement_type: data.type === 'RECEIVE' ? 'RECEIVE' : 
-             data.type === 'ISSUE' ? 'ISSUE' : 
-             data.type === 'ADJUSTMENT_IN' ? 'ADJUSTMENT_IN' : 
-             data.type === 'ADJUSTMENT_OUT' ? 'ADJUSTMENT_OUT' : 'PRODUCTION',
+      movement_type: data.type as 'RECEIVE' | 'ISSUE' | 'PRODUCTION' | 'RELEASE' | 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT', 
       reference_id: `${data.referenceType}: ${data.referenceId || 'Manual'}`,
       performed_by_user_id: 'STF-001', // Mock admin
     });

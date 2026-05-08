@@ -1,0 +1,236 @@
+
+> sutura-nextjs-prototype@0.1.0 lint
+> eslint
+
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(admin-portal)/admin/dashboard/page.tsx
+  1:10  warning  'ShieldCheck' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(admin-portal)/layout.tsx
+    7:13  warning  'Users' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+    7:20  warning  'ShoppingBag' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+    8:3   warning  'PackageSearch' is defined but never used                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    8:27  warning  'BarChart3' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    9:17  warning  'Plus' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+    9:36  warning  'Building2' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   10:20  warning  'Settings' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  143:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(auth)/login-gateway/page.tsx
+  4:21  warning  'ShoppingBag' is defined but never used  @typescript-eslint/no-unused-vars
+  5:3   warning  'Settings' is defined but never used     @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(customer-portal)/customer/dashboard/page.tsx
+  45:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(customer-portal)/layout.tsx
+  8:3   warning  'PackageSearch' is defined but never used  @typescript-eslint/no-unused-vars
+  8:18  warning  'Receipt' is defined but never used        @typescript-eslint/no-unused-vars
+  8:27  warning  'BarChart3' is defined but never used      @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(designer-portal)/designer/portfolio/page.tsx
+  16:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  27:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  38:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(designer-portal)/layout.tsx
+    7:20  warning  'ShoppingBag' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+    8:3   warning  'PackageSearch' is defined but never used                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    8:18  warning  'Receipt' is defined but never used                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+    8:27  warning  'BarChart3' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    9:17  warning  'Plus' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+    9:36  warning  'Building2' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  142:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/layout.tsx
+  29:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/appointments/components/AppointmentRequestsTable.tsx
+  11:3  warning  'ChevronRight' is defined but never used  @typescript-eslint/no-unused-vars
+  16:3  warning  'Trash2' is defined but never used        @typescript-eslint/no-unused-vars
+  55:3  warning  'onDelete' is defined but never used      @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/appointments/components/AppointmentSidePanel.tsx
+   7:3  warning  'Mail' is defined but never used                   @typescript-eslint/no-unused-vars
+  14:3  warning  'ShoppingBag' is defined but never used            @typescript-eslint/no-unused-vars
+  46:3  warning  'measurements' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  47:3  warning  'orders' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/appointments/components/ApprovalModals.tsx
+   7:3   warning  'CheckCircle2' is defined but never used                                                            @typescript-eslint/no-unused-vars
+  10:3   warning  'MapPin' is defined but never used                                                                  @typescript-eslint/no-unused-vars
+  19:23  warning  'Staff' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+  68:7   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/appointments/page.tsx
+    4:46  warning  'Filter' is defined but never used             @typescript-eslint/no-unused-vars
+    4:54  warning  'SlidersHorizontal' is defined but never used  @typescript-eslint/no-unused-vars
+  276:31  warning  'status' is defined but never used             @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/billing/components/InvoiceDetailModal.tsx
+  2:24  warning  'DollarSign' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/billing/components/PaymentModal.tsx
+   2:23  warning  'AlertCircle' is defined but never used      @typescript-eslint/no-unused-vars
+   2:36  warning  'ArrowUpRight' is defined but never used     @typescript-eslint/no-unused-vars
+   3:8   warning  'Image' is defined but never used            @typescript-eslint/no-unused-vars
+  32:3   warning  'paymentNotes' is defined but never used     @typescript-eslint/no-unused-vars
+  32:17  warning  'setPaymentNotes' is defined but never used  @typescript-eslint/no-unused-vars
+  33:3   warning  'paymentImage' is defined but never used     @typescript-eslint/no-unused-vars
+  33:17  warning  'setPaymentImage' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/billing/hooks/useBilling.ts
+  2:23  warning  'Payment' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/billing/page.tsx
+  6:17  warning  'ArrowUpRight' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/branches/[id]/page.tsx
+   13:8   warning  'Image' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   20:29  warning  'inventoryStock' is assigned a value but never used                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+  100:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/branches/page.tsx
+  178:53  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/dashboard/page.tsx
+   6:21  warning  'LayoutGrid' is defined but never used                   @typescript-eslint/no-unused-vars
+   6:41  warning  'BarChart3' is defined but never used                    @typescript-eslint/no-unused-vars
+   7:3   warning  'ArrowRight' is defined but never used                   @typescript-eslint/no-unused-vars
+   7:15  warning  'Activity' is defined but never used                     @typescript-eslint/no-unused-vars
+   7:37  warning  'Scissors' is defined but never used                     @typescript-eslint/no-unused-vars
+  10:10  warning  'resolveOrderState' is defined but never used            @typescript-eslint/no-unused-vars
+  35:5   warning  'inventoryMovements' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/finance/page.tsx
+  1:10  warning  'TrendingUp' is defined but never used  @typescript-eslint/no-unused-vars
+  1:22  warning  'CreditCard' is defined but never used  @typescript-eslint/no-unused-vars
+  1:34  warning  'DollarSign' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/InternalTransfers.tsx
+   4:62  warning  'CheckCircle2' is defined but never used  @typescript-eslint/no-unused-vars
+  11:37  warning  'inventory' is defined but never used     @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/InventoryItemDetail.tsx
+  5:53  warning  'Staff' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/InventoryModals/BOMModal.tsx
+  4:62  warning  'Edit3' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/InventoryModals/BatchReleaseModal.tsx
+   4:13  warning  'PackageCheck' is defined but never used         @typescript-eslint/no-unused-vars
+   4:33  warning  'User' is defined but never used                 @typescript-eslint/no-unused-vars
+   4:39  warning  'CheckCircle2' is defined but never used         @typescript-eslint/no-unused-vars
+   4:53  warning  'ChevronRight' is defined but never used         @typescript-eslint/no-unused-vars
+  28:3   warning  'setBatchReleaseStep' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/InventoryModals/StockMovementModal.tsx
+   4:55  warning  'HelpCircle' is defined but never used                 @typescript-eslint/no-unused-vars
+   4:81  warning  'ChevronRight' is defined but never used               @typescript-eslint/no-unused-vars
+   5:39  warning  'MovementReferenceType' is defined but never used      @typescript-eslint/no-unused-vars
+  56:9   warning  'selectedItem' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  57:9   warning  'movementTypeInfo' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/InventoryModals/StockTransferModal.tsx
+  4:29  warning  'Building2' is defined but never used      @typescript-eslint/no-unused-vars
+  6:10  warning  'InventoryItem' is defined but never used  @typescript-eslint/no-unused-vars
+  6:25  warning  'ShopBranch' is defined but never used     @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/InventoryWorkflowGuide.tsx
+  6:3  warning  'ChevronUp' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/MaterialsTable.tsx
+   4:10  warning  'Search' is defined but never used          @typescript-eslint/no-unused-vars
+   4:76  warning  'ArrowRightLeft' is defined but never used  @typescript-eslint/no-unused-vars
+  18:3   warning  'suppliers' is defined but never used       @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/components/ProductionAssembly.tsx
+  23:25  warning  'Order' is defined but never used         @typescript-eslint/no-unused-vars
+  23:32  warning  'JobOrderItem' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/inventory/page.tsx
+    3:29  warning  'useCallback' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+    8:3   warning  'Layers' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   14:3   warning  'Truck' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   20:3   warning  'InventoryMovement' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   22:3   warning  'JobOrderItem' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   23:3   warning  'Customer' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   24:3   warning  'Staff' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   25:3   warning  'Supplier' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   26:3   warning  'PurchaseOrder' is defined but never used                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   27:3   warning  'Appointment' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   40:30  warning  'BOMRecipe' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   42:10  warning  'InventoryWorkflowGuide' is defined but never used                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   48:10  warning  'BOMModal' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   65:7   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  103:24  warning  'setStatusFilter' is assigned a value but never used                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  118:10  warning  'isBOMModalOpen' is assigned a value but never used                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+  118:26  warning  'setIsBOMModalOpen' is assigned a value but never used                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  129:10  warning  'bomProductId' is assigned a value but never used                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  129:24  warning  'setBomProductId' is assigned a value but never used                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  130:10  warning  'bomMaterials' is assigned a value but never used                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  130:24  warning  'setBomMaterials' is assigned a value but never used                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  140:10  warning  'assemblyStep' is assigned a value but never used                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  140:24  warning  'setAssemblyStep' is assigned a value but never used                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  338:9   warning  'handleImageUpload' is assigned a value but never used                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/orders/components/CreateOrderModal/steps/SummaryStep.tsx
+  24:3  warning  'financials' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/reports/page.tsx
+  107:9  warning  'recentRework' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/staff/components/StaffModals.tsx
+  25:3  warning  'toggleRole' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/staff/page.tsx
+  5:16  warning  'Search' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/subscription/page.tsx
+   8:3   warning  'Rocket' is defined but never used                        @typescript-eslint/no-unused-vars
+  18:23  warning  'setCurrentPlan' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  19:28  warning  'setShowSuccessModal' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(owner-portal)/owner/suppliers/page.tsx
+    3:29  warning  'useRef' is defined but never used            @typescript-eslint/no-unused-vars
+  702:29  warning  'damaged' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(staff-portal)/layout.tsx
+    8:3   warning  'PackageSearch' is defined but never used                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    8:18  warning  'Receipt' is defined but never used                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+    8:27  warning  'BarChart3' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    9:17  warning  'Plus' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+    9:36  warning  'Building2' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   10:3   warning  'LayoutDashboard' is defined but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+   10:20  warning  'Settings' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  139:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/app/(staff-portal)/staff/measurements/page.tsx
+  1:10  warning  'Ruler' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/components/settings/GeneralTab.tsx
+   5:34  warning  'Camera' is defined but never used                     @typescript-eslint/no-unused-vars
+   5:42  warning  'RefreshCw' is defined but never used                  @typescript-eslint/no-unused-vars
+  14:32  warning  'updateUserAvatar' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/components/shared/BranchCard.tsx
+   4:29  warning  'Order' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  64:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/components/shared/BranchSwitcher.tsx
+  9:71  warning  'currentUser' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/lib/db.ts
+  26:16  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/store/slices/inventorySlice.ts
+  209:37  warning  'performedBy' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/joshuawaymanarabejo/Documents/Projects/Websites/CapstoneSatura/sutura-clean-nextjs-prototype/store/useERPStore.ts
+  7:17  warning  'Supplier' is defined but never used       @typescript-eslint/no-unused-vars
+  7:27  warning  'PurchaseOrder' is defined but never used  @typescript-eslint/no-unused-vars
+  7:42  warning  'InventoryItem' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 140 problems (0 errors, 140 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

@@ -37,6 +37,7 @@ export function BOMModal({
   // Reset edit mode when product changes
   React.useEffect(() => {
     const hasRecipe = recipes.find(r => r.productId === bomProductId);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsEditMode(!hasRecipe); // Default to edit mode if NEW recipe, otherwise locked
   }, [bomProductId, recipes]);
 

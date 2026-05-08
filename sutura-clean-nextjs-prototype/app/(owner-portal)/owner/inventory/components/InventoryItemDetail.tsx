@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Package, MapPin, TrendingUp, TrendingDown, History, Info, Layers, BarChart3, Tag, Edit3, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Package, MapPin, TrendingUp, TrendingDown, History, Info, BarChart3, Tag, Edit3 } from 'lucide-react';
 import { useERPStore, InventoryItem, StockMovement, Staff } from '@/store/useERPStore';
 
 interface InventoryItemDetailProps {
@@ -36,7 +36,7 @@ export function InventoryItemDetail({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-white shadow-2xl z-[300] border-l border-slate-100 flex flex-col animate-in slide-in-from-right duration-500">
+    <div className="fixed inset-y-0 right-0 w-full max-w-[450px] bg-white shadow-2xl z-300 border-l border-slate-100 flex flex-col animate-in slide-in-from-right duration-500">
       {/* Header */}
       <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div className="flex items-center gap-4">
@@ -153,7 +153,7 @@ export function InventoryItemDetail({
                   setIsUpdatingStock(false);
                 }}
                 disabled={parseInt(actualStock) === (item.stock || 0)}
-                className="flex-[2] py-2 bg-indigo-600 text-white font-black text-[12px] rounded-xl hover:bg-indigo-700 disabled:opacity-50"
+                className="flex-2 py-2 bg-indigo-600 text-white font-black text-[12px] rounded-xl hover:bg-indigo-700 disabled:opacity-50"
               >
                 Save Actual Count
               </button>

@@ -63,7 +63,9 @@ export function ConfirmScheduleModal({
 
   useEffect(() => {
     if (appointment) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDate(appointment.date);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTime(appointment.startTime);
     }
   }, [appointment]);
@@ -75,7 +77,7 @@ export function ConfirmScheduleModal({
   if (!isOpen || !appointment) return null;
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-250 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-[550px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-indigo-600 text-white">
           <div className="flex items-center gap-4">
@@ -98,7 +100,7 @@ export function ConfirmScheduleModal({
               <Info size={20} />
             </div>
             <p className="text-[13px] text-indigo-900 font-medium leading-relaxed">
-              You are approving <span className="font-black">{appointment.customer}'s</span> request for a <span className="font-black">{appointment.type}</span>.
+              You are approving <span className="font-black">{appointment.customer}&apos;s</span> request for a <span className="font-black">{appointment.type}</span>.
             </p>
           </div>
 
@@ -251,7 +253,7 @@ export function DeclineRequestModal({ isOpen, onClose, appointment, onConfirm }:
   if (!isOpen || !appointment) return null;
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-250 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-[450px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="p-8 space-y-6">
           <div className="flex flex-col items-center text-center space-y-4">
@@ -308,7 +310,7 @@ export function DeclineRequestModal({ isOpen, onClose, appointment, onConfirm }:
               setNote('');
               onClose();
             }}
-            className="flex-[2] h-16 bg-slate-900 text-white rounded-[22px] text-[15px] font-black hover:bg-rose-600 disabled:opacity-50 disabled:hover:bg-slate-900 transition-all shadow-xl shadow-slate-900/10 active:scale-95"
+            className="flex-2 h-16 bg-slate-900 text-white rounded-[22px] text-[15px] font-black hover:bg-rose-600 disabled:opacity-50 disabled:hover:bg-slate-900 transition-all shadow-xl shadow-slate-900/10 active:scale-95"
           >
             Confirm Decline
           </button>
@@ -334,7 +336,7 @@ export function CompleteAppointmentModal({
   if (!isOpen || !appointment) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
       <div className="relative w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
@@ -375,7 +377,7 @@ export function CompleteAppointmentModal({
                 setNotes('');
                 onClose();
               }}
-              className="flex-[2] h-16 bg-slate-900 text-white rounded-[22px] text-[15px] font-black hover:bg-emerald-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95 px-8"
+              className="flex-2 h-16 bg-slate-900 text-white rounded-[22px] text-[15px] font-black hover:bg-emerald-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95 px-8"
             >
               Finalize & Complete
             </button>

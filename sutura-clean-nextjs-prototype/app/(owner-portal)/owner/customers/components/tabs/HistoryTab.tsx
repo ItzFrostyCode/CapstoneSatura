@@ -2,7 +2,6 @@
 
 import React, { useMemo } from 'react';
 import { ShoppingBag, Calendar, Ruler, CreditCard, CheckCircle2 } from 'lucide-react';
-import { Order, Appointment, FittingSession, Payment } from '@/types/erp';
 import { useERPStore } from '@/store/useERPStore';
 
 interface HistoryEvent {

@@ -465,7 +465,7 @@ export default function JobOrdersPage() {
 
       {/* ORDER DETAILS MODAL */}
       {isModalOpen && selectedOrder && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-[1050px] h-[90vh] rounded-[24px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex">
             <div className="w-[400px] border-r border-slate-100 flex flex-col bg-slate-50/30">
               <div className="p-8 border-b border-slate-100 bg-white">
@@ -942,7 +942,7 @@ export default function JobOrdersPage() {
                     </div>
 
                     <div className="space-y-3">
-                      {(selectedOrder as any).discrepancies?.length > 0 ? (selectedOrder as any).discrepancies.map((d: any) => (
+                      {selectedOrder.discrepancies?.length && selectedOrder.discrepancies.length > 0 ? selectedOrder.discrepancies.map((d) => (
                         <div key={d.id} className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm flex items-start gap-4">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${d.discrepancy_type === 'MATERIAL_WASTE' ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
                             {d.discrepancy_type === 'MATERIAL_WASTE' ? <Scissors size={20} /> : <User size={20} />}
@@ -1470,7 +1470,7 @@ export default function JobOrdersPage() {
                   setDiscAmount('');
                 }}
                 disabled={!discReason || (discType === 'MATERIAL_WASTE' ? (!discItemId || !discQty) : !discAmount)}
-                className="flex-[2] py-3 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-slate-800 disabled:opacity-50 disabled:hover:bg-slate-900 transition-colors"
+                className="flex-2 py-3 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-slate-800 disabled:opacity-50 disabled:hover:bg-slate-900 transition-colors"
               >
                 Log Issue
               </button>

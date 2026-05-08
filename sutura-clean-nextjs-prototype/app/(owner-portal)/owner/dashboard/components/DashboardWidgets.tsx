@@ -4,11 +4,17 @@ import React from 'react';
 import { 
   ArrowUpRight, ArrowDownRight, TrendingUp, 
   AlertCircle, CheckCircle2, Clock, Package,
-  ArrowRight, Activity, Wallet, Scissors
+  ArrowRight, Activity, Wallet
 } from 'lucide-react';
+import { ShopBranch, Staff, InventoryItem } from '@/types/erp';
 
 // --- BRANCH PERFORMANCE COMPARISON ---
-export const BranchPerformance = ({ branches, branchData }: any) => {
+interface BranchPerformanceProps {
+  branches: ShopBranch[];
+  branchData: Record<string, { revenue: number; target: number }>;
+}
+
+export const BranchPerformance = ({ branches, branchData }: BranchPerformanceProps) => {
   const sortedBranches = [...branches].sort((a, b) => {
     const revA = branchData[a.id]?.revenue || 0;
     const revB = branchData[b.id]?.revenue || 0;
@@ -42,7 +48,7 @@ export const BranchPerformance = ({ branches, branchData }: any) => {
       )}
 
       <div className="space-y-4">
-        {branches.map((branch: any) => {
+        {branches.map((branch: ShopBranch) => {
           const data = branchData[branch.id] || { revenue: 0, target: 100000 };
           const percent = Math.min(100, (data.revenue / data.target) * 100);
           
@@ -70,7 +76,7 @@ export const BranchPerformance = ({ branches, branchData }: any) => {
 };
 
 // --- STAFF STATUS TRACKER ---
-export const StaffStatusWidget = ({ staff }: { staff: any[] }) => {
+export const StaffStatusWidget = ({ staff }: { staff: Staff[] }) => {
   const sortedStaff = [...staff].sort((a, b) => {
     const aIsOnline = a.status === 'Online' || a.status === 'Active';
     const bIsOnline = b.status === 'Online' || b.status === 'Active';
@@ -122,7 +128,16 @@ export const StaffStatusWidget = ({ staff }: { staff: any[] }) => {
 };
 
 // --- FINANCIAL AGING (AR) ---
-export const ReceivablesAging = ({ agingData }: any) => {
+interface ReceivablesAgingProps {
+  agingData: {
+    current: number;
+    overdue30: number;
+    overdue60: number;
+    overdue90: number;
+  };
+}
+
+export const ReceivablesAging = ({ agingData }: ReceivablesAgingProps) => {
   return (
     <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
       <div className="flex items-center gap-2 text-rose-600 text-[11px] font-black uppercase tracking-widest mb-6">
@@ -147,7 +162,7 @@ export const ReceivablesAging = ({ agingData }: any) => {
 };
 
 // --- PRODUCTION EFFICIENCY ---
-export const ProductionEfficiency = ({ stats }: any) => {
+export const ProductionEfficiency = ({ stats }: { stats: Record<string, unknown> }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="p-6 bg-white border border-slate-100 rounded-[28px] shadow-sm">
@@ -187,13 +202,20 @@ export const ProductionEfficiency = ({ stats }: any) => {
 };
 
 // --- ALERT CARD ---
-export const ExecutiveAlert = ({ title, desc, action, type = 'warning', count }: any) => {
+interface ExecutiveAlertProps {
+  title: string;
+  desc: string;
+  type?: 'warning' | 'critical' | 'info' | 'success';
+  count?: number;
+}
+
+export const ExecutiveAlert = ({ title, desc, type = 'warning', count }: ExecutiveAlertProps) => {
   const colors = {
     warning: 'bg-amber-50 border-amber-100 text-amber-900 icon-amber-600',
     critical: 'bg-rose-50 border-rose-100 text-rose-900 icon-rose-600',
     info: 'bg-indigo-50 border-indigo-100 text-indigo-900 icon-indigo-600',
     success: 'bg-emerald-50 border-emerald-100 text-emerald-900 icon-emerald-600'
-  }[type as 'warning' | 'critical' | 'info' | 'success'];
+  }[type];
 
   return (
     <div className={`p-5 rounded-3xl border flex items-center justify-between group cursor-pointer hover:scale-[1.02] transition-all ${colors}`}>
@@ -219,7 +241,7 @@ export const ExecutiveAlert = ({ title, desc, action, type = 'warning', count }:
 };
 
 // --- STOCK RISK QUEUE ---
-export const StockRiskQueue = ({ items }: { items: any[] }) => {
+export const StockRiskQueue = ({ items }: { items: InventoryItem[] }) => {
   return (
     <div className="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm">
        <div className="flex items-center justify-between mb-6">
@@ -260,7 +282,14 @@ export const StockRiskQueue = ({ items }: { items: any[] }) => {
 };
 
 // --- RECENT ACTIVITY (LIVE FEED) ---
-export const SystemPulse = ({ activities }: any) => {
+interface ActivityItem {
+  type: 'PAYMENT' | 'STATUS' | 'ALERT';
+  title: string;
+  desc: string;
+  time: string;
+}
+
+export const SystemPulse = ({ activities }: { activities: ActivityItem[] }) => {
   return (
     <div className="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm flex flex-col max-h-[420px]">
       <div className="flex items-center justify-between mb-6 shrink-0">
@@ -274,7 +303,7 @@ export const SystemPulse = ({ activities }: any) => {
       </div>
       
       <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar flex-1">
-        {activities.length > 0 ? activities.map((act: any, i: number) => (
+        {activities.length > 0 ? activities.map((act: ActivityItem, i: number) => (
           <div key={i} className="flex gap-4 group">
             <div className="flex flex-col items-center shrink-0">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${

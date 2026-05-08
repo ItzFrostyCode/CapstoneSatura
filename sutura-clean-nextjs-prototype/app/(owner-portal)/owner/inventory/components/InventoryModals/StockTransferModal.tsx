@@ -25,7 +25,7 @@ export function StockTransferModal({ isOpen, onClose, renderAvatar }: StockTrans
     destination_branch_id: '',
     inventory_item_id: '',
     qty: 1,
-    reason: 'BRANCH_REQUISITION' as any,
+    reason: 'BRANCH_REQUISITION' as 'BRANCH_REQUISITION' | 'LOW_STOCK' | 'HQ_REBALANCING' | 'MANUAL_TRANSFER',
     notes: ''
   });
 
@@ -192,7 +192,7 @@ export function StockTransferModal({ isOpen, onClose, renderAvatar }: StockTrans
                   <div className="relative">
                     <select 
                       value={transferForm.reason}
-                      onChange={e => setTransferForm(p => ({...p, reason: e.target.value as any}))}
+                      onChange={e => setTransferForm(p => ({...p, reason: e.target.value as 'BRANCH_REQUISITION' | 'LOW_STOCK' | 'HQ_REBALANCING' | 'MANUAL_TRANSFER'}))}
                       className="w-full h-12 px-4 pr-10 rounded-xl border border-slate-200 bg-white text-[14px] font-bold focus:border-slate-900 outline-none transition-all appearance-none cursor-pointer"
                     >
                       <option value="BRANCH_REQUISITION">Branch Requisition</option>

@@ -3,20 +3,21 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useMemo } from 'react';
 import { 
-  Building2, Users, ShoppingBag, ArrowLeft, 
+  Users, ShoppingBag, ArrowLeft, 
   TrendingUp, Clock, AlertCircle, Package,
   FileText, CreditCard, BarChart3, ChevronRight,
-  ArrowUpRight, ArrowDownRight, MapPin, UserPlus
+  MapPin, UserPlus
 } from 'lucide-react';
 import { useERPStore } from '@/store/useERPStore';
 import Link from 'next/link';
+import Image from 'next/image';
 
 type TabType = 'overview' | 'operations' | 'inventory' | 'billings' | 'reports';
 
 export default function BranchWorkspacePage() {
   const { id } = useParams();
   const router = useRouter();
-  const { branches, orders, inventoryStock, inventory, staff, payments, invoices } = useERPStore();
+  const { branches, orders, inventoryStock, staff, invoices } = useERPStore();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
   const branch = branches.find(b => b.id === id);
@@ -25,7 +26,6 @@ export default function BranchWorkspacePage() {
   // ── DATA ENGINE: HQ OVERSIGHT FILTERING ──
   const branchOrders = useMemo(() => orders.filter(o => o.branch_id === id), [orders, id]);
   const branchInvoices = useMemo(() => invoices.filter(i => i.branch_id === id), [invoices, id]);
-  const branchStock = useMemo(() => inventoryStock.filter(s => s.branch_id === id), [inventoryStock, id]);
   
   const revenue = useMemo(() => 
     branchInvoices.reduce((acc, inv) => acc + (inv.status === 'PAID' ? inv.total_amount : 0), 0)
@@ -43,19 +43,20 @@ export default function BranchWorkspacePage() {
 
   // ── MOCK DATA GENERATION (STABILIZED) ──
   const operationalMetrics = useMemo(() => {
-    return ['Bespoke Suits', 'Bulk Uniforms', 'Alterations'].map(cat => ({
-      cat,
-      items: Math.floor(Math.random() * 20) + 5,
-      days: Math.floor(Math.random() * 5) + 3
-    }));
+    return [
+      { cat: 'Bespoke Suits', items: 12, days: 5 },
+      { cat: 'Bulk Uniforms', items: 8, days: 4 },
+      { cat: 'Alterations', items: 15, days: 2 }
+    ];
   }, []);
 
   const inventoryValueData = useMemo(() => {
-    return ['Fabrics', 'Trims', 'Boutique Items', 'Finished Goods'].map(cat => ({
-      cat,
-      value: Math.floor(Math.random() * 500000 + 100000),
-      percent: Math.floor(Math.random() * 60) + 20
-    }));
+    return [
+      { cat: 'Fabrics', value: 450000, percent: 85 },
+      { cat: 'Trims', value: 120000, percent: 45 },
+      { cat: 'Boutique Items', value: 280000, percent: 65 },
+      { cat: 'Finished Goods', value: 350000, percent: 75 }
+    ];
   }, []);
 
   if (!branch) return <div>Branch not found</div>;

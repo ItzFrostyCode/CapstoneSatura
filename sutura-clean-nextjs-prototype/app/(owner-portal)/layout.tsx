@@ -24,7 +24,9 @@ export default function DashboardLayout({
 
   // Clock Logic
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentTime(new Date());
 
     const timer = window.setInterval(() => {
