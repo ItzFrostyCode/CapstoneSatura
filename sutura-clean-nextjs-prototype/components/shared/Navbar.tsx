@@ -2,9 +2,10 @@
 
 import { 
   Search, Bell, ChevronDown, Calendar, Clock, 
-  Settings, LogOut, Crown 
+  Settings, LogOut, Crown, Users 
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 interface NavbarProps {
@@ -30,6 +31,7 @@ export function Navbar({
   isNotificationsOpen,
   setIsNotificationsOpen
 }: NavbarProps) {
+  const pathname = usePathname();
   return (
     <header className="h-24 bg-slate-50 flex items-center justify-between px-10 shrink-0 z-40">
       {/* Left: Dynamic Title & Context */}
@@ -114,6 +116,15 @@ export function Navbar({
                     <Link href="/owner/settings" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
                       <Settings size={16} /> Settings
                     </Link>
+                    {pathname.startsWith('/staff') ? (
+                      <Link href="/owner/dashboard" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-white bg-slate-900 hover:bg-slate-800 transition-all shadow-sm">
+                        <Crown size={16} className="text-amber-400" /> Owner Portal
+                      </Link>
+                    ) : (
+                      <Link href="/staff/tasks" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-slate-900 bg-slate-100 hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                        <Users size={16} /> Staff Workspace
+                      </Link>
+                    )}
                     <Link href="/owner/subscription" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-indigo-600 hover:bg-indigo-50 transition-all">
                       <Crown size={16} /> Subscription
                     </Link>

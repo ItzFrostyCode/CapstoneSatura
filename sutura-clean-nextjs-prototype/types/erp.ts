@@ -5,7 +5,13 @@
 
 // ── ENUMS / SCALARS ─────────────────────────────────────────
 
-export type UserRole = 'ADMIN' | 'OWNER' | 'STAFF' | 'CUSTOMER' | 'DESIGNER';
+export type UserRole = 'SALES' | 'TAILOR' | 'INVENTORY' | 'MANAGER' | 'ADMIN';
+
+export type Permission = 
+  | 'customers:modify'
+  | 'orders:status_only'
+  | 'inventory:modify'
+  | 'billing:modify';
 export type AccountStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 export type PlanLevel = 'BASIC' | 'PRO' | 'PREMIUM';
 export type SubscriptionStatus = 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
@@ -108,7 +114,7 @@ export interface ShopBranch {
   manager_id?: string;
 }
 
-export type StaffRole = 'Owner' | 'Admin' | 'Manager' | 'Sales' | 'Tailor' | 'Inventory';
+export type StaffRole = UserRole; // Aliased for backward compatibility
 
 export interface Staff {
   id: string;
@@ -325,6 +331,7 @@ export interface JobOrderItem {
   quantity: number;
   unit_price: number;
   line_total: number;
+  size?: string;
   
   // -- COSTING per item --
   bom_cost?: number;
@@ -759,4 +766,40 @@ export interface AuditLog {
   previous_branch?: string;
   new_branch?: string;
   timestamp: string;
+}
+
+// ── H. SUPPORT SYSTEM ─────────────────────────────────────────
+
+export type SupportTicketCategory = 'Technical Issue' | 'Billing Concern' | 'Inventory Problem' | 'Feature Request' | 'Complaint' | 'Branch Concern';
+export type SupportTicketStatus = 'Open' | 'In Review' | 'Waiting Reply' | 'Resolved' | 'Closed';
+
+export interface SupportTicketAttachment {
+  id: string;
+  url: string;
+  fileName: string;
+  fileSize: number; // in bytes
+  fileType: 'image/png' | 'image/jpeg' | 'video/mp4' | 'video/quicktime' | 'application/pdf';
+}
+
+export interface SupportTicketMessage {
+  id: string;
+  sender: 'User' | 'HQ Admin';
+  senderName: string;
+  message: string;
+  timestamp: string;
+  attachments?: SupportTicketAttachment[];
+}
+
+export interface SupportTicket {
+  id: string;
+  shopId: string;
+  branchId?: string;
+  creatorId: string;
+  subject: string;
+  category: SupportTicketCategory;
+  status: SupportTicketStatus;
+  priority: Priority;
+  createdAt: string;
+  updatedAt: string;
+  messages: SupportTicketMessage[];
 }

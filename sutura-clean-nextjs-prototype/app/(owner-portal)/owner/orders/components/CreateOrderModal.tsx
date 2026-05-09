@@ -162,7 +162,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
     let laborCost = 0;
 
     if (formData.orderType === 'ALTERATION') {
-      baseAmount = formData.alterationDetails.tasks.reduce((sum, t) => sum + t.price, 0);
+      baseAmount = formData.alterationDetails.tasks.reduce((sum, t) => sum + (Number(t.price) || 0), 0);
     } else if (formData.orderType === 'READY_MADE') {
       baseAmount = (selectedProduct?.unit_price || 1500) * totalQuantity;
       bomCost = (selectedProduct?.unit_cost || 0) * totalQuantity;
@@ -332,7 +332,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
     if (formData.orderType === 'READY_MADE') {
        if (step === 1) setStep(1.5);
        else if (step === 1.5) setStep(7);
-       else if (step === 7) setStep(10);
+       else if (step === 7) setStep(9);
        else setStep(step + 1);
     } else if (formData.orderType === 'BULK') {
        if (step === 2) setStep(2.5);
@@ -345,7 +345,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
 
   const prevStep = () => {
     if (formData.orderType === 'READY_MADE') {
-        if (step === 10) setStep(7);
+        if (step === 9) setStep(7);
         else if (step === 7) setStep(1.5);
         else if (step === 1.5) setStep(1);
         else setStep(step - 1);
@@ -381,7 +381,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
 
         {/* Progress Bar */}
         <div className="h-1 bg-slate-100 w-full shrink-0">
-          <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${(step / 10) * 100}%` }} />
+          <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${(step / 9) * 100}%` }} />
         </div>
 
         {/* Content Area */}
@@ -433,15 +433,15 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
           )}
 
           {step === 7 && <PaymentStep formData={formData} setFormData={setFormData} selectedTemplate={selectedTemplate || null} totalPrice={financials.totalSellingPrice} financials={financials} />}
-          {step === 9 && <PersonnelAssignmentStep staff={staff} currentBranch={currentBranch} selectedTemplate={selectedTemplate || null} formData={formData} setFormData={setFormData} />}
-          {step === 10 && <SummaryStep formData={formData} setFormData={setFormData} selectedCustomer={selectedCustomer} selectedTemplate={selectedTemplate || null} measurementProfiles={measurementProfiles} totalPrice={financials.totalSellingPrice} financials={financials} staff={staff} />}
+          {step === 8 && <PersonnelAssignmentStep staff={staff} currentBranch={currentBranch} selectedTemplate={selectedTemplate || null} formData={formData} setFormData={setFormData} />}
+          {step === 9 && <SummaryStep formData={formData} setFormData={setFormData} selectedCustomer={selectedCustomer} selectedTemplate={selectedTemplate || null} measurementProfiles={measurementProfiles} totalPrice={financials.totalSellingPrice} financials={financials} staff={staff} />}
         </div>
 
         {/* Footer */}
         {step > 0 && (
           <div className="px-8 py-6 border-t border-slate-100 bg-white shrink-0 flex items-center justify-between">
             <button onClick={prevStep} className="flex items-center gap-2 px-6 py-3 rounded-xl text-slate-500 font-black uppercase tracking-widest text-[11px] hover:bg-slate-50"><ChevronLeft size={16} /> Back</button>
-            {step === 10 ? (
+            {step === 9 ? (
               <button onClick={handleFinalSubmit} className="flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[12px] shadow-xl hover:bg-indigo-600 transition-all active:scale-95"><Check size={18} /> Confirm Order</button>
             ) : (
               <button onClick={nextStep} className="flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[12px] shadow-xl hover:bg-slate-800 transition-all active:scale-95">Next Step <ChevronRight size={16} /></button>
@@ -464,8 +464,8 @@ function getStepTitle(step: number, orderType: OrderType) {
     5: orderType === 'ALTERATION' ? 'Materials' : 'Fabric Analysis',
     6: orderType === 'ALTERATION' ? 'Service Pricing' : 'Design & Assets',
     7: 'Payment & Deadline',
-    9: 'Production Assignment',
-    10: 'Final Review'
+    8: 'Production Assignment',
+    9: 'Final Review'
   };
   return titles[step] || 'Order Creation';
 }

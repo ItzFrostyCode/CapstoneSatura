@@ -50,6 +50,14 @@ export const AlterationMaterialsStep: React.FC<AlterationMaterialsStepProps> = (
     });
   };
 
+  const [search, setSearch] = React.useState('');
+
+  const filteredInventory = inventory.filter(i => {
+    const isMaterial = i.category === 'Components' || i.category === 'Raw Materials' || i.category === 'Fabric' || i.category === 'Accessories';
+    const matchesSearch = i.item_name.toLowerCase().includes(search.toLowerCase()) || i.sku.toLowerCase().includes(search.toLowerCase());
+    return isMaterial && matchesSearch;
+  });
+
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 pb-12">
       <div className="flex items-center justify-between">
@@ -65,11 +73,17 @@ export const AlterationMaterialsStep: React.FC<AlterationMaterialsStepProps> = (
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input 
               placeholder="Search components (Zipper, Button...)" 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
               className="w-full h-12 pl-12 pr-4 rounded-xl border border-slate-200 text-[13px] font-medium outline-none focus:border-indigo-500"
             />
           </div>
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-            {inventory.filter(i => i.category === 'Components' || i.category === 'Raw Materials').map(item => (
+            {filteredInventory.length === 0 ? (
+              <div className="p-8 text-center border border-dashed border-slate-100 rounded-2xl">
+                <p className="text-[11px] font-bold text-slate-400 uppercase">No items found</p>
+              </div>
+            ) : filteredInventory.map(item => (
               <button 
                 key={item.id}
                 onClick={() => addMaterial(item)}

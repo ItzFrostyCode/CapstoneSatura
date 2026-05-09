@@ -20,3 +20,46 @@ Naa tanan sa pro plan plus,
 -Customized shop profile
 -Multi-branch support
 - Multi-branch analytics and administrative audit logs
+
+
+
+
+Roles & System Permissions
+1. Sales
+Customers
+Orders
+Measurements
+Appointments
+Billing & Payments
+
+
+2. TAILOR
+Orders
+Measurements
+Inventory Usage
+
+3.Inventory
+Inventory
+Suppliers
+
+
+4.Admin
+Customers
+Orders
+Measurements
+Appointments
+Inventory
+Suppliers
+Billing & Payments
+Reports & Analytics
+
+
+5. Manager (under kay admin shop owner)
+Customers
+Orders
+Measurements
+Appointments
+Inventory
+Suppliers
+Billing & Payments
+Reports & Analytics

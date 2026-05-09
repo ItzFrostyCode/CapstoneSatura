@@ -2,27 +2,26 @@
 
 import React from 'react';
 import { Mail, Phone, MoreVertical, Lock } from 'lucide-react';
-import { Staff, StaffRole, Order } from '@/store/useERPStore';
+import { Staff, StaffRole, Order, ShopBranch } from '@/store/useERPStore';
 
 interface StaffTableProps {
   staff: Staff[];
   orders: Order[];
-  branches: import('@/types/erp').ShopBranch[];
+  branches: ShopBranch[];
   onUpdateStaff: (id: string, data: Partial<Staff>) => void;
-  roleFilter: string;
-  setRoleFilter: (role: string) => void;
+  roleFilter: StaffRole | 'All';
+  setRoleFilter: React.Dispatch<React.SetStateAction<StaffRole | 'All'>>;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
 }
 
 function getRoleBadge(role: StaffRole) {
   switch (role) {
-    case 'Owner': return 'bg-blue-50 text-blue-700 border-blue-100';
-    case 'Admin': return 'bg-rose-50 text-rose-700 border-rose-100';
-    case 'Manager': return 'bg-cyan-50 text-cyan-700 border-cyan-100';
-    case 'Sales': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
-    case 'Tailor': return 'bg-amber-50 text-amber-700 border-amber-100';
-    case 'Inventory': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    case 'ADMIN': return 'bg-rose-50 text-rose-700 border-rose-100';
+    case 'MANAGER': return 'bg-cyan-50 text-cyan-700 border-cyan-100';
+    case 'SALES': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+    case 'TAILOR': return 'bg-amber-50 text-amber-700 border-amber-100';
+    case 'INVENTORY': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
     default: return 'bg-slate-50 text-slate-700 border-slate-200';
   }
 }
@@ -38,13 +37,13 @@ export const StaffTable: React.FC<StaffTableProps> = ({
       {/* INTEGRATED HEADER */}
       <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/30 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-1.5 p-1 bg-slate-200/50 rounded-xl w-max border border-slate-200/50 overflow-x-auto max-w-full">
-          {['All', 'Admin', 'Manager', 'Sales', 'Tailor', 'Inventory'].map(role => (
+          {(['All', 'ADMIN', 'MANAGER', 'SALES', 'TAILOR', 'INVENTORY'] as const).map(role => (
             <button
               key={role}
-              onClick={() => setRoleFilter(role)}
+              onClick={() => setRoleFilter(role as StaffRole | 'All')}
               className={`px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${roleFilter === role ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-900'}`}
             >
-              {role}
+              {role === 'All' ? 'All' : role === 'ADMIN' ? 'Admin' : role === 'MANAGER' ? 'Manager' : role.charAt(0) + role.slice(1).toLowerCase()}
             </button>
           ))}
         </div>

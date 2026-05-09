@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { 
   Users, Calendar, ShoppingBag, PackageSearch, 
-  Truck, Briefcase, LayoutGrid, Wallet, BarChart3, 
-  ArrowRight, Activity, TrendingUp, Scissors, AlertCircle
+  Truck, Briefcase, Home, Wallet, BarChart3, LayoutGrid,
+  ArrowRight, Activity, TrendingUp, Scissors, AlertCircle,
+  Sparkles, Zap, ShieldCheck, Megaphone
 } from 'lucide-react';
 import { useERPStore } from '@/store/useERPStore';
 import { resolveOrderState } from '@/features/orders/orderEngine';
@@ -14,9 +15,10 @@ import {
   ReceivablesAging, 
   ProductionEfficiency, 
   ExecutiveAlert,
-  SystemPulse,
+  RecentActivity,
   StockRiskQueue,
-  StaffStatusWidget
+  StaffStatusWidget,
+  SystemAnnouncements
 } from './components/DashboardWidgets';
 
 export default function DashboardPage() {
@@ -37,13 +39,28 @@ export default function DashboardPage() {
   } = useERPStore();
 
   const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'news' | 'welcome'>('dashboard');
   
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
+    const frame = requestAnimationFrame(() => {
+      setMounted(true);
+    });
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const orders = getEnrichedOrders();
+
+  // --- System Broadcast Announcements ---
+  const announcements = [
+    {
+      id: 'platform-launch',
+      title: 'Welcome to the New Sutura ERP Experience',
+      message: 'The SUTURA Platform has been upgraded to Version 2.0. We have introduced a high-fidelity dashboard, enhanced inventory telemetry, and a specialized staff management engine. These tools are designed to provide professional-grade control over your tailoring operations.',
+      date: 'May 9, 2026',
+      type: 'Platform Update' as const,
+      author: 'Sutura Admin'
+    }
+  ];
 
   // --- Data Calculations ---
   const today = new Date().toISOString().split('T')[0];
@@ -64,7 +81,6 @@ export default function DashboardPage() {
   
   const pendingPOs = purchaseOrders?.filter(po => po.status === 'SENT' || po.status === 'DRAFT').length || 0;
 
-  // Mock branch data for widget
   const mockBranchData = useMemo(() => {
     const data: Record<string, { revenue: number; target: number }> = {};
     branches.forEach(b => {
@@ -98,164 +114,222 @@ export default function DashboardPage() {
   if (!mounted) return null;
 
   return (
-    <div className="max-w-[1600px] mx-auto pb-20 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+    <div className="relative min-h-full pb-20 overflow-x-hidden">
       
-      {/* ── HEADER ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-[32px] font-black text-slate-900 tracking-tight leading-none mb-2">Dashboard</h1>
-          <p className="text-[14px] text-slate-500 font-bold uppercase tracking-widest">
-            Overview of your tailoring business
-          </p>
-        </div>
+      {/* ── MESH GRADIENT BACKGROUND ── */}
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div className="absolute -top-[5%] -left-[5%] w-[60%] h-[50%] bg-indigo-50/50 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute -bottom-[5%] -right-[5%] w-[50%] h-[40%] bg-emerald-50/40 blur-[100px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      {/* ── ALIGNED DOMAINS ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-1000 pt-10">
         
-        {/* LEFT COLUMN: Operations & Customers (Orders, Appointments, Customers) */}
-        <div className="xl:col-span-2 space-y-8">
-          
-          {/* Section: Orders & Production */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 text-[14px] font-black text-slate-900 uppercase tracking-widest">
-              <ShoppingBag size={18} className="text-indigo-500" /> Orders & Production
-            </div>
-            {/* Workshop Flow removed per user request */}
-            <ProductionEfficiency stats={{}} />
-          </section>
+        {/* ── PREMIUM TAB SWITCHER ── */}
+        <div className="flex items-center gap-1 p-1 bg-slate-100/50 backdrop-blur-md border border-slate-200 w-max rounded-3xl">
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
+            { id: 'news', label: 'News', icon: Megaphone },
+            { id: 'welcome', label: 'Welcome', icon: Activity },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as 'dashboard' | 'news' | 'welcome')}
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl text-[14px] font-black uppercase tracking-widest transition-all duration-300 ${
+                activeTab === tab.id 
+                  ? 'bg-white text-slate-900 shadow-xl shadow-slate-200/50' 
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              <tab.icon size={18} />
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-          {/* Section: Appointments & Customers */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-[14px] font-black text-slate-900 uppercase tracking-widest">
-                <Calendar size={18} className="text-amber-500" /> Appointments & Customers
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Appointments List */}
-              <div className="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-[16px] font-black text-slate-900">Today&apos;s Schedule</h3>
-                  <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
-                    {todaySchedule.length} Fittings
-                  </span>
+        {activeTab === 'dashboard' && (
+          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* ── KPI GRID ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { label: 'Annual Revenue', val: formatPHP(totalRevenue), sub: '+12.5% vs Last Period', icon: Wallet, bg: 'bg-indigo-50', text: 'text-indigo-600', sparkle: 'text-indigo-400', zap: 'text-indigo-200' },
+                { label: 'Active Personnel', val: staff.length, sub: `${staff.filter(s => s.status === 'Online').length} Online Now`, icon: Users, bg: 'bg-emerald-50', text: 'text-emerald-600', sparkle: 'text-indigo-400', zap: 'text-indigo-200' },
+                { label: 'Open Job Orders', val: activeOrders.length, sub: `${delayedOrders} Delayed Tasks`, icon: ShoppingBag, bg: 'bg-blue-50', text: 'text-blue-600', sparkle: 'text-indigo-400', zap: 'text-indigo-200' },
+                { label: 'Inventory Value', val: '₱245k', sub: `${criticalStockItems.length} Low Stock Alerts`, icon: PackageSearch, bg: 'bg-rose-50', text: 'text-rose-600', sparkle: 'text-indigo-400', zap: 'text-indigo-200' },
+              ].map((kpi, i) => (
+                <div key={i} className="group relative bg-white/70 backdrop-blur-xl border border-white/60 rounded-[32px] p-6 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 hover:-translate-y-1">
+                  <div className={`w-12 h-12 mb-6 rounded-2xl ${kpi.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
+                    <kpi.icon size={22} className={kpi.text} />
+                  </div>
+                  <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{kpi.label}</div>
+                  <div className="text-[32px] font-black text-slate-900 tracking-tight leading-none mb-2">{kpi.val}</div>
+                  <div className="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
+                    <Sparkles size={12} className={kpi.sparkle} /> {kpi.sub}
+                  </div>
+                  <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Zap size={16} className={kpi.zap} />
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  {todaySchedule.slice(0, 4).map((apt, i) => (
-                    <div key={i} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors">
-                      <div className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center font-black text-[12px] shadow-sm">
-                        {apt.startTime?.split(':')[0]}:{apt.startTime?.split(':')[1]}
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              
+              <div className="xl:col-span-2 space-y-10">
+                
+                {/* ── PRODUCTION FLOW ── */}
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                        <LayoutGrid size={16} />
+                      </div>
+                      <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Production Efficiency</h2>
+                    </div>
+                    <button className="text-[11px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-700 transition-colors">View detailed reports →</button>
+                  </div>
+                  <ProductionEfficiency stats={{}} />
+                </section>
+
+                {/* ── APPOINTMENTS & CUSTOMERS ── */}
+                <section className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Appointments */}
+                    <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-[40px] p-8 shadow-xl shadow-slate-200/30 group">
+                      <div className="flex justify-between items-center mb-8">
+                        <div>
+                          <h3 className="text-[18px] font-black text-slate-900 tracking-tight">Daily Schedule</h3>
+                          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">Confirmed Fittings</p>
+                        </div>
+                        <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 group-hover:rotate-12 transition-transform duration-500">
+                          <Calendar size={24} />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        {todaySchedule.slice(0, 4).map((apt, i) => (
+                          <div key={i} className="flex items-center justify-between p-4 bg-white/50 rounded-[24px] border border-transparent hover:border-slate-100 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-slate-50 rounded-2xl flex flex-col items-center justify-center border border-slate-100 group-hover:border-indigo-100">
+                                <span className="text-[14px] font-black text-slate-900">{apt.startTime?.split(':')[0]}</span>
+                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">PM</span>
+                              </div>
+                              <div>
+                                <div className="text-[15px] font-black text-slate-900 leading-tight">{apt.customer}</div>
+                                <div className="text-[11px] font-bold text-indigo-500 uppercase tracking-widest mt-0.5">{apt.type || 'Fitting Session'}</div>
+                              </div>
+                            </div>
+                            <ArrowRight size={16} className="text-slate-300" />
+                          </div>
+                        ))}
+                        {todaySchedule.length === 0 && (
+                          <div className="text-center py-12">
+                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-slate-200">
+                              <Calendar size={24} className="text-slate-300" />
+                            </div>
+                            <p className="text-slate-400 font-bold text-[13px] uppercase tracking-widest">No scheduled fittings</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Receivables */}
+                    <div className="bg-slate-900 rounded-[40px] p-8 shadow-2xl shadow-slate-900/20 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] -mr-32 -mt-32" />
+                      <div className="relative z-10 flex flex-col h-full justify-between">
+                        <div>
+                          <div className="flex justify-between items-center mb-8">
+                            <div>
+                              <h3 className="text-[18px] font-black text-white tracking-tight">Aging Receivables</h3>
+                              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">Credit Risk Analysis</p>
+                            </div>
+                            <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-white ring-1 ring-white/20">
+                              <BarChart3 size={24} />
+                            </div>
+                          </div>
+                          <ReceivablesAging agingData={mockAging} />
+                        </div>
+                        <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
+                          <div>
+                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Outstanding</div>
+                            <div className="text-[24px] font-black text-white">{formatPHP(receivablesRisk)}</div>
+                          </div>
+                          <button className="h-10 px-5 bg-white text-slate-900 rounded-xl text-[12px] font-black uppercase tracking-widest hover:bg-indigo-400 hover:text-white transition-all">
+                            Collect
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              {/* ── RIGHT COLUMN: MANAGEMENT ── */}
+              <div className="space-y-10">
+                
+                {/* Alerts */}
+                {(delayedOrders > 0 || criticalStockItems.length > 0) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-[12px] font-black text-slate-900 uppercase tracking-widest px-1">
+                      <AlertCircle size={16} className="text-rose-600" /> Urgent Action Required
+                    </div>
+                    <div className="space-y-3">
+                      {delayedOrders > 0 && (
+                        <ExecutiveAlert type="critical" title="Delayed Production" desc="Orders past promised release date." count={delayedOrders} />
+                      )}
+                      {criticalStockItems.length > 0 && (
+                        <ExecutiveAlert type="warning" title="Inventory Warning" desc="Materials below critical threshold." count={criticalStockItems.length} />
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Supply Chain */}
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 text-[12px] font-black text-slate-900 uppercase tracking-widest px-1">
+                    <PackageSearch size={16} className="text-indigo-600" /> Supply Network
+                  </div>
+                  <StockRiskQueue items={criticalStockItems} />
+                  <div className="group bg-white/80 backdrop-blur-md border border-white/60 rounded-[28px] p-6 flex items-center justify-between shadow-xl shadow-slate-200/30 hover:shadow-indigo-500/5 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600 shadow-inner group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                        <Truck size={22}/>
                       </div>
                       <div>
-                        <div className="text-[14px] font-black text-slate-900 leading-tight">{apt.customer}</div>
-                        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{apt.type || 'Fitting Session'}</div>
+                        <div className="text-[14px] font-black text-slate-900 tracking-tight">Active Procurements</div>
+                        <div className="text-[11px] font-bold text-slate-500">Inbound from {suppliers?.length || 0} Vendors</div>
                       </div>
                     </div>
-                  ))}
-                  {todaySchedule.length === 0 && (
-                    <div className="text-center py-6 text-slate-400 italic text-[12px]">No appointments today</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Customer Snapshot - Clean Light Mode */}
-              <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-200 relative overflow-hidden flex flex-col justify-between">
-                <div className="relative z-10">
-                  <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                    <Users size={24} className="text-blue-600" />
+                    <div className="text-[24px] font-black text-slate-900 bg-slate-50 px-4 py-2 rounded-2xl">{pendingPOs}</div>
                   </div>
-                  <div className="text-[40px] font-black text-slate-900 tracking-tight leading-none mb-1">{customers.length}</div>
-                  <div className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mb-6">Total Registered Customers</div>
-                  
-                  {pendingAppointments > 0 && (
-                    <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-between">
-                      <span className="text-[12px] font-bold text-amber-700">Pending Booking Requests</span>
-                      <span className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-[10px] font-black text-white">{pendingAppointments}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
+                </section>
 
-          {/* Section: Finance & Billing */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 text-[14px] font-black text-slate-900 uppercase tracking-widest">
-              <Wallet size={18} className="text-emerald-500" /> Finance & Billing
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm flex flex-col justify-center relative overflow-hidden">
-                <div className="relative z-10">
-                  <div className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Collected Revenue</div>
-                  <div className="text-[40px] font-black text-slate-900 tracking-tight leading-none mb-4">{formatPHP(totalRevenue)}</div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 w-[85%]" />
+                {/* Staff & Activity */}
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 text-[12px] font-black text-slate-900 uppercase tracking-widest px-1">
+                    <Activity size={16} className="text-emerald-600" /> Recent Updates
                   </div>
-                </div>
-                <TrendingUp size={140} className="absolute -bottom-10 -right-10 text-emerald-50 opacity-50" />
-              </div>
-              <ReceivablesAging agingData={mockAging} />
-            </div>
-          </section>
-
-        </div>
-
-        {/* RIGHT COLUMN: Supply Chain, Management & Alerts */}
-        <div className="space-y-8">
-          
-          {/* Actionable Alerts */}
-          {(delayedOrders > 0 || criticalStockItems.length > 0) && (
-            <div className="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm">
-              <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <AlertCircle size={16} className="text-rose-500" /> Requires Attention
-              </h3>
-              <div className="space-y-3">
-                {delayedOrders > 0 && (
-                  <ExecutiveAlert type="critical" title="Delayed Orders" desc="Past promised release dates." count={delayedOrders} />
-                )}
-                {criticalStockItems.length > 0 && (
-                  <ExecutiveAlert type="warning" title="Low Inventory" desc="Items below reorder level." count={criticalStockItems.length} />
-                )}
+                  <StaffStatusWidget staff={staff} />
+                  <RecentActivity activities={pulseActivities} />
+                </section>
+                
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Section: Supply Chain (Inventory & Suppliers) */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 text-[14px] font-black text-slate-900 uppercase tracking-widest">
-              <PackageSearch size={18} className="text-rose-500" /> Supply Chain
-            </div>
-            <StockRiskQueue items={criticalStockItems} />
-            <div className="bg-white border border-slate-200 rounded-[24px] p-5 flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 shadow-sm"><Truck size={18}/></div>
-                <div>
-                  <div className="text-[13px] font-black text-slate-900">Active Purchase Orders</div>
-                  <div className="text-[11px] font-bold text-slate-500">To {suppliers?.length || 0} Suppliers</div>
-                </div>
-              </div>
-              <span className="text-[20px] font-black text-slate-900">{pendingPOs}</span>
-            </div>
-          </section>
+        {activeTab === 'news' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <SystemAnnouncements announcements={announcements} />
+          </div>
+        )}
 
-          {/* Section: Management (Branches & Staff) */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 text-[14px] font-black text-slate-900 uppercase tracking-widest">
-              <Briefcase size={18} className="text-cyan-500" /> Branches & Staff
-            </div>
-            
-            <StaffStatusWidget staff={staff} />
-
-            <div className="bg-white border border-slate-200 rounded-[32px] p-6 shadow-sm">
-              <BranchPerformance branches={branches} branchData={mockBranchData} />
-            </div>
-          </section>
-          
-          <SystemPulse activities={pulseActivities} />
-
-        </div>
+        {activeTab === 'welcome' && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[500px] flex items-center justify-center bg-white/40 backdrop-blur-xl border border-dashed border-slate-200 rounded-[48px]">
+             <div className="text-center opacity-20">
+                <LayoutGrid size={48} className="mx-auto mb-4" />
+                <div className="text-[14px] font-black uppercase tracking-[0.3em]">Welcome Portal</div>
+             </div>
+          </div>
+        )}
       </div>
     </div>
   );

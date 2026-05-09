@@ -4,6 +4,7 @@ import { createInventorySlice, InventorySlice } from './slices/inventorySlice';
 import { createCustomerSlice, CustomerSlice } from './slices/customerSlice';
 import { createSessionSlice, SessionSlice } from './slices/sessionSlice';
 import { createSupplierSlice, SupplierSlice } from './slices/supplierSlice';
+import { createSupportSlice, SupportSlice } from './slices/supportSlice';
 import { Staff, Supplier, PurchaseOrder, InventoryItem } from '@/types/erp';
 
 // Re-export all domain types so consumers can import from one place
@@ -21,6 +22,7 @@ export type {
   OrderType, OrderStatus, TaskStatus, InvoiceStatus, POStatus,
   PaymentConfirmStatus, Priority, MovementType,
   ItemType, BranchType, ReservationStatus,
+  SupportTicket, SupportTicketMessage, SupportTicketAttachment, SupportTicketStatus, SupportTicketCategory
 } from '@/types/erp';
 
 // Legacy re-exports for files not yet migrated
@@ -30,7 +32,7 @@ export type StockMovement = import('@/types/erp').InventoryMovement;
 
 
 // Combine all slices into a single Root Store (Zustand Slices Pattern)
-export type ERPStore = OrderSlice & InventorySlice & CustomerSlice & SessionSlice & SupplierSlice & {
+export type ERPStore = OrderSlice & InventorySlice & CustomerSlice & SessionSlice & SupplierSlice & SupportSlice & {
   addStaff: (staff: Omit<Staff, 'id' | 'staffCode'>) => void;
   updateAppointmentStatus: (id: string, status: 'Pending Review' | 'Scheduled' | 'Rescheduled' | 'Completed' | 'Cancelled' | 'No Show') => void;
   pushNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
@@ -42,4 +44,5 @@ export const useERPStore = create<ERPStore>((...a) => ({
   ...createCustomerSlice(...a),
   ...createSessionSlice(...a),
   ...createSupplierSlice(...a),
+  ...createSupportSlice(...a),
 }));

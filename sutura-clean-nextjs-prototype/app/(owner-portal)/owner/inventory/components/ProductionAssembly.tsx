@@ -18,7 +18,8 @@ import {
   Minus,
   ChevronDown,
   AlertCircle,
-  Edit3
+  Edit3,
+  Scissors
 } from 'lucide-react';
 import { InventoryItem, Order, JobOrderItem, Customer, InventoryMovement } from '@/types/erp';
 
@@ -58,7 +59,7 @@ interface ProductionAssemblyProps {
   movements: InventoryMovement[];
 }
 
-type ProductionMode = 'BULK' | 'JOB_ORDER' | 'READY_MADE';
+type ProductionMode = 'CUSTOM' | 'BULK' | 'ALTERATION' | 'RTW';
 
 interface QuickSaleTransaction {
   id: string;
@@ -97,7 +98,7 @@ export function ProductionAssembly({
   assemblyValidation,
   movements
 }: ProductionAssemblyProps) {
-  const [mode, setMode] = useState<ProductionMode>('BULK');
+  const [mode, setMode] = useState<ProductionMode>('CUSTOM');
   const [isEditMode, setIsEditMode] = useState(false);
   const [isNewStyleModalOpen, setIsNewStyleModalOpen] = useState(false);
   const [newStyle, setNewStyle] = useState({ name: '', sku: '' });
@@ -117,6 +118,14 @@ export function ProductionAssembly({
 
   const materialsList = inventory.filter(i => i.cat !== 'Finished Goods' && i.item_type !== 'FINISHED_GOOD');
   const finishedGoods = inventory.filter(i => i.cat === 'Finished Goods' || i.item_type === 'FINISHED_GOOD');
+
+  // Filter orders by current mode
+  const filteredOrders = useMemo(() => {
+    if (mode === 'CUSTOM') return activeJobOrders.filter(o => o.order_type === 'BESPOKE');
+    if (mode === 'BULK') return activeJobOrders.filter(o => o.order_type === 'BULK');
+    if (mode === 'ALTERATION') return activeJobOrders.filter(o => o.order_type === 'ALTERATION');
+    return [];
+  }, [activeJobOrders, mode]);
 
   const handleCreateStyle = (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,15 +157,20 @@ export function ProductionAssembly({
       {/* MODE SWITCHER */}
       <div className="flex items-center gap-2 bg-white/60 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/60 shadow-sm w-fit">
         {[
-          { id: 'BULK', label: 'Bulk Tailoring', icon: Package },
-          { id: 'READY_MADE', label: 'Walk-in Checkout', icon: ShoppingBag }
+          { id: 'CUSTOM', label: 'Custom Tailoring (Pasadya)', icon: Scissors },
+          { id: 'BULK', label: 'Bulk Order (Uniforms)', icon: Users },
+          { id: 'ALTERATION', label: 'Repair & Alterations', icon: Edit3 },
+          { id: 'RTW', label: 'Ready-to-Wear (RTW)', icon: ShoppingBag }
         ].map((m) => (
           <button
             key={m.id}
-            onClick={() => setMode(m.id as ProductionMode)}
+            onClick={() => {
+               setMode(m.id as ProductionMode);
+               setSelectedJoId(null);
+            }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-black transition-all ${
               mode === m.id
-                ? 'bg-white text-indigo-600 shadow-sm'
+                ? 'bg-white text-indigo-600 shadow-sm border border-slate-100'
                 : 'text-slate-400 hover:text-slate-600'
             }`}
           >
@@ -169,336 +183,224 @@ export function ProductionAssembly({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         {/* MAIN OPERATION CARD */}
         <div className="lg:col-span-8">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
             
-            {/* Header */}
+            {/* Header Section */}
             <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-              {mode === 'BULK' && (
-                <div className="space-y-6">
+              {mode !== 'RTW' ? (
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="text-[18px] font-black text-slate-900 tracking-tight">Bulk Tailoring Log</h2>
-                      <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-1">Record finished garments by size. Automatic material deduction.</p>
+                      <h2 className="text-[18px] font-black text-slate-900 tracking-tight">
+                        {mode === 'CUSTOM' ? 'Pasadya Fulfillment' : 
+                         mode === 'BULK' ? 'Uniform Production' : 
+                         'Alteration Workflow'}
+                      </h2>
+                      <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                        Select active job order to record production completion.
+                      </p>
                     </div>
-                    <button 
-                      onClick={() => setIsNewStyleModalOpen(true)}
-                      className="px-6 h-12 bg-slate-900 text-white rounded-2xl flex items-center gap-2 font-black text-[13px] hover:bg-indigo-600 shadow-xl shadow-slate-900/10 active:scale-95 transition-all"
-                    >
-                      <Plus size={18} /> Register New Garment
-                    </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-2">
-                    <div className="md:col-span-5 relative">
-                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Style Name</label>
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div className="md:col-span-8">
+                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Active {mode} Orders</label>
                       <div className="relative">
                         <select 
-                          value={assemblyProductId}
-                          onChange={(e) => setAssemblyProductId(e.target.value)}
+                          value={selectedJoId || ''}
+                          onChange={(e) => setSelectedJoId(e.target.value)}
                           className="w-full h-14 pl-12 pr-6 rounded-2xl border-2 border-slate-100 bg-white focus:border-slate-900 outline-none text-[15px] font-black text-slate-700 appearance-none cursor-pointer transition-all shadow-sm"
                         >
-                          <option value="" disabled>Select Style...</option>
-                          {finishedGoods.length > 0 ? (
-                            finishedGoods.map(p => (
-                              <option key={p.sku} value={p.sku}>{p.item || p.item_name} — {p.sku}</option>
-                            ))
+                          <option value="">Select Order to Fulfill...</option>
+                          {filteredOrders.length > 0 ? (
+                            filteredOrders.map(o => {
+                              const customer = customers.find(c => c.id === o.customer_id);
+                              return (
+                                <option key={o.id} value={o.id}>
+                                  {o.id} — {customer?.name || o.organization_name || 'Unknown'}
+                                </option>
+                              );
+                            })
                           ) : (
-                            <option disabled>No styles registered</option>
+                            <option disabled>No active {mode.toLowerCase()} orders found</option>
                           )}
                         </select>
-                        <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                       </div>
                     </div>
-                    
-                    <div className="md:col-span-7">
-                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Quantity per Size</label>
-                      <div className="grid grid-cols-5 gap-3">
-                        {['S', 'M', 'L', 'XL', 'XXL'].map(size => (
-                          <div key={size} className="bg-white p-3 rounded-2xl border-2 border-slate-100 hover:border-slate-300 transition-all text-center group">
-                            <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-tighter group-hover:text-slate-900 transition-colors">{size}</p>
-                            <input 
-                              type="number"
-                              min="0"
-                              value={assemblySizes[size] || 0}
-                              onChange={(e) => setAssemblySizes({...assemblySizes, [size]: Math.max(0, parseInt(e.target.value) || 0)})}
-                              onFocus={e => e.target.select()}
-                              className="w-full bg-transparent text-slate-900 text-[18px] font-black text-center outline-none tabular-nums"
-                            />
-                          </div>
-                        ))}
+                    {selectedJoId && (
+                      <div className="md:col-span-4 bg-white p-3 rounded-2xl border-2 border-indigo-50 flex flex-col justify-center animate-in zoom-in-95 duration-200">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 text-center">Commitment Date</p>
+                        <p className="text-[16px] font-black text-indigo-600 text-center">
+                          {new Date(activeJobOrders.find(o => o.id === selectedJoId)?.due_date || '').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </p>
                       </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-[18px] font-black text-slate-900 tracking-tight">Walk-in Checkout (RTW)</h2>
+                      <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-1">Direct sale from available finished goods stock.</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Finished Garment</label>
+                      <select
+                        value={quickSaleItemSku}
+                        onChange={e => setQuickSaleItemSku(e.target.value)}
+                        className="w-full h-14 pl-12 pr-6 rounded-2xl border-2 border-slate-100 bg-white outline-none text-[15px] font-black text-slate-700 appearance-none cursor-pointer focus:border-slate-900 transition-all shadow-sm"
+                      >
+                        <option value="">Select On-Hand Style...</option>
+                        {finishedGoods.filter(i => (i.stock || 0) > 0).map(p => (
+                          <option key={p.sku} value={p.sku}>
+                            {p.item_name || p.item} ({p.stock} in stock)
+                          </option>
+                        ))}
+                      </select>
+                      <ShoppingBag className="absolute left-4 top-[42px] text-slate-300" size={18} />
+                      <ChevronDown size={16} className="absolute right-4 top-[42px] text-slate-400 pointer-events-none" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Customer Name</label>
+                      <input 
+                        type="text"
+                        placeholder="Walk-in Customer"
+                        value={quickSaleCustomer}
+                        onChange={(e) => setQuickSaleCustomer(e.target.value)}
+                        className="w-full h-14 px-5 rounded-2xl border-2 border-slate-100 bg-white text-[15px] font-black text-slate-900 outline-none focus:border-slate-900 transition-all shadow-sm"
+                      />
                     </div>
                   </div>
                 </div>
               )}
+            </div>
 
-
-              {mode === 'READY_MADE' && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-[16px] font-black text-slate-900">Walk-in Checkout</h2>
-                      <p className="text-[11px] text-slate-400 font-medium mt-0.5">Instant stock checkout for walk-in customers.</p>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-xl border border-emerald-100">
-                      <TrendingUp size={14} className="text-emerald-600" />
-                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Active Terminal</span>
-                    </div>
+            {/* Middle Content Section */}
+            <div className="flex-1 p-6">
+              {mode !== 'RTW' ? (
+                <div className="space-y-4">
+                   <div className="flex items-center gap-2 mb-2">
+                    <Layers size={14} className="text-slate-400" />
+                    <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Garments in Order</h3>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2 space-y-4">
-                      {/* Item Selection */}
-                      <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Select Item to Buy</label>
-                        <div className="relative">
-                          <select
-                            value={quickSaleItemSku}
-                            onChange={e => setQuickSaleItemSku(e.target.value)}
-                            className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 bg-white outline-none text-[13px] font-black text-slate-700 appearance-none cursor-pointer focus:border-indigo-600 transition-all shadow-sm"
-                          >
-                            <option value="">Select On-Hand Item...</option>
-                            {finishedGoods.filter(i => (i.stock || 0) > 0).map(p => (
-                              <option key={p.sku} value={p.sku}>
-                                {p.item_name || p.item} — {p.stock} pcs left
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" />
-                        </div>
-                      </div>
-
-                      {/* Customer Selection */}
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Customer Name</label>
-                          <button 
-                            onClick={() => setIsRegisterCustomerModalOpen(true)}
-                            className="text-[10px] font-black text-indigo-600 hover:underline uppercase tracking-widest"
-                          >
-                            + Register New
-                          </button>
-                        </div>
-                        <div className="relative">
-                          <select
-                            value={quickSaleCustomer}
-                            onChange={e => setQuickSaleCustomer(e.target.value)}
-                            className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 bg-white outline-none text-[13px] font-black text-slate-700 appearance-none cursor-pointer focus:border-indigo-600 transition-all shadow-sm"
-                          >
-                            <option value="">Search/Select Customer...</option>
-                            <option value="Walk-in Customer">Walk-in Customer</option>
-                            {customers.map(c => (
-                              <option key={c.id} value={c.name}>{c.name}</option>
-                            ))}
-                          </select>
-                          <Users size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" />
-                        </div>
-                      </div>
+                  {!selectedJoId ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-300 opacity-50 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-100">
+                      <Search size={48} strokeWidth={1} />
+                      <p className="mt-4 font-black text-[12px] uppercase tracking-widest">Select an order above to begin</p>
                     </div>
-
-                    {/* Quantity Selection */}
-                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col justify-center items-center">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Buy Count</label>
-                      <div className="flex items-center gap-4">
-                        <button 
-                          onClick={() => setQuickSaleQty(Math.max(1, quickSaleQty - 1))}
-                          className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all shadow-sm"
-                        >
-                          <Minus size={18} />
-                        </button>
-                        <span className="text-[32px] font-black text-slate-900 tabular-nums">{quickSaleQty}</span>
-                        <button 
-                          onClick={() => {
-                            const item = finishedGoods.find(i => i.sku === quickSaleItemSku);
-                            if (item && quickSaleQty < (item.stock || 0)) {
-                              setQuickSaleQty(quickSaleQty + 1);
-                            }
-                          }}
-                          className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all shadow-sm"
-                        >
-                          <Plus size={18} />
-                        </button>
-                      </div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase mt-2">Pcs to Checkout</span>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      {jobOrderItems.filter(item => item.job_order_id === selectedJoId).map((item, i) => (
+                        <div key={i} className="p-5 rounded-[24px] border border-slate-200 bg-white shadow-sm hover:border-indigo-200 transition-all group flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-[16px] shadow-lg shadow-slate-900/10">
+                              {item.garment_name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-[15px] font-black text-slate-900">{item.garment_name}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100/50 uppercase tracking-tight">Size: {item.size || 'Custom'}</span>
+                                <span className="text-[10px] font-bold text-slate-400">Qty: {item.quantity}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                               mode === 'ALTERATION' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                            }`}>
+                              {mode === 'ALTERATION' ? 'For Repair' : 'Ready to Fulfill'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {!quickSaleItemSku ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-300 opacity-50 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-100">
+                      <ShoppingBag size={48} strokeWidth={1} />
+                      <p className="mt-4 font-black text-[12px] uppercase tracking-widest">Select an item to checkout</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                       <div className="bg-slate-50 p-6 rounded-[32px] border border-slate-100 flex flex-col items-center justify-center">
+                          <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">Quantity to Sell</label>
+                          <div className="flex items-center gap-8">
+                            <button 
+                              onClick={() => setQuickSaleQty(Math.max(1, quickSaleQty - 1))}
+                              className="w-14 h-14 rounded-2xl bg-white border-2 border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-900 transition-all shadow-sm"
+                            >
+                              <Minus size={24} />
+                            </button>
+                            <span className="text-[48px] font-black text-slate-900 tabular-nums">{quickSaleQty}</span>
+                            <button 
+                              onClick={() => {
+                                const item = finishedGoods.find(i => i.sku === quickSaleItemSku);
+                                if (item && quickSaleQty < (item.stock || 0)) {
+                                  setQuickSaleQty(quickSaleQty + 1);
+                                }
+                              }}
+                              className="w-14 h-14 rounded-2xl bg-white border-2 border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-900 transition-all shadow-sm"
+                            >
+                              <Plus size={24} />
+                            </button>
+                          </div>
+                          <p className="text-[11px] font-bold text-slate-400 uppercase mt-4">Stock will be deducted from {quickSaleItemSku}</p>
+                       </div>
 
-                  {/* Financial & Audit Preview */}
-                  {quickSaleItemSku && (
-                    <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 grid grid-cols-2 gap-4 animate-in zoom-in-95 duration-200">
-                      <div className="space-y-1">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Inventory Deduction</p>
-                        <div className="flex items-center gap-2">
-                          <Package size={14} className="text-slate-400" />
-                          <p className="text-[12px] font-black text-slate-700">
-                            -{quickSaleQty} pc <span className="text-slate-400 font-bold">{quickSaleItemSku}</span>
-                          </p>
-                        </div>
-                      </div>
-                      <div className="space-y-1 text-right">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Expected Income</p>
-                        <div className="flex items-center justify-end gap-2">
-                          <ShoppingBag size={14} className="text-emerald-500" />
-                          <p className="text-[16px] font-black text-emerald-600">
-                            ₱{((finishedGoods.find(i => i.sku === quickSaleItemSku)?.price || 0) * quickSaleQty).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
+                       <div className="p-5 rounded-[24px] bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 flex justify-between items-center">
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Expected Total</p>
+                            <p className="text-[24px] font-black">
+                              ₱{((finishedGoods.find(i => i.sku === quickSaleItemSku)?.price || 0) * quickSaleQty).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                             <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Inventory Status</p>
+                             <p className="text-[14px] font-black">In Stock: {finishedGoods.find(i => i.sku === quickSaleItemSku)?.stock || 0} pcs</p>
+                          </div>
+                       </div>
                     </div>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Middle Content */}
-            {mode === 'BULK' && (
-              <div className="p-5 flex-1 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Layers size={14} className="text-slate-400" />
-                    <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Material Deduction</h3>
-                  </div>
-                  {selectedRecipe && !isEditMode && (
-                    <button onClick={() => setIsEditMode(true)} className="flex items-center gap-2 text-[10px] font-black text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-all border border-indigo-100">
-                      <Edit3 size={12} /> Edit Recipe
-                    </button>
-                  )}
-                </div>
-
-                {!assemblyProductId ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-slate-300 opacity-50 bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-100">
-                    <Search size={32} strokeWidth={1} />
-                    <p className="mt-2 font-black text-[11px] uppercase tracking-widest">Select style to see recipe</p>
-                  </div>
-                ) : isEditMode ? (
-                  <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
-                    <div className="flex items-center justify-between bg-amber-50 p-3 rounded-xl border border-amber-100">
-                      <span className="text-[11px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
-                        <Zap size={12} /> Recipe Editor Mode
-                      </span>
-                      <button 
-                        onClick={() => setIsEditMode(false)}
-                        className="text-[10px] font-black text-slate-900 bg-white px-3 py-1 rounded-lg shadow-sm border border-slate-200"
-                      >
-                        Finish Editing
-                      </button>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 gap-2">
-                      {selectedRecipe?.materials.map((mat, idx) => {
-                        const item = inventory.find(inv => inv.sku === mat.sku);
-                        return (
-                          <div key={idx} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
-                            <div className="flex items-center gap-3">
-                              <Package size={14} className="text-slate-400" />
-                              <div>
-                                <p className="text-[12px] font-black text-slate-900">{item?.item || mat.sku}</p>
-                                <p className="text-[10px] font-bold text-slate-400">{mat.qty} {item?.unit || 'units'} per piece</p>
-                              </div>
-                            </div>
-                            <button 
-                              onClick={() => {
-                                const newMats = selectedRecipe.materials.filter((_, i) => i !== idx);
-                                onSaveRecipe({ productId: assemblyProductId, materials: newMats });
-                              }}
-                              className="text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition-all"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : !selectedRecipe ? (
-                  <div className="flex flex-col items-center justify-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <Package size={24} className="text-slate-300 mb-2" />
-                    <p className="text-[11px] font-black text-slate-900 uppercase tracking-widest">No Recipe Found</p>
-                    <button 
-                      onClick={() => setIsEditMode(true)}
-                      className="mt-3 px-6 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black hover:bg-slate-800 transition-all shadow-lg"
-                    >
-                      + Create Recipe
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-2.5">
-                    {selectedRecipe?.materials.map((mat, i) => {
-                      const item = inventory.find(inv => inv.sku === mat.sku);
-                      const isFabric = item?.category?.toLowerCase() === 'fabric' || item?.cat?.toLowerCase() === 'fabric' || item?.unit?.toLowerCase() === 'meters' || item?.unit?.toLowerCase() === 'yards';
-                      const needed = mat.qty * Object.values(assemblySizes).reduce((a, b) => a + b, 0);
-                      const isShort = isFabric && item && (item.stock || 0) < needed;
-                      
-                      return (
-                        <div key={i} className={`p-4 rounded-2xl border transition-all ${!isFabric ? 'bg-slate-50/50 border-slate-100' : isShort ? 'bg-rose-50/30 border-rose-100 ring-1 ring-rose-100' : 'bg-white border-slate-200 shadow-sm'}`}>
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isFabric ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
-                                <Package size={14} />
-                              </div>
-                              <div>
-                                <p className="text-[13px] font-black text-slate-900">{item?.item || mat.sku} <span className="ml-2 text-[10px] text-slate-400 font-bold uppercase">{mat.sku}</span></p>
-                                <p className="text-[11px] font-bold text-slate-400 mt-0.5">
-                                  {isFabric ? (
-                                    <>Total: <span className="text-slate-900 font-black">{needed.toFixed(1)} {item?.unit || 'units'}</span> <span className="ml-1 opacity-60">({mat.qty} per pc)</span></>
-                                  ) : (
-                                    <>Estimated Use: <span className="text-slate-900 font-black">{needed.toFixed(1)} {item?.unit || 'units'}</span></>
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${!isFabric ? 'bg-slate-100 text-slate-500' : isShort ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                              {!isFabric ? 'Loosely Tracked' : isShort ? 'Low Stock' : 'OK'}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Bottom Footer */}
+            {/* Bottom Footer Section */}
             <div className="p-6 border-t border-slate-100 bg-slate-50/50">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-8">
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Output</p>
-                    <p className="text-[28px] font-black text-slate-900 leading-none">
-                      {Object.values(assemblySizes).reduce((a, b) => a + b, 0)} <span className="text-[12px] text-slate-400 font-bold uppercase ml-1">Pcs</span>
-                    </p>
-                  </div>
-                  <div className="h-10 w-px bg-slate-200" />
-                  <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Status</p>
+                <div className="flex items-center gap-10">
+                   <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Production Status</p>
                     <div className="flex items-center gap-2">
-                      {(() => {
-                        const totalQty = Object.values(assemblySizes).reduce((a, b) => a + b, 0);
-                        const isReady = mode === 'BULK'
-                          ? (assemblyValidation.canAssemble && assemblyProductId && totalQty > 0)
-                          : mode === 'JOB_ORDER'
-                          ? !!selectedJoId
-                          : !!quickSaleItemSku;
-                        return (
-                          <>
-                            <div className={`w-2 h-2 rounded-full ${isReady ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
-                            <span className={`text-[12px] font-black uppercase tracking-widest ${isReady ? 'text-emerald-600' : 'text-slate-400'}`}>
-                              {isReady ? 'Ready' : 'Wait'}
-                            </span>
-                          </>
-                        );
-                      })()}
+                       <div className={`w-2 h-2 rounded-full ${((mode !== 'RTW' && selectedJoId) || (mode === 'RTW' && quickSaleItemSku)) ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                       <span className={`text-[12px] font-black uppercase tracking-widest ${((mode !== 'RTW' && selectedJoId) || (mode === 'RTW' && quickSaleItemSku)) ? 'text-emerald-600' : 'text-slate-400'}`}>
+                         {((mode !== 'RTW' && selectedJoId) || (mode === 'RTW' && quickSaleItemSku)) ? 'Valid Order' : 'Missing Info'}
+                       </span>
                     </div>
+                  </div>
+                  <div className="h-10 w-px bg-slate-200 hidden md:block" />
+                  <div className="hidden md:block">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Items for Release</p>
+                    <p className="text-[20px] font-black text-slate-900 leading-none">
+                      {mode === 'RTW' ? quickSaleQty : 
+                       selectedJoId ? jobOrderItems.filter(i => i.job_order_id === selectedJoId).reduce((sum, i) => sum + i.quantity, 0) : 0} 
+                      <span className="text-[11px] text-slate-400 font-bold uppercase ml-1">Pcs</span>
+                    </p>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => {
-                    if (mode === 'BULK') onExecute();
-                    else if (mode === 'JOB_ORDER' && selectedJoId) onFulfillJO(selectedJoId);
-                    else if (mode === 'READY_MADE' && quickSaleItemSku) {
+                    if (mode !== 'RTW' && selectedJoId) onFulfillJO(selectedJoId);
+                    else if (mode === 'RTW' && quickSaleItemSku) {
                       const item = finishedGoods.find(i => i.sku === quickSaleItemSku);
                       const total = (item?.price || 0) * quickSaleQty;
                       setLastTransaction({
@@ -514,20 +416,17 @@ export function ProductionAssembly({
                       setShowReceipt(true);
                     }
                   }}
-                  disabled={
-                    (mode === 'BULK' && (!assemblyValidation.canAssemble || !assemblyProductId || Object.values(assemblySizes).reduce((a, b) => a + b, 0) === 0)) ||
-                    (mode === 'READY_MADE' && !quickSaleItemSku)
-                  }
-                  className="px-10 h-14 bg-slate-900 text-white rounded-2xl text-[14px] font-black flex items-center justify-center gap-3 hover:bg-indigo-600 transition-all disabled:opacity-20 shadow-2xl shadow-slate-900/20 active:scale-95"
+                  disabled={ (mode !== 'RTW' && !selectedJoId) || (mode === 'RTW' && !quickSaleItemSku) }
+                  className="px-12 h-14 bg-slate-900 text-white rounded-2xl text-[14px] font-black flex items-center justify-center gap-3 hover:bg-indigo-600 transition-all disabled:opacity-20 shadow-2xl shadow-slate-900/20 active:scale-95"
                 >
-                  {mode === 'BULK' ? 'Log Tailoring' : 'Complete Sale'}
+                  {mode === 'RTW' ? 'Complete Checkout' : 'Mark as Ready'}
                   <ArrowRight size={18} />
                 </button>
               </div>
             </div>
-            </div>
           </div>
         </div>
+
 
         {/* RIGHT COLUMN */}
         <div className="lg:col-span-4 space-y-4">
@@ -603,6 +502,7 @@ export function ProductionAssembly({
             </div>
           </div>
       </div>
+    </div>
 
       {/* Register New Style Modal */}
       {isNewStyleModalOpen && (
@@ -736,13 +636,13 @@ export function ProductionAssembly({
         </div>
       )}
 
-      {/* Register Customer Modal */}
+      {/* Add Customer Modal */}
       {isRegisterCustomerModalOpen && (
         <div className="fixed inset-0 z-250 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[450px] rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div>
-                <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Register Customer</h2>
+                <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Add Customer</h2>
                 <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-1">Instant Profile (No Measurement)</p>
               </div>
               <button onClick={() => setIsRegisterCustomerModalOpen(false)} className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 hover:text-slate-900 transition-all"><X size={20} /></button>

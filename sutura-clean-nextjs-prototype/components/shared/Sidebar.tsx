@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { 
-  Scissors, LayoutDashboard, UserPlus, Calendar, 
+  Scissors, Home, UserPlus, Calendar, 
   ShoppingBag, PackageSearch, Building2, Users, 
-  Receipt, BarChart3, ChevronLeft, ChevronRight 
+  Receipt, BarChart3, ChevronLeft, ChevronRight, HelpCircle,
+  Activity, Ruler, ListTodo
 } from 'lucide-react';
 import { useERPStore } from '../../store/useERPStore';
 
@@ -15,22 +16,37 @@ interface SidebarProps {
   currentPlan: string;
 }
 
-const navItems = [
-  { name: 'Dashboard', path: '/owner/dashboard', icon: <LayoutDashboard size={20} /> },
+interface NavItem {
+  name: string;
+  path: string;
+  icon: React.ReactNode;
+  roles?: string[];
+}
+
+const ownerNavItems: NavItem[] = [
+  { name: 'Home', path: '/owner/dashboard', icon: <Home size={20} /> },
   { name: 'Customers', path: '/owner/customers', icon: <UserPlus size={20} /> },
   { name: 'Appointments', path: '/owner/appointments', icon: <Calendar size={20} /> },
   { name: 'Orders', path: '/owner/orders', icon: <ShoppingBag size={20} /> },
   { name: 'Inventory', path: '/owner/inventory', icon: <PackageSearch size={20} /> },
   { name: 'Suppliers', path: '/owner/suppliers', icon: <Building2 size={20} /> },
   { name: 'Staff', path: '/owner/staff', icon: <Users size={20} /> },
-  { name: 'Branches', path: '/owner/branches', icon: <Building2 size={20} />, roles: ['OWNER', 'ADMIN'] },
+  { name: 'Branches', path: '/owner/branches', icon: <Building2 size={20} />, roles: ['ADMIN'] },
   { name: 'Billing', path: '/owner/billing', icon: <Receipt size={20} /> },
   { name: 'Reports', path: '/owner/reports', icon: <BarChart3 size={20} /> },
+  { name: 'Support', path: '/owner/support', icon: <HelpCircle size={20} /> },
+];
+
+const staffNavItems: NavItem[] = [
+  { name: 'Production', path: '/staff/tasks', icon: <ListTodo size={20} /> },
+  { name: 'Inventory View', path: '/staff/inventory', icon: <PackageSearch size={20} /> },
+  { name: 'Measurements', path: '/staff/measurements', icon: <Ruler size={20} /> },
+  { name: 'My Schedule', path: '/staff/appointments', icon: <Calendar size={20} /> },
 ];
 
 export function Sidebar({ isCollapsed, setIsCollapsed, pathname, currentPlan }: SidebarProps) {
   const { currentUser } = useERPStore();
-  const userRole = currentUser?.role || 'STAFF';
+  const userRole = currentUser?.role || 'SALES';
 
   return (
     <aside 
@@ -66,7 +82,8 @@ export function Sidebar({ isCollapsed, setIsCollapsed, pathname, currentPlan }: 
           ? 'items-center px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]' 
           : 'px-6 custom-scrollbar'
       }`}>
-        {navItems.map((item) => {
+        {/* Dynamic Selection of Nav Items */}
+        {(pathname.startsWith('/staff') ? staffNavItems : ownerNavItems).map((item) => {
           // Role-based visibility check
           if (item.roles && !item.roles.includes(userRole)) {
             return null;

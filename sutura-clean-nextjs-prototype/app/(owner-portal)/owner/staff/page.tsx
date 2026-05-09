@@ -10,12 +10,11 @@ import { StaffTable } from './components/StaffTable';
 import { StaffModals } from './components/StaffModals';
 
 const ROLE_PERMISSIONS: Record<string, Record<string, boolean | 'usage-only'>> = {
-  Owner: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
-  Admin: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
-  Manager: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
-  Sales: { customers: true, orders: true, measurements: true, appointments: true, inventory: false, suppliers: false, billing: true, reports: false },
-  Tailor: { customers: false, orders: true, measurements: true, appointments: false, inventory: 'usage-only', suppliers: false, billing: false, reports: false },
-  Inventory: { customers: false, orders: false, measurements: false, appointments: false, inventory: true, suppliers: true, billing: false, reports: false }
+  ADMIN: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
+  MANAGER: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
+  SALES: { customers: true, orders: true, measurements: true, appointments: true, inventory: false, suppliers: false, billing: true, reports: false },
+  TAILOR: { customers: false, orders: true, measurements: true, appointments: false, inventory: 'usage-only', suppliers: false, billing: false, reports: false },
+  INVENTORY: { customers: false, orders: false, measurements: false, appointments: false, inventory: true, suppliers: true, billing: false, reports: false }
 };
 
 const MODULE_LABELS = {
@@ -39,7 +38,7 @@ export default function StaffPage() {
   const [isModalOpen, setIsModalOpen] = useState(onboardingParam === 'true');
   const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
   const [newStaff, setNewStaff] = useState<Partial<Staff> & { password?: string }>({
-    name: '', email: '', phone: '', roles: ['Tailor'], hasSystemAccess: true, status: 'Active', password: '', specialization: ''
+    name: '', email: '', phone: '', roles: ['TAILOR'], hasSystemAccess: true, status: 'Active', password: '', specialization: ''
   });
 
   const filteredStaff = useMemo(() => 
@@ -71,7 +70,7 @@ export default function StaffPage() {
     
     setIsModalOpen(false);
     setEditingStaffId(null);
-    setNewStaff({ name: '', email: '', phone: '', roles: ['Tailor'], hasSystemAccess: true, status: 'Active', password: '', specialization: '' });
+    setNewStaff({ name: '', email: '', phone: '', roles: ['TAILOR'], hasSystemAccess: true, status: 'Active', password: '', specialization: '' });
   };
 
   const handleUpdateStaff = (id: string, data: Partial<Staff>) => {
@@ -105,6 +104,8 @@ export default function StaffPage() {
 
   const currentPermissions = (newStaff.roles || []).reduce((acc, role) => {
     const perms = ROLE_PERMISSIONS[role as StaffRole];
+    if (!perms) return acc;
+
     Object.keys(perms).forEach((k: string) => {
       if (perms[k] === true) acc[k] = true;
       if (perms[k] === 'usage-only' && acc[k] !== true) acc[k] = 'usage-only';

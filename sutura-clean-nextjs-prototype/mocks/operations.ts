@@ -350,18 +350,18 @@ export const INITIAL_ORDERS: Order[] = [
 
 export const INITIAL_JOB_ORDER_ITEMS: JobOrderItem[] = [
   { "id": "JOI-100", "job_order_id": "ORD-1051", "garment_name": "Premium Barong Tagalog", "quantity": 1, "unit_price": 29607, "line_total": 29607 },
-  { "id": "JOI-101", "job_order_id": "ORD-1052", "garment_name": "Team Jersey (Full Set)", "quantity": 8, "unit_price": 850, "line_total": 6800 },
+  { "id": "JOI-101", "job_order_id": "ORD-1052", "garment_name": "Team Jersey (Full Set)", "quantity": 8, "unit_price": 850, "line_total": 6800, "size": "M" },
   { "id": "JOI-102", "job_order_id": "ORD-1053", "garment_name": "Pants Shortening", "quantity": 1, "unit_price": 500, "line_total": 500 },
-  { "id": "JOI-103", "job_order_id": "ORD-1054", "garment_name": "Linen Shorts", "quantity": 1, "unit_price": 1850, "line_total": 1850 },
+  { "id": "JOI-103", "job_order_id": "ORD-1054", "garment_name": "Linen Shorts", "quantity": 1, "unit_price": 1850, "line_total": 1850, "size": "32" },
   { "id": "JOI-104", "job_order_id": "ORD-1055", "garment_name": "Velvet Dinner Jacket", "quantity": 1, "unit_price": 35164, "line_total": 35164 },
   { "id": "JOI-140", "job_order_id": "ORD-1091", "garment_name": "Wedding Gown (Silk)", "quantity": 1, "unit_price": 38924, "line_total": 38924 },
-  { "id": "JOI-141", "job_order_id": "ORD-1092", "garment_name": "Corporate Polo (Batch)", "quantity": 16, "unit_price": 850, "line_total": 13600 },
-  { "id": "JOI-HIST-001", "job_order_id": "ORD-HIST-001", "garment_name": "Standard Suit", "quantity": 1, "unit_price": 15000, "line_total": 15000 },
-  { "id": "JOI-HIST-002", "job_order_id": "ORD-HIST-002", "garment_name": "Premium Cotton Shirt", "quantity": 3, "unit_price": 4000, "line_total": 12000 },
+  { "id": "JOI-141", "job_order_id": "ORD-1092", "garment_name": "Corporate Polo (Batch)", "quantity": 16, "unit_price": 850, "line_total": 13600, "size": "L" },
+  { "id": "JOI-HIST-001", "job_order_id": "ORD-HIST-001", "garment_name": "Standard Suit", "quantity": 1, "unit_price": 15000, "line_total": 15000, "size": "XL" },
+  { "id": "JOI-HIST-002", "job_order_id": "ORD-HIST-002", "garment_name": "Premium Cotton Shirt", "quantity": 3, "unit_price": 4000, "line_total": 12000, "size": "L" },
   { "id": "JOI-HIST-003", "job_order_id": "ORD-HIST-003", "garment_name": "Alteration Bundle", "quantity": 1, "unit_price": 2500, "line_total": 2500 },
   { "id": "JOI-HIST-004", "job_order_id": "ORD-HIST-004", "garment_name": "Bespoke Silk Gown", "quantity": 1, "unit_price": 45000, "line_total": 45000 },
   { "id": "JOI-HIST-005", "job_order_id": "ORD-HIST-005", "garment_name": "Traditional Filipiniana", "quantity": 1, "unit_price": 28000, "line_total": 28000 },
-  { "id": "JOI-HIST-006", "job_order_id": "ORD-HIST-006", "garment_name": "Event Polo T-Shirts", "quantity": 10, "unit_price": 850, "line_total": 8500 }
+  { "id": "JOI-HIST-006", "job_order_id": "ORD-HIST-006", "garment_name": "Event Polo T-Shirts", "quantity": 10, "unit_price": 850, "line_total": 8500, "size": "M" }
 ];
 
 export const INITIAL_PRODUCTION_TASKS: ProductionTask[] = [

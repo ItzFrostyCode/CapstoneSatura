@@ -18,6 +18,11 @@ export const PersonnelAssignmentStep: React.FC<PersonnelAssignmentStepProps> = (
   formData,
   setFormData
 }) => {
+  const isAlteration = formData.orderType === 'ALTERATION';
+  const displayTasks = isAlteration 
+    ? formData.alterationDetails.tasks.map(t => t.title)
+    : (selectedTemplate?.default_tasks || []);
+
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4">
       <div className="flex items-center justify-between">
@@ -27,9 +32,11 @@ export const PersonnelAssignmentStep: React.FC<PersonnelAssignmentStepProps> = (
         </div>
         <button 
           onClick={() => {
-            const localStaff = staff.filter(s => s.branch_id === (currentBranch?.id || 'BRN-001'));
+            const localStaff = staff.filter(s => s.branch_id === (currentBranch?.id || 'BRN-001') && s.roles.includes('TAILOR'));
+            if (localStaff.length === 0) return;
+            
             const assignments: Record<string, string> = {};
-            (selectedTemplate?.default_tasks || []).forEach((task: string, idx: number) => {
+            displayTasks.forEach((task: string, idx: number) => {
               assignments[task] = localStaff[idx % localStaff.length]?.id;
             });
             setFormData({...formData, taskAssignments: assignments});
@@ -42,17 +49,24 @@ export const PersonnelAssignmentStep: React.FC<PersonnelAssignmentStepProps> = (
 
       <div className="space-y-4">
         <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
-          <Users size={14}/> Production Team Assignment
+          <Users size={14}/> {isAlteration ? 'Repair Assignment' : 'Production Team Assignment'}
         </h3>
-        {(selectedTemplate?.default_tasks || []).map((task: string) => (
+        
+        {displayTasks.length === 0 ? (
+          <div className="p-12 border-2 border-dashed border-slate-100 rounded-[40px] text-center">
+            <p className="text-[13px] font-bold text-slate-400 italic">No tasks found for assignment.</p>
+          </div>
+        ) : displayTasks.map((task: string) => (
           <div key={task} className="p-5 rounded-3xl border border-slate-100 bg-white shadow-sm space-y-4">
             <div className="flex justify-between items-center">
               <div className="text-[14px] font-black text-slate-900">{task}</div>
-              <div className="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-black text-slate-500 uppercase tracking-tighter">Production Stage</div>
+              <div className="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-black text-slate-500 uppercase tracking-tighter">
+                {isAlteration ? 'Repair Stage' : 'Production Stage'}
+              </div>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
-              {staff.filter(s => s.branch_id === (currentBranch?.id || 'BRN-001') && s.roles.includes('Tailor')).map(t => (
+              {staff.filter(s => s.branch_id === (currentBranch?.id || 'BRN-001') && s.roles.includes('TAILOR')).map(t => (
                 <button 
                   key={t.id}
                   onClick={() => setFormData({
@@ -66,7 +80,7 @@ export const PersonnelAssignmentStep: React.FC<PersonnelAssignmentStepProps> = (
                   </div>
                   <div>
                     <div className="text-[12px] font-bold text-slate-900 leading-none">{t.name}</div>
-                    <div className="text-[10px] text-slate-400 font-medium">Workload: 4</div>
+                    <div className="text-[10px] text-slate-400 font-medium">Available</div>
                   </div>
                 </button>
               ))}

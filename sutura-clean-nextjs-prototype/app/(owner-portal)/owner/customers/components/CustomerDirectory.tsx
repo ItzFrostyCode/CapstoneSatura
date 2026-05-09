@@ -30,7 +30,7 @@ export const CustomerDirectory: React.FC<CustomerDirectoryProps> = ({
           onClick={onOpenAddModal}
           className="bg-slate-900 text-white h-10 px-6 rounded-xl text-[13px] font-black shadow-lg shadow-slate-900/10 hover:bg-indigo-600 transition-all flex items-center gap-2 active:scale-95"
         >
-          <Plus size={16} /> Register Customer
+          <Plus size={16} /> Add Customer
         </button>
       </div>
 

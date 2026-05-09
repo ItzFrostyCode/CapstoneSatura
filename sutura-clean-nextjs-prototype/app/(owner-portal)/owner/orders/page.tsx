@@ -32,8 +32,10 @@ import {
   MessageCircle,
   Printer,
   Ruler,
-  Lock
+  Lock,
+  PackageOpen
 } from 'lucide-react';
+import { AllocateMaterialsModal } from '@/components/shared/AllocateMaterialsModal';
 
 type DetailTab = 'jobs' | 'measurements' | 'tasks' | 'timeline' | 'discrepancies';
 
@@ -113,6 +115,7 @@ export default function JobOrdersPage() {
 
   // Release Checklist State
   const [releaseChecklist, setReleaseChecklist] = useState({ fitting: false, packaging: false });
+  const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
 
   const STATUS_TABS = ['All', 'WAITING_FOR_DP', 'IN_PRODUCTION', 'READY_FOR_FITTING', 'ALTERATIONS'];
 
@@ -705,6 +708,12 @@ export default function JobOrdersPage() {
                       <div className="text-[12px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
                         {resolveOrderState(selectedOrder).taskStats.label} ({resolveOrderState(selectedOrder).progress}%)
                       </div>
+                      <button
+                        onClick={() => setIsAllocationModalOpen(true)}
+                        className="flex items-center gap-2 bg-indigo-50 text-indigo-700 border border-indigo-200 h-9 px-4 rounded-xl text-[12px] font-black hover:bg-indigo-100 transition-all shadow-sm active:scale-95"
+                      >
+                        <PackageOpen size={16} /> Allocate Materials
+                      </button>
                     </div>
                     {resolveOrderState(selectedOrder).productionStage === 'ON_HOLD' && (
                       <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
@@ -1479,6 +1488,16 @@ export default function JobOrdersPage() {
         </div>
       )}
 
+      <AllocateMaterialsModal 
+        isOpen={isAllocationModalOpen}
+        onClose={() => setIsAllocationModalOpen(false)}
+        order={selectedOrder ? {
+          id: selectedOrder.id,
+          garment: selectedOrder.items?.[0]?.garment_name || 'Custom Garment',
+          customer: customers.find(c => c.id === selectedOrder.customer_id)?.name || 'Unknown',
+          due: selectedOrder.due_date
+        } : null}
+      />
     </div>
   );
 }

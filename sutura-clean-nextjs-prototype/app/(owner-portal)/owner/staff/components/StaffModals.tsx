@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, Check, Lock, ShieldCheck, Plus } from 'lucide-react';
-import { Staff, StaffRole } from '@/store/useERPStore';
+import { Staff, StaffRole, ShopBranch } from '@/store/useERPStore';
 
 interface StaffModalsProps {
   isModalOpen: boolean;
@@ -13,7 +13,7 @@ interface StaffModalsProps {
   toggleRole: (role: StaffRole) => void;
   currentPermissions: Record<string, boolean | 'usage-only'>;
   MODULE_LABELS: Record<string, string>;
-  branches: import('@/types/erp').ShopBranch[];
+  branches: ShopBranch[];
 }
 
 export const StaffModals: React.FC<StaffModalsProps> = ({
@@ -138,7 +138,7 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                 <div className="pt-6 border-t border-slate-100">
                   <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">Roles & System Permissions</label>
                   <div className="grid grid-cols-2 gap-3">
-                    {['Admin', 'Manager', 'Sales', 'Tailor', 'Inventory'].map(role => {
+                    {['ADMIN', 'MANAGER', 'SALES', 'TAILOR', 'INVENTORY'].map(role => {
                       const isSelected = newStaff.roles?.includes(role as StaffRole);
                       return (
                         <button
@@ -147,12 +147,12 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                             const currentRoles = newStaff.roles || [];
                             let nextRoles: StaffRole[] = [];
                             
-                            if (role === 'Manager') {
+                            if (role === 'MANAGER') {
                               // If selecting manager, remove all other roles
-                              nextRoles = isSelected ? [] : ['Manager'];
-                            } else if (role === 'Admin') {
+                              nextRoles = isSelected ? [] : ['MANAGER'];
+                            } else if (role === 'ADMIN') {
                               // Admin can be combined with others, but not with manager
-                              if (currentRoles.includes('Manager')) {
+                              if (currentRoles.includes('MANAGER')) {
                                 nextRoles = [role as StaffRole];
                               } else {
                                 nextRoles = isSelected 
@@ -162,7 +162,7 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                             } else {
                               // Standard roles (Sales, Tailor, Inventory)
                               // Remove manager if it was there
-                              const filtered = currentRoles.filter(r => r !== 'Manager');
+                              const filtered = currentRoles.filter(r => r !== 'MANAGER');
                               nextRoles = isSelected
                                 ? filtered.filter(r => r !== role)
                                 : [...filtered, role as StaffRole];
@@ -174,7 +174,9 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                           <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
                             {isSelected && <Check size={14} className="text-white" />}
                           </div>
-                          <div className={`text-[14px] font-black ${isSelected ? 'text-indigo-900' : 'text-slate-700'}`}>{role}</div>
+                          <div className={`text-[14px] font-black ${isSelected ? 'text-indigo-900' : 'text-slate-700'}`}>
+                            {role === 'ADMIN' ? 'Admin' : role === 'MANAGER' ? 'Manager' : role.charAt(0) + role.slice(1).toLowerCase()}
+                          </div>
                         </button>
                       );
                     })}

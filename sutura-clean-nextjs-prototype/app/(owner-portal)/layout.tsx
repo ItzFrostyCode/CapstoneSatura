@@ -65,7 +65,7 @@ export default function DashboardLayout({
 
         {/* ── PAGE CONTENT (Scrollable) ── */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-          <div className="p-10 pt-4 max-w-[1600px] mx-auto w-full">
+          <div className="p-6 pt-2 w-full">
             {children}
           </div>
         </main>
