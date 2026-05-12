@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Menu, ChevronLeft, ChevronRight, LayoutGrid, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, List, Columns } from 'lucide-react';
 
 interface CalendarHeaderProps {
   selectedDate: Date;
+  view: 'Week' | 'Month' | 'Agenda';
+  setView: (view: 'Week' | 'Month' | 'Agenda') => void;
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
@@ -12,47 +14,65 @@ interface CalendarHeaderProps {
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ 
   selectedDate, 
+  view,
+  setView,
   onPrev, 
   onNext, 
   onToday 
 }) => {
   return (
-    <header className="h-16 border-b border-slate-200 flex items-center justify-between px-6 shrink-0 bg-white">
+    <header className="h-20 border-b border-slate-100 flex items-center justify-between px-10 shrink-0 bg-white">
       <div className="flex items-center gap-4">
-        <button className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors">
-          <Menu size={20} />
+        <button 
+          onClick={onToday}
+          className="h-10 px-5 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-indigo-600 transition-all shadow-lg shadow-slate-900/10 active:scale-95"
+        >
+          Today
         </button>
-        <h2 className="text-[18px] font-bold text-slate-900 ml-2">
-          {selectedDate.toLocaleString('default', { month: 'long' })} {selectedDate.getFullYear()}
-        </h2>
-        <div className="flex items-center gap-1 ml-4 border border-slate-200 rounded-xl p-1 bg-white">
+        <div className="flex items-center gap-1">
           <button 
             onClick={onPrev}
-            className="p-1 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors"
+            className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-all"
           >
-            <ChevronLeft size={18} />
-          </button>
-          <button 
-            onClick={onToday}
-            className="px-3 py-1 text-[13px] font-bold text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            Today
+            <ChevronLeft size={20} />
           </button>
           <button 
             onClick={onNext}
-            className="p-1 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors"
+            className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-all"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={20} />
           </button>
         </div>
+        <h2 className="text-[20px] font-black text-slate-900 ml-4 tracking-tight">
+          {selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+        </h2>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 gap-2 cursor-pointer hover:bg-slate-100 transition-all shadow-sm">
-          <LayoutGrid size={16} className="text-indigo-600" />
-          <span className="text-[13px] font-bold text-slate-700">Week View</span>
-          <ChevronDown size={14} className="text-slate-400" />
-        </div>
+      <div className="flex items-center p-1.5 bg-slate-100 rounded-2xl">
+        <button 
+          onClick={() => setView('Week')}
+          className={`h-9 px-5 rounded-xl flex items-center gap-2 text-[12px] font-black transition-all ${
+            view === 'Week' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <Columns size={16} /> Week
+        </button>
+        <button 
+          onClick={() => setView('Month')}
+          className={`h-9 px-5 rounded-xl flex items-center gap-2 text-[12px] font-black transition-all ${
+            view === 'Month' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <Calendar size={16} /> Month
+        </button>
+        <button 
+          onClick={() => setView('Agenda')}
+          className={`h-9 px-5 rounded-xl flex items-center gap-2 text-[12px] font-black transition-all ${
+            view === 'Agenda' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          <List size={16} /> Agenda
+        </button>
       </div>
     </header>
   );

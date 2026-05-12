@@ -2,7 +2,7 @@
 
 import { 
   Search, Bell, ChevronDown, Calendar, Clock, 
-  Settings, LogOut, Crown, Users 
+  Settings, LogOut, Crown, Users, Menu 
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -20,6 +20,7 @@ interface NavbarProps {
   setIsUserMenuOpen: (open: boolean) => void;
   isNotificationsOpen: boolean;
   setIsNotificationsOpen: (open: boolean) => void;
+  onMenuClick?: () => void;
 }
 
 export function Navbar({ 
@@ -29,18 +30,25 @@ export function Navbar({
   isUserMenuOpen, 
   setIsUserMenuOpen,
   isNotificationsOpen,
-  setIsNotificationsOpen
+  setIsNotificationsOpen,
+  onMenuClick
 }: NavbarProps) {
   const pathname = usePathname();
   return (
-    <header className="h-24 bg-slate-50 flex items-center justify-between px-10 shrink-0 z-40">
+    <header className="h-24 bg-slate-50 flex items-center justify-between px-6 md:px-10 shrink-0 z-40">
       {/* Left: Dynamic Title & Context */}
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-4 md:gap-8">
+        <button 
+          onClick={onMenuClick}
+          className="p-2 -ml-2 text-slate-400 hover:text-slate-900 lg:hidden transition-all"
+        >
+          <Menu size={24} />
+        </button>
         <div>
           <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none uppercase">
             SUTURA
           </h1>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-1 md:mt-2">
             <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[11px] tracking-tight bg-slate-100/50 px-2 py-0.5 rounded-lg">
               <Calendar size={12} className="text-indigo-500" />
               <span>{mounted ? currentTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}</span>
@@ -56,8 +64,8 @@ export function Navbar({
       </div>
 
       {/* Right: Search & Utilities */}
-      <div className="flex items-center gap-6">
-        <div className="relative group">
+      <div className="flex items-center gap-3 md:gap-6">
+        <div className="relative group hidden md:block">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" size={18} />
           <input 
             type="text" 
@@ -65,6 +73,11 @@ export function Navbar({
             className="w-64 h-11 pl-12 pr-6 bg-white border border-slate-200 rounded-full text-[13px] font-medium outline-none focus:border-slate-400 focus:shadow-md transition-all placeholder:text-slate-400 shadow-sm"
           />
         </div>
+
+        {/* Mobile Search Icon Only */}
+        <button className="p-2 text-slate-400 md:hidden">
+          <Search size={22} />
+        </button>
 
         <div className="flex items-center gap-5">
           <button className="text-slate-400 hover:text-slate-900 transition-colors relative group">

@@ -15,6 +15,7 @@ import {
   Clock,
   CheckCircle2,
   ChevronRight,
+  ChevronDown,
   X,
   Scissors,
   Calendar,
@@ -30,10 +31,13 @@ import {
   Check,
   Phone,
   MessageCircle,
+  MessageSquare,
   Printer,
   Ruler,
   Lock,
-  PackageOpen
+  PackageOpen,
+  ArrowUpRight,
+  Activity
 } from 'lucide-react';
 import { AllocateMaterialsModal } from '@/components/shared/AllocateMaterialsModal';
 
@@ -79,13 +83,16 @@ export default function JobOrdersPage() {
     staff,
     recordPayment,
     recordInspection,
+    orderInspections,
     updateTaskStatus,
     addProductionTask,
     measurementProfiles,
     pushNotification,
     logProductionDiscrepancy,
     inventory,
-    updateOrderStatus
+    inventoryReservations,
+    updateOrderStatus,
+    releaseStock
   } = useERPStore();
   
   const jobOrders = getEnrichedOrders();
@@ -95,7 +102,10 @@ export default function JobOrdersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [detailTab, setDetailTab] = useState<DetailTab>('jobs');
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [feedbackContent, setFeedbackContent] = useState('');
 
   // Transaction Inputs for the modal
   const [paymentAmount, setPaymentAmount] = useState<string | number>('');
@@ -117,14 +127,15 @@ export default function JobOrdersPage() {
   const [releaseChecklist, setReleaseChecklist] = useState({ fitting: false, packaging: false });
   const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
 
-  const STATUS_TABS = ['All', 'WAITING_FOR_DP', 'IN_PRODUCTION', 'READY_FOR_FITTING', 'ALTERATIONS'];
+  const STATUS_TABS = ['All', 'IN_PRODUCTION', 'READY_FOR_FITTING', 'ALTERATIONS'];
 
-  const filteredOrders = statusFilter === 'All'
-    ? jobOrders
-    : jobOrders.filter(o => {
-        const { productionStage } = resolveOrderState(o);
-        return productionStage === statusFilter;
-      });
+  const filteredOrders = jobOrders.filter(o => {
+    const { productionStage } = resolveOrderState(o);
+    const matchesStatus = statusFilter === 'All' || productionStage === statusFilter;
+    const matchesSearch = o.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (customers.find(c => c.id === o.customer_id)?.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesStatus && matchesSearch;
+  });
 
   const orderStatusLogs = selectedOrder
     ? globalLogs.filter(l => l.order_id === selectedOrder.id)
@@ -203,8 +214,8 @@ export default function JobOrdersPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Total Orders', val: jobOrders.length, trend: 'Overall' },
-          { label: 'In Tailoring', val: jobOrders.filter(o => resolveOrderState(o).productionStage === 'IN_PRODUCTION').length, trend: 'Active' },
-          { label: 'Ready for Pickup', val: jobOrders.filter(o => resolveOrderState(o).productionStage === 'RELEASED').length, trend: 'Release' },
+          { label: 'In Tailoring', val: jobOrders.filter(o => { const s = resolveOrderState(o).productionStage; return s === 'IN_PRODUCTION' || s === 'ALTERATIONS'; }).length, trend: 'Active' },
+          { label: 'Ready for Pickup', val: jobOrders.filter(o => resolveOrderState(o).productionStage === 'READY_FOR_RELEASE').length, trend: 'Release' },
           { label: 'At Risk / Revision', val: jobOrders.filter(o => resolveOrderState(o).isAtRisk).length, trend: 'Needs QC' },
         ].map((stat, i) => (
           <div
@@ -226,148 +237,118 @@ export default function JobOrdersPage() {
       </div>
 
       {/* MAIN CONTENT */}
-      {activeView === 'table' ? (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          {/* INTEGRATED TABS & SEARCH */}
-          <div className="px-6 py-5 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-50/30">
-            <div className="flex items-center p-1 bg-slate-200/50 rounded-xl w-fit border border-slate-200/50">
-              {[
-                { id: 'All', label: 'All', icon: <LayoutList size={14} /> },
-                { id: 'ON_HOLD', label: 'On Hold', icon: <Clock size={14} /> },
-                { id: 'IN_PRODUCTION', label: 'In Tailoring', icon: <Scissors size={14} /> },
-                { id: 'QUALITY_CHECK', label: 'Quality Check', icon: <ShieldCheck size={14} /> },
-                { id: 'REVISION_REQUIRED', label: 'For Revision', icon: <AlertCircle size={14} /> },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setStatusFilter(tab.id)}
-                  className={`h-8 px-4 rounded-lg flex items-center gap-2 text-[11px] font-black transition-all ${
-                    statusFilter === tab.id
-                      ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
-                  }`}
-                >
-                  {tab.icon}
-                  <span className="whitespace-nowrap uppercase tracking-widest">
-                    {tab.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <div className="relative group w-full lg:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                <input type="text" placeholder="Search orders..." className="h-9 w-full pl-9 pr-3 bg-white border border-slate-200 rounded-lg text-[12px] font-bold outline-none focus:border-slate-900 transition-all shadow-sm" />
-              </div>
-              <button className="h-9 px-3 bg-white border border-slate-200 rounded-lg flex items-center gap-2 text-[12px] font-black text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-                <Calendar size={14} /> Date
-              </button>
-            </div>
-          </div>
+      {/* INTEGRATED TABS & SEARCH (OUTSIDE) */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+        <div className="flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-full w-fit">
+          {[
+            { id: 'All', label: 'All' },
+            { id: 'IN_PRODUCTION', label: 'In Tailoring' },
+            { id: 'READY_FOR_FITTING', label: 'Quality Check' },
+            { id: 'ALTERATIONS', label: 'For Revision' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id)}
+              className={`px-6 py-2 text-[12px] font-bold capitalize transition-all rounded-full ${
+                statusFilter === tab.id 
+                  ? 'bg-white text-slate-900 shadow-sm' 
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input 
+            type="text" 
+            placeholder="Search by order ID or customer..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full h-11 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-full text-[13px] font-medium outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 transition-all shadow-sm"
+          />
+        </div>
+      </div>
+
+      {activeView === 'table' ? (
+        <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden">
+          <div className="fixed-table-container">
+            <table className="fixed-table w-full text-left">
               <thead>
-                <tr className="border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                  <th className="px-5 py-3 w-[25%]">Order Details</th>
-                  <th className="px-5 py-3 w-[20%]">Customer</th>
-                  <th className="px-5 py-3 w-[25%]">Tailoring Progress</th>
-                  <th className="px-5 py-3 w-[15%]">Financials</th>
-                  <th className="px-5 py-3 text-right w-[15%]">Action</th>
+                <tr className="bg-slate-50/20 border-b border-slate-100">
+                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
+                    <div className="flex items-center gap-2">Order ID & Date <ChevronDown size={14} className="text-slate-400" /></div>
+                  </th>
+                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
+                    <div className="flex items-center gap-2">Production Type <ChevronDown size={14} className="text-slate-400" /></div>
+                  </th>
+                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
+                    <div className="flex items-center gap-2">Garment / Service <ChevronDown size={14} className="text-slate-400" /></div>
+                  </th>
+                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
+                    <div className="flex items-center gap-2">Status <ChevronDown size={14} className="text-slate-400" /></div>
+                  </th>
+                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end gap-2 pr-2">Financials <ChevronDown size={14} className="text-slate-400" /></div>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {filteredOrders.map((order) => {
                   const engine = resolveOrderState(order);
-                  const { productionStage, balance, progress } = engine;
-                  const totalQty = order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+                  const { productionStage, balance } = engine;
                   return (
-                    <tr key={order.id} className="hover:bg-slate-50/50 transition-all group">
-                      <td className="px-5 py-3">
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${
-                              order.order_type === 'BESPOKE' ? 'bg-amber-100 text-amber-700' :
-                              order.order_type === 'BULK' ? 'bg-blue-100 text-blue-700' :
-                              order.order_type === 'ALTERATION' ? 'bg-purple-100 text-purple-700' :
-                              'bg-emerald-100 text-emerald-700'
-                            }`}>
-                              {order.order_type}
-                            </span>
-                            <div className="text-[13px] font-bold text-slate-900 truncate max-w-[180px]">
-                              {order.order_type === 'ALTERATION' 
-                                ? order.alteration_details?.item_description || 'Repair Item'
-                                : order.items?.[0]?.garment_name || 'Custom Garment'}
-                            </div>
-                          </div>
-                          <div className="text-[10px] text-slate-500 font-bold flex items-center gap-2">
-                            {order.order_type === 'BULK' && (
-                              <span className="flex items-center gap-1 uppercase tracking-tighter"><Package size={10}/> Qty: {totalQty}</span>
-                            )}
-                            {order.order_type === 'ALTERATION' && (
-                              <span className="flex items-center gap-1 text-rose-500 uppercase tracking-tighter"><Scissors size={10}/> {order.alteration_details?.item_condition || 'Normal'}</span>
-                            )}
-                            {order.order_type === 'BESPOKE' && (
-                              <span className="flex items-center gap-1 uppercase tracking-tighter"><Ruler size={10}/> Bespoke</span>
-                            )}
-                          </div>
+                    <tr 
+                      key={order.id} 
+                      className="hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setReleaseChecklist({ fitting: false, packaging: false });
+                        setPaymentAmount(resolveOrderState(order).balance);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      <td className="py-6 px-8">
+                        <div className="text-[14px] font-bold text-slate-900">#{order.id}</div>
+                        <div className="text-[12px] text-slate-400 font-medium mt-1">
+                          {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : '5/10/2026'}
                         </div>
                       </td>
-                      <td className="px-5 py-3">
-                        <Link 
-                          href={`/owner/customers?id=${order.customer_id}`}
-                          className="text-[13px] font-bold text-slate-700 hover:text-indigo-600 transition-colors"
-                        >
-                          {customers.find(c => c.id === order.customer_id)?.name || 'Unknown'}
-                        </Link>
+                      <td className="py-6 px-8 text-[14px] font-medium text-slate-600">
+                        {order.order_type === 'READY_MADE' ? 'Ready Made' : order.order_type.charAt(0) + order.order_type.slice(1).toLowerCase()}
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border w-max ${getStatusColor(
-                                productionStage
-                              )}`}
+                      <td className="py-6 px-8 text-[14px] font-medium text-slate-600">
+                        {order.order_type === 'ALTERATION' 
+                          ? order.alteration_details?.item_description || 'Repair Item'
+                          : order.items?.[0]?.garment_name || 'Custom Garment'}
+                      </td>
+                      <td className="py-6 px-8">
+                        <div className="flex flex-col gap-2">
+                          <span className="text-[13px] font-bold text-slate-900 uppercase tracking-wide">
+                            {productionStage.replace('_', ' ')}
+                          </span>
+                          {productionStage === 'ALTERATIONS' && (
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const lastInspection = orderInspections.filter(i => i.job_order_id === order.id && !i.passed).at(-1);
+                                setFeedbackContent(lastInspection?.notes || 'No specific feedback provided.');
+                                setIsFeedbackModalOpen(true);
+                              }}
+                              className="w-fit text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 hover:bg-rose-100 transition-all flex items-center gap-1.5"
                             >
-                              {getDisplayLabel(productionStage)}
-                            </span>
-                            <span className="text-[9px] font-black text-slate-400 ml-auto">{progress}%</span>
-                          </div>
-                          <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                            <div className="h-full bg-indigo-500" style={{ width: `${progress}%` }} />
-                          </div>
+                              <MessageCircle size={12} /> Check Feedback
+                            </button>
+                          )}
                         </div>
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="text-[13px] font-black text-slate-900">
-                          ₱{order.total_amount.toLocaleString()}
+                      <td className="py-6 px-8 text-right pr-10">
+                        <div className="text-[15px] font-bold text-slate-900">₱{order.total_amount.toLocaleString()}</div>
+                        <div className={`text-[12px] font-medium mt-1 ${balance > 0 ? 'text-rose-500' : 'text-slate-400'}`}>
+                          {balance > 0 ? `₱${balance.toLocaleString()} Due` : 'Fully Paid'}
                         </div>
-                        <div className={`text-[9px] font-bold uppercase tracking-widest ${
-                            balance > 0 ? 'text-rose-500' : 'text-emerald-500'
-                          }`}
-                        >
-                          {balance > 0 ? `₱${balance.toLocaleString()} Due` : 'Paid Full'}
-                        </div>
-                        {order.actual_production_cost && order.actual_production_cost > ((order.total_bom_cost || 0) + (order.total_labor_cost || 0)) ? (
-                          <div className="mt-1.5 flex items-center gap-1 text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 w-max">
-                            <AlertTriangle size={8} />
-                            <span className="text-[8px] font-black uppercase tracking-widest">Profit Warning</span>
-                          </div>
-                        ) : null}
-                      </td>
-                      <td className="px-5 py-3 text-right">
-                        <button
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setReleaseChecklist({ fitting: false, packaging: false });
-                            setPaymentAmount(resolveOrderState(order).balance);
-                            setIsModalOpen(true);
-                          }}
-                          className="h-8 px-3 rounded-lg bg-white border border-slate-200 text-slate-900 text-[11px] font-black hover:bg-slate-900 hover:text-white transition-all shadow-sm"
-                        >
-                          Details
-                        </button>
                       </td>
                     </tr>
                   );
@@ -435,9 +416,17 @@ export default function JobOrdersPage() {
                         <h4 className="text-[14px] font-bold text-slate-900 leading-tight mb-1 flex flex-col gap-1.5">
                           <span>{order.items?.[0]?.garment_name || 'Custom Garment'}</span>
                           {order.inspection_failed && (
-                            <span className="w-max px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-rose-50 border border-rose-200 text-rose-600">
-                              REVISION REQUIRED
-                            </span>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const lastInspection = orderInspections.filter(i => i.job_order_id === order.id && !i.passed).at(-1);
+                                setFeedbackContent(lastInspection?.notes || 'No specific feedback provided.');
+                                setIsFeedbackModalOpen(true);
+                              }}
+                              className="w-fit px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 transition-all flex items-center gap-1.5 mt-1"
+                            >
+                              <MessageCircle size={10} /> REVISION: Check Feedback
+                            </button>
                           )}
                           {order.actual_production_cost && order.actual_production_cost > ((order.total_bom_cost || 0) + (order.total_labor_cost || 0)) ? (
                             <span className="w-max px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-amber-50 border border-amber-200 text-amber-700 flex items-center gap-1">
@@ -469,7 +458,7 @@ export default function JobOrdersPage() {
       {/* ORDER DETAILS MODAL */}
       {isModalOpen && selectedOrder && (
         <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-[1050px] h-[90vh] rounded-[24px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex">
+          <div className="bg-white w-full max-w-[1200px] h-[90vh] rounded-[24px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex">
             <div className="w-[400px] border-r border-slate-100 flex flex-col bg-slate-50/30">
               <div className="p-8 border-b border-slate-100 bg-white">
                 <div className="flex items-center justify-between mb-6">
@@ -612,7 +601,9 @@ export default function JobOrdersPage() {
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <Calendar size={18} className="text-slate-400" />
-                    <span className="text-[14px] font-bold">{selectedOrder.due_date}</span>
+                    <span className="text-[14px] font-bold">
+                      {new Date(selectedOrder.due_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3 text-slate-600">
                     <Clock size={18} className="text-slate-400" />
@@ -715,7 +706,7 @@ export default function JobOrdersPage() {
                         <PackageOpen size={16} /> Allocate Materials
                       </button>
                     </div>
-                    {resolveOrderState(selectedOrder).productionStage === 'ON_HOLD' && (
+                    {(resolveOrderState(selectedOrder).productionStage === 'ON_HOLD' || resolveOrderState(selectedOrder).productionStage === 'WAITING_FOR_DP') && (
                       <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
                         <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={18} />
                         <div>
@@ -726,7 +717,8 @@ export default function JobOrdersPage() {
                     )}
                     <div className="space-y-3">
                        {(selectedOrder.tasks || []).map((task) => {
-                        const isLocked = resolveOrderState(selectedOrder).productionStage === 'ON_HOLD';
+                        const stage = resolveOrderState(selectedOrder).productionStage;
+                        const isLocked = stage === 'ON_HOLD' || stage === 'WAITING_FOR_DP';
                         return (
                           <div 
                             key={task.id} 
@@ -766,18 +758,18 @@ export default function JobOrdersPage() {
                               className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg outline-none border transition-all ${ 
                                 task.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                                 task.status === 'In Progress' ? 'bg-indigo-50 text-indigo-600 border-indigo-100 animate-pulse' : 
-                                task.status === 'Blocked' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                task.status === 'For Revision' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                'bg-white text-slate-400 border-slate-200' 
-                              } ${isLocked ? 'cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400' : ''}`}
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Assigned">Assigned</option>
-                              <option value="In Progress">In Progress</option>
-                              <option value="Completed">Completed</option>
-                              <option value="Blocked">Blocked</option>
-                              <option value="For Revision">For Revision</option>
-                            </select>
+                              task.status === 'Delayed' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                              task.status === 'For Revision' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                              'bg-white text-slate-400 border-slate-200' 
+                            } ${isLocked ? 'cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400' : ''}`}
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Delayed">Delayed</option>
+                            <option value="For Revision">For Revision</option>
+                          </select>
                           </div>
                         );
                       })}
@@ -827,12 +819,12 @@ export default function JobOrdersPage() {
                         {profile ? (
                           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-200">
                             {[
-                              ['Neck', profile.neck],
-                              ['Shoulder', profile.shoulder_width],
-                              ['Chest', profile.chest],
-                              ['Waist', profile.waist],
-                              ['Hips', profile.hip],
-                              ['Sleeve', profile.sleeve_length],
+                              ['Neck', profile.jacket_neck || profile.neck],
+                              ['Shoulder', profile.jacket_shoulder || profile.shoulder_width],
+                              ['Chest', profile.jacket_chest || profile.chest],
+                              ['Waist', profile.jacket_waist || profile.waist],
+                              ['Hips', profile.jacket_hip || profile.hip],
+                              ['Sleeve', profile.jacket_sleeve || profile.sleeve_length],
                             ].map(([label, val]) => (
                               <div key={label as string} className="text-center">
                                 <div className="text-[11px] font-black text-slate-400 uppercase">{label as string}</div>
@@ -1033,14 +1025,14 @@ export default function JobOrdersPage() {
                             <div className="flex gap-2">
                               <div className="relative flex-1">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]">₱</span>
-                                <input 
-                                  type="number" 
-                                  value={paymentAmount}
-                                  onChange={(e) => setPaymentAmount(e.target.value)}
-                                  placeholder="Amount to Pay" 
-                                  className="h-11 w-full pl-7 pr-3 bg-white border border-slate-200 rounded-xl text-[14px] font-bold outline-none focus:border-slate-900 transition-all shadow-sm"
-                                />
-                              </div>
+                                  <input 
+                                    type="number" 
+                                    value={paymentAmount}
+                                    onChange={(e) => setPaymentAmount(e.target.value)}
+                                    placeholder="Amount to Pay" 
+                                    className="h-11 w-full pl-7 pr-3 bg-white border border-slate-200 rounded-xl text-[15px] font-black outline-none focus:border-slate-900 transition-all shadow-sm"
+                                  />
+                                </div>
                               <select 
                                 value={paymentMethod}
                                 onChange={(e) => setPaymentMethod(e.target.value)}
@@ -1060,13 +1052,13 @@ export default function JobOrdersPage() {
                                     type="number" 
                                     value={cashReceived}
                                     onChange={(e) => setCashReceived(e.target.value)}
-                                    placeholder="Cash Received" 
-                                    className="h-11 w-full pl-7 pr-3 bg-emerald-50 border border-emerald-100 rounded-xl text-[14px] font-black outline-none focus:border-emerald-500 transition-all shadow-sm" 
+                                    placeholder="Cash Tendered" 
+                                    className="h-11 w-full pl-7 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-[15px] font-black outline-none focus:border-indigo-500 transition-all shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                                   />
                                 </div>
-                                <div className="h-11 flex items-center justify-between px-4 bg-slate-900 rounded-xl border border-slate-800">
-                                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Change:</span>
-                                  <span className="text-[14px] font-black text-emerald-400">
+                                <div className="h-11 flex flex-col justify-center px-4 bg-slate-900 rounded-xl border border-slate-800 shadow-lg shadow-slate-900/10">
+                                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Change</span>
+                                  <span className="text-[15px] font-black text-indigo-400 tracking-tight leading-none truncate">
                                     ₱{Math.max(0, (parseFloat(cashReceived) || 0) - (parseFloat(String(paymentAmount)) || 0)).toLocaleString()}
                                   </span>
                                 </div>
@@ -1174,9 +1166,16 @@ export default function JobOrdersPage() {
                             <button 
                               disabled={!releaseChecklist.fitting}
                               onClick={() => {
+                                // 1. Finalize Inventory (Convert reservation to deduction)
+                                const reservations = inventoryReservations.filter(r => r.job_order_id === selectedOrder.id && r.status !== 'RELEASED');
+                                reservations.forEach(res => {
+                                  releaseStock(res.id, res.qty_reserved);
+                                });
+
+                                // 2. Finalize Status
                                 updateOrderStatus(selectedOrder.id, 'RELEASED');
                                 setIsModalOpen(false);
-                                pushNotification('Garment released successfully.', 'success');
+                                pushNotification('Garment released and inventory updated.', 'success');
                               }}
                               className="w-full h-11 bg-indigo-600 text-white rounded-xl text-[12px] font-black hover:bg-indigo-700 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2"
                             >
@@ -1498,6 +1497,59 @@ export default function JobOrdersPage() {
           due: selectedOrder.due_date
         } : null}
       />
+
+      {/* CHECK FEEDBACK MODAL */}
+      {isFeedbackModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+          <div className="bg-white rounded-[32px] w-full max-w-[450px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-rose-50/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                  <MessageCircle size={20} />
+                </div>
+                <div>
+                  <h2 className="text-[18px] font-black text-slate-900">Revision Feedback</h2>
+                  <p className="text-[12px] font-medium text-slate-500">Quality Check Remarks</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsFeedbackModalOpen(false)} 
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all shadow-sm"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div className="p-8">
+              <div className="relative">
+                <div className="absolute -left-4 top-0 bottom-0 w-1 bg-rose-100 rounded-full" />
+                <div className="space-y-4">
+                  <div className="text-[11px] font-black text-rose-600 uppercase tracking-widest">Feedback from Inspector</div>
+                  <p className="text-[15px] text-slate-700 font-bold leading-relaxed italic">
+                    &quot;{feedbackContent}&quot;
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="flex items-center gap-3 text-slate-500">
+                  <Clock size={14} />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">Awaiting Alterations</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex gap-3">
+              <button 
+                onClick={() => setIsFeedbackModalOpen(false)}
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[13px] font-black hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/10 active:scale-[0.98]"
+              >
+                Understood
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

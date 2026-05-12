@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useERPStore } from '@/store/useERPStore';
-import { Customer, MeasurementProfile, MeasurementStatus } from '@/types/erp';
+import { Customer, MeasurementProfile, MeasurementStatus, Appointment } from '@/types/erp';
 
 // Sub-components
 import { CustomerDirectory } from './components/CustomerDirectory';
@@ -21,24 +21,24 @@ const GARMENT_TYPES = [
   "Suit", "Barong", "Polo", "Blazer", "Uniform", "Slacks", "Dress", "Skirt", "Custom"
 ];
 
-const UPPER_FIELDS = [
-  'Neck', 'Shoulder Width', 'Chest', 'Bust', 'Waist', 'Hip', 
-  'Front Length', 'Back Length', 'Sleeve Length', 'Armhole', 
-  'Bicep', 'Elbow', 'Forearm', 'Cuff', 'Across Chest', 
-  'Across Back', 'Shoulder Slope', 'Jacket Length'
+const JACKET_FIELDS = [
+  'Jacket Neck', 'Jacket Shoulder', 'Jacket Chest', 'Jacket Bust', 'Jacket Waist', 'Jacket Hip', 
+  'Jacket Sleeve', 'Jacket Length', 'Jacket Armhole', 'Jacket Bicep', 'Jacket Cuff', 
+  'Jacket Shoulder Slope', 'Jacket Front Length', 'Jacket Back Length'
 ];
 
-const LOWER_FIELDS = [
-  'Waist', 'Hip', 'Seat', 'Thigh', 'Knee', 'Calf', 
-  'Rise', 'Front Rise', 'Back Rise', 'Inseam', 
-  'Outseam', 'Leg Opening', 'Crotch Depth', 'Ankle'
+const PANTS_FIELDS = [
+  'Pants Waist', 'Pants Hip', 'Pants Inseam', 'Pants Outseam', 
+  'Pants Thigh', 'Pants Knee', 'Pants Hem', 'Pants Rise'
 ];
 
 const FULL_BODY_FIELDS = [
-  'Bust', 'Under Bust', 'Natural Waist', 'Dropped Waist', 'Hip', 
-  'Shoulder to Bust', 'Shoulder to Waist', 'Shoulder to Floor', 
-  'Back Width', 'Nape to Waist', 'Arm Circumference', 'Wrist'
+  ...JACKET_FIELDS,
+  ...PANTS_FIELDS
 ];
+
+// Utility helpers
+const generateAppointmentId = () => `APP-${Math.floor(Math.random() * 9000) + 1000}`;
 
 export default function CustomersPage() {
   const { 
@@ -59,6 +59,7 @@ export default function CustomersPage() {
   const [selectedEditMeasurement, setSelectedEditMeasurement] = useState<MeasurementProfile | null>(null);
   const [isAddFittingModalOpen, setIsAddFittingModalOpen] = useState(false);
   const [activeProfileForFitting, setActiveProfileForFitting] = useState<string | null>(null);
+  const [isScheduleAppointmentModalOpen, setIsScheduleAppointmentModalOpen] = useState(false);
 
   // Form States
   const [customerForm, setCustomerForm] = useState<CustomerForm>({ name: '', email: '', phone: '', address: '', gender: 'Male' });
@@ -69,6 +70,9 @@ export default function CustomersPage() {
   const [measValues, setMeasValues] = useState<Record<string, string>>({});
   const [fittingForm, setFittingForm] = useState<FittingForm>({ adjustment_notes: '', next_fitting_date: '', handled_by_staff_id: 'STF-001' });
   const [fittingMetrics, setFittingMetrics] = useState<Record<string, string>>({});
+  const [aptForm, setAptForm] = useState<Partial<Appointment>>({ 
+    type: 'CONSULTATION', status: 'Scheduled', duration: 60 
+  });
 
   // ── HELPERS ──
   const selectedCustomer = useMemo(() => customers.find(c => c.id === selectedCustomerId), [customers, selectedCustomerId]);
@@ -143,7 +147,7 @@ export default function CustomersPage() {
     });
     
     const initial: Record<string, string> = {};
-    const fields = profile.garment_category === 'Upper Wear' ? UPPER_FIELDS : profile.garment_category === 'Lower Wear' ? LOWER_FIELDS : FULL_BODY_FIELDS;
+    const fields = profile.garment_category === 'Upper Wear' ? JACKET_FIELDS : profile.garment_category === 'Lower Wear' ? PANTS_FIELDS : FULL_BODY_FIELDS;
     fields.forEach(f => {
       const key = f.toLowerCase().replace(/ /g, '_');
       const val = (profile as unknown as Record<string, unknown>)[key];
@@ -174,46 +178,50 @@ export default function CustomersPage() {
   const handleSaveFitting = () => {
     if (!activeProfileForFitting || !activeProfile) return;
     
-    addFittingSession({
-      measurement_profile_id: activeProfileForFitting,
-      session_no: fittingSessions.filter(s => s.measurement_profile_id === activeProfileForFitting).length + 1,
-      ...fittingForm
-    });
-
     const updatedMetrics: Record<string, number> = {};
     Object.entries(fittingMetrics).forEach(([k, v]) => {
       if (v) updatedMetrics[k.toLowerCase().replace(/ /g, '_')] = parseFloat(v);
     });
 
-    const currentV = parseInt(activeProfile.version_no.replace('V', '')) || 1;
-    
-    // 2. Create a NEW versioned profile instead of overwriting the old one
-    const newProfileId = `MEAS-${Date.now()}`;
-    const newProfile = {
-      ...activeProfile,
-      ...updatedMetrics,
-      id: newProfileId,
-      version_no: `V${currentV + 1}`,
-      status: 'PENDING_FITTING' as MeasurementStatus,
-      is_current: true,
-      recorded_at: new Date().toISOString()
-    };
-
-    useERPStore.setState((state) => ({
-      measurementProfiles: [
-        newProfile,
-        ...state.measurementProfiles.map(m => 
-          m.id === activeProfileForFitting 
-            ? { ...m, is_current: false, status: 'SUPERSEDED' as MeasurementStatus }
-            : m
-        )
-      ]
-    }));
+    // Use the new store action for versioned adjustments
+    const { recordFittingAdjustment } = useERPStore.getState();
+    recordFittingAdjustment(activeProfile, updatedMetrics, fittingForm);
 
     setIsAddFittingModalOpen(false);
     setFittingForm({ adjustment_notes: '', next_fitting_date: '', handled_by_staff_id: 'STF-001' });
     setFittingMetrics({});
-    pushNotification(`Revision V${currentV + 1} recorded successfully. Measurement history preserved.`, 'success');
+    pushNotification(`Adjustment recorded. New version created based on fitting results.`, 'success');
+  };
+
+  const handleScheduleAppointment = () => {
+    if (!selectedCustomerId || !selectedCustomer || !aptForm.date || !aptForm.startTime) {
+      pushNotification('Date and Time are required.', 'error');
+      return;
+    }
+    
+    // Add logic to save appointment (mock for now)
+    const newApt: Appointment = {
+      id: generateAppointmentId(),
+      customer: selectedCustomer.name,
+      email: selectedCustomer.email,
+      phone: selectedCustomer.phone,
+      type: aptForm.type || 'CONSULTATION',
+      category: aptForm.type || 'Consultation',
+      date: aptForm.date,
+      startTime: aptForm.startTime,
+      duration: aptForm.duration || 60,
+      status: 'Scheduled',
+      staff: aptForm.staff || 'Unassigned',
+      source: 'Walk-in',
+      reason: aptForm.reason
+    };
+
+    // Use store action if available, or just push to local state for demo
+    useERPStore.getState().appointments.push(newApt);
+    
+    setIsScheduleAppointmentModalOpen(false);
+    setAptForm({ type: 'CONSULTATION', status: 'Scheduled', duration: 60 });
+    pushNotification('Appointment scheduled successfully.', 'success');
   };
 
   return (
@@ -253,7 +261,7 @@ export default function CustomersPage() {
           onRecordFitting={(profile) => {
              setActiveProfileForFitting(profile.id);
              const initial: Record<string, string> = {};
-             const fields = profile.garment_category === 'Upper Wear' ? UPPER_FIELDS : profile.garment_category === 'Lower Wear' ? LOWER_FIELDS : FULL_BODY_FIELDS;
+             const fields = profile.garment_category === 'Upper Wear' ? JACKET_FIELDS : profile.garment_category === 'Lower Wear' ? PANTS_FIELDS : FULL_BODY_FIELDS;
              fields.forEach(f => {
                const key = f.toLowerCase().replace(/ /g, '_');
                const val = (profile as unknown as Record<string, unknown>)[key];
@@ -262,6 +270,7 @@ export default function CustomersPage() {
              setFittingMetrics(initial);
              setIsAddFittingModalOpen(true);
           }}
+          onNewAppointment={() => setIsScheduleAppointmentModalOpen(true)}
           postureTags={TAILORING_POSTURE_TAGS}
         />
       ) : null}
@@ -285,8 +294,8 @@ export default function CustomersPage() {
         selectedEditMeasurement={selectedEditMeasurement}
         selectedCustomer={selectedCustomer}
         garmentTypes={GARMENT_TYPES}
-        upperFields={UPPER_FIELDS}
-        lowerFields={LOWER_FIELDS}
+        upperFields={JACKET_FIELDS}
+        lowerFields={PANTS_FIELDS}
         fullBodyFields={FULL_BODY_FIELDS}
         isAddFittingModalOpen={isAddFittingModalOpen}
         setIsAddFittingModalOpen={setIsAddFittingModalOpen}
@@ -297,6 +306,11 @@ export default function CustomersPage() {
         handleSaveFitting={handleSaveFitting}
         activeProfile={activeProfile}
         staff={staff}
+        isScheduleAppointmentModalOpen={isScheduleAppointmentModalOpen}
+        setIsScheduleAppointmentModalOpen={setIsScheduleAppointmentModalOpen}
+        aptForm={aptForm}
+        setAptForm={setAptForm}
+        handleScheduleAppointment={handleScheduleAppointment}
       />
 
     </div>

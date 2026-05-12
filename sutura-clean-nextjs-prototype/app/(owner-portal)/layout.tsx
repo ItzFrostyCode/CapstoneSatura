@@ -17,23 +17,36 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { currentPlan, currentUser } = useERPStore();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
 
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    // Defer closing to avoid cascading render warning during route transitions
+    const handle = requestAnimationFrame(() => {
+      setIsMobileSidebarOpen(false);
+    });
+    return () => cancelAnimationFrame(handle);
+  }, [pathname]);
+
   // Clock Logic
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentTime(new Date());
+    const handle = requestAnimationFrame(() => {
+      setMounted(true);
+      setCurrentTime(new Date());
+    });
 
     const timer = window.setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+      cancelAnimationFrame(handle);
+    };
   }, []);
 
   // Disable layout for onboarding/welcome
@@ -42,11 +55,21 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-outfit text-slate-900">
+    <div className="flex h-screen bg-slate-50 overflow-hidden font-outfit text-slate-900 relative">
       
+      {/* Mobile Backdrop */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[140] lg:hidden animate-in fade-in duration-300"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
       <Sidebar 
         isCollapsed={isSidebarCollapsed} 
         setIsCollapsed={setIsSidebarCollapsed} 
+        isMobileOpen={isMobileSidebarOpen}
+        setIsMobileOpen={setIsMobileSidebarOpen}
         pathname={pathname}
         currentPlan={currentPlan}
       />
@@ -61,11 +84,12 @@ export default function DashboardLayout({
           setIsUserMenuOpen={setIsUserMenuOpen}
           isNotificationsOpen={isNotificationsOpen}
           setIsNotificationsOpen={setIsNotificationsOpen}
+          onMenuClick={() => setIsMobileSidebarOpen(true)}
         />
 
         {/* ── PAGE CONTENT (Scrollable) ── */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-          <div className="p-6 pt-2 w-full">
+          <div className="p-4 md:p-6 pt-2 w-full max-w-full overflow-x-hidden">
             {children}
           </div>
         </main>

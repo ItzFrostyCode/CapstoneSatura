@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Scissors, AlertTriangle, ArrowRight, X } from 'lucide-react';
+import { Scissors, AlertTriangle, ArrowRight, X, CheckCircle2 } from 'lucide-react';
 
 interface AllocateMaterialsModalProps {
   isOpen: boolean;
@@ -15,6 +15,8 @@ interface AllocateMaterialsModalProps {
 }
 
 export function AllocateMaterialsModal({ isOpen, onClose, order }: AllocateMaterialsModalProps) {
+  const [showWarning, setShowWarning] = React.useState(true);
+
   if (!isOpen || !order) return null;
 
   return (
@@ -88,7 +90,7 @@ export function AllocateMaterialsModal({ isOpen, onClose, order }: AllocateMater
                     <div className="text-[11px] font-mono text-slate-500 mt-0.5">SKU: THR-WHT-008</div>
                   </td>
                   <td className="px-5 py-4 font-medium">4 spools</td>
-                  <td className="px-5 py-4"><span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-md border border-amber-200">Low Stock</span></td>
+                  <td className="px-5 py-4"><span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">Sufficient</span></td>
                   <td className="px-5 py-4"><input type="number" defaultValue={2} className="w-16 h-8 border border-slate-300 rounded-md text-center font-bold text-[13px] outline-none focus:border-indigo-500"/></td>
                   <td className="px-5 py-4 text-slate-500 font-medium">spools</td>
                 </tr>
@@ -97,21 +99,23 @@ export function AllocateMaterialsModal({ isOpen, onClose, order }: AllocateMater
                     <div className="font-bold text-slate-900">Barong Buttons (Small)</div>
                     <div className="text-[11px] font-mono text-slate-500 mt-0.5">SKU: ACC-BTN-031</div>
                   </td>
-                  <td className="px-5 py-4 font-medium text-rose-600">0 sets</td>
-                  <td className="px-5 py-4"><span className="text-[11px] font-bold text-rose-700 bg-rose-50 px-2 py-1 rounded-md border border-rose-200">Out of Stock</span></td>
-                  <td className="px-5 py-4"><input type="number" defaultValue={0} readOnly className="w-16 h-8 border border-slate-200 bg-slate-50 rounded-md text-center font-bold text-[13px] outline-none opacity-50"/></td>
+                  <td className="px-5 py-4 font-medium text-slate-900">15 sets</td>
+                  <td className="px-5 py-4"><span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200">Sufficient</span></td>
+                  <td className="px-5 py-4"><input type="number" defaultValue={1} className="w-16 h-8 border border-slate-300 rounded-md text-center font-bold text-[13px] outline-none focus:border-indigo-500"/></td>
                   <td className="px-5 py-4 text-slate-500 font-medium">sets</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          {/* Blocked Warning */}
-          <div className="bg-rose-50 border border-rose-200 rounded-xl p-5 flex items-start gap-4">
-            <AlertTriangle size={20} className="text-rose-600 shrink-0 mt-0.5" />
+          {/* Success Message */}
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 flex items-start gap-4 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white shrink-0 mt-0.5 shadow-lg shadow-emerald-200">
+              <CheckCircle2 size={18} />
+            </div>
             <div>
-              <h4 className="text-[13px] font-bold text-rose-900 mb-1">1 item is out of stock (Barong Buttons)</h4>
-              <p className="text-[12px] text-rose-700 leading-relaxed">A restock request will be automatically flagged for the Shop Owner to approve. Production can still begin with the available allocated materials.</p>
+              <h4 className="text-[13px] font-black text-emerald-900 mb-1 uppercase tracking-tight">All materials are sufficient</h4>
+              <p className="text-[12px] text-emerald-700 font-medium leading-relaxed">Required resources for <span className="font-bold">{order.id}</span> have been successfully verified. You may now proceed with the allocation and initiate the production workflow.</p>
             </div>
           </div>
 

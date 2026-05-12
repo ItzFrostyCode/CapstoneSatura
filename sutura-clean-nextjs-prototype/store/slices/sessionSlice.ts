@@ -23,15 +23,16 @@ export interface SessionSlice {
   pushNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
   addStaff: (staff: Omit<Staff, 'id' | 'staffCode'>) => void;
   addBranch: (branch: Omit<ShopBranch, 'id' | 'created_at' | 'updated_at'>) => void;
+  pushAuditLog: (log: Omit<AuditLog, 'id' | 'timestamp'>) => void;
 }
 
 export const createSessionSlice: StateCreator<ERPStore, [], [], SessionSlice> = (set, get) => ({
   currentUser: { 
     id: 'USR-001', 
-    name: 'Joshua Arabejo', 
-    email: 'joshua@sutura.com', 
+    name: 'John Clock', 
+    email: 'johncloc@gmail.com', 
     avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Molang&backgroundColor=b6e3f4', 
-    role: 'ADMIN', 
+    role: 'SHOP_OWNER', 
     status: 'ACTIVE', 
     createdAt: new Date().toISOString() 
   },
@@ -62,7 +63,7 @@ export const createSessionSlice: StateCreator<ERPStore, [], [], SessionSlice> = 
   setCurrentShop: (shop) => set({ currentShop: shop }),
   setCurrentBranch: (branch) => set((state) => {
     const user = state.currentUser;
-    const canSwitch = user?.role === 'ADMIN';
+    const canSwitch = user?.role === 'SHOP_OWNER' || user?.role === 'ADMIN';
     const prevBranch = state.currentBranch;
     
     // 1. Logic-layer permission check
@@ -102,7 +103,7 @@ export const createSessionSlice: StateCreator<ERPStore, [], [], SessionSlice> = 
   }),
   canSwitchBranch: () => {
     const user = get().currentUser;
-    return user?.role === 'ADMIN';
+    return user?.role === 'SHOP_OWNER' || user?.role === 'ADMIN';
   },
   pushNotification: (message, type) => set((state) => ({
     notifications: [{ id: Date.now().toString(), message, type, timestamp: new Date().toISOString(), read: false }, ...state.notifications]
@@ -127,5 +128,13 @@ export const createSessionSlice: StateCreator<ERPStore, [], [], SessionSlice> = 
       updated_at: new Date().toISOString(),
     } as ShopBranch;
     return { branches: [...state.branches, newBranch] };
+  }),
+  pushAuditLog: (logData) => set((state) => {
+    const newLog: AuditLog = {
+      ...logData,
+      id: `LOG-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+    };
+    return { auditLogs: [newLog, ...state.auditLogs] };
   }),
 });

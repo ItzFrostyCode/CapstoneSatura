@@ -11,10 +11,10 @@ import { StaffModals } from './components/StaffModals';
 
 const ROLE_PERMISSIONS: Record<string, Record<string, boolean | 'usage-only'>> = {
   ADMIN: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
-  MANAGER: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
-  SALES: { customers: true, orders: true, measurements: true, appointments: true, inventory: false, suppliers: false, billing: true, reports: false },
-  TAILOR: { customers: false, orders: true, measurements: true, appointments: false, inventory: 'usage-only', suppliers: false, billing: false, reports: false },
-  INVENTORY: { customers: false, orders: false, measurements: false, appointments: false, inventory: true, suppliers: true, billing: false, reports: false }
+  SHOP_OWNER: { customers: true, orders: true, measurements: true, appointments: true, inventory: true, suppliers: true, billing: true, reports: true },
+  STAFF: { customers: true, orders: true, measurements: true, appointments: true, inventory: 'usage-only', suppliers: false, billing: false, reports: false },
+  DESIGNER: { customers: false, orders: false, measurements: true, appointments: true, inventory: false, suppliers: false, billing: false, reports: false },
+  CUSTOMER: { customers: false, orders: false, measurements: false, appointments: true, inventory: false, suppliers: false, billing: false, reports: false }
 };
 
 const MODULE_LABELS = {
@@ -38,7 +38,7 @@ export default function StaffPage() {
   const [isModalOpen, setIsModalOpen] = useState(onboardingParam === 'true');
   const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
   const [newStaff, setNewStaff] = useState<Partial<Staff> & { password?: string }>({
-    name: '', email: '', phone: '', roles: ['TAILOR'], hasSystemAccess: true, status: 'Active', password: '', specialization: ''
+    name: '', email: '', phone: '', roles: ['STAFF'], hasSystemAccess: true, status: 'Active', password: '', specialization: []
   });
 
   const filteredStaff = useMemo(() => 
@@ -59,18 +59,18 @@ export default function StaffPage() {
       useERPStore.setState(state => ({
         staff: state.staff.map(s => s.id === editingStaffId ? { ...s, ...newStaff } : s)
       }));
-      pushNotification('Staff information updated successfully.', 'success');
+      pushNotification('User account information updated successfully.', 'success');
     } else {
       // Handle Create
       const staffData = { ...newStaff };
       delete staffData.password;
       addStaff(staffData as Omit<Staff, 'id' | 'staffCode'>);
-      pushNotification('New staff member added successfully.', 'success');
+      pushNotification('New user account added successfully.', 'success');
     }
     
     setIsModalOpen(false);
     setEditingStaffId(null);
-    setNewStaff({ name: '', email: '', phone: '', roles: ['TAILOR'], hasSystemAccess: true, status: 'Active', password: '', specialization: '' });
+    setNewStaff({ name: '', email: '', phone: '', roles: ['STAFF'], hasSystemAccess: true, status: 'Active', password: '', specialization: [] });
   };
 
   const handleUpdateStaff = (id: string, data: Partial<Staff>) => {
@@ -79,7 +79,7 @@ export default function StaffPage() {
       useERPStore.setState(state => ({
         staff: state.staff.map(s => s.id === id ? { ...s, ...data } : s)
       }));
-      pushNotification('Staff information updated.', 'info');
+      pushNotification('User account information updated.', 'info');
       return;
     }
 
@@ -119,14 +119,14 @@ export default function StaffPage() {
       {/* HEADER */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[32px] font-black text-slate-900 tracking-tight leading-none">Staff</h1>
-          <p className="text-[14px] text-slate-500 font-bold mt-2 uppercase tracking-widest">Team Management & Role Control</p>
+          <h1 className="text-[32px] font-black text-slate-900 tracking-tight leading-none">User Accounts</h1>
+          <p className="text-[14px] text-slate-500 font-bold mt-2 uppercase tracking-widest">System Access & User Controls</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="h-12 px-6 bg-slate-900 text-white rounded-[18px] flex items-center gap-2 text-[13px] font-black hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95"
         >
-          <Plus size={18} /> Add New Staff
+          <Plus size={18} /> Add User Account
         </button>
       </div>
 

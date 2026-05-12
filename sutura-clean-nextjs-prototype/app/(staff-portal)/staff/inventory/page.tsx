@@ -11,7 +11,7 @@ import { useERPStore } from '@/store/useERPStore';
 export default function StaffInventoryPage() {
   const { inventory, currentUser } = useERPStore();
   const [search, setSearch] = useState('');
-  const isInventoryStaff = currentUser?.role === 'INVENTORY' || currentUser?.role === 'ADMIN' || currentUser?.role === 'MANAGER';
+  const isInventoryStaff = currentUser?.role === 'ADMIN' || currentUser?.role === 'SHOP_OWNER' || currentUser?.role === 'STAFF';
 
   const filteredInventory = inventory.filter(i => 
     (i.item || i.item_name || '').toLowerCase().includes(search.toLowerCase()) || 

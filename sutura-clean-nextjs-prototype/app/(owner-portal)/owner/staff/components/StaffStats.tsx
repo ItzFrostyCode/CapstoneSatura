@@ -10,7 +10,7 @@ interface StaffStatsProps {
 
 export const StaffStats: React.FC<StaffStatsProps> = ({ staff, orders }) => {
   const stats = [
-    { label: 'Total Team', val: staff.length, sub: 'Employees' },
+    { label: 'Total Accounts', val: staff.length, sub: 'Active Users' },
     { 
       label: 'High Workload', 
       val: staff.filter(s => orders.filter(o => o.assigned_tailor_id === s.id && o.status !== 'RELEASED' && o.status !== 'CANCELLED').length > 3).length, 
@@ -20,11 +20,6 @@ export const StaffStats: React.FC<StaffStatsProps> = ({ staff, orders }) => {
       label: 'Capacity', 
       val: `${staff.filter(s => s.status === 'Active').length * 5}`, 
       sub: 'Target Order Load' 
-    },
-    { 
-      label: 'System Users', 
-      val: staff.filter(s => s.hasSystemAccess).length, 
-      sub: 'Login Enabled' 
     },
   ];
 

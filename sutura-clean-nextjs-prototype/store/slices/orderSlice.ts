@@ -51,10 +51,15 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
   productionTasks: INITIAL_PRODUCTION_TASKS,
   payments: INITIAL_PAYMENTS,
   orderInspections: [],
-  orderStatusLogs: [],
+  orderStatusLogs: [
+    { id: 'LOG-1', order_id: 'ORD-1070', previous_status: 'PENDING_QUOTE', new_status: 'CONFIRMED', changed_by: 'STF-001', changed_at: '2026-05-10T11:00:00Z', remarks: 'Order confirmed after downpayment.' },
+    { id: 'LOG-2', order_id: 'ORD-1070', previous_status: 'CONFIRMED', new_status: 'IN_PRODUCTION', changed_by: 'STF-002', changed_at: '2026-05-11T09:00:00Z', remarks: 'Materials allocated. Production started.' },
+  ],
   garmentTemplates: INITIAL_TEMPLATES,
   invoices: INITIAL_INVOICES,
-  productionDiscrepancies: [],
+  productionDiscrepancies: [
+    { id: 'DISC-1', job_order_id: 'ORD-1070', discrepancy_type: 'MATERIAL_WASTE', financial_impact: 150, description: 'Slight fabric misalignment during cutting. Required extra 0.5 yards.', logged_by_user_id: 'STF-003', logged_at: '2026-05-11T14:00:00Z', status: 'RESOLVED' }
+  ],
 
   // ── Selector: join normalized tables onto Order for UI ──────
   getEnrichedOrder: (orderId) => {

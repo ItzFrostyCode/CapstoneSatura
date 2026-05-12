@@ -5,13 +5,16 @@ import {
   Scissors, Home, UserPlus, Calendar, 
   ShoppingBag, PackageSearch, Building2, Users, 
   Receipt, BarChart3, ChevronLeft, ChevronRight, HelpCircle,
-  Activity, Ruler, ListTodo
+  Activity, Ruler, ListTodo, ShieldCheck, Palette, History,
+  Database
 } from 'lucide-react';
 import { useERPStore } from '../../store/useERPStore';
 
 interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
+  isMobileOpen?: boolean;
+  setIsMobileOpen?: (open: boolean) => void;
   pathname: string;
   currentPlan: string;
 }
@@ -23,15 +26,32 @@ interface NavItem {
   roles?: string[];
 }
 
+const adminNavItems: NavItem[] = [
+  { name: 'Overview', path: '/admin/dashboard', icon: <Home size={20} /> },
+  { name: 'Verification Queue', path: '/admin/verification', icon: <ShieldCheck size={20} /> },
+  { name: 'Active Businesses', path: '/admin/tenants', icon: <Building2 size={20} /> },
+  { name: 'Operational Audit', path: '/admin/audit', icon: <History size={20} /> },
+  { name: 'Business Support', path: '/admin/support', icon: <HelpCircle size={20} /> },
+];
+
+const designerNavItems: NavItem[] = [
+  { name: 'Dashboard', path: '/designer/dashboard', icon: <Home size={20} /> },
+  { name: 'Showcase', path: '/designer/portfolio', icon: <Palette size={20} /> },
+  { name: 'Inquiries', path: '/designer/requests', icon: <ShoppingBag size={20} /> },
+  { name: 'Consultations', path: '/designer/appointments', icon: <Calendar size={20} /> },
+  { name: 'Blueprints', path: '/designer/projects', icon: <Scissors size={20} /> },
+];
+
 const ownerNavItems: NavItem[] = [
-  { name: 'Home', path: '/owner/dashboard', icon: <Home size={20} /> },
+  { name: 'Dashboard', path: '/owner/dashboard', icon: <Home size={20} /> },
   { name: 'Customers', path: '/owner/customers', icon: <UserPlus size={20} /> },
-  { name: 'Appointments', path: '/owner/appointments', icon: <Calendar size={20} /> },
+  { name: 'Consultations', path: '/owner/appointments', icon: <Calendar size={20} /> },
   { name: 'Orders', path: '/owner/orders', icon: <ShoppingBag size={20} /> },
+  { name: 'Design Proposals', path: '/owner/design-proposals', icon: <Palette size={20} /> },
   { name: 'Inventory', path: '/owner/inventory', icon: <PackageSearch size={20} /> },
   { name: 'Suppliers', path: '/owner/suppliers', icon: <Building2 size={20} /> },
-  { name: 'Staff', path: '/owner/staff', icon: <Users size={20} /> },
-  { name: 'Branches', path: '/owner/branches', icon: <Building2 size={20} />, roles: ['ADMIN'] },
+  { name: 'User Account', path: '/owner/staff', icon: <Users size={20} /> },
+  { name: 'Branches', path: '/owner/branches', icon: <Building2 size={20} />, roles: ['SHOP_OWNER', 'ADMIN'] },
   { name: 'Billing', path: '/owner/billing', icon: <Receipt size={20} /> },
   { name: 'Reports', path: '/owner/reports', icon: <BarChart3 size={20} /> },
   { name: 'Support', path: '/owner/support', icon: <HelpCircle size={20} /> },
@@ -44,14 +64,16 @@ const staffNavItems: NavItem[] = [
   { name: 'My Schedule', path: '/staff/appointments', icon: <Calendar size={20} /> },
 ];
 
-export function Sidebar({ isCollapsed, setIsCollapsed, pathname, currentPlan }: SidebarProps) {
+export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen, pathname, currentPlan }: SidebarProps) {
   const { currentUser } = useERPStore();
-  const userRole = currentUser?.role || 'SALES';
+  const userRole = currentUser?.role || 'STAFF';
 
   return (
     <aside 
-      className={`bg-white h-[calc(100vh-32px)] m-4 rounded-[32px] border border-slate-200/60 flex flex-col shrink-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative z-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ${
+      className={`bg-white h-[calc(100vh-32px)] m-4 rounded-[32px] border border-slate-200/60 flex flex-col shrink-0 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] fixed lg:static inset-y-0 left-0 z-[150] lg:z-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] ${
         isCollapsed ? 'w-[88px]' : 'w-[280px]'
+      } ${
+        isMobileOpen ? 'translate-x-0' : '-translate-x-[110%] lg:translate-x-0'
       }`}
     >
       {/* Modern Tab Toggle */}
@@ -83,7 +105,12 @@ export function Sidebar({ isCollapsed, setIsCollapsed, pathname, currentPlan }: 
           : 'px-6 custom-scrollbar'
       }`}>
         {/* Dynamic Selection of Nav Items */}
-        {(pathname.startsWith('/staff') ? staffNavItems : ownerNavItems).map((item) => {
+        {(
+          pathname.startsWith('/admin') ? adminNavItems :
+          pathname.startsWith('/designer') ? designerNavItems :
+          pathname.startsWith('/staff') ? staffNavItems : 
+          ownerNavItems
+        ).map((item) => {
           // Role-based visibility check
           if (item.roles && !item.roles.includes(userRole)) {
             return null;

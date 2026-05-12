@@ -92,9 +92,11 @@ export function InventoryItemDetail({
               </div>
            </div>
            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Valuation</p>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Asset Valuation</p>
               <div className="flex items-baseline gap-2">
-                 <span className="text-[20px] font-black text-emerald-600">{formatCurrency((item.price || 0) * (item.stock || 0))}</span>
+                 <span className="text-[20px] font-black text-emerald-600">
+                   {formatCurrency((item.weighted_average_cost || item.unit_cost || item.price || 0) * (item.stock || 0))}
+                 </span>
               </div>
            </div>
         </div>
@@ -168,8 +170,18 @@ export function InventoryItemDetail({
            </h4>
            <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden divide-y divide-slate-50 shadow-sm">
               <div className="flex justify-between p-4">
-                 <span className="text-[13px] font-bold text-slate-500">Unit Cost</span>
-                 <span className="text-[13px] font-black text-slate-900">{formatCurrency(item.price || 0)}</span>
+                 <span className="text-[13px] font-bold text-slate-500">Weighted Avg Cost</span>
+                 <span className="text-[13px] font-black text-slate-900">{formatCurrency(item.weighted_average_cost || item.unit_cost || item.price || 0)}</span>
+              </div>
+              <div className="flex justify-between p-4">
+                 <span className="text-[13px] font-bold text-slate-500">Last Purchase Price</span>
+                 <span className="text-[13px] font-black text-slate-900">{formatCurrency(item.last_purchase_price || item.unit_cost || item.price || 0)}</span>
+              </div>
+              <div className="flex justify-between p-4">
+                 <span className="text-[13px] font-bold text-slate-500">Is Sellable</span>
+                 <span className={`text-[13px] font-black ${item.is_sellable ? 'text-emerald-600' : 'text-amber-600'}`}>
+                   {item.is_sellable ? 'Yes (Retail)' : 'No (Raw Material)'}
+                 </span>
               </div>
               <div className="flex justify-between p-4">
                  <span className="text-[13px] font-bold text-slate-500">Reorder Level</span>

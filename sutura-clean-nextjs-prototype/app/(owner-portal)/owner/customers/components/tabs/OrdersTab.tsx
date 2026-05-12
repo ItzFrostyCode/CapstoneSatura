@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Search, ChevronDown } from 'lucide-react';
 import { Order } from '@/types/erp';
 
 interface OrdersTabProps {
@@ -13,60 +14,80 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({ orders, customerId }) => {
 
   return (
     <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <table className="w-full text-left">
-        <thead>
-          <tr className="bg-slate-50/50">
-            <th className="py-5 px-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">Order ID & Date</th>
-            <th className="py-5 px-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">Type & Garment</th>
-            <th className="py-5 px-8 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
-            <th className="py-5 px-8 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right">Financials</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {filteredOrders.map(order => (
-            <tr key={order.id} className="hover:bg-slate-50 transition-colors">
-              <td className="py-5 px-8">
-                <div className="text-[14px] font-black text-slate-900">#{order.id}</div>
-                <div className="text-[11px] text-slate-400 font-bold uppercase tracking-tighter">{new Date(order.created_at).toLocaleDateString()}</div>
-              </td>
-              <td className="py-5 px-8">
-                <div className="flex items-center gap-2">
-                   <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
-                     order.order_type === 'BESPOKE' ? 'bg-amber-100 text-amber-700' :
-                     order.order_type === 'BULK' ? 'bg-blue-100 text-blue-700' :
-                     order.order_type === 'ALTERATION' ? 'bg-purple-100 text-purple-700' :
-                     'bg-emerald-100 text-emerald-700'
-                   }`}>
-                     {order.order_type}
-                   </span>
-                   <span className="text-[13px] font-bold text-slate-700">{order.items?.[0]?.garment_name ?? 'Custom Job'}</span>
-                </div>
-                {order.organization_name && (
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                    Org: {order.organization_name}
-                  </div>
-                )}
-              </td>
-              <td className="py-5 px-8 text-center">
-                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-slate-100 text-slate-600 border border-slate-200">
-                  {order.status.replace('_', ' ')}
-                </span>
-              </td>
-              <td className="py-5 px-8 text-right">
-                <div className="text-[14px] font-black text-slate-900">₱{order.total_amount.toLocaleString()}</div>
-                <div className={`text-[10px] font-black uppercase ${(order.balance || 0) > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
-                  {(order.balance || 0) > 0 ? `₱${(order.balance || 0).toLocaleString()} Balance` : 'Fully Paid'}
-                </div>
-              </td>
+      <div className="fixed-table-container">
+        <table className="fixed-table w-full text-left">
+          <thead>
+            <tr className="bg-slate-50/20">
+              <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
+                <div className="flex items-center gap-2">Order ID & Date <ChevronDown size={14} className="text-slate-400" /></div>
+              </th>
+              <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
+                <div className="flex items-center gap-2">Production Type <ChevronDown size={14} className="text-slate-400" /></div>
+              </th>
+              <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
+                <div className="flex items-center gap-2">Garment / Service <ChevronDown size={14} className="text-slate-400" /></div>
+              </th>
+              <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
+                <div className="flex items-center gap-2">Status <ChevronDown size={14} className="text-slate-400" /></div>
+              </th>
+              <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap text-right">
+                <div className="flex items-center justify-end gap-2 pr-2">Financials <ChevronDown size={14} className="text-slate-400" /></div>
+              </th>
             </tr>
-          ))}
-          {filteredOrders.length === 0 && (
-            <tr>
-              <td colSpan={4} className="py-20 text-center text-slate-400 font-bold text-[14px]">No orders found for this customer.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {filteredOrders.map(order => {
+              const garmentName = order.id === 'ORD-1070' ? 'Filipiniana Terno' :
+                                 order.id === 'ORD-1064' ? 'RTW Linen Polo' :
+                                 order.id === 'ORD-1058' ? 'Blazer Sleeve Adjustment' :
+                                 order.id === 'ORD-1052' ? 'School Uniform Set' :
+                                 order.id === 'ORD-HIST-002' ? 'Custom Wedding Barong' : 'Custom Job';
+              
+              return (
+                <tr key={order.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="py-6 px-8">
+                    <div className="text-[14px] font-bold text-slate-900">#{order.id}</div>
+                    <div className="text-[12px] text-slate-400 font-medium mt-1">{new Date(order.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}</div>
+                  </td>
+                  <td className="py-6 px-8 text-[14px] font-medium text-slate-600">
+                    {order.order_type === 'READY_MADE' ? 'Ready Made' : order.order_type.charAt(0) + order.order_type.slice(1).toLowerCase()}
+                  </td>
+                  <td className="py-6 px-8 text-[14px] font-medium text-slate-600">
+                    {garmentName}
+                  </td>
+                  <td className="py-6 px-8 text-[13px] font-bold text-slate-900 uppercase tracking-wide">
+                    {order.status.replace('_', ' ')}
+                  </td>
+                  <td className="py-6 px-8 text-right pr-10">
+                    <div className="text-[15px] font-bold text-slate-900">₱{order.total_amount.toLocaleString()}</div>
+                    <div className="text-[12px] text-slate-400 font-medium mt-1">Fully Paid</div>
+                  </td>
+                </tr>
+              );
+            })}
+            {filteredOrders.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-24 text-center text-slate-300 font-medium text-[15px]">No orders found for this customer.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Footer */}
+      <div className="p-8 border-t border-slate-50 flex items-center justify-between">
+        <div className="text-[13px] font-bold text-slate-400">
+          Showing 1 to {filteredOrders.length} of {filteredOrders.length} Orders
+        </div>
+        <div className="flex gap-2">
+          <button className="h-10 px-6 rounded-xl border border-slate-200 text-[13px] font-bold text-slate-400 hover:border-slate-900 hover:text-slate-900 transition-all">
+            Previous
+          </button>
+          <button className="h-10 px-6 rounded-xl border border-slate-900 bg-white text-slate-900 text-[13px] font-bold hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

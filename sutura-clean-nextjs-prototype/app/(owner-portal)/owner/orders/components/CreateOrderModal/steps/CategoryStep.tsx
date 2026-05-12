@@ -8,10 +8,9 @@ interface CategoryStepProps {
 
 export const CategoryStep: React.FC<CategoryStepProps> = ({ onSelect }) => {
   const categories = [
-    { id: 'BESPOKE' as OrderType, icon: <User />, label: 'Custom Tailoring (Pasadya)', desc: 'Bespoke / one-of-a-kind garment', color: 'bg-indigo-600' },
+    { id: 'BESPOKE' as OrderType, icon: <User />, label: 'Custom Tailoring', desc: 'Bespoke / one-of-a-kind garment', color: 'bg-indigo-600' },
     { id: 'BULK' as OrderType, icon: <Users />, label: 'Bulk Order (Uniforms)', desc: 'Group orders, teams, or corporate', color: 'bg-amber-500' },
-    { id: 'ALTERATION' as OrderType, icon: <Scissors />, label: 'Repair & Alterations', desc: 'Adjustments, resizing, or patching', color: 'bg-rose-500' },
-    { id: 'READY_MADE' as OrderType, icon: <Shirt />, label: 'Ready-to-Wear (RTW)', desc: 'Instant sale from available stock', color: 'bg-emerald-500' }
+    { id: 'ALTERATION' as OrderType, icon: <Scissors />, label: 'Repair & Alterations', desc: 'Adjustments, resizing, or patching', color: 'bg-rose-500' }
   ];
 
   return (

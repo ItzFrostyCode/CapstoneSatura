@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Check, Lock, ShieldCheck, Plus } from 'lucide-react';
-import { Staff, StaffRole, ShopBranch } from '@/store/useERPStore';
+import { X, Check, Lock, ShieldCheck, Plus, ChevronDown } from 'lucide-react';
+import { Staff, StaffRole, ShopBranch, ProductionSpecialization } from '@/store/useERPStore';
+
+
 
 interface StaffModalsProps {
   isModalOpen: boolean;
@@ -27,50 +29,18 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
   MODULE_LABELS,
   branches
 }) => {
-  const [tagInput, setTagInput] = useState('');
-
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const tag = tagInput.trim().replace(',', '');
-      if (tag) {
-        const currentSpecs = typeof newStaff.specialization === 'string' 
-          ? newStaff.specialization.split(',').filter((x: string) => x.trim()) 
-          : [];
-        
-        if (!currentSpecs.includes(tag)) {
-          const newSpecs = [...currentSpecs, tag].join(', ');
-          setNewStaff({ ...newStaff, specialization: newSpecs });
-        }
-      }
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    const currentSpecs = typeof newStaff.specialization === 'string' 
-      ? newStaff.specialization.split(',').filter((x: string) => x.trim()) 
-      : [];
-    const newSpecs = currentSpecs.filter((t: string) => t !== tag).join(', ');
-    setNewStaff({ ...newStaff, specialization: newSpecs });
-  };
-
-  const currentSpecs = typeof newStaff.specialization === 'string' 
-    ? newStaff.specialization.split(',').filter((x: string) => x.trim()) 
-    : [];
-
   return (
     <>
       {isModalOpen && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-[850px] max-h-[90vh] overflow-y-auto rounded-[32px] shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-300 flex flex-col md:flex-row">
+        <div className="fixed inset-0 z-[140] flex items-center justify-center p-0 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-[850px] h-full md:h-auto md:max-h-[90vh] overflow-hidden md:rounded-[32px] rounded-none shadow-2xl border-x md:border border-slate-200 animate-in zoom-in-95 duration-300 flex flex-col md:flex-row">
             
-            {/* Form Section */}
+            {/* Left Panel: Form Section */}
             <div className="flex-1 p-8 overflow-y-auto custom-scrollbar">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-[24px] font-black text-slate-900 leading-tight tracking-tight">
-                    {newStaff.id ? 'Edit Staff Member' : 'Add New Staff'}
+                    {newStaff.id ? 'Edit User Account' : 'Add User Account'}
                   </h2>
                   <p className="text-[13px] text-slate-500 font-medium mt-1">
                     {newStaff.id ? 'Update staff roles, contact info, and account access.' : 'Assign a role and skills to determine access and workload.'}
@@ -95,40 +65,48 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Specializations / Skills</label>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {currentSpecs.map((tag: string) => (
-                        <span key={tag} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100 text-[11px] font-black uppercase tracking-widest">
-                          {tag}
-                          <button onClick={() => removeTag(tag)} className="hover:text-rose-600 transition-colors"><X size={12} /></button>
-                        </span>
-                      ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email Address</label>
+                      <input type="email" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} placeholder="juan@sutura.com" className="h-12 w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl text-[14px] font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all" />
                     </div>
-                    <input 
-                      type="text" 
-                      value={tagInput}
-                      onChange={e => setTagInput(e.target.value)}
-                      onKeyDown={handleAddTag}
-                      placeholder="Type skill and press Enter or Comma..." 
-                      className="h-12 w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl text-[14px] font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all" 
-                    />
+                    <div>
+                      <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Gender</label>
+                      <div className="relative">
+                        <select 
+                          value={newStaff.gender || ''} 
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewStaff({...newStaff, gender: e.target.value as 'Male' | 'Female' | 'Other'})}
+                          className="h-12 w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl text-[14px] font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                        >
+                          <option value="">Select Gender...</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                           <ChevronDown size={16} />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Primary Branch Assignment</label>
-                    <div className="relative">
-                      <select 
-                        value={newStaff.branch_id || ''} 
-                        onChange={e => setNewStaff({...newStaff, branch_id: e.target.value})}
-                        className="h-12 w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl text-[14px] font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all appearance-none"
-                      >
-                        <option value="">Select a Branch...</option>
-                        {branches.map(b => (
-                          <option key={b.id} value={b.id}>{b.branchName} ({b.branchCode})</option>
-                        ))}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                        <Plus size={16} className="rotate-45" />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+                    <div className="col-span-2">
+                      <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Branch Assignment</label>
+                      <div className="relative">
+                        <select 
+                          value={newStaff.branch_id || ''} 
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewStaff({...newStaff, branch_id: e.target.value})}
+                          className="h-12 w-full px-4 bg-slate-50 border border-slate-200 rounded-2xl text-[14px] font-bold outline-none focus:border-indigo-500 focus:bg-white transition-all appearance-none cursor-pointer"
+                        >
+                          <option value="">Select Branch...</option>
+                          {branches.map(branch => (
+                            <option key={branch.id} value={branch.id}>{branch.branchName} ({branch.branchCode})</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                           <ChevronDown size={16} />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -136,87 +114,81 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                 
                 {/* Roles Selection */}
                 <div className="pt-6 border-t border-slate-100">
-                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">Roles & System Permissions</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {['ADMIN', 'MANAGER', 'SALES', 'TAILOR', 'INVENTORY'].map(role => {
-                      const isSelected = newStaff.roles?.includes(role as StaffRole);
-                      return (
-                        <button
-                          key={role}
-                          onClick={() => {
-                            const currentRoles = newStaff.roles || [];
-                            let nextRoles: StaffRole[] = [];
-                            
-                            if (role === 'MANAGER') {
-                              // If selecting manager, remove all other roles
-                              nextRoles = isSelected ? [] : ['MANAGER'];
-                            } else if (role === 'ADMIN') {
-                              // Admin can be combined with others, but not with manager
-                              if (currentRoles.includes('MANAGER')) {
-                                nextRoles = [role as StaffRole];
-                              } else {
-                                nextRoles = isSelected 
-                                  ? currentRoles.filter(r => r !== role)
-                                  : [...currentRoles, role as StaffRole];
-                              }
-                            } else {
-                              // Standard roles (Sales, Tailor, Inventory)
-                              // Remove manager if it was there
-                              const filtered = currentRoles.filter(r => r !== 'MANAGER');
-                              nextRoles = isSelected
-                                ? filtered.filter(r => r !== role)
-                                : [...filtered, role as StaffRole];
-                            }
-                            setNewStaff({ ...newStaff, roles: nextRoles });
-                          }}
-                          className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${isSelected ? 'bg-indigo-50 border-indigo-500 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}`}
-                        >
-                          <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
-                            {isSelected && <Check size={14} className="text-white" />}
-                          </div>
-                          <div className={`text-[14px] font-black ${isSelected ? 'text-indigo-900' : 'text-slate-700'}`}>
-                            {role === 'ADMIN' ? 'Admin' : role === 'MANAGER' ? 'Manager' : role.charAt(0) + role.slice(1).toLowerCase()}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {newStaff.roles?.length === 0 && (
-                    <p className="text-[11px] text-rose-500 font-bold mt-3">Please select at least one role to proceed.</p>
-                  )}
-                </div>
-
-                {/* System Access Toggle */}
-                <div className="pt-6 border-t border-slate-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <div className="text-[14px] font-black text-slate-900">System Access (Cloud Login)</div>
-                      <div className="text-[12px] text-slate-500 font-medium">Enable this for staff who need to use the ERP dashboard.</div>
-                    </div>
-                    <button 
-                      onClick={() => setNewStaff({...newStaff, hasSystemAccess: !newStaff.hasSystemAccess})}
-                      className={`w-12 h-7 rounded-full p-1 transition-all flex ${newStaff.hasSystemAccess ? 'bg-emerald-500 justify-end' : 'bg-slate-200 justify-start'}`}
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">Account Role & Access Type</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Shop Owner Card */}
+                    <button
+                      type="button"
+                      onClick={() => setNewStaff({ ...newStaff, roles: ['SHOP_OWNER'] })}
+                      className={`group flex flex-col p-5 rounded-3xl border text-left transition-all ${newStaff.roles?.includes('SHOP_OWNER') ? 'bg-indigo-50 border-indigo-500 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}`}
                     >
-                      <div className="w-5 h-5 bg-white rounded-full shadow-sm" />
-                    </button>
-                  </div>
-
-                  {newStaff.hasSystemAccess && (
-                    <div className="p-6 bg-slate-50 border border-slate-100 rounded-[24px] space-y-4 animate-in slide-in-from-top-2 fade-in duration-300">
-                      <div className="text-[11px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2"><Lock size={14} className="text-indigo-500"/> Account Security</div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 text-[10px]">Email Address</label>
-                          <input type="email" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} className="h-11 w-full px-4 bg-white border border-slate-200 rounded-xl text-[14px] font-bold outline-none focus:border-indigo-500 transition-all" />
+                      <div className="flex items-center justify-between mb-3">
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${newStaff.roles?.includes('SHOP_OWNER') ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                          <ShieldCheck size={20} />
                         </div>
-                        <div>
-                          <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 text-[10px]">Temporary Password</label>
-                          <input type="password" value={newStaff.password} onChange={e => setNewStaff({...newStaff, password: e.target.value})} placeholder="••••••••" className="h-11 w-full px-4 bg-white border border-slate-200 rounded-xl text-[14px] font-bold outline-none focus:border-indigo-500 transition-all" />
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${newStaff.roles?.includes('SHOP_OWNER') ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
+                          {newStaff.roles?.includes('SHOP_OWNER') && <Check size={12} className="text-white" strokeWidth={4} />}
                         </div>
                       </div>
-                    </div>
-                  )}
+                      <div className={`text-[16px] font-black ${newStaff.roles?.includes('SHOP_OWNER') ? 'text-indigo-900' : 'text-slate-900'}`}>Shop Owner</div>
+                      <p className="text-[12px] text-slate-500 font-medium mt-1 leading-snug">Full authority over business operations, staff, and financial reports.</p>
+                    </button>
+
+                    {/* Staff Card */}
+                    <button
+                      type="button"
+                      onClick={() => setNewStaff({ ...newStaff, roles: ['STAFF'] })}
+                      className={`group flex flex-col p-5 rounded-3xl border text-left transition-all ${newStaff.roles?.includes('STAFF') ? 'bg-indigo-50 border-indigo-500 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${newStaff.roles?.includes('STAFF') ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                          <Lock size={20} />
+                        </div>
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${newStaff.roles?.includes('STAFF') ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
+                          {newStaff.roles?.includes('STAFF') && <Check size={12} className="text-white" strokeWidth={4} />}
+                        </div>
+                      </div>
+                      <div className={`text-[16px] font-black ${newStaff.roles?.includes('STAFF') ? 'text-indigo-900' : 'text-slate-900'}`}>Shop Staff</div>
+                      <p className="text-[12px] text-slate-500 font-medium mt-1 leading-snug">Operational access to tasks, measurements, and daily production.</p>
+                    </button>
+                  </div>
                 </div>
+
+                {/* Specializations (Operational Tags) */}
+                <div className="pt-6 border-t border-slate-100">
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">Operational Specializations</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      'Tailoring', 'Cutting', 'Quality Check', 'Bookkeeper', 
+                      'Embroidery', 'Finishing', 'Marketing & Operations', 
+                      'Admin/HR', 'Layout Artist', 'Machine Operator', 
+                      'Sales Assistant', 'Shop Helper', 'Liaison'
+                    ].map(spec => (
+                      <button
+                        key={spec}
+                        type="button"
+                        onClick={() => {
+                          const current = newStaff.specialization || [];
+                          const updated = current.includes(spec as ProductionSpecialization)
+                            ? current.filter(s => s !== spec)
+                            : [...current, spec as ProductionSpecialization];
+                          setNewStaff({ ...newStaff, specialization: updated });
+                        }}
+                        className={`px-4 py-2 rounded-full border text-[12px] font-bold transition-all ${
+                          newStaff.specialization?.includes(spec as ProductionSpecialization)
+                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
+                            : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                        }`}
+                      >
+                        {spec}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-medium mt-3 italic">
+                    * Assigning specializations helps in filtering tasks and organizing production workflows.
+                  </p>
+                </div>
+
               </div>
 
               <div className="mt-10 flex justify-end gap-4">
@@ -226,12 +198,12 @@ export const StaffModals: React.FC<StaffModalsProps> = ({
                   disabled={!newStaff.name || newStaff.roles?.length === 0}
                   className="h-12 px-8 rounded-[18px] bg-slate-900 text-white text-[14px] font-black hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl shadow-slate-900/10 active:scale-95"
                 >
-                  {newStaff.id ? 'Save Changes' : 'Create Staff Account'}
+                  {newStaff.id ? 'Save Changes' : 'Create Account'}
                 </button>
               </div>
             </div>
 
-            {/* RBAC Visualizer Section */}
+            {/* Right Panel: RBAC Visualizer Section */}
             <div className="w-full md:w-[320px] bg-slate-50 border-l border-slate-100 p-8 shrink-0 md:max-h-[90vh] overflow-y-auto">
               <div className="flex items-center gap-2 text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-2">
                 <ShieldCheck size={16} /> Access Matrix

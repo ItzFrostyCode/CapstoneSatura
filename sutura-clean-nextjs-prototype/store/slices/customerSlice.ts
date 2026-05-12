@@ -18,6 +18,7 @@ export interface CustomerSlice {
   deleteAppointment: (id: string) => void;
   updateMeasurementProfile: (id: string, updates: Partial<MeasurementProfile>) => void;
   deleteMeasurementProfile: (id: string) => void;
+  recordFittingAdjustment: (previousProfile: MeasurementProfile, adjustmentData: Partial<MeasurementProfile>, sessionData: Partial<FittingSession>) => void;
 }
 
 export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> = (set, get) => ({
@@ -51,6 +52,7 @@ export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> 
         recorded_at: new Date().toISOString(),
         is_current: true,
         status: 'DRAFT',
+        version_no: 'V1',
         ...profile
       } as MeasurementProfile;
       return { measurementProfiles: [newObj, ...state.measurementProfiles] };
@@ -85,4 +87,37 @@ export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> 
   deleteAppointment: (id) => set((state) => ({
     appointments: state.appointments.filter(a => a.id !== id)
   })),
+  recordFittingAdjustment: (prev, adjustments, session) => set((state) => {
+    const nextVerNum = (parseInt(prev.version_no.replace('V', '')) || 1) + 1;
+    const newVerNo = `V${nextVerNum}`;
+    
+    const newProfile: MeasurementProfile = {
+      ...prev,
+      ...adjustments,
+      id: `MEAS-${Date.now()}`,
+      parent_profile_id: prev.id,
+      version_no: newVerNo,
+      version_notes: session.adjustment_notes,
+      next_fitting_date: session.next_fitting_date,
+      recorded_at: new Date().toISOString(),
+      is_current: true,
+      status: 'CONFIRMED'
+    };
+
+    const newSession: FittingSession = {
+      id: `FIT-${Date.now()}`,
+      measurement_profile_id: newProfile.id,
+      session_no: nextVerNum,
+      status: 'Completed',
+      created_at: new Date().toISOString(),
+      ...session
+    } as FittingSession;
+
+    return {
+      measurementProfiles: state.measurementProfiles.map(p => 
+        p.id === prev.id ? { ...p, is_current: false } : p
+      ).concat(newProfile),
+      fittingSessions: [newSession, ...state.fittingSessions]
+    };
+  }),
 });

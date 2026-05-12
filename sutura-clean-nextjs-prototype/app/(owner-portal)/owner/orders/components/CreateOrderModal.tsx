@@ -61,7 +61,8 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
     addGarmentTemplate,
     addMeasurementProfile,
     createNewOrder,
-    recordInventoryTransaction
+    recordInventoryTransaction,
+    reserveStock
   } = useERPStore();
 
   const [step, setStep] = useState(0);
@@ -312,12 +313,12 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
       const fabric = inventory.find(i => i.sku.trim().toUpperCase() === selectedTemplate.fabric_sku.trim().toUpperCase());
       if (fabric) {
         const needed = selectedTemplate.fabric_per_unit * totalQuantity;
-        recordInventoryTransaction(
+        reserveStock(
+          newOrderId,
+          formData.branchId || 'BRN-001',
           fabric.id,
-          'RESERVE', // Reserve the fabric for this job order
           needed,
-          `Fabric reservation for ${newOrderId}`,
-          newOrderId
+          currentUser?.id || 'USR-001'
         );
       }
     }
@@ -361,11 +362,11 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-[800px] h-[90vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-0 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white w-full max-w-[800px] h-full md:h-[90vh] md:rounded-[32px] rounded-none shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
         
         {/* Header */}
-        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+        <div className="px-6 md:px-8 py-4 md:py-6 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
           <div>
             <h2 className="text-[20px] font-black text-slate-900 tracking-tight">
               {formData.orderType === 'READY_MADE' ? 'Retail / POS Checkout' : 'Create New Job Order'}
@@ -439,12 +440,12 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
 
         {/* Footer */}
         {step > 0 && (
-          <div className="px-8 py-6 border-t border-slate-100 bg-white shrink-0 flex items-center justify-between">
-            <button onClick={prevStep} className="flex items-center gap-2 px-6 py-3 rounded-xl text-slate-500 font-black uppercase tracking-widest text-[11px] hover:bg-slate-50"><ChevronLeft size={16} /> Back</button>
+          <div className="px-6 md:px-8 py-4 md:py-6 border-t border-slate-100 bg-white shrink-0 flex items-center justify-between">
+            <button onClick={prevStep} className="flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-xl text-slate-500 font-black uppercase tracking-widest text-[10px] md:text-[11px] hover:bg-slate-50"><ChevronLeft size={16} /> Back</button>
             {step === 9 ? (
-              <button onClick={handleFinalSubmit} className="flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[12px] shadow-xl hover:bg-indigo-600 transition-all active:scale-95"><Check size={18} /> Confirm Order</button>
+              <button onClick={handleFinalSubmit} className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] md:text-[12px] shadow-xl hover:bg-indigo-600 transition-all active:scale-95"><Check size={18} /> Confirm Order</button>
             ) : (
-              <button onClick={nextStep} className="flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[12px] shadow-xl hover:bg-slate-800 transition-all active:scale-95">Next Step <ChevronRight size={16} /></button>
+              <button onClick={nextStep} className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] md:text-[12px] shadow-xl hover:bg-slate-800 transition-all active:scale-95">Next Step <ChevronRight size={16} /></button>
             )}
           </div>
         )}

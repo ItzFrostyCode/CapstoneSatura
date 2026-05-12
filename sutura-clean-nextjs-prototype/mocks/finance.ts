@@ -22,6 +22,26 @@ export const INITIAL_INVOICES: Invoice[] = [
     ]
   },
   {
+    id: 'INV-2026-007',
+    shop_id: 'SHOP-001',
+    branch_id: 'BRN-001',
+    job_order_id: 'ORD-2026-001',
+    invoice_no: 'INV-DS-2026-001',
+    customer: 'Maria Clara Santos',
+    email: 'maria.clara@noli.ph',
+    subject: 'Modern Filipiniana Gown - Deposit Required',
+    subtotal: 18500,
+    discount: 0,
+    tax: 0,
+    total_amount: 18500,
+    status: 'UNPAID',
+    issued_at: new Date().toISOString(),
+    due_date: new Date().toISOString(),
+    items: [
+      { description: 'Modern Filipiniana Gown (Deposit)', qty: 1, unitPrice: 18500, total: 18500 }
+    ]
+  },
+  {
     id: 'INV-2026-002',
     shop_id: 'SHOP-001',
     branch_id: 'BRN-001',
@@ -324,21 +344,11 @@ export const INITIAL_INVOICES: Invoice[] = [
 ];
 
 export const INITIAL_PAYMENTS: Payment[] = [
-  { "id": "PAY-100", "job_order_id": "ORD-1051", "received_by_user_id": "STF-006", "amount": 29607, "payment_method": "CASH", "reference_no": "CSH-29607", "paid_at": "2026-05-02T16:11:14.659Z", "status": "CONFIRMED" },
-  { "id": "PAY-101", "job_order_id": "ORD-1052", "received_by_user_id": "STF-002", "amount": 6800, "payment_method": "CASH", "reference_no": "CSH-6800", "paid_at": "2026-05-04T16:11:14.659Z", "status": "CONFIRMED" },
-  { "id": "PAY-102", "job_order_id": "ORD-1053", "received_by_user_id": "STF-002", "amount": 500, "payment_method": "GCASH", "reference_no": "GCSH-500", "paid_at": "2026-05-02T16:11:14.659Z", "status": "CONFIRMED" },
-  { "id": "PAY-115", "job_order_id": "ORD-1045", "invoice_id": "INV-2024-001", "received_by_user_id": "STF-001", "amount": 15000, "amount_paid": 15000, "payment_method": "BANK_TRANSFER", "reference_no": "BNK-TR-998877", "paid_at": "2026-05-06T10:00:00.000Z", "status": "CONFIRMED" },
-  { "id": "PAY-116", "job_order_id": "ORD-1052", "invoice_id": "INV-2026-003", "received_by_user_id": "STF-002", "amount": 3000, "amount_paid": 3000, "payment_method": "CASH", "reference_no": "CSH-3000", "paid_at": "2026-05-06T11:00:00.000Z", "status": "CONFIRMED" },
-  { "id": "PAY-117", "job_order_id": "ORD-1048", "invoice_id": "INV-2026-006", "received_by_user_id": "STF-001", "amount": 25000, "amount_paid": 25000, "payment_method": "BANK_TRANSFER", "reference_no": "BNK-PAY-117", "paid_at": "2026-05-02T10:00:00.000Z", "status": "CONFIRMED" },
-  { "id": "PAY-109", "job_order_id": "ORD-1061", "received_by_user_id": "STF-002", "amount": 500, "payment_method": "GCASH", "reference_no": "GCSH-99221100", "paid_at": "2026-05-03T16:11:14.659Z", "status": "CONFIRMED" },
-  { "id": "PAY-110", "job_order_id": "ORD-1062", "received_by_user_id": "STF-005", "amount": 1850, "payment_method": "GCASH", "reference_no": "GCSH-88334455", "paid_at": "2026-05-05T16:11:14.659Z", "status": "CONFIRMED" },
-  { "id": "PAY-112", "job_order_id": "ORD-1065", "received_by_user_id": "STF-006", "amount": 250, "payment_method": "GCASH", "reference_no": "GCSH-77665544", "paid_at": "2026-05-04T16:11:14.659Z", "status": "CONFIRMED" },
-  { "id": "PAY-HIST-001", "job_order_id": "ORD-HIST-001", "invoice_id": "INV-HIST-001", "received_by_user_id": "STF-001", "amount": 15000, "amount_paid": 15000, "payment_method": "CASH", "reference_no": "CSH-H001", "paid_at": "2025-11-20T11:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-HIST-002", "job_order_id": "ORD-HIST-002", "invoice_id": "INV-HIST-002", "received_by_user_id": "STF-002", "amount": 12000, "amount_paid": 12000, "payment_method": "BANK_TRANSFER", "reference_no": "BNK-H002", "paid_at": "2025-12-05T11:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-HIST-003", "job_order_id": "ORD-HIST-003", "invoice_id": "INV-HIST-003", "received_by_user_id": "STF-004", "amount": 2500, "amount_paid": 2500, "payment_method": "GCASH", "reference_no": "GCSH-H003", "paid_at": "2026-02-01T11:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-HIST-004", "job_order_id": "ORD-HIST-004", "invoice_id": "INV-HIST-004", "received_by_user_id": "STF-005", "amount": 45000, "amount_paid": 45000, "payment_method": "BANK_TRANSFER", "reference_no": "BNK-H004", "paid_at": "2026-02-25T11:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-HIST-005", "job_order_id": "ORD-HIST-005", "invoice_id": "INV-HIST-005", "received_by_user_id": "STF-006", "amount": 28000, "amount_paid": 28000, "payment_method": "CASH", "reference_no": "CSH-H005", "paid_at": "2025-12-28T11:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-HIST-006", "job_order_id": "ORD-HIST-006", "invoice_id": "INV-HIST-006", "received_by_user_id": "STF-001", "amount": 8500, "amount_paid": 8500, "payment_method": "GCASH", "reference_no": "GCSH-H006", "paid_at": "2026-02-15T11:00:00Z", "status": "CONFIRMED" }
+  { "id": "PAY-1070", "job_order_id": "ORD-1070", "received_by_user_id": "STF-001", "amount": 9250, "payment_method": "GCASH", "reference_no": "GCSH-7700", "paid_at": "2026-05-10T11:00:00Z", "status": "CONFIRMED" },
+  { "id": "PAY-1064", "job_order_id": "ORD-1064", "received_by_user_id": "STF-002", "amount": 950, "payment_method": "CASH", "reference_no": "CSH-950", "paid_at": "2026-05-08T14:00:00Z", "status": "CONFIRMED" },
+  { "id": "PAY-1058", "job_order_id": "ORD-1058", "received_by_user_id": "STF-004", "amount": 1850, "payment_method": "GCASH", "reference_no": "GCSH-1850", "paid_at": "2026-05-05T09:00:00Z", "status": "CONFIRMED" },
+  { "id": "PAY-1052", "job_order_id": "ORD-1052", "received_by_user_id": "STF-005", "amount": 6800, "payment_method": "BANK_TRANSFER", "reference_no": "BNK-6800", "paid_at": "2026-05-03T10:00:00Z", "status": "CONFIRMED" },
+  { "id": "PAY-HIST-002", "job_order_id": "ORD-HIST-002", "received_by_user_id": "STF-006", "amount": 12000, "payment_method": "CASH", "reference_no": "CSH-12000", "paid_at": "2025-12-05T12:00:00Z", "status": "CONFIRMED" }
 ];
 
 export const INITIAL_SUPPLIER_BILLS: SupplierBill[] = [

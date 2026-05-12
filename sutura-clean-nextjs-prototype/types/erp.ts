@@ -5,7 +5,27 @@
 
 // ── ENUMS / SCALARS ─────────────────────────────────────────
 
-export type UserRole = 'SALES' | 'TAILOR' | 'INVENTORY' | 'MANAGER' | 'ADMIN';
+export type UserRole = 'ADMIN' | 'SHOP_OWNER' | 'STAFF' | 'CUSTOMER' | 'DESIGNER';
+
+/**
+ * PRODUCTION SPECIALIZATIONS — assignment tags for production workflow.
+ * These are NOT login access roles. They are used to filter staff for task assignment.
+ * A single staff member can have multiple specializations.
+ */
+export type ProductionSpecialization = 
+  | 'Tailoring' 
+  | 'Cutting' 
+  | 'Quality Check' 
+  | 'Bookkeeper' 
+  | 'Embroidery' 
+  | 'Finishing'
+  | 'Marketing & Operations'
+  | 'Admin/HR'
+  | 'Layout Artist'
+  | 'Machine Operator'
+  | 'Sales Assistant'
+  | 'Shop Helper'
+  | 'Liaison';
 
 export type Permission = 
   | 'customers:modify'
@@ -18,7 +38,7 @@ export type SubscriptionStatus = 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
 export type ShopStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'EXPIRED';
 export type BranchStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
 export type BranchType = 'MAIN' | 'SATELLITE' | 'WAREHOUSE';
-export type BranchRole = 'MANAGER' | 'TAILOR' | 'HELPER' | 'CASHIER' | 'INVENTORY';
+export type BranchRole = 'SHOP_OWNER' | 'STAFF' | 'HELPER' | 'CASHIER';
 
 export type OrderType = 'BESPOKE' | 'BULK' | 'ALTERATION' | 'READY_MADE';
 export type BulkSizingStrategy = 'STANDARD' | 'CUSTOM' | 'HYBRID';
@@ -28,7 +48,7 @@ export type OrderStatus =
   | 'READY_FOR_FITTING' | 'ALTERATIONS' | 'READY_FOR_RELEASE'
   | 'RELEASED' | 'CANCELLED' | 'ON_HOLD';
 
-export type TaskStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed' | 'Blocked' | 'For Revision';
+export type TaskStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed' | 'Delayed' | 'For Revision';
 
 export type InvoiceStatus = 'UNPAID' | 'PARTIAL' | 'PAID' | 'VOID';
 export type PaymentMethod = 'CASH' | 'GCASH' | 'MAYA' | 'BANK_TRANSFER' | 'CHECK';
@@ -56,7 +76,7 @@ export interface InventoryAnalysis {
 }
 
 // Supplier / Procurement
-export type POStatus = 'DRAFT' | 'FOR_APPROVAL' | 'APPROVED' | 'SENT' | 'PARTIAL_RECEIVED' | 'RECEIVED' | 'CANCELLED';
+export type POStatus = 'DRAFT' | 'PENDING' | 'CONFIRMED' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
 
 
 // ── A. SHOP INFRASTRUCTURE ───────────────────────────────────
@@ -120,14 +140,16 @@ export interface Staff {
   id: string;
   name: string;
   roles: StaffRole[];
+  /** Production assignment tags — NOT access roles. Used to filter staff in task workflows. */
+  specialization?: ProductionSpecialization[];
   status: 'Online' | 'Offline' | 'Active' | 'Inactive' | string;
   branch_id?: string;
   staffCode?: string;
-  specialization?: string | string[];
   email?: string;
   phone?: string;
   hasSystemAccess?: boolean;
   avatar?: string;
+  gender?: 'Male' | 'Female' | 'Other';
 }
 
 
@@ -144,6 +166,8 @@ export interface Customer {
   is_active: boolean;
   style_preferences?: string;
   posture_tags?: string[];
+  avatar?: string;
+  source?: 'Online' | 'Walk-in';
   createdAt: string;
 }
 
@@ -161,35 +185,63 @@ export interface MeasurementProfile {
   base_size?: string;
   fit_preference: FitPreference;
   measurement_unit: 'Inches' | 'Centimeters';
-  version_no: string;
+  version_no: string; // V1, V2, V3, Final
   status: MeasurementStatus;
 
+  parent_profile_id?: string; // Link to previous version
+  version_notes?: string;
+  next_fitting_date?: string;
+  recorded_by: string;
+  recorded_at: string;
+  is_current: boolean;
+
+  // --- Grouped Measurements ---
+  
+  // Jacket / Upper Body
+  jacket_neck?: number;
+  jacket_shoulder?: number;
+  jacket_chest?: number; // Men's
+  jacket_bust?: number;  // Women's
+  jacket_waist?: number;
+  jacket_hip?: number;
+  jacket_sleeve?: number;
+  jacket_length?: number;
+  jacket_armhole?: number;
+  jacket_bicep?: number;
+  jacket_cuff?: number;
+  jacket_shoulder_slope?: number;
+  jacket_front_length?: number;
+  jacket_back_length?: number;
+
+  // Pants / Lower Body
+  pants_waist?: number;
+  pants_hip?: number;
+  pants_inseam?: number;
+  pants_outseam?: number;
+  pants_thigh?: number;
+  pants_knee?: number;
+  pants_hem?: number;
+  pants_rise?: number;
+
+  // Legacy / Misc
   posture_notes?: string;
   fabric_allowance_notes?: string;
   special_instructions?: string;
 
-  // Upper Wear
+  // Keep old fields for backward compatibility during migration
   neck?: number; shoulder_width?: number; chest?: number; bust?: number;
   waist?: number; hip?: number; front_length?: number; back_length?: number;
   sleeve_length?: number; armhole?: number; bicep?: number; elbow?: number;
   forearm?: number; cuff?: number; across_chest?: number; across_back?: number;
   shoulder_slope?: number; jacket_length?: number;
-
-  // Lower Wear
   lower_waist?: number; lower_hip?: number; seat?: number; thigh?: number;
   knee?: number; calf?: number; rise?: number; front_rise?: number;
   back_rise?: number; inseam?: number; outseam?: number; leg_opening?: number;
   crotch_depth?: number; ankle?: number;
-
-  // Full Body
   full_bust?: number; under_bust?: number; natural_waist?: number;
   dropped_waist?: number; full_hip?: number; shoulder_to_bust?: number;
   shoulder_to_waist?: number; shoulder_to_floor?: number; back_width?: number;
   nape_to_waist?: number; arm_circumference?: number; wrist?: number;
-
-  recorded_by: string;
-  recorded_at: string;
-  is_current: boolean;
 }
 
 export interface FittingSession {
@@ -553,6 +605,11 @@ export interface InventoryItem {
   supplier_id?: string;
   status?: string;               // Legacy status string
   location?: string;            // Legacy location string
+
+  // -- VALUATION & SALES --
+  weighted_average_cost?: number; // Internal "Book Value"
+  is_sellable: boolean;           // True for RETAIL, False for RAW MATERIAL
+  last_purchase_price?: number;   // From most recent PO
 
   // Legacy fields (kept for backward compat with pages not yet migrated)
   item?: string;                // Alias for item_name

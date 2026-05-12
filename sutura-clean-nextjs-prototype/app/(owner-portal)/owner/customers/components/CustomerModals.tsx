@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { X } from 'lucide-react';
-import { Customer, MeasurementProfile, Staff } from '@/types/erp';
+import { Customer, MeasurementProfile, Staff, Appointment } from '@/types/erp';
 
 export interface CustomerForm {
   name: string;
@@ -52,6 +52,12 @@ interface CustomerModalsProps {
   handleSaveFitting: () => void;
   activeProfile: MeasurementProfile | undefined;
   staff: Staff[];
+
+  isScheduleAppointmentModalOpen: boolean;
+  setIsScheduleAppointmentModalOpen: (open: boolean) => void;
+  aptForm: Partial<Appointment>;
+  setAptForm: React.Dispatch<React.SetStateAction<Partial<Appointment>>>;
+  handleScheduleAppointment: () => void;
 }
 
 export const CustomerModals: React.FC<CustomerModalsProps> = ({
@@ -84,7 +90,12 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
   setFittingMetrics,
   handleSaveFitting,
   activeProfile,
-  staff
+  staff,
+  isScheduleAppointmentModalOpen,
+  setIsScheduleAppointmentModalOpen,
+  aptForm,
+  setAptForm,
+  handleScheduleAppointment
 }) => {
   return (
     <>
@@ -273,13 +284,42 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
 
               <div className="lg:col-span-8">
                  <h3 className="text-[14px] font-black text-slate-900 flex items-center gap-2 uppercase tracking-widest mb-6">Detailed Metrics ({measForm.measurement_unit})</h3>
-                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {(measForm.garment_category === 'Upper Wear' ? upperFields : measForm.garment_category === 'Lower Wear' ? lowerFields : fullBodyFields).map(field => (
-                      <div key={field} className="space-y-1.5">
-                        <label className="block text-[9px] font-black text-slate-400 uppercase tracking-tighter">{field}</label>
-                        <input type="number" step="0.125" className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl font-black text-[14px] outline-none focus:bg-white focus:border-indigo-500 transition-all" placeholder="0.0" value={measValues[field] || ''} onChange={e => setMeasValues({...measValues, [field]: e.target.value})} />
-                      </div>
-                    ))}
+                 
+                 <div className="space-y-8">
+                   {/* Jacket Section */}
+                   {(measForm.garment_category === 'Upper Wear' || measForm.garment_category === 'Full Body') && (
+                     <div className="space-y-4 p-6 bg-slate-50/50 border border-slate-100 rounded-[32px]">
+                       <h4 className="text-[11px] font-black text-indigo-600 uppercase tracking-widest px-2">Jacket / Upper Body</h4>
+                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                         {upperFields.filter(f => {
+                           // Gender-based filtering
+                           if (f === 'Jacket Chest' && selectedCustomer?.gender === 'Female') return false;
+                           if (f === 'Jacket Bust' && selectedCustomer?.gender === 'Male') return false;
+                           return true;
+                         }).map(field => (
+                           <div key={field} className="space-y-1.5">
+                             <label className="block text-[9px] font-black text-slate-400 uppercase tracking-tighter px-1">{field}</label>
+                             <input type="number" step="0.125" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl font-black text-[14px] outline-none focus:border-indigo-500 transition-all shadow-sm" placeholder="0.0" value={measValues[field] || ''} onChange={e => setMeasValues({...measValues, [field]: e.target.value})} />
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+
+                   {/* Pants Section */}
+                   {(measForm.garment_category === 'Lower Wear' || measForm.garment_category === 'Full Body') && (
+                     <div className="space-y-4 p-6 bg-slate-50/50 border border-slate-100 rounded-[32px]">
+                       <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest px-2">Pants / Lower Body</h4>
+                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                         {lowerFields.map(field => (
+                           <div key={field} className="space-y-1.5">
+                             <label className="block text-[9px] font-black text-slate-400 uppercase tracking-tighter px-1">{field}</label>
+                             <input type="number" step="0.125" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl font-black text-[14px] outline-none focus:border-indigo-500 transition-all shadow-sm" placeholder="0.0" value={measValues[field] || ''} onChange={e => setMeasValues({...measValues, [field]: e.target.value})} />
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   )}
                  </div>
               </div>
             </div>
@@ -320,15 +360,43 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
                 </div>
               </div>
 
-              <div className="lg:col-span-7 space-y-4">
+              <div className="lg:col-span-7">
                  <h3 className="text-[14px] font-black text-slate-900 flex items-center gap-2 uppercase tracking-widest mb-4">Adjust Metrics ({activeProfile?.measurement_unit})</h3>
-                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {(activeProfile?.garment_category === 'Upper Wear' ? upperFields : activeProfile?.garment_category === 'Lower Wear' ? lowerFields : fullBodyFields).map(field => (
-                      <div key={field} className="space-y-1.5">
-                        <label className="block text-[9px] font-black text-slate-400 uppercase tracking-tighter">{field}</label>
-                        <input type="number" step="0.125" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl font-black text-[14px] outline-none focus:border-indigo-500 transition-all shadow-sm" value={fittingMetrics[field] || ''} onChange={e => setFittingMetrics({...fittingMetrics, [field]: e.target.value})} />
+                 
+                 <div className="space-y-6">
+                    {/* Jacket Section */}
+                    {(activeProfile?.garment_category === 'Upper Wear' || activeProfile?.garment_category === 'Full Body') && (
+                      <div className="space-y-4 p-5 bg-slate-50 border border-slate-100 rounded-[24px]">
+                        <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest px-1">Jacket Adjustment</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {upperFields.filter(f => {
+                            if (f === 'Jacket Chest' && selectedCustomer?.gender === 'Female') return false;
+                            if (f === 'Jacket Bust' && selectedCustomer?.gender === 'Male') return false;
+                            return true;
+                          }).map(field => (
+                            <div key={field} className="space-y-1.5">
+                              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-tighter">{field}</label>
+                              <input type="number" step="0.125" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl font-black text-[14px] outline-none focus:border-indigo-500 transition-all shadow-sm" value={fittingMetrics[field] || ''} onChange={e => setFittingMetrics({...fittingMetrics, [field]: e.target.value})} />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
+                    )}
+
+                    {/* Pants Section */}
+                    {(activeProfile?.garment_category === 'Lower Wear' || activeProfile?.garment_category === 'Full Body') && (
+                      <div className="space-y-4 p-5 bg-slate-50 border border-slate-100 rounded-[24px]">
+                        <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest px-1">Pants Adjustment</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {lowerFields.map(field => (
+                            <div key={field} className="space-y-1.5">
+                              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-tighter">{field}</label>
+                              <input type="number" step="0.125" className="w-full h-10 px-3 bg-white border border-slate-200 rounded-xl font-black text-[14px] outline-none focus:border-indigo-500 transition-all shadow-sm" value={fittingMetrics[field] || ''} onChange={e => setFittingMetrics({...fittingMetrics, [field]: e.target.value})} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                  </div>
               </div>
             </div>
@@ -338,6 +406,68 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
           </div>
         </div>
       )}
+
+      {/* Schedule Appointment Modal */}
+      {isScheduleAppointmentModalOpen && (
+        <div className="fixed inset-0 z-500 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-[500px] rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Schedule Appointment</h2>
+              <button onClick={() => setIsScheduleAppointmentModalOpen(false)} className="w-10 h-10 rounded-xl hover:bg-white flex items-center justify-center text-slate-400 transition-colors"><X size={20} /></button>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Customer</label>
+                  <input type="text" className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-400 cursor-not-allowed" value={selectedCustomer?.name || ''} readOnly />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Date</label>
+                    <input type="date" className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" value={aptForm.date || ''} onChange={e => setAptForm({...aptForm, date: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Time</label>
+                    <input type="time" className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" value={aptForm.startTime || ''} onChange={e => setAptForm({...aptForm, startTime: e.target.value})} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Appointment Type</label>
+                    <select 
+                      className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" 
+                      value={aptForm.type || 'CONSULTATION'} 
+                      onChange={e => setAptForm({...aptForm, type: e.target.value})}
+                    >
+                      <option value="CONSULTATION">CONSULTATION</option>
+                      <option value="MEASUREMENT">MEASUREMENT</option>
+                      <option value="FITTING">FITTING</option>
+                      <option value="PICKUP">PICKUP</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Assigned Staff</label>
+                    <select 
+                      className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" 
+                      value={aptForm.staff || ''} 
+                      onChange={e => setAptForm({...aptForm, staff: e.target.value})}
+                    >
+                      <option value="">Select Staff</option>
+                      {staff.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Purpose / Notes</label>
+                  <textarea className="w-full h-24 bg-slate-50 border border-slate-100 rounded-2xl p-4 font-bold text-slate-900 outline-none focus:bg-white resize-none" placeholder="e.g. Discussing materials and design..." value={aptForm.reason || ''} onChange={e => setAptForm({...aptForm, reason: e.target.value})} />
+                </div>
+              </div>
+              <button onClick={handleScheduleAppointment} className="w-full h-14 bg-slate-900 text-white rounded-[24px] font-black text-[15px] hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95">Confirm Schedule</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
+
   );
 };

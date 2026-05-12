@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import {
   AlertTriangle, Package, Users, Calendar, ShoppingBag,
   Truck, ChevronRight, ArrowUpRight,
-  Zap, CheckCircle2, XCircle, BarChart3
+  Zap, CheckCircle2, XCircle, BarChart3, ChevronDown
 } from 'lucide-react';
-import { InventoryItem, Order, JobOrderItem, Customer, Appointment, Supplier, PurchaseOrder } from '@/store/useERPStore';
+import { InventoryItem, Order, JobOrderItem, Customer, Appointment, Supplier, PurchaseOrder } from '@/types/erp';
 
 interface InventoryCommandCenterProps {
   inventory: InventoryItem[];
@@ -25,7 +25,6 @@ export function InventoryCommandCenter({
 }: InventoryCommandCenterProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  // ── Number formatter: prevents large numbers from breaking UI ──
   const fmt = (n: number): string => {
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
     if (n >= 10_000)    return `${(n / 1_000).toFixed(0)}k`;
@@ -33,32 +32,25 @@ export function InventoryCommandCenter({
     return n.toString();
   };
 
-  // ── Cross-module computations ──────────────────────────────────
   const lowStockItems = inventory.filter(i => {
-    const s = i.stock || 0;
-    return s <= (i.reorder_level || 0) || s === 0;
+    const available = (i.stock || 0) - (i.reserved || 0);
+    return available <= (i.reorder_level || 0) || available === 0;
   });
 
   const activeJOs = orders.filter(o => o.status === 'IN_PRODUCTION' || o.status === 'ALTERATIONS');
-
   const totalInventoryValue = inventory.reduce((sum, i) => sum + (i.stock || 0) * (i.unit_cost || 0), 0);
 
-
-  // Appointments in next 7 days that are Scheduled (need materials prepped)
-  const upcomingFittings = appointments.filter(a => {
+  const readyForPickup = orders.filter(o => o.status === 'READY_FOR_RELEASE');
+  const upcomingFittings = appointments?.filter(a => {
     if (a.status !== 'Scheduled' && a.status !== 'Pending Review') return false;
     const d = new Date(a.date);
     const now = new Date();
     const diff = (d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
     return diff >= 0 && diff <= 7;
-  });
+  }) || [];
 
-  // Customers with READY_FOR_PICKUP orders
-  const readyForPickup = orders.filter(o => o.status === 'READY_FOR_RELEASE');
-
-  // Overdue POs
   const overduePOs = purchaseOrders.filter(po => {
-    if (po.status === 'RECEIVED' || po.status === 'CANCELLED') return false;
+    if (po.status === 'DELIVERED' || po.status === 'CANCELLED') return false;
     const deliveryDate = po.expected_delivery_date || po.requested_at;
     return deliveryDate ? new Date(deliveryDate) < new Date() : false;
   });
@@ -66,8 +58,8 @@ export function InventoryCommandCenter({
   const cards = [
     {
       id: 'orders',
-      icon: <Zap size={20} />,
-      label: 'Active Production',
+      icon: <Zap size={18} />,
+      label: 'Production',
       value: activeJOs.length,
       sub: 'orders in progress',
       color: 'indigo',
@@ -75,17 +67,16 @@ export function InventoryCommandCenter({
       alert: activeJOs.some(o => new Date(o.due_date) < new Date()),
       detail: activeJOs.slice(0, 4).map(jo => {
         const c = customers.find(c => c.id === jo.customer_id);
-        const items = jobOrderItems.filter(i => i.job_order_id === jo.id);
         const overdue = new Date(jo.due_date) < new Date();
-        return { id: jo.id, label: c?.name || jo.customer_id, sub: items[0]?.garment_name || jo.id, overdue };
+        return { id: jo.id, label: c?.name || jo.customer_id, sub: jo.id, overdue };
       }),
     },
     {
       id: 'lowstock',
-      icon: <AlertTriangle size={20} />,
-      label: 'Low Stock',
+      icon: <AlertTriangle size={18} />,
+      label: 'Inventory Alerts',
       value: lowStockItems.length,
-      sub: 'items need restocking',
+      sub: 'restock required',
       color: 'amber',
       tab: 'low_stock' as const,
       alert: lowStockItems.some(i => (i.stock || 0) === 0),
@@ -97,10 +88,10 @@ export function InventoryCommandCenter({
     },
     {
       id: 'customers',
-      icon: <Users size={20} />,
-      label: 'Ready for Pickup',
+      icon: <Users size={18} />,
+      label: 'Ready Pickup',
       value: readyForPickup.length,
-      sub: 'orders awaiting customer',
+      sub: 'awaiting release',
       color: 'emerald',
       tab: 'finished' as const,
       alert: false,
@@ -111,10 +102,10 @@ export function InventoryCommandCenter({
     },
     {
       id: 'appointments',
-      icon: <Calendar size={20} />,
-      label: 'Upcoming Fittings',
+      icon: <Calendar size={18} />,
+      label: 'Fittings',
       value: upcomingFittings.length,
-      sub: 'in next 7 days',
+      sub: 'next 7 days',
       color: 'sky',
       tab: 'materials' as const,
       alert: false,
@@ -126,14 +117,14 @@ export function InventoryCommandCenter({
     },
     {
       id: 'suppliers',
-      icon: <Truck size={20} />,
-      label: 'Supplier POs',
+      icon: <Truck size={18} />,
+      label: 'Overdue POs',
       value: overduePOs.length,
-      sub: overduePOs.length > 0 ? 'overdue deliveries' : 'all deliveries on time',
+      sub: 'delayed deliveries',
       color: overduePOs.length > 0 ? 'rose' : 'slate',
       tab: 'materials' as const,
       alert: overduePOs.length > 0,
-      detail: purchaseOrders.filter(p => p.status !== 'RECEIVED' && p.status !== 'CANCELLED').slice(0, 4).map(po => {
+      detail: purchaseOrders.filter(p => p.status !== 'DELIVERED' && p.status !== 'CANCELLED').slice(0, 4).map(po => {
         const s = suppliers.find(s => s.id === po.supplier_id);
         const deliveryDate = po.expected_delivery_date || po.requested_at;
         const overdue = deliveryDate ? new Date(deliveryDate) < new Date() : false;
@@ -152,17 +143,21 @@ export function InventoryCommandCenter({
   };
 
   return (
-    <div className="px-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">System Connections</span>
-        <span className="text-[12px] font-bold text-slate-500">
-          Total Inventory Value: <span className="font-black text-slate-900">₱{totalInventoryValue.toLocaleString()}</span>
-        </span>
+    <div className="space-y-6">
+      {/* Header Info */}
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Real-time Operational Intelligence</span>
+        </div>
+        <div className="px-4 py-1.5 bg-white border border-slate-200 rounded-full shadow-sm">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-2">Valuation:</span>
+          <span className="text-[13px] font-black text-slate-900">₱{totalInventoryValue.toLocaleString()}</span>
+        </div>
       </div>
 
       {/* Connected Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {cards.map(card => {
           const c = colorMap[card.color];
           const isOpen = expanded === card.id;
@@ -170,50 +165,55 @@ export function InventoryCommandCenter({
             <div key={card.id} className="relative">
               <button
                 onClick={() => { setExpanded(isOpen ? null : card.id); onTabChange(card.tab); }}
-                className={`w-full p-4 rounded-2xl border transition-all text-left group ${
+                className={`w-full p-6 rounded-[32px] border transition-all text-left group overflow-hidden ${
                   isOpen
-                    ? `border-slate-900 bg-white shadow-xl`
-                    : `border-slate-200 bg-white hover:border-slate-300 hover:shadow-md`
+                    ? `border-slate-900 bg-slate-900 text-white shadow-xl scale-[1.02]`
+                    : `border-slate-200 bg-white hover:border-slate-400 hover:shadow-md`
                 }`}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className={`w-9 h-9 rounded-xl ${c.bg} ${c.text} flex items-center justify-center`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-10 h-10 rounded-[14px] flex items-center justify-center transition-colors ${isOpen ? 'bg-white/10 text-white' : `${c.bg} ${c.text}`}`}>
                     {card.icon}
                   </div>
                   {card.alert && (
-                    <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse mt-1" />
+                    <div className="px-2 py-0.5 bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full animate-pulse">Alert</div>
                   )}
                 </div>
-                <p className="text-[22px] font-black text-slate-900 leading-none tabular-nums">{fmt(card.value)}</p>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{card.label}</p>
-                <p className="text-[10px] font-medium text-slate-400 mt-0.5">{card.sub}</p>
-                <div className={`flex items-center gap-1 mt-3 text-[10px] font-black uppercase tracking-widest transition-all ${c.text}`}>
-                  <span>{isOpen ? 'Close' : 'View'}</span>
-                  <ChevronRight size={10} className={`transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+                <p className={`text-[28px] font-black tracking-tight leading-none tabular-nums ${isOpen ? 'text-white' : 'text-slate-900'}`}>{fmt(card.value)}</p>
+                <p className={`text-[10px] font-black uppercase tracking-widest mt-2 ${isOpen ? 'text-slate-400' : 'text-slate-400'}`}>{card.label}</p>
+                
+                <div className={`flex items-center gap-1.5 mt-4 text-[9px] font-black uppercase tracking-widest transition-all ${isOpen ? 'text-indigo-400' : c.text}`}>
+                  <span>{isOpen ? 'Close Intelligence' : 'Inspect Module'}</span>
+                  <ChevronDown size={12} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                 </div>
               </button>
 
               {/* Dropdown Detail Panel */}
               {isOpen && card.detail.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 z-30 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-2 duration-200" style={{ minWidth: '240px' }}>
-                  <div className={`px-4 py-2 ${c.bg} border-b border-slate-100`}>
-                    <p className={`text-[10px] font-black uppercase tracking-widest ${c.text}`}>{card.label}</p>
+                <div className="absolute top-[calc(100%+12px)] left-0 right-0 z-[100] bg-white border-2 border-slate-900 rounded-[28px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200" style={{ minWidth: '280px' }}>
+                  <div className="px-5 py-3 bg-slate-900 border-b border-white/10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live Queue</p>
                   </div>
-                  {card.detail.map(d => (
-                    <div key={d.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 border-b border-slate-50 last:border-0">
-                      <div>
-                        <p className="text-[12px] font-black text-slate-900">{d.label}</p>
-                        <p className="text-[10px] font-medium text-slate-400">{d.sub}</p>
+                  <div className="divide-y divide-slate-100 max-h-[300px] overflow-y-auto">
+                    {card.detail.map(d => (
+                      <div key={d.id} className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-colors">
+                        <div>
+                          <p className="text-[13px] font-black text-slate-900 tracking-tight">{d.label}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{d.sub}</p>
+                        </div>
+                        {d.overdue
+                          ? <XCircle size={16} className="text-rose-500 shrink-0" />
+                          : <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                        }
                       </div>
-                      {d.overdue
-                        ? <XCircle size={14} className="text-rose-500 shrink-0" />
-                        : <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                      }
-                    </div>
-                  ))}
-                  {card.detail.length === 0 && (
-                    <div className="px-4 py-6 text-center text-[11px] text-slate-400 font-medium">Nothing to show</div>
-                  )}
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => onTabChange(card.tab)}
+                    className="w-full py-4 bg-slate-50 text-[11px] font-black text-slate-900 uppercase tracking-widest hover:bg-slate-100 border-t border-slate-100 flex items-center justify-center gap-2"
+                  >
+                    View All in {card.label} <ArrowUpRight size={14} />
+                  </button>
                 </div>
               )}
             </div>
@@ -221,25 +221,24 @@ export function InventoryCommandCenter({
         })}
       </div>
 
-      {/* Mini Production Flow Indicator */}
-      <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-hide">
+      {/* Production Flow Breadcrumbs */}
+      <div className="bg-white border border-slate-200 rounded-[24px] p-2 flex items-center gap-1 overflow-x-auto scrollbar-hide shadow-sm">
         {[
-          { label: 'Raw Materials', icon: <Package size={12} /> },
-          { label: 'In Production',  icon: <Zap size={12} /> },
-          { label: 'Finished Goods', icon: <ShoppingBag size={12} /> },
-          { label: 'Ready Pickup',   icon: <Users size={12} /> },
-          { label: 'Audit Log',      icon: <BarChart3 size={12} /> },
+          { label: 'Sourcing', icon: <Truck size={14} /> },
+          { label: 'Raw Inventory', icon: <Package size={14} /> },
+          { label: 'Production Line',  icon: <Zap size={14} /> },
+          { label: 'Quality Audit', icon: <CheckCircle2 size={14} /> },
+          { label: 'Final Release', icon: <ShoppingBag size={14} /> },
         ].map((step, i, arr) => (
           <React.Fragment key={i}>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg shrink-0">
-              <span className="text-slate-400">{step.icon}</span>
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider whitespace-nowrap">{step.label}</span>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors cursor-default group shrink-0">
+              <span className="text-slate-300 group-hover:text-indigo-500 transition-colors">{step.icon}</span>
+              <span className="text-[10px] font-black text-slate-500 group-hover:text-slate-900 uppercase tracking-widest whitespace-nowrap transition-colors">{step.label}</span>
             </div>
-            {i < arr.length - 1 && <ArrowUpRight size={12} className="text-slate-300 shrink-0" />}
+            {i < arr.length - 1 && <ChevronRight size={14} className="text-slate-200 shrink-0" />}
           </React.Fragment>
         ))}
       </div>
-
     </div>
   );
 }

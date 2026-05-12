@@ -22,7 +22,8 @@ export type {
   OrderType, OrderStatus, TaskStatus, InvoiceStatus, POStatus,
   PaymentConfirmStatus, Priority, MovementType,
   ItemType, BranchType, ReservationStatus,
-  SupportTicket, SupportTicketMessage, SupportTicketAttachment, SupportTicketStatus, SupportTicketCategory
+  SupportTicket, SupportTicketMessage, SupportTicketAttachment, SupportTicketStatus, SupportTicketCategory,
+  ProductionSpecialization
 } from '@/types/erp';
 
 // Legacy re-exports for files not yet migrated

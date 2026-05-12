@@ -84,69 +84,92 @@ export default function ProductionQueuePage() {
         </div>
       </div>
 
-      {/* Orders List */}
-      <div className="space-y-4">
-        <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">My Assigned Orders</h2>
-        <div className="flex flex-col gap-4">
-          {assignedOrders.map((order, i) => (
-            <div key={i} className="bg-white border border-slate-200 rounded-[32px] p-6 flex flex-col lg:flex-row lg:items-center justify-between shadow-sm hover:shadow-xl hover:border-slate-300 transition-all group relative overflow-hidden">
-              <div className="flex items-center gap-8">
-                <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-inner group-hover:bg-slate-900 group-hover:text-white transition-all">
-                  <span className="text-[10px] font-black opacity-40 uppercase tracking-tighter">ID</span>
-                  <span className="text-[15px] font-black">{order.id.split('-')[1]}</span>
-                </div>
-                
-                <div className="w-72">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${
-                      order.priority === 'Urgent' ? 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse' :
-                      order.priority === 'High Priority' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                      'bg-slate-50 text-slate-500 border-slate-200'
-                    }`}>
-                      {order.priority}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{order.type}</span>
-                  </div>
-                  <h3 className="font-black text-[18px] text-slate-900 leading-tight tracking-tight">{order.garment}</h3>
-                  <p className="text-[13px] text-slate-500 font-bold mt-1 uppercase tracking-tight">{order.customer}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-12 pl-8 hidden xl:grid">
-                  <div>
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div> Current Stage
+      {/* Orders List Table */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+          <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Assigned Production Queue</h2>
+          <span className="text-[10px] font-bold text-slate-400 bg-white border border-slate-200 px-2 py-0.5 rounded-md">
+            Showing {assignedOrders.length} active tasks
+          </span>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                <th className="px-6 py-4 w-[300px]">Order Details</th>
+                <th className="px-6 py-4 w-[200px]">Customer</th>
+                <th className="px-6 py-4 w-[250px]">Tailoring Progress</th>
+                <th className="px-6 py-4 w-[180px]">Deadline</th>
+                <th className="px-6 py-4 text-right pr-8">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {assignedOrders.map((order, i) => (
+                <tr key={i} className="hover:bg-slate-50/50 transition-all group">
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${
+                          order.id === 'ORD-1006' ? 'bg-amber-100 text-amber-700' :
+                          order.id === 'ORD-1004' ? 'bg-rose-100 text-rose-700' :
+                          order.type === 'Bulk' ? 'bg-blue-100 text-blue-700' :
+                          'bg-emerald-100 text-emerald-700'
+                        }`}>
+                          {order.id === 'ORD-1006' ? 'BESPOKE' : 
+                           order.id === 'ORD-1004' ? 'ALTERATION' :
+                           order.type === 'Bulk' ? 'BULK' : 'READY_MADE'}
+                        </span>
+                        <div className="text-[13px] font-bold text-slate-900 truncate max-w-[200px]">
+                          {order.garment}
+                        </div>
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight flex items-center gap-1.5 ml-1">
+                        {order.id === 'ORD-1004' ? <Scissors size={10} className="text-rose-400" /> : 
+                         order.type === 'Bulk' ? <PackageOpen size={10} className="text-blue-400" /> : 
+                         <Clock size={10} className="text-slate-300" />}
+                        {order.type} • ID: {order.id.split('-')[1]}
+                      </div>
                     </div>
-                    <div className="text-[14px] font-black text-slate-900 uppercase tracking-tight">{order.stage}</div>
-                  </div>
-
-                  <div>
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                      <Clock size={12} className="text-rose-400" /> Target Date
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="text-[14px] font-bold text-slate-900">{order.customer}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex items-center px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-indigo-100 bg-indigo-50 text-indigo-700">
+                          IN TAILORING
+                        </span>
+                        <span className="text-[10px] font-black text-slate-400">
+                          {order.stage === 'Cutting' ? '15%' : order.stage === 'Sewing' ? '45%' : order.stage === 'QC Inspection' ? '85%' : '100%'}
+                        </span>
+                      </div>
+                      <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-indigo-500" 
+                          style={{ width: order.stage === 'Cutting' ? '15%' : order.stage === 'Sewing' ? '45%' : order.stage === 'QC Inspection' ? '85%' : '100%' }} 
+                        />
+                      </div>
                     </div>
-                    <div className="text-[14px] font-black text-slate-900 uppercase tracking-tight">{order.due}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 mt-6 lg:mt-0">
-                <button className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-600 font-black text-[13px] hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                  <Edit2 size={16} /> Update Status
-                </button>
-                {order.action.includes('Allocate') ? (
-                  <button 
-                    onClick={() => handleOpenModal(order)}
-                    className="h-12 px-6 rounded-2xl bg-indigo-600 text-white font-black text-[13px] hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2 active:scale-95"
-                  >
-                    <PackageOpen size={18} /> {order.action}
-                  </button>
-                ) : (
-                  <button className="h-12 px-6 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200 font-black text-[13px] hover:bg-slate-200 transition-all flex items-center gap-2 active:scale-95">
-                    <ArrowRight size={18} /> {order.action}
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <Clock size={12} className={order.priority === 'Urgent' ? 'text-rose-500 animate-pulse' : 'text-slate-400'} />
+                      <span className={`text-[12px] font-bold ${order.priority === 'Urgent' ? 'text-rose-600' : 'text-slate-900'}`}>{order.due}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-right pr-8">
+                    <div className="flex items-center justify-end gap-2">
+                      <button className="h-8 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 text-[11px] font-black hover:bg-slate-50 transition-all shadow-sm">
+                        Details
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

@@ -24,7 +24,10 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     reorder_qty: 10,
     is_active: true,
     unit_cost: 850,
-    supplier_id: 'SUPP-001'
+    weighted_average_cost: 850,
+    last_purchase_price: 850,
+    is_sellable: false,
+    supplier_id: 'SUPP-MNL-002'
   },
   {
     id: 'INV-002',
@@ -42,7 +45,10 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     reorder_qty: 5,
     is_active: true,
     unit_cost: 1200,
-    supplier_id: 'SUPP-003'
+    weighted_average_cost: 1200,
+    last_purchase_price: 1200,
+    is_sellable: false,
+    supplier_id: 'SUPP-LOCAL-001'
   },
   {
     id: 'INV-003',
@@ -65,7 +71,10 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     item_type: 'FINISHED_GOOD',
     unit_of_measure: 'PCS',
     reorder_qty: 20,
-    is_active: true
+    is_active: true,
+    weighted_average_cost: 450,
+    last_purchase_price: 450,
+    is_sellable: true
   },
   {
     id: 'INV-004',
@@ -85,7 +94,10 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     unit_cost: 15,
     price: 15,
     location: 'Shelf B-2',
-    supplier_id: 'SUPP-004'
+    supplier_id: 'SUPP-LOCAL-002',
+    weighted_average_cost: 15,
+    last_purchase_price: 15,
+    is_sellable: false
   },
   {
     id: 'INV-005',
@@ -105,7 +117,10 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     unit_cost: 450,
     price: 450,
     location: 'Rack A-1',
-    supplier_id: 'SUPP-003'
+    supplier_id: 'SUPP-MNL-001',
+    weighted_average_cost: 450,
+    last_purchase_price: 450,
+    is_sellable: false
   },
   {
     id: 'INV-006',
@@ -125,7 +140,10 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     unit_cost: 12,
     price: 12,
     location: 'Drawer 4',
-    supplier_id: 'SUPP-002'
+    supplier_id: 'SUPP-LOCAL-003',
+    weighted_average_cost: 12,
+    last_purchase_price: 12,
+    is_sellable: false
   },
   {
     id: 'INV-007',
@@ -144,7 +162,10 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     is_active: true,
     unit_cost: 1200,
     price: 4500,
-    location: 'Showroom'
+    location: 'Showroom',
+    weighted_average_cost: 1200,
+    last_purchase_price: 1200,
+    is_sellable: true
   },
   {
     id: 'INV-008',
@@ -164,7 +185,10 @@ export const INITIAL_INVENTORY: InventoryItem[] = [
     unit_cost: 120,
     price: 120,
     location: 'Bin 3',
-    supplier_id: 'SUPP-002'
+    supplier_id: 'SUPP-LOCAL-003',
+    weighted_average_cost: 120,
+    last_purchase_price: 120,
+    is_sellable: false
   }
 ];
 

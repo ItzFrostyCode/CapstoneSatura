@@ -5,10 +5,11 @@ import {
   Users, Calendar, ShoppingBag, PackageSearch, 
   Truck, Briefcase, Home, Wallet, BarChart3, LayoutGrid,
   ArrowRight, Activity, TrendingUp, Scissors, AlertCircle,
-  Sparkles, Zap, ShieldCheck, Megaphone
+  Sparkles, Zap, ShieldCheck, Megaphone, Plus
 } from 'lucide-react';
 import { useERPStore } from '@/store/useERPStore';
 import { resolveOrderState } from '@/features/orders/orderEngine';
+import Link from 'next/link';
 
 import { 
   BranchPerformance, 
@@ -79,7 +80,7 @@ export default function DashboardPage() {
   const totalRevenue = useMemo(() => payments?.reduce((sum, p) => sum + p.amount, 0) || 0, [payments]);
   const receivablesRisk = Math.max(0, invoices.reduce((s,i) => s + i.total_amount, 0) - totalRevenue);
   
-  const pendingPOs = purchaseOrders?.filter(po => po.status === 'SENT' || po.status === 'DRAFT').length || 0;
+  const pendingPOs = purchaseOrders?.filter(po => ['PENDING', 'CONFIRMED', 'IN_TRANSIT'].includes(po.status)).length || 0;
 
   const mockBranchData = useMemo(() => {
     const data: Record<string, { revenue: number; target: number }> = {};
@@ -176,6 +177,61 @@ export default function DashboardPage() {
               
               <div className="xl:col-span-2 space-y-10">
                 
+                {/* ── DESIGNER HANDOFF: ARCHITECT TO BUILDER ── */}
+                <section className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-amber-100">
+                        <Scissors size={16} />
+                      </div>
+                      <h2 className="text-[20px] font-black text-slate-900 tracking-tight">Incoming Designer Projects</h2>
+                    </div>
+                    <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                       Requires Builder Review
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     {/* Mock Proposal 1 */}
+                     <div className="bg-white border border-slate-100 rounded-[32px] p-6 hover:shadow-xl hover:shadow-slate-200/50 transition-all group">
+                        <div className="flex items-center justify-between mb-6">
+                           <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black text-xs">JA</div>
+                              <div>
+                                 <div className="text-sm font-black text-slate-900">John Clock</div>
+                                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Lead Designer</div>
+                              </div>
+                           </div>
+                           <div className="text-right">
+                              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Project ID</div>
+                              <div className="text-xs font-black text-slate-900">DS-2026-001</div>
+                           </div>
+                        </div>
+                        <h3 className="text-md font-black text-slate-900 mb-2">Modern Filipiniana Gown</h3>
+                        <p className="text-xs text-slate-500 font-medium line-clamp-2 mb-6">High-low hemline with structured butterfly sleeves and hand-embroidered floral patterns.</p>
+                        <div className="flex items-center justify-between pt-6 border-t border-slate-50">
+                           <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending Review</span>
+                           </div>
+                           <Link href="/owner/design-proposals/DS-2026-001">
+                              <button className="h-9 px-4 bg-slate-900 text-white rounded-xl text-[11px] font-black hover:bg-indigo-600 transition-all shadow-lg shadow-slate-200">
+                                 Review Blueprint
+                              </button>
+                           </Link>
+                        </div>
+                     </div>
+
+                     {/* Add empty state placeholder if needed */}
+                     <div className="border-2 border-dashed border-slate-100 rounded-[32px] flex flex-col items-center justify-center p-8 opacity-40">
+                        <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-300 mb-2">
+                           <Plus size={16} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Waiting for architect proposals</p>
+                     </div>
+                  </div>
+                </section>
+
                 {/* ── PRODUCTION FLOW ── */}
                 <section className="space-y-6">
                   <div className="flex items-center justify-between">

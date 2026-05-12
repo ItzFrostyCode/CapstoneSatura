@@ -76,23 +76,92 @@ export const MeasurementsTab: React.FC<MeasurementsTabProps> = ({
               </button>
             </div>
           </div>
-          <div className={`p-8 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 ${!profile.is_current ? 'opacity-50 grayscale' : ''}`}>
-            {(Object.entries(profile) as [string, unknown][])
-              .filter((entry): entry is [string, number] => typeof entry[1] === 'number' && entry[1] > 0)
-              .map(([key, val]) => (
-                <div key={key} className="space-y-1">
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{key.replace(/_/g, ' ')}</div>
-                  <div className="text-[16px] font-black text-slate-900">{val} <span className="text-[10px] text-slate-400">{unit === 'Inches' ? 'in' : 'cm'}</span></div>
+          <div className={`p-6 space-y-6 ${!profile.is_current ? 'opacity-50 grayscale' : ''}`}>
+            {/* Jacket Group */}
+            {(profile.garment_category === 'Upper Wear' || profile.garment_category === 'Full Body') && (
+              <div className="space-y-3">
+                <h5 className="text-[12px] font-bold text-slate-800 flex items-center gap-2">
+                  Jacket / Upper Body
+                </h5>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-4">
+                  {Object.entries(profile)
+                    .filter(([key, val]) => key.startsWith('jacket_') && typeof val === 'number' && val > 0)
+                    .map(([key, val]) => (
+                      <div key={key} className="flex flex-col">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{key.replace('jacket_', '').replace(/_/g, ' ')}</div>
+                        <div className="text-[15px] font-black text-slate-900">{val as number} <span className="text-[10px] text-slate-400 font-medium">{unit === 'Inches' ? 'in' : 'cm'}</span></div>
+                      </div>
+                    ))}
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* Pants Group */}
+            {(profile.garment_category === 'Lower Wear' || profile.garment_category === 'Full Body') && (
+              <div className="space-y-3">
+                <h5 className="text-[12px] font-bold text-slate-800 flex items-center gap-2">
+                  Pants / Lower Body
+                </h5>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-4">
+                  {Object.entries(profile)
+                    .filter(([key, val]) => key.startsWith('pants_') && typeof val === 'number' && val > 0)
+                    .map(([key, val]) => (
+                      <div key={key} className="flex flex-col">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{key.replace('pants_', '').replace(/_/g, ' ')}</div>
+                        <div className="text-[15px] font-black text-slate-900">{val as number} <span className="text-[10px] text-slate-400 font-medium">{unit === 'Inches' ? 'in' : 'cm'}</span></div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Misc / Legacy Group */}
+            {(Object.entries(profile).some(([key, val]) => !key.startsWith('jacket_') && !key.startsWith('pants_') && typeof val === 'number' && val > 0 && ![ 'neck', 'waist', 'hip'].includes(key))) && (
+              <div className="pt-4 border-t border-slate-50">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-4">
+                  {(Object.entries(profile) as [string, unknown][])
+                    .filter(([key, val]) => !key.startsWith('jacket_') && !key.startsWith('pants_') && typeof val === 'number' && val > 0 && ![ 'neck', 'waist', 'hip'].includes(key))
+                    .map(([key, val]) => (
+                      <div key={key} className="flex flex-col">
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{key.replace(/_/g, ' ')}</div>
+                        <div className="text-[15px] font-black text-slate-900">{val as number} <span className="text-[10px] text-slate-400 font-medium">{unit === 'Inches' ? 'in' : 'cm'}</span></div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Version Info & Notes */}
+          {(profile.version_notes || profile.next_fitting_date) && (
+            <div className="px-8 pb-8 flex flex-col md:flex-row gap-4">
+              {profile.version_notes && (
+                <div className="flex-1 p-4 bg-slate-50 border border-slate-100 rounded-2xl flex gap-3">
+                  <Info size={16} className="text-slate-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Version {profile.version_no} Notes</div>
+                    <p className="text-[13px] text-slate-600 font-medium">{profile.version_notes}</p>
+                  </div>
+                </div>
+              )}
+              {profile.next_fitting_date && (
+                <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex gap-3">
+                  <History size={16} className="text-slate-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Next Fitting</div>
+                    <div className="text-[14px] text-slate-900 font-black">{new Date(profile.next_fitting_date).toLocaleDateString(undefined, { dateStyle: 'long' })}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           {profile.special_instructions && (
             <div className="px-8 pb-8">
-              <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex gap-3">
-                <Info size={16} className="text-amber-600 shrink-0 mt-0.5" />
+              <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex gap-3">
+                <Info size={16} className="text-slate-400 shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-[11px] font-black text-amber-700 uppercase tracking-widest mb-1">Special Instructions</div>
-                  <p className="text-[13px] text-amber-800 font-medium">{profile.special_instructions}</p>
+                  <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Special Instructions</div>
+                  <p className="text-[13px] text-slate-600 font-medium">{profile.special_instructions}</p>
                 </div>
               </div>
             </div>

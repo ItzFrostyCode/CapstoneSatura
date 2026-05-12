@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 // Custom Hooks
-import { useBilling } from './hooks/useBilling';
+import { useBilling, BillingTab } from './hooks/useBilling';
 
 // Modular Components
 import { BillingStats } from './components/BillingStats';
@@ -76,49 +76,38 @@ export default function BillingPage() {
       {/* KPI Stats Grid */}
       <BillingStats stats={stats} />
 
-      {/* Main Ledger Section */}
-      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
-        
-        {/* Table Filters & Tabs */}
-        <div className="px-8 py-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-50/30">
-          <div className="flex bg-slate-100 p-1 rounded-xl w-fit">
+      {/* Tab Switcher & Search Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-200/40 rounded-2xl w-max border border-slate-200/50 overflow-x-auto">
+          {[
+            { id: 'invoices', label: 'Sales Invoices' },
+            { id: 'bills', label: 'Supplier Bills' },
+            { id: 'settlements', label: 'Payments' }
+          ].map(tab => (
             <button 
-              onClick={() => setActiveTab('invoices')}
-              className={`px-6 py-2 rounded-lg text-[13px] font-black transition-all ${activeTab === 'invoices' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as BillingTab)}
+              className={`px-6 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
             >
-              Sales Invoices
+              {tab.label}
             </button>
-            <button 
-              onClick={() => setActiveTab('bills')}
-              className={`px-6 py-2 rounded-lg text-[13px] font-black transition-all ${activeTab === 'bills' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Supplier Bills
-            </button>
-            <button 
-              onClick={() => setActiveTab('settlements')}
-              className={`px-6 py-2 rounded-lg text-[13px] font-black transition-all ${activeTab === 'settlements' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Payments
-            </button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
-              <input 
-                type="text" 
-                placeholder={`Search ${activeTab}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full md:w-[320px] pl-12 pr-4 h-11 bg-white border border-slate-200 rounded-xl text-[14px] font-medium focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 outline-none transition-all"
-              />
-            </div>
-            <button className="h-11 w-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-all">
-              <Filter size={18} />
-            </button>
-          </div>
+          ))}
         </div>
 
+        <div className="relative w-full lg:w-72 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-slate-900 transition-colors" size={16} />
+          <input 
+            type="text" 
+            placeholder={`Search ${activeTab}...`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-11 w-full pl-12 pr-6 bg-white border border-slate-200 rounded-xl text-[12px] font-bold outline-none focus:border-slate-900 transition-all shadow-sm" 
+          />
+        </div>
+      </div>
+
+      {/* Main Ledger Section */}
+      <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
         {/* Data Table */}
         <div className="overflow-x-auto">
           {activeTab === 'invoices' && (

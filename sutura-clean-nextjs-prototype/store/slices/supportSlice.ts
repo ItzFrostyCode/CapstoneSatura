@@ -56,7 +56,7 @@ export const createSupportSlice: StateCreator<ERPStore, [], [], SupportSlice> = 
         {
           id: 'MSG-001',
           sender: 'User',
-          senderName: 'Joshua Arabejo',
+          senderName: 'John Clock',
           message:
             'Hi Support, I just transferred 50 units of Cotton Twill to the main branch, but the inventory count still says 0. Please help!',
           timestamp: '2026-05-07T10:32:00Z',
@@ -80,7 +80,7 @@ export const createSupportSlice: StateCreator<ERPStore, [], [], SupportSlice> = 
         {
           id: 'MSG-004',
           sender: 'User',
-          senderName: 'Joshua Arabejo',
+          senderName: 'John Clock',
           message: 'Confirmed! The stock is showing up correctly now. Thank you.',
           timestamp: '2026-05-08T14:15:00Z',
         },
@@ -100,7 +100,7 @@ export const createSupportSlice: StateCreator<ERPStore, [], [], SupportSlice> = 
         {
           id: 'MSG-005',
           sender: 'User',
-          senderName: 'Joshua Arabejo',
+          senderName: 'John Clock',
           message:
             'The asset upload button in the Create Order flow is completely unresponsive on my iPad. I need to upload measurement sheets for a large school uniform bulk order by this afternoon.',
           timestamp: '2026-05-09T09:00:00Z',

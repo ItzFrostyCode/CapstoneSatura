@@ -83,16 +83,15 @@ export function AppointmentRequestsTable({
   }
 
   const renderTable = (items: Appointment[]) => (
-    <div className="bg-white border border-slate-200 rounded-[28px] overflow-hidden shadow-xl shadow-slate-200/40 mx-2">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+    <div className="fixed-table-container">
+        <table className="fixed-table">
           <thead>
             <tr className="bg-slate-50/50 border-b border-slate-100">
-              <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[15%]">Request</th>
-              <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[25%]">Customer</th>
-              <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[30%]">Appointment</th>
-              <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-[15%]">Source</th>
-              <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-10 w-[15%]">Actions</th>
+              <th>Request</th>
+              <th>Customer</th>
+              <th>Appointment</th>
+              <th>Source</th>
+              <th className="text-right pr-10">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -183,7 +182,6 @@ export function AppointmentRequestsTable({
             ))}
           </tbody>
         </table>
-      </div>
     </div>
   );
 

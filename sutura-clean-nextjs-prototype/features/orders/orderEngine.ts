@@ -34,6 +34,7 @@ export interface OrderEngineInput {
   // Legacy: pass amount_paid directly (still supported for backward compat)
   amount_paid?: number;
   amountPaid?: number;            // Legacy alias
+  status?: string;                // Manual status from DB
 }
 
 // ── PAYMENT LOGIC ─────────────────────────────────────────────
@@ -85,9 +86,15 @@ export function computeBalance(input: OrderEngineInput): number {
  */
 export function getProductionStage(input: OrderEngineInput): ProductionStage {
   const paymentStatus = getPaymentStatus(input);
+  
+  // Manual Status override (from DB)
+  if (input.status === 'ON_HOLD') return 'ON_HOLD';
+  if (input.status === 'CANCELLED') return 'CANCELLED';
+  if (input.status === 'RELEASED') return 'RELEASED';
+
   const tasks = input.tasks ?? [];
   const allTasksDone = tasks.length > 0 && tasks.every(t => t.status === 'Completed' || (t.status as string) === 'Completed');
-  const hasActiveTasks = tasks.some(t => t.status === 'Pending' || t.status === 'In Progress' || t.status === 'Assigned' || t.status === 'For Revision');
+  const hasActiveTasks = tasks.some(t => t.status === 'Pending' || t.status === 'In Progress' || t.status === 'Assigned' || t.status === 'For Revision' || t.status === 'Delayed');
   
   const failed = input.inspection_failed || input.inspectionFailed;
   const passed = input.inspection_passed || input.inspectionPassed;
@@ -138,7 +145,7 @@ export function resolveOrderState(input: OrderEngineInput) {
     isFullyPaid: paymentStatus === 'PAID_FULL',
     isAtRisk:
       !!input.inspection_failed ||
-      tasks.some(t => t.status === 'Blocked' || t.status === 'For Revision'),
+      tasks.some(t => t.status === 'Delayed' || t.status === 'For Revision'),
     canBeInspected: totalTasks > 0 && tasks.every(t => t.status === 'Completed'),
   };
 }

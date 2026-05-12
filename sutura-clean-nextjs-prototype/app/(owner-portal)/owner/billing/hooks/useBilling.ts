@@ -3,8 +3,10 @@ import { useERPStore, Payment, PaymentMethod } from '@/store/useERPStore';
 import { EnhancedInvoice, EnhancedBill } from '../types/billing';
 import { formatPHP } from '../utils/billingUtils';
 
+export type BillingTab = 'invoices' | 'bills' | 'settlements';
+
 export function useBilling() {
-  const [activeTab, setActiveTab] = useState('invoices');
+  const [activeTab, setActiveTab] = useState<BillingTab>('invoices');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Modal states

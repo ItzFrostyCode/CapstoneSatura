@@ -46,6 +46,11 @@ export function NewItemModal({ isOpen, onClose, onSave, defaultCategory }: NewIt
       ...form,
       stock: 0, // Strict rule: Initial stock is always 0
       is_active: true,
+      is_sellable: form.item_type === 'FINISHED_GOOD',
+      weighted_average_cost: form.price || 0,
+      last_purchase_price: form.price || 0,
+      unit_cost: form.price || 0,
+      cost: form.price || 0,
       // Legacy compatibility
       item: form.item_name,
       cat: form.category,

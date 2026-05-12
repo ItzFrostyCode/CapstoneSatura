@@ -155,7 +155,7 @@ export const PersonnelSizingStep: React.FC<PersonnelSizingStepProps> = ({
             <textarea 
               value={bulkImportText}
               onChange={e => setBulkImportText(e.target.value)}
-              placeholder={"Joshua Arabejo, L, 7\nMaria Santos, M, 12\nAlex Reyes, XL, 23"}
+              placeholder={"John Clock, L, 7\nMaria Santos, M, 12\nAlex Reyes, XL, 23"}
               className="w-full h-32 p-4 rounded-2xl border border-indigo-200 outline-none focus:border-indigo-600 text-[13px] font-medium"
             />
             <button 

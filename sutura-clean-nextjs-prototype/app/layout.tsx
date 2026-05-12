@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,9 +7,14 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+});
+
 export const metadata: Metadata = {
-  title: "SUTURA Prototype",
-  description: "Subscription-Based Tailoring Business Management System",
+  title: "Sutura | The Complete Operating System for Tailors & Designers",
+  description: "Digitize measurements, automate production, and grow your tailoring business with 100% verified accuracy.",
 };
 
 export default function RootLayout({
@@ -18,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="antialiased font-sans bg-[#F9FAFB] text-[#111827]">
+    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+      <body className="antialiased font-outfit bg-[#F9FAFB] text-[#111827]">
         {children}
       </body>
     </html>

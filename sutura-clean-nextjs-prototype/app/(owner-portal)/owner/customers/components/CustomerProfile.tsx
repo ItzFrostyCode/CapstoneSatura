@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowLeft, Ruler, Plus, Edit2, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Ruler, Plus, Edit2, Mail, Phone, Search, Calendar } from 'lucide-react';
 import { Customer, Order, MeasurementProfile, Appointment, FittingSession } from '@/types/erp';
 import { OverviewTab } from './tabs/OverviewTab';
 import { OrdersTab } from './tabs/OrdersTab';
@@ -29,6 +29,7 @@ interface CustomerProfileProps {
   onRecordFitting: (profile: MeasurementProfile) => void;
   onEditProfile: (profile: MeasurementProfile) => void;
   onDeleteProfile: (profileId: string) => void;
+  onNewAppointment: () => void;
   postureTags: string[];
 }
 
@@ -52,6 +53,7 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
   onRecordFitting,
   onEditProfile,
   onDeleteProfile,
+  onNewAppointment,
   postureTags
 }) => {
   const customerOrders = orders.filter(o => o.customer_id === customer.id);
@@ -67,6 +69,12 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Directory
         </button>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={onNewAppointment}
+            className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-[12px] font-black text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center gap-2"
+          >
+            <Calendar size={16} /> Schedule Appointment
+          </button>
           <button 
             onClick={onNewProfile}
             className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-[12px] font-black text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center gap-2"
@@ -84,12 +92,25 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
 
       <div className="bg-white border border-slate-200 rounded-[40px] p-10 shadow-sm flex flex-col md:flex-row items-center justify-between gap-10">
         <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className={`w-24 h-24 rounded-[32px] flex items-center justify-center text-[32px] font-black shadow-inner ${customer.gender === 'Female' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>
-            {customer.name.split(' ').map(n => n[0]).join('')}
+          <div className={`w-24 h-24 rounded-[32px] overflow-hidden flex items-center justify-center text-[32px] font-black shadow-inner ${customer.gender === 'Female' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>
+            {customer.avatar ? (
+              <img src={customer.avatar} alt={customer.name} className="w-full h-full object-cover" />
+            ) : (
+              customer.name.split(' ').map(n => n[0]).join('')
+            )}
           </div>
           <div className="text-center md:text-left space-y-2">
-            <div className="flex items-center justify-center md:justify-start gap-3">
-              <h2 className="text-[36px] font-black text-slate-900 tracking-tight leading-none">{customer.name}</h2>
+            <div className="flex items-center justify-center md:justify-start gap-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-[36px] font-black text-slate-900 tracking-tight leading-none">{customer.name}</h2>
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${customer.gender === 'Female' ? 'bg-rose-50 text-rose-500' : 'bg-indigo-50 text-indigo-500'}`}>
+                  {customer.gender === 'Female' ? (
+                    <span className="text-[18px] font-black">♀</span>
+                  ) : (
+                    <span className="text-[18px] font-black">♂</span>
+                  )}
+                </div>
+              </div>
               <button 
                 onClick={() => onEditCustomer(customer)}
                 className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-600 hover:bg-indigo-50 transition-all"
@@ -103,29 +124,41 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-center">
+        <div className="flex flex-col gap-4">
+          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-center min-w-[120px]">
             <div className="text-[24px] font-black text-slate-900">{customerOrders.length}</div>
             <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Total Orders</div>
-          </div>
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-center">
-            <div className="text-[24px] font-black text-slate-900">₱{ltv.toLocaleString()}</div>
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">LTV</div>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-8 border-b border-slate-200 pb-0 overflow-x-auto no-scrollbar">
-        {(['overview', 'orders', 'measurements', 'appointments', 'history'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setProfileTab(tab)}
-            className={`pb-4 text-[14px] font-black uppercase tracking-widest transition-all relative ${profileTab === tab ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-900'}`}
-          >
-            {tab}
-            {profileTab === tab && <div className="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 rounded-full" />}
-          </button>
-        ))}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-2 p-1 bg-slate-50 border border-slate-200 rounded-full w-fit">
+          {(['overview', 'orders', 'measurements', 'appointments', 'history'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setProfileTab(tab)}
+              className={`px-6 py-2 text-[13px] font-bold capitalize transition-all rounded-full ${
+                profileTab === tab 
+                  ? 'bg-white text-slate-900 shadow-sm' 
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {profileTab === 'orders' && (
+          <div className="relative w-full max-w-[300px] animate-in fade-in slide-in-from-right-4 duration-300">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input 
+              type="text" 
+              placeholder="Search by order ID or garment..." 
+              className="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-full text-[13px] font-medium outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 transition-all"
+            />
+          </div>
+        )}
       </div>
 
       <div className="min-h-[400px]">

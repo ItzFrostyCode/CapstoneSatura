@@ -35,46 +35,59 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="lg:col-span-2 space-y-8">
         <div className="bg-white border border-slate-200 rounded-[32px] p-8 space-y-6">
-          <h3 className="text-[18px] font-black text-slate-900 flex items-center gap-2">
-            <Target size={20} className="text-indigo-500" /> Posture & Figuration
+          <h3 className="text-[15px] font-bold text-slate-800">
+            Posture & Figuration
           </h3>
           
           <div className="flex flex-wrap gap-2">
             {(customer.posture_tags || []).map(tag => (
-              <div key={tag} className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl text-[12px] font-bold border border-slate-900">
+              <div key={tag} className="flex items-center gap-2 px-5 py-2.5 bg-[#222] text-white rounded-full text-[14px] font-medium group">
                 {tag}
-                <button onClick={() => onUpdatePosture(customer.posture_tags?.filter(t => t !== tag) || [])}>
-                  <X size={14} />
+                <button 
+                  onClick={() => onUpdatePosture(customer.posture_tags?.filter(t => t !== tag) || [])}
+                  className="text-white/60 hover:text-white transition-colors"
+                >
+                  <X size={16} />
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="pt-4 border-t border-slate-50">
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Quick Add Tags</div>
-            <div className="flex flex-wrap gap-2">
-              {postureTags.filter(tag => !customer.posture_tags?.includes(tag)).map(tag => (
+          <div className="pt-4">
+            <div className="text-[15px] font-bold text-slate-800 mb-5">Quick Add Tags</div>
+            <div className="flex flex-wrap gap-3">
+              {[
+                'Full Bicep', 'Square', 'Stopped', 'Thin',
+                'Square Shoulders', 'Stooped', 'Erect', 'Prominent Seat', 
+                'Sway Back', 'Head Forward', 'Low Right Shoulder', 
+                'Low Left Shoulder'
+              ].filter(tag => !customer.posture_tags?.includes(tag)).map(tag => (
                 <button 
                   key={tag} 
                   onClick={() => onUpdatePosture([...(customer.posture_tags || []), tag])} 
-                  className="px-3 py-1.5 bg-white text-slate-400 border border-slate-200 rounded-lg text-[11px] font-bold hover:border-indigo-500 hover:text-indigo-600 transition-all"
+                  className="flex items-center gap-3 px-5 py-2.5 bg-white text-slate-400 border border-slate-100 rounded-full text-[14px] font-medium hover:border-slate-400 hover:text-slate-600 transition-all shadow-sm shadow-slate-100/50"
                 >
-                  + {tag}
+                  {tag} <span className="text-[18px] leading-none text-slate-900 font-light">+</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="pt-4">
-            <div className="flex gap-2">
+          <div className="pt-6">
+            <div className="flex gap-3">
               <input 
                 type="text" 
                 value={newPostureTag} 
                 onChange={e => setNewPostureTag(e.target.value)}
                 placeholder="Add custom tag..." 
-                className="flex-1 h-11 px-4 bg-slate-50 border border-slate-100 rounded-xl text-[13px] font-medium outline-none focus:bg-white"
+                className="flex-1 h-12 px-6 bg-slate-50/50 border border-slate-100 rounded-2xl text-[14px] font-medium outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 transition-all"
               />
-              <button onClick={onAddCustomTag} className="px-4 bg-slate-900 text-white rounded-xl text-[12px] font-black">Add</button>
+              <button 
+                onClick={onAddCustomTag} 
+                className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center hover:bg-indigo-600 transition-all active:scale-95 shadow-lg shadow-slate-900/10"
+              >
+                <span className="text-[20px] font-light">+</span>
+              </button>
             </div>
           </div>
         </div>

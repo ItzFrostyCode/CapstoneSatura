@@ -244,13 +244,24 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
       qty_reserved: qty, qty_released: 0, status: 'ACTIVE',
       created_at: new Date().toISOString(),
     };
+    
+    // Update normalized stock table
     const updatedStock = state.inventoryStock.map(s =>
       s.branch_id === branchId && s.inventory_item_id === itemId
         ? { ...s, reserved_qty: s.reserved_qty + qty, available_qty: s.available_qty - qty, updated_at: new Date().toISOString() }
         : s
     );
+
+    // Update denormalized item fields for UI compatibility
+    const updatedInventory = state.inventory.map(item => 
+      item.id === itemId 
+        ? { ...item, reserved: (item.reserved || 0) + qty } 
+        : item
+    );
+
     const newMovements = [...state.inventoryMovements, movement];
     return {
+      inventory: updatedInventory,
       inventoryMovements: newMovements,
       inventoryTransactions: newMovements,
       movements: newMovements,
@@ -262,6 +273,7 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
   releaseStock: (reservationId, qty, performedBy) => set((state) => {
     const reservation = state.inventoryReservations.find(r => r.id === reservationId);
     if (!reservation) return {};
+    
     const movement: InventoryMovement = {
       id: `MOV-${Date.now()}`,
       shop_id: 'SHOP-001', branch_id: reservation.branch_id, inventory_item_id: reservation.inventory_item_id,
@@ -270,19 +282,35 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
       performed_by_user_id: performedBy ?? 'STF-001',
       created_at: new Date().toISOString(),
     };
+    
     const newReleased = reservation.qty_released + qty;
     const updatedReservations = state.inventoryReservations.map(r =>
       r.id === reservationId
         ? { ...r, qty_released: newReleased, status: newReleased >= r.qty_reserved ? 'RELEASED' as const : 'PARTIALLY_RELEASED' as const }
         : r
     );
+
+    // Update normalized stock table: release from reserved and deduct from on-hand
     const updatedStock = state.inventoryStock.map(s =>
       s.branch_id === reservation.branch_id && s.inventory_item_id === reservation.inventory_item_id
-        ? { ...s, reserved_qty: Math.max(0, s.reserved_qty - qty), on_hand_qty: s.on_hand_qty - qty, updated_at: new Date().toISOString() }
+        ? { ...s, reserved_qty: Math.max(0, s.reserved_qty - qty), on_hand_qty: Math.max(0, s.on_hand_qty - qty), updated_at: new Date().toISOString() }
         : s
     );
+
+    // Update denormalized item fields
+    const updatedInventory = state.inventory.map(item => 
+      item.id === reservation.inventory_item_id 
+        ? { 
+            ...item, 
+            stock: Math.max(0, (item.stock || 0) - qty),
+            reserved: Math.max(0, (item.reserved || 0) - qty)
+          } 
+        : item
+    );
+
     const newMovements = [...state.inventoryMovements, movement];
     return {
+      inventory: updatedInventory,
       inventoryMovements: newMovements,
       inventoryTransactions: newMovements,
       movements: newMovements,
@@ -306,17 +334,39 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
         supplier_id: supplierId,
         performed_by_user_id: performedBy ?? 'STF-001',
         created_at: new Date().toISOString(),
+        notes: `Stock In-take: ${referenceId}`,
       };
+
       const updatedStock = state.inventoryStock.map(s =>
         s.branch_id === branchId && s.inventory_item_id === itemId
           ? { ...s, on_hand_qty: s.on_hand_qty + qty, available_qty: s.available_qty + qty, updated_at: new Date().toISOString() }
           : s
       );
-      // Also update legacy stock field
-      const updatedInventory = state.inventory.map(item =>
-        item.id === itemId ? { ...item, stock: (item.stock ?? 0) + qty } : item
-      );
-      const newMovements = [...state.inventoryMovements, movement];
+
+      const updatedInventory = state.inventory.map(item => {
+        if (item.id === itemId) {
+          const currentQty = item.stock || 0;
+          const currentAvg = item.weighted_average_cost || item.unit_cost || item.cost || 0;
+          
+          const incomingValue = qty * unitCost;
+          const currentTotalValue = currentQty * currentAvg;
+          const newQty = currentQty + qty;
+          const newAvg = newQty > 0 ? (incomingValue + currentTotalValue) / newQty : unitCost;
+          
+          return { 
+            ...item, 
+            stock: newQty, 
+            weighted_average_cost: Number(newAvg.toFixed(2)),
+            last_purchase_price: unitCost,
+            unit_cost: Number(newAvg.toFixed(2)), // Keep legacy synced
+            cost: Number(newAvg.toFixed(2)),      // Keep legacy synced
+            updated_at: new Date().toISOString()
+          };
+        }
+        return item;
+      });
+
+      const newMovements = [movement, ...state.inventoryMovements];
       return {
         inventoryMovements: newMovements,
         inventoryTransactions: newMovements,
@@ -325,7 +375,7 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
         inventory: updatedInventory,
       };
     });
-    get().pushNotification(`Stock received: +${qty} units added to branch inventory.`, 'success');
+    get().pushNotification(`Stock Intake Successful: +${qty} units. Average cost updated.`, 'success');
   },
 
   transferStock: (transferData) => {

@@ -7,8 +7,9 @@ import {
   MapPin, User, ArrowRight, PackageOpen, ClipboardList, Info
 } from 'lucide-react';
 import { 
-  useERPStore, Supplier, PurchaseOrder
+  useERPStore, Supplier, PurchaseOrder, POStatus
 } from '../../../../store/useERPStore';
+import { getNextPOStatus, getPOStatusLabel } from '@/store/slices/supplierSlice';
 
 type NavTab = 'directory' | 'purchase-orders' | 'receiving';
 type DetailTab = 'info' | 'catalog' | 'po-history' | 'receiving-history' | 'performance';
@@ -16,25 +17,36 @@ type SupplierStatus = 'Active' | 'Inactive' | 'Blacklisted' | 'Verified' | 'Pref
 
 function getStatusClasses(status: string) {
   switch (status) {
-    case 'Active': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    case 'Verified': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    case 'Preferred': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
-    case 'Inactive': return 'bg-slate-50 text-slate-500 border-slate-200';
+    case 'Active':      return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    case 'Verified':    return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    case 'Preferred':   return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+    case 'Inactive':    return 'bg-slate-50 text-slate-500 border-slate-200';
     case 'Blacklisted': return 'bg-rose-50 text-rose-700 border-rose-100';
-    default: return 'bg-slate-50 text-slate-500 border-slate-200';
+    default:            return 'bg-slate-50 text-slate-500 border-slate-200';
   }
 }
 
+/** Maps POStatus to badge colors — aligned with new 6-stage lifecycle */
 function getPOStatusClasses(status: string) {
   switch (status) {
-    case 'ORDERED':
-    case 'SENT': return 'bg-amber-50 text-amber-700 border-amber-100';
-    case 'PARTIAL_RECEIVED': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
-    case 'RECEIVED': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    case 'CANCELLED': return 'bg-rose-50 text-rose-700 border-rose-100';
-    default: return 'bg-slate-50 text-slate-500 border-slate-200';
+    case 'DRAFT':      return 'bg-slate-100 text-slate-500 border-slate-200';
+    case 'PENDING':    return 'bg-amber-50 text-amber-700 border-amber-100';
+    case 'CONFIRMED':  return 'bg-blue-50 text-blue-700 border-blue-100';
+    case 'IN_TRANSIT': return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+    case 'DELIVERED':  return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    case 'CANCELLED':  return 'bg-rose-50 text-rose-700 border-rose-100';
+    default:           return 'bg-slate-50 text-slate-500 border-slate-200';
   }
 }
+
+const PO_STEP_ICON: Record<string, string> = {
+  DRAFT:      '',
+  PENDING:    '',
+  CONFIRMED:  '',
+  IN_TRANSIT: '',
+  DELIVERED:  '',
+  CANCELLED:  '',
+};
 
 function formatCurrency(n: number) {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(n);
@@ -44,7 +56,7 @@ export default function SuppliersPage() {
   const { 
     suppliers, purchaseOrders, purchaseOrderItems, goodsReceipts, 
     goodsReceiptItems, supplierItems, inventory, branches,
-    addSupplier, updateSupplier, createPO, recordGoodsReceipt 
+    addSupplier, updateSupplier, createPO, updatePOStatus, recordGoodsReceipt 
   } = useERPStore();
 
   const [navTab, setNavTab] = useState<NavTab>('directory');
@@ -180,7 +192,8 @@ export default function SuppliersPage() {
   const receivingOrders = useMemo(() =>
     purchaseOrders.filter((po: PurchaseOrder) => {
       const matchesFilter = deliveryFilter === 'All' ? true : po.status === deliveryFilter;
-      const isReceivable = po.status === 'SENT' || po.status === 'PARTIAL_RECEIVED';
+      // Show orders that are confirmed or in-transit (actionable inbound)
+      const isReceivable = po.status === 'CONFIRMED' || po.status === 'IN_TRANSIT';
       return matchesFilter && (navTab === 'receiving' ? isReceivable : true);
     }), [purchaseOrders, deliveryFilter, navTab]);
 
@@ -199,10 +212,10 @@ export default function SuppliersPage() {
 
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total Suppliers', val: suppliers.length, color: 'indigo', sub: 'Active Directory' },
-          { label: 'Total Payables', val: formatCurrency(purchaseOrders.reduce((sum, po) => sum + (po.total_amount - po.amount_paid), 0)), color: 'rose', sub: 'Accounts Payable' },
-          { label: 'Open POs', val: purchaseOrders.filter(p => p.status === 'SENT' || p.status === 'PARTIAL_RECEIVED').length, color: 'amber', sub: 'Goods in Transit' },
-          { label: 'Settled POs', val: purchaseOrders.filter(p => p.status === 'RECEIVED').length, color: 'emerald', sub: 'Completed' },
+          { label: 'Total Suppliers', val: suppliers.length,                                                                                                          color: 'indigo', sub: 'Active Directory' },
+          { label: 'Total Payables',  val: formatCurrency(purchaseOrders.filter(p => p.status !== 'CANCELLED' && p.status !== 'DRAFT').reduce((sum, po) => sum + (po.total_amount - po.amount_paid), 0)), color: 'rose',    sub: 'Accounts Payable' },
+          { label: 'Active Orders',   val: purchaseOrders.filter(p => ['PENDING','CONFIRMED','IN_TRANSIT'].includes(p.status)).length,                                color: 'amber',   sub: 'In Progress' },
+          { label: 'Delivered POs',   val: purchaseOrders.filter(p => p.status === 'DELIVERED').length,                                                              color: 'emerald', sub: 'Goods Received' },
         ].map((stat, i) => (
           <div key={i} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
             <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</div>
@@ -295,18 +308,34 @@ export default function SuppliersPage() {
       {navTab === 'purchase-orders' && (
         <>
           <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-            <h3 className="text-[13px] font-black text-slate-900 tracking-widest uppercase flex items-center gap-2"><ClipboardList size={16} className="text-slate-400" /> Active Supplier Orders</h3>
+            <div>
+              <h3 className="text-[13px] font-black text-slate-900 tracking-widest uppercase flex items-center gap-2"><ClipboardList size={16} className="text-slate-400" /> Purchase Orders</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Manually advance each PO through the lifecycle. Delivery confirmation triggers Goods Receipt.</p>
+            </div>
             <button onClick={() => setIsCreatePOOpen(true)} className="h-9 px-4 bg-slate-900 text-white rounded-full text-[12px] font-bold flex items-center gap-2 hover:bg-indigo-600 transition-all">
               <Plus size={14} /> Create New PO
             </button>
           </div>
+
+          {/* PO Lifecycle legend */}
+          <div className="px-8 py-3 flex items-center gap-2 border-b border-slate-100 bg-slate-50/30">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mr-2">Lifecycle:</span>
+            {(['DRAFT','PENDING','CONFIRMED','IN_TRANSIT','DELIVERED'] as POStatus[]).map((s, i, arr) => (
+              <div key={s} className="flex items-center gap-2">
+                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border uppercase tracking-widest ${getPOStatusClasses(s)}`}>{getPOStatusLabel(s)}</span>
+                {i < arr.length - 1 && <span className="text-slate-300 text-[10px]">→</span>}
+              </div>
+            ))}
+          </div>
+
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
                 <th className="px-6 py-4">PO ID</th>
                 <th className="px-6 py-4">Supplier</th>
-                <th className="px-6 py-4 text-center">Items</th>
-                <th className="px-6 py-4">Destination</th>
+                <th className="px-6 py-4 text-center">SKUs</th>
+                <th className="px-6 py-4">Total</th>
+                <th className="px-6 py-4">ETA</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -314,33 +343,53 @@ export default function SuppliersPage() {
             <tbody className="divide-y divide-slate-50">
               {purchaseOrders.map(po => {
                 const itemsCount = purchaseOrderItems.filter(i => i.purchase_order_id === po.id).length;
-                const payable = po.total_amount - (po.amount_paid || 0);
-                const branch = branches?.find(b => b.id === po.branch_id);
+                const nextStatus = getNextPOStatus(po.status as POStatus);
                 return (
-                  <tr key={po.id} className="hover:bg-slate-50/50 transition-all">
-                    <td className="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">{po.id}</td>
+                  <tr key={po.id} className="hover:bg-slate-50/50 transition-all group">
+                    <td className="px-6 py-4">
+                      <div className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{po.id}</div>
+                      <div className="text-[10px] text-slate-400 font-medium">{new Date(po.requested_at).toLocaleDateString()}</div>
+                    </td>
                     <td className="px-6 py-4 text-[14px] font-bold text-slate-900">{getSupplierName(po.supplier_id)}</td>
                     <td className="px-6 py-4 text-center text-[13px] font-bold text-slate-600">{itemsCount}</td>
-                    <td className="px-6 py-4 text-right text-[14px] font-black text-slate-900">{formatCurrency(po.total_amount)}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className={`text-[13px] font-black ${payable > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                        {payable > 0 ? formatCurrency(payable) : 'Settled'}
-                      </div>
+                    <td className="px-6 py-4 text-[14px] font-black text-slate-900">{formatCurrency(po.total_amount)}</td>
+                    <td className="px-6 py-4 text-[12px] font-medium text-slate-500 flex items-center gap-1.5">
+                      <Clock size={12} className="text-slate-300" />
+                      {po.expected_delivery_date ? new Date(po.expected_delivery_date).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-                        <MapPin size={10} className="text-slate-400" /> {branch?.branchName || 'Main'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-widest ${getPOStatusClasses(po.status)}`}>{po.status}</span>
+                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-widest flex items-center gap-1 w-max ${getPOStatusClasses(po.status)}`}>
+                        {getPOStatusLabel(po.status)}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {(po.status === 'SENT' || po.status === 'PARTIAL_RECEIVED') && (
-                        <button onClick={() => openReceiptModal(po, 'PO')} className="h-8 px-4 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[11px] font-bold hover:bg-emerald-600 hover:text-white transition-all">
-                          Receive Items
-                        </button>
-                      )}
+                      <div className="flex items-center justify-end gap-2">
+                        {nextStatus && po.status !== 'DELIVERED' && po.status !== 'CANCELLED' && (
+                          <button
+                            onClick={() => updatePOStatus(po.id, nextStatus, 'STF-001')}
+                            className={`h-8 px-3 rounded-full text-[10px] font-black border transition-all active:scale-95 ${
+                              nextStatus === 'DELIVERED'
+                                ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-sm shadow-emerald-200'
+                                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900'
+                            }`}
+                          >
+                            {nextStatus === 'DELIVERED' ? '📦 Mark Delivered' : `→ ${getPOStatusLabel(nextStatus)}`}
+                          </button>
+                        )}
+                        {po.status === 'IN_TRANSIT' && (
+                          <button onClick={() => openReceiptModal(po, 'PO')} className="h-8 px-3 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-black hover:bg-indigo-600 hover:text-white transition-all">
+                            Receive Items
+                          </button>
+                        )}
+                        {po.status !== 'DELIVERED' && po.status !== 'CANCELLED' && (
+                          <button
+                            onClick={() => updatePOStatus(po.id, 'CANCELLED', 'STF-001')}
+                            className="h-8 px-3 rounded-full text-[10px] font-black border border-transparent text-slate-300 hover:text-rose-500 hover:border-rose-100 hover:bg-rose-50 transition-all"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -354,14 +403,14 @@ export default function SuppliersPage() {
         <>
           <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
             <div>
-              <h3 className="text-[13px] font-black text-slate-900 tracking-widest uppercase">Pending Inbound Shipments</h3>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Verify physical goods against purchase orders to update inventory.</p>
+              <h3 className="text-[13px] font-black text-slate-900 tracking-widest uppercase">Inbound Shipments — Goods Receipt</h3>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">POs confirmed or in-transit. Process intake to update raw material stock.</p>
             </div>
             <div className="flex items-center gap-2">
               <select value={deliveryFilter} onChange={e => setDeliveryFilter(e.target.value)} className="h-9 px-4 rounded-xl border border-slate-200 text-[11px] font-black outline-none focus:border-slate-900 transition-all bg-white shadow-sm">
                 <option value="All">All Inbound</option>
-                <option value="SENT">Sent / Ordered</option>
-                <option value="PARTIAL_RECEIVED">Partial Shipments</option>
+                <option value="CONFIRMED">Confirmed</option>
+                <option value="IN_TRANSIT">In Transit</option>
               </select>
             </div>
           </div>
@@ -552,7 +601,7 @@ export default function SuppliersPage() {
                       const items = purchaseOrderItems.filter(i => i.purchase_order_id === po.id);
                       return (
                         <div key={po.id} className="bg-white border border-slate-100 p-6 rounded-[24px] shadow-sm relative overflow-hidden group">
-                          <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${po.status === 'RECEIVED' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                          <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${po.status === 'DELIVERED' ? 'bg-emerald-500' : po.status === 'CANCELLED' ? 'bg-rose-400' : 'bg-amber-500'}`} />
                           <div className="flex items-start justify-between">
                             <div className="space-y-3">
                               <div className="flex items-center gap-3">
@@ -969,28 +1018,28 @@ export default function SuppliersPage() {
               <button onClick={() => setIsCreatePOOpen(false)} className="px-8 h-12 bg-white border border-slate-200 rounded-full text-[14px] font-black text-slate-600 hover:bg-slate-50 transition-all">Discard Draft</button>
               <button 
                 onClick={() => {
-                  createPO({
-                    supplier_id: poSupplierId,
-                    status: 'SENT',
-                    requested_at: new Date().toISOString(),
-                    expected_delivery_date: poETA,
-                    total_amount: newPOItems.reduce((s, i) => s + (i.qty * i.cost), 0),
-                    amount_paid: 0,
-                    items: newPOItems.map(i => ({
-                      id: `POI-${Date.now()}-${Math.random()}`,
-                      purchase_order_id: '',
+                  createPO(
+                    {
+                      supplier_id: poSupplierId,
+                      expected_delivery_date: poETA,
+                      total_amount: newPOItems.reduce((s, i) => s + (i.qty * i.cost), 0),
+                    },
+                    // Line items passed separately so createPO can store them properly
+                    newPOItems.filter(i => i.sku && i.qty > 0).map(i => ({
                       inventory_item_id: i.sku,
                       qty_ordered: i.qty,
-                      qty_received: 0,
-                      unit_cost: i.cost
+                      unit_cost: i.cost,
                     }))
-                  });
+                  );
                   setIsCreatePOOpen(false);
+                  setNewPOItems([{ sku: '', qty: 1, cost: 0 }]);
+                  setPOSupplierId('');
+                  setPOETA('');
                 }} 
                 disabled={!poSupplierId || newPOItems.some(i => !i.sku || i.qty <= 0)} 
                 className="px-10 h-12 bg-slate-900 text-white rounded-full text-[14px] font-black shadow-2xl shadow-indigo-200 hover:bg-indigo-600 transition-all disabled:opacity-30 active:scale-95 flex items-center gap-2"
               >
-                <FileText size={18} /> Finalize & Issue PO
+                <FileText size={18} /> Save as Draft
               </button>
             </div>
           </div>

@@ -1,15 +1,14 @@
 import { Staff, Customer, MeasurementProfile } from '@/types/erp';
 
 export const INITIAL_STAFF: Staff[] = [
-  { id: 'STF-001', name: 'Joshua Arabejo', roles: ['ADMIN'], phone: '0917-123-4567', email: 'joshua@sutura.com', hasSystemAccess: true, status: 'Online', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Molang&backgroundColor=b6e3f4' },
-  { id: 'STF-002', name: 'Maria Santos', roles: ['TAILOR', 'INVENTORY'], phone: '0918-234-5678', email: 'maria@sutura.com', hasSystemAccess: true, status: 'Online', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=PiuPiu&backgroundColor=ffdfba' },
-  { id: 'STF-003', name: 'Robert Chen', roles: ['TAILOR'], phone: '0919-345-6789', email: 'robert@sutura.com', hasSystemAccess: true, status: 'Offline', branch_id: 'BRN-002', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Brown&backgroundColor=dfccbe' },
-  { id: 'STF-004', name: 'Elena Cruz', roles: ['SALES', 'TAILOR'], phone: '0920-456-7890', email: 'elena@sutura.com', hasSystemAccess: true, status: 'Online', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Cony&backgroundColor=ffb3ba' },
-  { id: 'STF-005', name: 'Juan Reyes', roles: ['TAILOR'], phone: '0921-567-8901', email: 'juan@sutura.com', hasSystemAccess: true, status: 'Online', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Koda&backgroundColor=bae1ff' },
-  { id: 'STF-006', name: 'Isabella Garcia', roles: ['SALES', 'INVENTORY'], phone: '0922-678-9012', email: 'isabella@sutura.com', hasSystemAccess: true, status: 'Online', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Lilly&backgroundColor=fdfd96' },
-  { id: 'STF-007', name: 'Michael Torres', roles: ['TAILOR'], phone: '0923-789-0123', email: 'michael@sutura.com', hasSystemAccess: true, status: 'Offline', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Bear&backgroundColor=c5b9cd' },
-  { id: 'STF-MGR-001', name: 'Ricardo Dalisay', roles: ['MANAGER'], phone: '0924-890-1234', email: 'ricardo@sutura.com', hasSystemAccess: true, status: 'Online', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Ricardo&backgroundColor=b6e3f4' },
-  { id: 'STF-INV-001', name: 'Isagani Cruz', roles: ['INVENTORY'], phone: '0925-901-2345', email: 'isagani@sutura.com', hasSystemAccess: true, status: 'Online', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Isagani&backgroundColor=ffdfba' },
+  { id: 'STF-001', name: 'John Clock',   roles: ['SHOP_OWNER'],          specialization: ['Marketing & Operations', 'Bookkeeper'], phone: '0917-123-4567', email: 'john@sutura.com',   hasSystemAccess: true, status: 'Online',  branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Molang&backgroundColor=b6e3f4'   },
+  { id: 'STF-002', name: 'Maria Santos',     roles: ['STAFF'],               specialization: ['Tailoring', 'Quality Check'],           phone: '0918-234-5678', email: 'maria@sutura.com',    hasSystemAccess: true, status: 'Online',  branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=PiuPiu&backgroundColor=ffdfba'   },
+  { id: 'STF-003', name: 'Robert Chen',      roles: ['STAFF'],               specialization: ['Tailoring', 'Cutting'],                 phone: '0919-345-6789', email: 'robert@sutura.com',   hasSystemAccess: true, status: 'Offline', branch_id: 'BRN-002', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Brown&backgroundColor=dfccbe'    },
+  { id: 'STF-004', name: 'Elena Cruz',       roles: ['STAFF'],               specialization: ['Sales Assistant', 'Admin/HR'],          phone: '0920-456-7890', email: 'elena@sutura.com',    hasSystemAccess: true, status: 'Online',  branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Cony&backgroundColor=ffb3ba'     },
+  { id: 'STF-005', name: 'Juan Reyes',       roles: ['STAFF'],               specialization: ['Machine Operator'],                    phone: '0921-567-8901', email: 'juan@sutura.com',     hasSystemAccess: true, status: 'Online',  branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Koda&backgroundColor=bae1ff'     },
+  { id: 'STF-006', name: 'Isabella Garcia',  roles: ['STAFF'],               specialization: ['Liaison', 'Shop Helper'],               phone: '0922-678-9012', email: 'isabella@sutura.com',  hasSystemAccess: true, status: 'Online',  branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Lilly&backgroundColor=fdfd96'    },
+  { id: 'STF-007', name: 'Michael Torres',   roles: ['STAFF'],               specialization: ['Layout Artist'],                        phone: '0923-789-0123', email: 'michael@sutura.com',  hasSystemAccess: true, status: 'Offline', branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Bear&backgroundColor=c5b9cd'     },
+  { id: 'STF-ADMIN-001', name: 'Admin User', roles: ['ADMIN'],               specialization: ['Admin/HR'],                             phone: '0900-000-0000', email: 'admin@sutura.com',    hasSystemAccess: true, status: 'Online',  branch_id: 'BRN-001', avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Admin&backgroundColor=b6e3f4'  },
 ];
 
 export const INITIAL_CUSTOMERS: Customer[] = [
@@ -22,6 +21,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     gender: 'Male',
     type: 'Individual',
     is_active: true,
+    source: 'Walk-in',
+    avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=James&backgroundColor=b6e3f4',
     style_preferences: 'Prefers standard notched lapels and 2-button closure.',
     posture_tags: ['Sloping Shoulders', 'Prominent Chest'],
     createdAt: new Date('2025-02-15').toISOString()
@@ -35,6 +36,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     gender: 'Male',
     type: 'Individual',
     is_active: true,
+    source: 'Online',
+    avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Arthur&backgroundColor=ffdfba',
     createdAt: new Date('2025-03-10').toISOString()
   },
   {
@@ -46,6 +49,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     gender: 'Male',
     type: 'Individual',
     is_active: true,
+    source: 'Walk-in',
+    avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Matt&backgroundColor=dfccbe',
     createdAt: new Date('2025-03-20').toISOString()
   },
   {
@@ -57,6 +62,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     gender: 'Male',
     type: 'Individual',
     is_active: true,
+    source: 'Walk-in',
+    avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Alex&backgroundColor=ffb3ba',
     style_preferences: 'High-end bespoke tailoring. Avant-garde elements.',
     posture_tags: ['Erect Posture', 'Broad Shoulders'],
     createdAt: new Date('2025-04-01').toISOString()
@@ -70,6 +77,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     gender: 'Female',
     type: 'Individual',
     is_active: true,
+    source: 'Online',
+    avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Maria&backgroundColor=bae1ff',
     style_preferences: 'Traditional Filipiniana styles.',
     posture_tags: ['Petite Frame'],
     createdAt: new Date('2025-04-10').toISOString()
@@ -83,6 +92,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     gender: 'Female',
     type: 'Individual',
     is_active: true,
+    source: 'Walk-in',
+    avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Wei&backgroundColor=fdfd96',
     createdAt: new Date('2025-04-15').toISOString()
   }
 ];
@@ -124,10 +135,56 @@ export const INITIAL_MEASUREMENTS: MeasurementProfile[] = [
     hip: 42,
     sleeve_length: 26,
     measurement_unit: 'Inches',
-    status: 'APPROVED',
-    is_current: true,
+    status: 'SUPERSEDED',
+    is_current: false,
     version_no: 'V1',
     recorded_by: 'STF-002',
     recorded_at: new Date('2025-02-15').toISOString()
+  },
+  {
+    id: 'MEAS-003',
+    customer_id: 'CUST-001',
+    branch_id: 'BRN-001',
+    profile_name: 'Premium Suit Profile',
+    garment_category: 'Upper Wear',
+    garment_type: 'Suit',
+    fit_preference: 'Slim',
+    measurement_unit: 'Inches',
+    status: 'CONFIRMED',
+    is_current: true,
+    version_no: 'V2',
+    parent_profile_id: 'MEAS-002',
+    version_notes: 'Reduced chest and waist by 0.5 inches after first fitting.',
+    jacket_neck: 16.5,
+    jacket_shoulder: 19,
+    jacket_chest: 43.5,
+    jacket_waist: 35.5,
+    jacket_hip: 42,
+    jacket_sleeve: 26,
+    recorded_by: 'STF-001',
+    recorded_at: new Date().toISOString()
+  },
+  {
+    id: 'MEAS-004',
+    customer_id: 'CUST-001',
+    branch_id: 'BRN-001',
+    profile_name: 'Standard Slacks Profile',
+    garment_category: 'Lower Wear',
+    garment_type: 'Slacks',
+    fit_preference: 'Regular',
+    measurement_unit: 'Inches',
+    status: 'APPROVED',
+    is_current: true,
+    version_no: 'V1',
+    pants_waist: 36,
+    pants_hip: 42,
+    pants_inseam: 30,
+    pants_outseam: 40,
+    pants_thigh: 24,
+    pants_knee: 18,
+    pants_hem: 16,
+    pants_rise: 11,
+    recorded_by: 'STF-001',
+    recorded_at: new Date().toISOString()
   }
 ];
