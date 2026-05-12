@@ -1,353 +1,410 @@
-erDiagram
-    USERS {
-        string id PK
-        string role
-        string name
-        string email
-        string password_hash
-        string status
-        datetime created_at
-    }
 
-    SUBSCRIPTIONS {
-        string id PK
-        string plan_name
-        string plan_level
-        string status
-        int max_branches
-        int max_staff
-        date start_date
-        date end_date
-        decimal price
-    }
+Table users {
+  id uuid [pk]
+  role text
+  name text
+  email text
+  password_hash text
+  status text
+  created_at timestamp
+}
 
-    SHOPS {
-        string id PK
-        string owner_user_id FK
-        string subscription_id FK
-        string shop_name
-        string business_name
-        string business_type
-        string status
-        datetime created_at
-    }
+Table subscriptions {
+  id uuid [pk]
+  plan_level text
+  status text
+  start_date date
+  end_date date
+  price decimal
+}
 
-    SHOP_BRANCHES {
-        string id PK
-        string shop_id FK
-        string branch_name
-        string branch_code
-        string address
-        string contact_no
-        boolean is_main
-        string manager_user_id FK
-        string status
-        datetime created_at
-    }
+Table shops {
+  id uuid [pk]
+  owner_user_id uuid [ref: > users.id]
+  subscription_id uuid [ref: > subscriptions.id]
+  shop_name text
+  business_name text
+  status text
+  created_at timestamp
+}
 
-    BRANCH_MEMBERS {
-        string id PK
-        string branch_id FK
-        string user_id FK
-        string branch_role
-        string status
-        datetime assigned_at
-    }
+Table shop_branches {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  branch_name text
+  branch_code text
+  address text
+  contact_no text
+  branch_type text
+  manager_user_id uuid [ref: > users.id]
+  status text
+}
 
-    BRANCH_PERMISSIONS {
-        string id PK
-        string branch_member_id FK
-        string permission_code
-        boolean can_view
-        boolean can_create
-        boolean can_update
-        boolean can_delete
-    }
+Table branch_members {
+  id uuid [pk]
+  branch_id uuid [ref: > shop_branches.id]
+  user_id uuid [ref: > users.id]
+  branch_role text
+  specialization text
+  status text
+}
 
-    CUSTOMERS {
-        string id PK
-        string shop_id FK
-        string user_id FK
-        string full_name
-        string email
-        string phone
-        string address
-        string status
-        datetime created_at
-    }
+Table branch_permissions {
+  id uuid [pk]
+  branch_member_id uuid [ref: > branch_members.id]
+  permission_code text
+  can_view boolean
+  can_create boolean
+  can_update boolean
+  can_delete boolean
+}
 
-    CUSTOMER_MEASUREMENTS {
-        string id PK
-        string customer_id FK
-        string branch_id FK
-        string recorded_by_user_id FK
-        datetime recorded_at
-        decimal neck
-        decimal chest
-        decimal waist
-        decimal hip
-        decimal shoulder
-        decimal sleeve
-        decimal length
-        string posture_notes
-        string status
-        int version_no
-    }
+Table customers {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  user_id uuid [ref: > users.id]
+  full_name text
+  phone text
+  email text
+  address text
+  source text
+  status text
+}
 
-    ORDERS {
-        string id PK
-        string shop_id FK
-        string branch_id FK
-        string customer_id FK
-        string created_by_user_id FK
-        string assigned_staff_id FK
-        string order_type
-        string source_type
-        string status
-        decimal total_amount
-        decimal balance
-        date due_date
-        datetime created_at
-    }
+Table customer_measurements {
+  id uuid [pk]
+  customer_id uuid [ref: > customers.id]
+  branch_id uuid [ref: > shop_branches.id]
+  parent_profile_id uuid [ref: > customer_measurements.id]
+  garment_category text
+  garment_type text
+  version_no int
+  is_current boolean
+  recorded_at timestamp
+}
 
-    ORDER_ITEMS {
-        string id PK
-        string order_id FK
-        string garment_name
-        int quantity
-        decimal unit_price
-        string notes
-    }
+Table measurement_values {
+  id uuid [pk]
+  profile_id uuid [ref: > customer_measurements.id]
+  field_name text
+  value_inches decimal
+}
 
-    ORDER_STATUS_HISTORY {
-        string id PK
-        string order_id FK
-        string status
-        string changed_by_user_id FK
-        datetime changed_at
-        string notes
-    }
+Table appointments {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  branch_id uuid [ref: > shop_branches.id]
+  customer_id uuid [ref: > customers.id]
+  assigned_staff_id uuid [ref: > users.id]
+  order_id uuid [ref: > orders.id]
+  appointment_type text
+  source text
+  status text
+  date date
+  start_time time
+  duration_minutes int
+  notes text
+}
 
-    INVENTORY_ITEMS {
-        string id PK
-        string shop_id FK
-        string sku
-        string item_name
-        string category
-        string unit
-        decimal reorder_level
-        string status
-    }
+Table orders {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  branch_id uuid [ref: > shop_branches.id]
+  customer_id uuid [ref: > customers.id]
+  created_by_user_id uuid [ref: > users.id]
+  assigned_staff_id uuid [ref: > users.id]
+  appointment_id uuid [ref: > appointments.id]
+  measurement_profile_id uuid [ref: > customer_measurements.id]
+  order_type text
+  source_type text
+  status text
+  total_amount decimal
+  due_date date
+  created_at timestamp
+}
 
-    BRANCH_INVENTORY {
-        string id PK
-        string branch_id FK
-        string inventory_item_id FK
-        decimal on_hand_qty
-        decimal reserved_qty
-        decimal available_qty
-        boolean low_stock_flag
-        datetime last_updated
-    }
+Table order_items {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  garment_name text
+  quantity int
+  unit_price decimal
+  notes text
+}
 
-    INVENTORY_MOVEMENTS {
-        string id PK
-        string branch_id FK
-        string inventory_item_id FK
-        string movement_type
-        decimal quantity
-        string reference_type
-        string reference_id
-        string moved_by_user_id FK
-        datetime created_at
-    }
+Table production_tasks {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  task_name text
+  assigned_to_user_id uuid [ref: > users.id]
+  status text
+  started_at timestamp
+  completed_at timestamp
+}
 
-    SUPPLIERS {
-        string id PK
-        string shop_id FK
-        string supplier_name
-        string contact_person
-        string phone
-        string email
-        string address
-        string status
-    }
+Table fitting_sessions {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  appointment_id uuid [ref: > appointments.id]
+  measurement_profile_id uuid [ref: > customer_measurements.id]
+  adjustment_notes text
+  revision_no int
+  next_fitting_date date
+}
 
-    PURCHASE_ORDERS {
-        string id PK
-        string shop_id FK
-        string branch_id FK
-        string supplier_id FK
-        string requested_by_user_id FK
-        string status
-        datetime requested_at
-    }
+Table order_status_history {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  status text
+  changed_by_user_id uuid [ref: > users.id]
+  changed_at timestamp
+  notes text
+}
 
-    PURCHASE_ORDER_ITEMS {
-        string id PK
-        string purchase_order_id FK
-        string inventory_item_id FK
-        decimal quantity
-        decimal unit_cost
-        decimal received_qty
-    }
+Table order_inspections {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  inspected_by_user_id uuid [ref: > users.id]
+  status text
+  findings text
+  inspected_at timestamp
+}
 
-    INVOICES {
-        string id PK
-        string shop_id FK
-        string branch_id FK
-        string order_id FK
-        string invoice_no
-        decimal subtotal
-        decimal discount
-        decimal tax
-        decimal total_amount
-        string status
-        datetime issued_at
-        date due_date
-    }
+Table inventory_items {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  sku text
+  item_name text
+  category text
+  item_type text
+  unit text
+  reorder_level decimal
+}
 
-    PAYMENTS {
-        string id PK
-        string invoice_id FK
-        decimal amount
-        string method
-        string reference_no
-        string status
-        datetime paid_at
-        string received_by_user_id FK
-    }
+Table branch_inventory {
+  id uuid [pk]
+  branch_id uuid [ref: > shop_branches.id]
+  inventory_item_id uuid [ref: > inventory_items.id]
+  on_hand_qty decimal
+  reserved_qty decimal
+  available_qty decimal
+}
 
-    NOTIFICATIONS {
-        string id PK
-        string user_id FK
-        string branch_id FK
-        string type
-        string message
-        string status
-        datetime scheduled_at
-        datetime sent_at
-    }
+Table inventory_movements {
+  id uuid [pk]
+  branch_id uuid [ref: > shop_branches.id]
+  inventory_item_id uuid [ref: > inventory_items.id]
+  movement_type text
+  quantity decimal
+  reference_type text
+  reference_id text
+  moved_by_user_id uuid [ref: > users.id]
+  discrepancy_type text
+  created_at timestamp
+}
 
-    AUDIT_LOGS {
-        string id PK
-        string user_id FK
-        string action
-        string module
-        string entity_id
-        datetime created_at
-    }
+Table inventory_reservations {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  inventory_item_id uuid [ref: > inventory_items.id]
+  branch_id uuid [ref: > shop_branches.id]
+  quantity decimal
+  status text
+}
 
-    APPOINTMENTS {
-        string id PK
-        string shop_id FK
-        string branch_id FK
-        string customer_id FK
-        string assigned_staff_id FK
-        string appointment_type
-        string status
-        date date
-        time start_time
-        int duration_minutes
-        string notes
-        datetime created_at
-    }
+Table suppliers {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  supplier_name text
+  contact_person text
+  phone text
+  email text
+  address text
+  status text
+}
 
-    FITTING_SESSIONS {
-        string id PK
-        string appointment_id FK
-        string measurement_profile_id FK
-        string adjustment_notes
-        int revision_no
-        date next_fitting_date
-        datetime created_at
-    }
+Table supplier_items {
+  id uuid [pk]
+  supplier_id uuid [ref: > suppliers.id]
+  inventory_item_id uuid [ref: > inventory_items.id]
+  unit_cost decimal
+  moq decimal
+  lead_time_days int
+}
 
-    USERS ||--o{ SHOPS : owns
-    SUBSCRIPTIONS ||--|| SHOPS : activates
-    SHOPS ||--o{ SHOP_BRANCHES : has
-    USERS ||--o{ SHOP_BRANCHES : manages
-    SHOP_BRANCHES ||--o{ BRANCH_MEMBERS : assigns
-    USERS ||--o{ BRANCH_MEMBERS : joins
-    BRANCH_MEMBERS ||--o{ BRANCH_PERMISSIONS : has
+Table purchase_orders {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  branch_id uuid [ref: > shop_branches.id]
+  supplier_id uuid [ref: > suppliers.id]
+  requested_by_user_id uuid [ref: > users.id]
+  status text
+  requested_at timestamp
+}
 
-    SHOPS ||--o{ CUSTOMERS : serves
-    USERS ||--o| CUSTOMERS : links
-    CUSTOMERS ||--o{ CUSTOMER_MEASUREMENTS : has
-    SHOP_BRANCHES ||--o{ CUSTOMER_MEASUREMENTS : records
-    USERS ||--o{ CUSTOMER_MEASUREMENTS : recorded_by
+Table purchase_order_items {
+  id uuid [pk]
+  purchase_order_id uuid [ref: > purchase_orders.id]
+  inventory_item_id uuid [ref: > inventory_items.id]
+  quantity decimal
+  unit_cost decimal
+  received_qty decimal
+}
 
-    SHOPS ||--o{ ORDERS : receives
-    SHOP_BRANCHES ||--o{ ORDERS : processes
-    CUSTOMERS ||--o{ ORDERS : places
-    USERS ||--o{ ORDERS : creates
-    USERS ||--o{ ORDERS : assigned_to
-    ORDERS ||--o{ ORDER_ITEMS : contains
-    ORDERS ||--o{ ORDER_STATUS_HISTORY : logs
+Table goods_receipts {
+  id uuid [pk]
+  purchase_order_id uuid [ref: > purchase_orders.id]
+  received_by_user_id uuid [ref: > users.id]
+  received_at timestamp
+}
 
-    SHOPS ||--o{ INVENTORY_ITEMS : has
-    SHOP_BRANCHES ||--o{ BRANCH_INVENTORY : tracks
-    INVENTORY_ITEMS ||--o{ BRANCH_INVENTORY : allocated_as
-    SHOP_BRANCHES ||--o{ INVENTORY_MOVEMENTS : records
-    INVENTORY_ITEMS ||--o{ INVENTORY_MOVEMENTS : moved
-    USERS ||--o{ INVENTORY_MOVEMENTS : moved_by
+Table goods_receipt_items {
+  id uuid [pk]
+  goods_receipt_id uuid [ref: > goods_receipts.id]
+  inventory_item_id uuid [ref: > inventory_items.id]
+  quantity_received decimal
+  condition_notes text
+}
 
-    SHOPS ||--o{ SUPPLIERS : works_with
-    SUPPLIERS ||--o{ PURCHASE_ORDERS : receives
-    SHOPS ||--o{ PURCHASE_ORDERS : creates
-    SHOP_BRANCHES ||--o{ PURCHASE_ORDERS : requests
-    PURCHASE_ORDERS ||--o{ PURCHASE_ORDER_ITEMS : contains
-    INVENTORY_ITEMS ||--o{ PURCHASE_ORDER_ITEMS : ordered_item
+Table stock_transfers {
+  id uuid [pk]
+  source_branch_id uuid [ref: > shop_branches.id]
+  dest_branch_id uuid [ref: > shop_branches.id]
+  inventory_item_id uuid [ref: > inventory_items.id]
+  quantity decimal
+  status text
+  created_at timestamp
+}
 
-    SHOPS ||--o{ INVOICES : issues
-    SHOP_BRANCHES ||--o{ INVOICES : generates
-    ORDERS ||--|| INVOICES : billed_by
-    INVOICES ||--o{ PAYMENTS : paid_by
-    USERS ||--o{ PAYMENTS : received_by
+Table invoices {
+  id uuid [pk]
+  order_id uuid [ref: > orders.id]
+  invoice_no text
+  subtotal decimal
+  discount decimal
+  total_amount decimal
+  status text
+  issued_at timestamp
+}
 
-    USERS ||--o{ NOTIFICATIONS : gets
-    SHOP_BRANCHES ||--o{ NOTIFICATIONS : scoped_to
-    USERS ||--o{ AUDIT_LOGS : performs
+Table payments {
+  id uuid [pk]
+  invoice_id uuid [ref: > invoices.id]
+  amount decimal
+  method text
+  reference_no text
+  status text
+  paid_at timestamp
+  received_by_user_id uuid [ref: > users.id]
+}
 
-    SHOPS ||--o{ APPOINTMENTS : has
-    SHOP_BRANCHES ||--o{ APPOINTMENTS : hosts
-    CUSTOMERS ||--o{ APPOINTMENTS : books
-    USERS ||--o{ APPOINTMENTS : assigned_to
-    APPOINTMENTS ||--o| FITTING_SESSIONS : triggers
-    CUSTOMER_MEASUREMENTS ||--o{ FITTING_SESSIONS : used_in
+Table designer_profiles {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  bio text
+  specialization text
+  rating decimal
+}
 
+Table designer_portfolio_items {
+  id uuid [pk]
+  designer_id uuid [ref: > designer_profiles.id]
+  title text
+  image_url text
+  category text
+  created_at timestamp
+}
 
+Table consultation_requests {
+  id uuid [pk]
+  customer_id uuid [ref: > customers.id]
+  designer_id uuid [ref: > designer_profiles.id]
+  shop_id uuid [ref: > shops.id]
+  status text
+  requested_at timestamp
+}
 
+Table design_proposals {
+  id uuid [pk]
+  consultation_id uuid [ref: > consultation_requests.id]
+  designer_id uuid [ref: > designer_profiles.id]
+  title text
+  description text
+  status text
+  created_at timestamp
+}
 
+Table design_blueprint_assets {
+  id uuid [pk]
+  proposal_id uuid [ref: > design_proposals.id]
+  asset_type text
+  url text
+  created_at timestamp
+}
 
+Table proposal_revisions {
+  id uuid [pk]
+  proposal_id uuid [ref: > design_proposals.id]
+  notes text
+  created_at timestamp
+}
 
+Table proposal_handoffs {
+  id uuid [pk]
+  proposal_id uuid [ref: > design_proposals.id]
+  order_id uuid [ref: > orders.id]
+  converted_by_user_id uuid [ref: > users.id]
+  converted_at timestamp
+}
 
+Table tenant_verifications {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  status text
+  verified_at timestamp
+}
 
+Table support_tickets {
+  id uuid [pk]
+  shop_id uuid [ref: > shops.id]
+  user_id uuid [ref: > users.id]
+  subject text
+  status text
+  priority text
+  created_at timestamp
+}
 
-    What this ERD gives you
-1. One subscription, one parent shop
+Table support_ticket_messages {
+  id uuid [pk]
+  ticket_id uuid [ref: > support_tickets.id]
+  sender_user_id uuid [ref: > users.id]
+  message text
+  created_at timestamp
+}
 
-That is handled by:
+Table support_ticket_attachments {
+  id uuid [pk]
+  message_id uuid [ref: > support_ticket_messages.id]
+  url text
+  file_type text
+  file_size int
+}
 
-subscriptions
-shops.subscription_id
-shops.owner_user_id
-2. Multi-branch without separate subscriptions
+Table audit_logs {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  action text
+  module text
+  entity_id text
+  created_at timestamp
+}
 
-That is handled by:
-
-shop_branches.shop_id
-branch_members
-branch_permissions
-3. Real tailoring-shop operations
-
-That is handled by:
-
-customer measurements
-orders
-inventory allocation
-supplier orders
-invoices and payments
-4. Scalable digital logic
-
-Your schema review specifically warns against arrays inside entities and missing FK links, so this ERD fixes those by separating members, permissions, inventory allocations, order history, and purchase order items into proper child tables.
+Table notifications {
+  id uuid [pk]
+  user_id uuid [ref: > users.id]
+  branch_id uuid [ref: > shop_branches.id]
+  type text
+  message text
+  status text
+  sent_at timestamp
+}

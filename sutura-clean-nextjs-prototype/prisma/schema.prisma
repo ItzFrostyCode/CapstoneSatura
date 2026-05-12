@@ -33,7 +33,20 @@ model User {
   payments      Payment[]
   recordedMeasurements CustomerMeasurement[] @relation("MeasurementRecorder")
   inventoryMovements InventoryMovement[]
-  requestedPurchaseOrders PurchaseOrder[]
+  requestedPurchaseOrders PurchaseOrder[] @relation("OrderRequester")
+  supportMessages         SupportTicketMessage[] @relation("TicketMessageSender")
+  
+  // New relations
+  assignedTasks ProductionTask[]
+  inspections   OrderInspection[]
+  goodsReceipts GoodsReceipt[]
+  stockTransfers StockTransfer[]
+  designerProfile DesignerProfile?
+  convertedProposals ProposalHandoff[]
+  supportTickets SupportTicket[]
+  appointments   Appointment[]     @relation("StaffAppointment")
+  suspensionsPerformed TenantSuspensionLog[] @relation("SuspensionActor")
+  verificationActions  TenantVerificationHistory[]
 }
 
 enum UserRole {
@@ -61,7 +74,8 @@ model Subscription {
   endDate      DateTime
   price        Decimal   @db.Decimal(10, 2)
 
-  shops        Shop[]
+  shop         Shop?
+  logs         SubscriptionLog[]
 }
 
 enum PlanLevel {
@@ -80,9 +94,9 @@ enum SubscriptionStatus {
 model Shop {
   id              String   @id @default(cuid())
   ownerUserId     String
-  owner           User     @relation(fields: [ownerUserId], references: [id])
-  subscriptionId  String
-  subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+  owner           User     @relation("ShopOwner", fields: [ownerUserId], references: [id])
+  subscriptionId  String?  @unique
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id])
   shopName        String
   businessName    String
   businessType    String
@@ -96,7 +110,17 @@ model Shop {
   suppliers       Supplier[]
   purchaseOrders  PurchaseOrder[]
   invoices        Invoice[]
+  
+  // New relations
+  verification    TenantVerification?
+  supportTickets  SupportTicket[]
+  suspensionLogs  TenantSuspensionLog[]
+  garmentTemplates GarmentTemplate[]
+  specializations ProductionSpecialization[]
+  appointments    Appointment[]
+  consultationRequests ConsultationRequest[]
 }
+
 
 enum ShopStatus {
   PENDING
@@ -116,6 +140,7 @@ model ShopBranch {
   address       String
   contactNo     String
   isMain        Boolean  @default(false)
+  branchType    BranchType @default(RETAIL)
   managerUserId String?
   status        BranchStatus @default(ACTIVE)
   createdAt     DateTime @default(now())
@@ -128,6 +153,11 @@ model ShopBranch {
   purchaseOrders PurchaseOrder[]
   invoices      Invoice[]
   notifications Notification[]
+  
+  // New relations
+  inventoryReservations InventoryReservation[]
+  sourceTransfers StockTransfer[] @relation("SourceBranch")
+  destTransfers StockTransfer[] @relation("DestBranch")
 }
 
 enum BranchStatus {
@@ -135,6 +165,14 @@ enum BranchStatus {
   INACTIVE
   ARCHIVED
 }
+
+enum BranchType {
+  RETAIL
+  PRODUCTION
+  WAREHOUSE
+  OFFICE
+}
+
 
 model BranchMember {
   id            String   @id @default(cuid())
@@ -147,7 +185,10 @@ model BranchMember {
   assignedAt    DateTime @default(now())
 
   permissions   BranchPermission[]
+
+  @@unique([branchId, userId])
 }
+
 
 enum BranchRole {
   MANAGER
@@ -174,7 +215,7 @@ model Customer {
   id          String   @id @default(cuid())
   shopId      String
   shop        Shop     @relation(fields: [shopId], references: [id])
-  userId      String?  // nullable if walk-in
+  userId      String?  @unique // nullable if walk-in
   user        User?    @relation(fields: [userId], references: [id])
   fullName    String
   email       String?
@@ -185,6 +226,10 @@ model Customer {
 
   measurements CustomerMeasurement[]
   orders       Order[]
+  
+  // New relations
+  consultationRequests ConsultationRequest[]
+  bulkOrderMembers     BulkOrderMember[]
 }
 
 model CustomerMeasurement {
@@ -197,17 +242,22 @@ model CustomerMeasurement {
   recorder          User     @relation("MeasurementRecorder", fields: [recordedByUserId], references: [id])
   recordedAt        DateTime @default(now())
   
-  neck              Decimal? @db.Decimal(5, 2)
-  chest             Decimal? @db.Decimal(5, 2)
-  waist             Decimal? @db.Decimal(5, 2)
-  hip               Decimal? @db.Decimal(5, 2)
-  shoulder          Decimal? @db.Decimal(5, 2)
-  sleeve            Decimal? @db.Decimal(5, 2)
-  length            Decimal? @db.Decimal(5, 2)
+  parentProfileId   String?
+  parentProfile     CustomerMeasurement? @relation("MeasurementHistory", fields: [parentProfileId], references: [id])
+  childProfiles     CustomerMeasurement[] @relation("MeasurementHistory")
   
-  postureNotes      String?
-  status            MeasurementStatus @default(DRAFT)
+  garmentCategory String?  // e.g. "Upper Body", "Lower Body"
+  garmentType     String?  // e.g. "Suit", "Pants", "Dress"
+  
+  status            String   @default("DRAFT") // DRAFT, ACTIVE, ARCHIVED
   versionNo         Int      @default(1)
+  isCurrent         Boolean  @default(true)
+  
+  // New relations
+  measurementValues  MeasurementValue[]
+  orders             Order[]
+  bulkOrderMembers   BulkOrderMember[]
+  fittingSessions    FittingSession[]
 }
 
 enum MeasurementStatus {
@@ -237,13 +287,30 @@ model Order {
   status          OrderStatus @default(DRAFT)
   
   totalAmount     Decimal  @db.Decimal(10, 2)
-  balance         Decimal  @db.Decimal(10, 2)
   dueDate         DateTime
   createdAt       DateTime @default(now())
+
+  // Fix: Add appointment_id and measurement_profile_id
+  appointmentId   String?
+  appointment     Appointment? @relation(fields: [appointmentId], references: [id])
+  measurementProfileId String?
+  measurementProfile   CustomerMeasurement? @relation(fields: [measurementProfileId], references: [id])
 
   items           OrderItem[]
   history         OrderStatusHistory[]
   invoice         Invoice?
+  
+  // New relations
+  tasks           ProductionTask[]
+  inspections     OrderInspection[]
+  costSheet       OrderCostSheet?
+  alterations     AlterationDetail[]
+  bulkMembers     BulkOrderMember[]
+  handoff         ProposalHandoff?
+  inventoryReservations InventoryReservation[]
+  fittingSessions FittingSession[]
+  swatches        OrderSwatch[]
+  designAssets    OrderDesignAsset[]
 }
 
 enum OrderType {
@@ -261,22 +328,28 @@ enum OrderStatus {
   DRAFT
   PENDING
   ACCEPTED
+  WAITING_FOR_DOWN_PAYMENT
   IN_PRODUCTION
   FOR_FITTING
+  ALTERATIONS
   READY_FOR_PICKUP
+  READY_FOR_RELEASE
+  RELEASED
   COMPLETED
   CANCELLED
   ON_HOLD
 }
 
 model OrderItem {
-  id            String   @id @default(cuid())
-  orderId       String
-  order         Order    @relation(fields: [orderId], references: [id])
-  garmentName   String
-  quantity      Int
-  unitPrice     Decimal  @db.Decimal(10, 2)
-  notes         String?
+  id                String   @id @default(cuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id])
+  garmentTemplateId String?
+  template          GarmentTemplate? @relation(fields: [garmentTemplateId], references: [id])
+  garmentName       String
+  quantity          Int
+  unitPrice         Decimal  @db.Decimal(10, 2)
+  notes             String?
 }
 
 model OrderStatusHistory {
@@ -298,7 +371,7 @@ model InventoryItem {
   shop          Shop     @relation(fields: [shopId], references: [id])
   sku           String   @unique
   itemName      String
-  category      String
+  category      ItemType
   unit          String
   reorderLevel  Decimal  @db.Decimal(10, 2)
   status        InventoryStatus @default(ACTIVE)
@@ -306,6 +379,12 @@ model InventoryItem {
   branchInventory BranchInventory[]
   movements       InventoryMovement[]
   poItems         PurchaseOrderItem[]
+  
+  // New relations
+  supplierItems   SupplierItem[]
+  reservations    InventoryReservation[]
+  receiptItems    GoodsReceiptItem[]
+  stockTransfers  StockTransfer[]
 }
 
 enum InventoryStatus {
@@ -326,6 +405,8 @@ model BranchInventory {
   availableQty    Decimal  @db.Decimal(10, 2)
   lowStockFlag    Boolean  @default(false)
   lastUpdated     DateTime @updatedAt
+
+  @@unique([branchId, inventoryItemId])
 }
 
 model InventoryMovement {
@@ -341,6 +422,8 @@ model InventoryMovement {
   movedByUserId   String
   user            User     @relation(fields: [movedByUserId], references: [id])
   createdAt       DateTime @default(now())
+  
+  discrepancyType DiscrepancyType?
 }
 
 enum MovementType {
@@ -354,7 +437,7 @@ enum MovementType {
 model Supplier {
   id              String   @id @default(cuid())
   shopId          String
-  shop            Shop     @relation(fields: [shopId], references: [id])
+  shop          Shop     @relation(fields: [shopId], references: [id])
   supplierName    String
   contactPerson   String?
   phone           String?
@@ -363,6 +446,7 @@ model Supplier {
   status          Boolean  @default(true)
 
   purchaseOrders  PurchaseOrder[]
+  supplierItems   SupplierItem[]
 }
 
 model PurchaseOrder {
@@ -374,11 +458,15 @@ model PurchaseOrder {
   supplierId        String
   supplier          Supplier @relation(fields: [supplierId], references: [id])
   requestedByUserId String
-  requester         User     @relation(fields: [requestedByUserId], references: [id])
+  requester         User     @relation("OrderRequester", fields: [requestedByUserId], references: [id])
   status            POStatus @default(DRAFT)
   requestedAt       DateTime @default(now())
+  
+  billAmount        Decimal? @db.Decimal(10, 2)
+  amountPaid        Decimal? @db.Decimal(10, 2)
 
   items             PurchaseOrderItem[]
+  goodsReceipts     GoodsReceipt[]
 }
 
 enum POStatus {
@@ -489,3 +577,457 @@ model AuditLog {
   entityId    String?
   createdAt   DateTime @default(now())
 }
+
+// --- New Enums ---
+
+enum ItemType {
+  FABRIC
+  LINING
+  BUTTON
+  ZIPPER
+  THREAD
+  ACCESSORY
+  OTHER
+}
+
+enum ConsultationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum DesignProposalStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  CONVERTED
+  REJECTED
+}
+
+enum ReservationStatus {
+  ACTIVE
+  FULFILLED
+  CANCELLED
+}
+
+// --- New Models ---
+
+model ProductionTask {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id])
+  taskName        String
+  specializationId String?
+  specialization  ProductionSpecialization? @relation(fields: [specializationId], references: [id])
+  assignedToUserId String?
+  assignee        User?    @relation(fields: [assignedToUserId], references: [id])
+  status          String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  startedAt       DateTime?
+  completedAt     DateTime?
+  notes           String?
+}
+
+model OrderInspection {
+  id                String   @id @default(cuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id])
+  inspectedByUserId String
+  inspector         User     @relation(fields: [inspectedByUserId], references: [id])
+  status            String   // PASS, FAIL
+  findings          String?
+  inspectedAt       DateTime @default(now())
+}
+
+model OrderCostSheet {
+  id               String   @id @default(cuid())
+  orderId          String   @unique
+  order            Order    @relation(fields: [orderId], references: [id])
+  baseCost         Decimal  @db.Decimal(10, 2)
+  laborCost        Decimal  @db.Decimal(10, 2)
+  materialCost     Decimal  @db.Decimal(10, 2)
+  rushFee          Decimal  @db.Decimal(10, 2) @default(0)
+  customizationFee Decimal  @db.Decimal(10, 2) @default(0)
+  discountAmount   Decimal  @db.Decimal(10, 2) @default(0)
+  estimatedTotal   Decimal  @db.Decimal(10, 2)
+  actualTotal      Decimal? @db.Decimal(10, 2)
+}
+
+model AlterationDetail {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id])
+  description     String
+  difficultyLevel String?
+  estimatedHours  Decimal? @db.Decimal(4, 2)
+  completedAt     DateTime?
+}
+
+model BulkOrderMember {
+  id                   String   @id @default(cuid())
+  orderId              String
+  order                Order    @relation(fields: [orderId], references: [id])
+  customerId           String?
+  customer             Customer? @relation(fields: [customerId], references: [id])
+  tagName              String?  // e.g. "Jersey Number"
+  sizeCode             String?
+  measurementProfileId String?
+  measurementProfile   CustomerMeasurement? @relation(fields: [measurementProfileId], references: [id])
+}
+
+model MeasurementValue {
+  id          String   @id @default(cuid())
+  profileId   String
+  profile     CustomerMeasurement @relation(fields: [profileId], references: [id])
+  fieldName   String   // e.g. "neck", "chest"
+  valueInches Decimal? @db.Decimal(5, 2)
+  valueCm     Decimal? @db.Decimal(5, 2)
+}
+
+model SupplierItem {
+  id              String   @id @default(cuid())
+  supplierId      String
+  supplier        Supplier @relation(fields: [supplierId], references: [id])
+  inventoryItemId String
+  item            InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  unitCost        Decimal  @db.Decimal(10, 2)
+  moq             Decimal? @db.Decimal(10, 2)
+  isPreferred     Boolean  @default(false)
+  leadTimeDays    Int?
+
+  @@unique([supplierId, inventoryItemId])
+}
+
+
+model InventoryReservation {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id])
+  inventoryItemId String
+  item            InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  branchId        String
+  branch          ShopBranch @relation(fields: [branchId], references: [id])
+  quantity        Decimal  @db.Decimal(10, 2)
+  status          ReservationStatus @default(ACTIVE)
+
+  @@unique([orderId, inventoryItemId, branchId])
+}
+
+model GoodsReceipt {
+  id                String   @id @default(cuid())
+  purchaseOrderId   String
+  purchaseOrder     PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  receivedByUserId  String
+  receiver          User     @relation(fields: [receivedByUserId], references: [id])
+  receivedAt        DateTime @default(now())
+  referenceNo       String?
+
+  items             GoodsReceiptItem[]
+}
+
+model GoodsReceiptItem {
+  id                String   @id @default(cuid())
+  goodsReceiptId    String
+  receipt           GoodsReceipt @relation(fields: [goodsReceiptId], references: [id])
+  inventoryItemId   String
+  item              InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantityReceived  Decimal  @db.Decimal(10, 2)
+  conditionNotes    String?
+}
+
+model StockTransfer {
+  id                String   @id @default(cuid())
+  sourceBranchId    String
+  sourceBranch      ShopBranch @relation("SourceBranch", fields: [sourceBranchId], references: [id])
+  destBranchId      String
+  destBranch        ShopBranch @relation("DestBranch", fields: [destBranchId], references: [id])
+  inventoryItemId   String
+  item              InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantity          Decimal  @db.Decimal(10, 2)
+  status            String   @default("REQUESTED") // REQUESTED, IN_TRANSIT, COMPLETED, CANCELLED
+  movedByUserId     String
+  user              User     @relation(fields: [movedByUserId], references: [id])
+  createdAt         DateTime @default(now())
+}
+
+model FittingSession {
+  id                String   @id @default(cuid())
+  appointmentId     String?
+  appointment       Appointment? @relation(fields: [appointmentId], references: [id])
+  orderId           String?
+  order             Order? @relation(fields: [orderId], references: [id])
+  measurementProfileId String
+  measurementProfile   CustomerMeasurement @relation(fields: [measurementProfileId], references: [id])
+  adjustmentNotes   String?
+  revisionNo        Int      @default(1)
+  nextFittingDate   DateTime?
+  createdAt         DateTime @default(now())
+}
+
+// --- Designer Models ---
+
+model DesignerProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  bio            String?
+  specialization String?
+  rating         Decimal? @db.Decimal(3, 2)
+  isPublic       Boolean  @default(true)
+
+  portfolioItems DesignerPortfolioItem[]
+  consultations  ConsultationRequest[]
+  proposals      DesignProposal[]
+}
+
+model DesignerPortfolioItem {
+  id          String   @id @default(cuid())
+  designerId  String
+  designer    DesignerProfile @relation(fields: [designerId], references: [id])
+  title       String
+  imageUrl    String
+  category    String?
+  createdAt   DateTime @default(now())
+}
+
+model ConsultationRequest {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  designerId  String
+  designer    DesignerProfile @relation(fields: [designerId], references: [id])
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  subject     String?
+  description String?
+  status      ConsultationStatus @default(PENDING)
+  requestedAt DateTime @default(now())
+
+  proposals   DesignProposal[]
+}
+
+model DesignProposal {
+  id              String   @id @default(cuid())
+  consultationId  String?
+  consultation    ConsultationRequest? @relation(fields: [consultationId], references: [id])
+  designerId      String
+  designer        DesignerProfile @relation(fields: [designerId], references: [id])
+  title           String
+  description     String?
+  estimatedCost   Decimal? @db.Decimal(10, 2)
+  status          DesignProposalStatus @default(DRAFT)
+  createdAt       DateTime @default(now())
+
+  assets          DesignBlueprintAsset[]
+  revisions       ProposalRevision[]
+  handoff         ProposalHandoff?
+}
+
+model DesignBlueprintAsset {
+  id          String   @id @default(cuid())
+  proposalId  String
+  proposal    DesignProposal @relation(fields: [proposalId], references: [id])
+  url         String
+  assetType   String   // Sketch, FabricRef, Palette
+  createdAt   DateTime @default(now())
+}
+
+model ProposalRevision {
+  id          String   @id @default(cuid())
+  proposalId  String
+  proposal    DesignProposal @relation(fields: [proposalId], references: [id])
+  notes       String
+  createdAt   DateTime @default(now())
+}
+
+model ProposalHandoff {
+  id                String   @id @default(cuid())
+  proposalId        String   @unique
+  proposal          DesignProposal @relation(fields: [proposalId], references: [id])
+  orderId           String?  @unique
+  order             Order?   @relation(fields: [orderId], references: [id])
+  convertedByUserId String
+  converter         User     @relation(fields: [convertedByUserId], references: [id])
+  convertedAt       DateTime @default(now())
+  notes             String?
+}
+
+// --- Admin Models ---
+
+model TenantVerification {
+  id                String   @id @default(cuid())
+  shopId            String   @unique
+  shop              Shop     @relation(fields: [shopId], references: [id])
+  submittedByUserId String
+  adminReviewerId   String?
+  status            String   @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, REJECTED
+  notes             String?
+  verifiedAt        DateTime?
+  
+  history           TenantVerificationHistory[]
+}
+
+model TenantVerificationHistory {
+  id              String   @id @default(cuid())
+  verificationId  String
+  verification    TenantVerification @relation(fields: [verificationId], references: [id])
+  status          String
+  notes           String?
+  actorId         String
+  actor           User     @relation(fields: [actorId], references: [id])
+  createdAt       DateTime @default(now())
+}
+
+
+model SubscriptionLog {
+  id              String   @id @default(cuid())
+  subscriptionId  String
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+  action          String   // UPGRADE, RENEWAL, EXPIRED
+  notes           String?
+  createdAt       DateTime @default(now())
+}
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  categoryId  String?
+  category    SupportTicketCategory? @relation(fields: [categoryId], references: [id])
+  subject     String
+  status      String   @default("OPEN")
+  priority    String   @default("NORMAL")
+  createdAt   DateTime @default(now())
+
+  messages    SupportTicketMessage[]
+}
+
+model SupportTicketMessage {
+  id          String   @id @default(cuid())
+  ticketId    String
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
+  senderUserId String
+  sender      User     @relation("TicketMessageSender", fields: [senderUserId], references: [id])
+  message     String
+  createdAt   DateTime @default(now())
+
+  attachments SupportTicketAttachment[]
+}
+
+model SupportTicketAttachment {
+  id          String   @id @default(cuid())
+  messageId   String
+  message     SupportTicketMessage @relation(fields: [messageId], references: [id])
+  url         String
+  fileType    String?
+  fileSize    Int?
+}
+
+model Appointment {
+  id            String   @id @default(cuid())
+  shopId          String
+  shop            Shop     @relation(fields: [shopId], references: [id])
+  branchId        String
+  customerId      String
+  customer        Customer @relation(fields: [customerId], references: [id])
+  assignedStaffId String?
+  staff         User?    @relation("StaffAppointment", fields: [assignedStaffId], references: [id])
+  appointmentType AppointmentType
+  status        AppointmentStatus @default(SCHEDULED)
+  date          DateTime
+  startTime     String
+  durationMinutes Int
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  // Fix: Add order_id link
+  orderId       String?
+  order         Order?   @relation(fields: [orderId], references: [id])
+  fittingSessions FittingSession[]
+}
+
+model OrderSwatch {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+  url     String
+  notes   String?
+}
+
+model OrderDesignAsset {
+  id        String @id @default(cuid())
+  orderId   String
+  order     Order  @relation(fields: [orderId], references: [id])
+  assetType String // LOGO, SKETCH, REFERENCE
+  url       String
+}
+
+model TenantSuspensionLog {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  reason    String
+  actorId   String   // User ID who suspended
+  actor     User     @relation("SuspensionActor", fields: [actorId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model GarmentTemplate {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  name        String   // e.g. "Standard Suit", "Modern Barong"
+  basePrice   Decimal  @db.Decimal(10, 2)
+  description String?
+  category    String?
+  isActive    Boolean  @default(true)
+  
+  orderItems  OrderItem[]
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  CONSULTATION
+  MEASUREMENT
+  FITTING
+  PICKUP
+  ALTERATION
+}
+
+enum DiscrepancyType {
+  DAMAGED
+  STOLEN
+  EXPIRED
+  MISCOUNT
+  RETURNED_TO_SUPPLIER
+}
+
+model ProductionSpecialization {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  name      String   // e.g. "Cutting", "Stitching", "QC"
+  
+  tasks     ProductionTask[]
+}
+
+model SupportTicketCategory {
+  id        String   @id @default(cuid())
+  name      String   // e.g. "Billing", "Technical", "Feedback"
+  
+  tickets   SupportTicket[]
+}
+
+
+
+

@@ -1,371 +1,211 @@
 # SUTURA Sequence Diagrams
 
-## Objective 1: Secure Registration, Subscription, and Role-Based User Management
+Operational flows for SUTURA. 1 Objective = 1 Figure. Mermaid-compatible.
 
-To develop a secure registration and subscription module that enables tailoring businesses to manage role-based user accounts and allows fashion designers to curate profiles, showcase products, and publish design posts.
+---
 
-### Figure 1: Sequence Diagram – Registration, Subscription, and Role-Based Access
+## Objective 1: Subscription and Admin Module
+**Goal:** To develop a Subscription and Admin Module for managing platform oversight, tiered service plans, role-based user accounts, and professional business profiles.
+
+### Figure 1: Platform Administration, Shop Onboarding, and Role Management
 
 ```mermaid
 sequenceDiagram
-    actor Owner as "Shop Owner"
-    actor Designer as "Fashion Designer"
-    actor Staff as "Staff Member"
-    participant System as "System"
-    participant Gateway as "Payment Gateway"
-    actor Admin as "System Admin"
-    participant DB as "Database"
+    actor Owner as Shop Owner
+    participant UI as User Interface
+    participant System as System
+    actor Admin as Platform Admin
+    participant DB as Database
 
-    Note over Owner, DB: Shop Owner Registration and Subscription Flow
-    Owner->>System: Submit Registration Form (Shop Name, BIR, Permits, Password)
-    Owner->>System: Select Subscription Plan (Basic / Pro / Premium) and enter payment details
-    System->>Gateway: Process subscription payment
-    Gateway-->>System: Payment Confirmed
-    System->>DB: Save shop account as "Pending Verification"
-    System-->>Owner: Show "Account under review by Admin"
-    System->>Admin: Notify of new pending shop registration
+    Owner->>UI: Open Registration & Select Tiered Plan (Basic/Pro/Premium)
+    UI->>System: Submit Shop Registration Form
+    System->>DB: Create Shop Record & Subscription (PENDING)
+    System-->>Admin: Notify: New Verification Request
 
-    Admin->>System: Review submitted documents in Verification Queue
     alt Documents Valid
-        Admin->>System: Click Approve
-        System->>DB: Set shop account status to "Active"
-        System-->>Owner: Send email "Your shop is approved. You may now log in."
+        Admin->>System: Approve Business Identity
+        System->>DB: Update Shop Status to ACTIVE
+        System-->>UI: Notify Owner - Account Approved
     else Documents Invalid
-        Admin->>System: Click Reject and enter reason
-        System->>Gateway: Initiate subscription refund
-        System->>DB: Set account status to "Rejected"
-        System-->>Owner: Send email with rejection reason
+        Admin->>System: Reject & Enter Reason
+        System->>DB: Update Shop Status to REJECTED
+        System-->>UI: Notify Owner - Account Rejected
     end
 
-    Note over Owner, DB: Staff Account Creation and First-Time Onboarding
-    Owner->>System: Go to Staff Management and click Add Staff
-    System->>System: Generate temporary password
-    System->>DB: Save new staff account with role (Tailor / Sales / Inventory)
-    System-->>Staff: Send welcome email with username and temporary password
-    Staff->>System: Log in using temporary credentials
-    System->>DB: Detect first-time login flag
-    System-->>Staff: Redirect to Password Setup Page
-    Staff->>System: Set new personal password
-    System->>DB: Update password and mark onboarding complete
-    System-->>Staff: Redirect to Staff Dashboard
-
-    Note over Designer, DB: Designer Registration and Profile Publishing
-    Designer->>System: Submit Designer Registration Form (Name, Portfolio, Skills)
-    System->>DB: Save designer account as "Pending Verification"
-    System-->>Designer: Show "Portfolio submitted. Review within 24–48 hours."
-    System->>Admin: Notify of new pending designer application
-    Admin->>System: Review portfolio in Verification Queue
-    alt Portfolio Meets Standards
-        Admin->>System: Click Approve
-        System->>DB: Set designer account status to "Active"
-        System-->>Designer: Send email "Your designer account is approved."
-        Designer->>System: Log in and go to Designer Portal
-        Designer->>System: Update profile (bio, specialization, contact)
-        Designer->>System: Click Add New Design Post (title, description, images, tags)
-        System->>DB: Save design post as "Published"
-        System-->>Designer: Design post is now visible to Shop Owners on the platform
-    else Portfolio Rejected
-        Admin->>System: Click Reject and enter reason
-        System->>DB: Set account status to "Rejected"
-        System-->>Designer: Send email with rejection reason
-    end
+    Owner->>UI: Create Staff Accounts & Assign Roles (Sastre/Cutter/QC)
+    UI->>System: Submit Staff Account Details
+    System->>DB: Save User Credentials & Role-Based Permissions
+    System-->>UI: Staff Account Activated
 ```
 
 ---
 
-## Objective 2: Customer and Order Management System
+## Objective 2: Customer Job and Fulfillment Order Module
+**Goal:** To develop a Customer Job and Fulfillment Order Module for digitizing garment orders, tracking production stages, and managing measurement version history.
 
-To develop a comprehensive customer and order management system that stores body measurements with version history, digitizes the submission of tailoring requests, and tracks job order statuses in real time.
-
-### Figure 2: Sequence Diagram – Customer Profile, Measurements, and Order Tracking
-
-```mermaid
-sequenceDiagram
-    actor Staff as "Shop Staff / Sales"
-    actor Tailor as "Assigned Tailor"
-    actor Customer as "Customer"
-    participant System as "System"
-    participant DB as "Database"
-
-    Note over Staff, DB: Customer Profile and Measurement Recording
-    Customer->>Staff: Arrives at shop (walk-in or consultation request)
-    Staff->>System: Go to Customers module and click Add Customer
-    System-->>Staff: Display customer registration form
-    Staff->>System: Enter customer name, contact, and address
-    System->>DB: Save customer profile
-    DB-->>System: Confirm customer saved
-    System-->>Staff: Show customer profile (ready for measurements)
-
-    Staff->>System: Open Customer Profile and go to Measurements tab
-    System-->>Staff: Display measurement form (Chest, Waist, Hips, Sleeve, Inseam, etc.)
-    Staff->>Customer: Take physical body measurements
-    Staff->>System: Enter all measurements into the form
-    System->>DB: Save measurements as a new version linked to customer profile
-    DB-->>System: Confirm measurements saved with version timestamp
-    System-->>Staff: Show measurement confirmation and version history
-
-    Note over Staff, DB: Tailoring Order Creation
-    Staff->>System: Go to Orders module and click Create New Order
-    System-->>Staff: Display order form
-    Staff->>System: Select Order Type (Bespoke / Bulk / Alteration / RTW)
-    Staff->>System: Select Customer profile (auto-loads saved measurements)
-    Staff->>System: Fill in garment details (fabric, style, design specs, quantity)
-    Staff->>System: Set due date and assign to Tailor
-    System->>DB: Save order with status "In Progress"
-    DB-->>System: Confirm order saved with Order Number
-    System-->>Staff: Show Job Order summary and Order Number
-    System-->>Customer: Send SMS/Email with Order Number and estimated due date
-
-    Note over Tailor, Customer: Real-Time Job Order Status Tracking
-    Tailor->>System: Open assigned order and update production stage
-    System->>DB: Update order status (Cutting → Sewing → Finishing → Ready for Pickup)
-    DB-->>System: Confirm status updated
-    System-->>Customer: Send automated SMS/Email update on order progress
-
-    Customer->>System: Open Customer Portal and enter Order Number
-    System->>DB: Retrieve current order status
-    DB-->>System: Return status and stage details
-    System-->>Customer: Display order stage and estimated completion date
-```
-
----
-
-## Objective 3: Automated Scheduling and Notification Engine
-
-To develop an automated scheduling and notification engine for fittings, consultations, and release dates that alerts both staff and clients of upcoming deadlines and order updates.
-
-### Figure 3: Sequence Diagram – Appointment Scheduling, Release Confirmation, and Deadline Alerts
+### Figure 2: Fulfillment Order Lifecycle and Production Stage Tracking
 
 ```mermaid
 sequenceDiagram
-    actor Staff as "Shop Staff"
-    actor Customer as "Customer"
-    actor Designer as "Fashion Designer"
-    participant System as "System"
-    participant Scheduler as "System Scheduler"
-    participant DB as "Database"
+    actor Staff as Tailoring Staff
+    participant UI as User Interface
+    participant System as System
+    participant DB as Database
 
-    Note over Staff, DB: Fitting Appointment Booking
-    Customer->>Staff: Request fitting schedule (in-person or call)
-    Staff->>System: Go to Appointments and click Add Appointment
-    System-->>Staff: Display appointment form with available time slots
-    Staff->>System: Select date and time, link to Customer and Order
-    System->>System: Validate schedule for conflicts
-    System->>DB: Save fitting appointment
-    DB-->>System: Confirm appointment saved
-    System-->>Customer: Send confirmation SMS/Email with fitting date and time
-    System-->>Staff: Show appointment on calendar view
+    Staff->>UI: Open Customer Profile & View Measurement History
+    UI->>System: Fetch Measurement Version History
+    System->>DB: Query Previous Measurement Profiles
+    DB-->>System: Return Version History
+    System-->>UI: Display Measurement Versions
 
-    Note over Staff, DB: Designer Consultation Booking
-    Customer->>Staff: Request consultation with a specific designer
-    Staff->>System: Go to Appointments and click Add Consultation
-    Staff->>System: Enter customer details, select designer, and set date/time
-    System->>DB: Save consultation schedule
-    DB-->>System: Confirm saved
-    System-->>Customer: Send confirmation SMS/Email with consultation details
-    System-->>Designer: Send notification of upcoming consultation
+    Staff->>UI: Encode New Measurements (Manual Input)
+    UI->>System: Submit New Measurement Entry
+    System->>DB: Save Versioned Measurement & EAV Values
 
-    Note over System, Customer: Order Release and Pickup Confirmation
-    System->>System: Detect order status changed to "Ready for Pickup"
-    System-->>Customer: Send SMS/Email "Your order is ready for pickup!"
-    Customer->>Staff: Arrives at shop to claim order
-    Staff->>System: Open order and verify payment is settled
-    alt Payment is Complete
-        Staff->>System: Click "Mark as Released / Picked Up"
-        System->>DB: Update order status to "Released"
-        System-->>Customer: Issue digital release confirmation
-    else Balance Remaining
-        System-->>Staff: Show remaining balance due
-        Staff->>Customer: Collect remaining payment
-        Staff->>System: Record payment then click "Mark as Released"
-        System->>DB: Update payment record and order status to "Released"
+    Staff->>UI: Initialize Fulfillment Order & Specify Materials
+    UI->>System: Submit Job Order Form
+    System->>DB: Create Order Record & Production Tasks
+
+    loop Production Stage Tracking
+        Staff->>UI: Update Production Stage (Intake / Cutting / Sewing / QC)
+        UI->>System: Update Stage Status
+        System->>DB: Log ProductionTask & OrderStatusHistory
+        System-->>UI: Confirm Stage Update
     end
 
-    Note over Scheduler, Customer: Automated Deadline Reminder Notifications
-    Scheduler->>System: Trigger daily check at midnight
-    System->>DB: Query orders and appointments due within 2 days
-    DB-->>System: Return list of upcoming deadlines
-    System-->>Staff: Send internal dashboard notification (Urgent badges)
-    System-->>Customer: Send SMS/Email reminder for upcoming fitting or order pickup
-    System->>DB: Log notification records
+    Staff->>UI: Final Quality Check & Release Order
+    UI->>System: Mark Order as Completed
+    System->>DB: Update Fulfillment Status to COMPLETED
+    System-->>UI: Order Released Successfully
 ```
 
 ---
 
-## Objective 4: Integrated Inventory and Supplier Management
+## Objective 3: Appointment Module
+**Goal:** To develop an Appointment Module for scheduling fittings and consultations through a digital calendar with automated client and staff notifications.
 
-To develop an integrated inventory and supplier management module that monitors material availability and facilitates seamless coordination with textile providers to streamline reordering and prevent production delays.
-
-### Figure 4: Sequence Diagram – Inventory Monitoring, Low-Stock Alerts, and Supplier Reordering
+### Figure 3: Digital Calendar Scheduling and Automated Notifications
 
 ```mermaid
 sequenceDiagram
-    actor Staff as "Shop Staff / Inventory Staff"
-    actor Manager as "Shop Manager / Owner"
-    participant System as "System"
-    participant DB as "Database"
+    actor Staff as Authorized Staff
+    participant UI as User Interface
+    participant System as System
+    participant DB as Database
+    participant Notify as Third-Party Notifier
+    actor Client as Customer
 
-    Note over Staff, DB: Inventory Stock Viewing and Material Deduction
-    Staff->>System: Go to Inventory module
-    System->>DB: Retrieve all inventory records (fabrics, threads, accessories)
-    DB-->>System: Return inventory data with current stock quantities
-    System-->>Staff: Display inventory list with stock levels and low-stock indicators
+    Staff->>UI: Open Calendar & Create Booking (Fitting/Consultation)
+    UI->>System: Submit Appointment Details (Type, Date, Time, Staff)
+    System->>System: Validate Appointment & Check Overbooking
 
-    Staff->>System: Open an active order and record materials used
-    System->>System: Deduct used quantities from inventory stock
-    System->>DB: Update inventory stock quantities
-    DB-->>System: Confirm stock updated
-
-    System->>System: Check updated stock levels against reorder threshold
-    alt Stock Falls Below Reorder Threshold
-        System->>DB: Save low-stock alert record
-        System-->>Staff: Show low-stock warning notification on dashboard
-        System-->>Manager: Send alert "Material is running low. Consider reordering."
+    alt Slot Available
+        System->>DB: Save Appointment Record
+        System->>DB: Insert Notification Log
+        par Automated Alerts
+            System->>Notify: Trigger Client Notification
+            Notify-->>Client: Send SMS/Email Alert
+            System->>Notify: Trigger Staff Notification
+            Notify-->>Staff: Send Workload Alert
+        end
+        System-->>UI: Appointment Confirmed on Digital Calendar
+    else Slot Not Available
+        System-->>UI: Notify: Slot Taken, Suggest New Time
     end
 
-    Note over Manager, DB: Supplier Directory and Purchase Order Creation
-    Manager->>System: Go to Suppliers module and select a supplier
-    System-->>Manager: Display supplier profile and procurement history
-    Manager->>System: Click Create Purchase Order
-    System-->>Manager: Display reorder form (material, quantity, expected delivery date)
-    Manager->>System: Fill in reorder details and submit
-    System->>DB: Save Purchase Order with status "Ordered"
-    DB-->>System: Confirm PO saved
-    System-->>Manager: Show "Purchase order created and recorded."
-
-    Note over Manager, DB: Delivery Confirmation and Stock Replenishment
-    Manager->>System: Go to Suppliers and open the pending Purchase Order
-    System-->>Manager: Display Purchase Order details and expected delivery
-    Manager->>System: Confirm delivery received and enter actual received quantities
-    System->>DB: Update inventory stock with received quantities
-    DB-->>System: Confirm stock replenished
-    System->>DB: Mark Purchase Order status as "Delivered"
-    System-->>Manager: Show "Stock updated. Purchase order marked as complete."
+    Staff->>UI: Request Daily Schedule Summary
+    UI->>System: Fetch Upcoming Appointments
+    System->>DB: Aggregate Daily Workload Data
+    System-->>UI: Display Calendar Overview & Daily Workload
 ```
 
 ---
 
-## Objective 5: Financial Tracking and Digital Billing System
+## Objective 4: Inventory and Supplier Management Module
+**Goal:** To develop an Inventory and Supplier Management Module for real-time stock monitoring of materials and maintaining internal procurement and supplier records.
 
-To develop a financial tracking system that automatically generates digital invoices and records payments to ensure billing accuracy and prevent deposit discrepancies.
-
-### Figure 5: Sequence Diagram – Invoice Generation, Payment Processing, and Financial Records
+### Figure 4: Real-Time Stock Monitoring and Internal Procurement Management
 
 ```mermaid
 sequenceDiagram
-    actor Staff as "Shop Staff"
-    actor Customer as "Customer"
-    actor Owner as "Shop Owner / Manager"
-    participant System as "System"
-    participant Gateway as "Payment Gateway"
-    participant DB as "Database"
+    actor Manager as Shop Owner/Manager
+    participant UI as User Interface
+    participant System as System
+    participant DB as Database
 
-    Note over Staff, DB: Downpayment Collection on Order Creation
-    Staff->>System: Enter downpayment amount during Order creation
-    Customer->>Staff: Pay downpayment (cash)
-    Staff->>System: Record downpayment received
-    System->>DB: Save downpayment record linked to order
-    DB-->>System: Confirm saved
-    System-->>Staff: Show "Downpayment recorded. Remaining balance reflected on final invoice."
-
-    Note over Staff, DB: Invoice Generation on Order Completion
-    Staff->>System: Open completed order in the Billing module
-    System->>DB: Retrieve order details (items, quantities, garment prices, downpayment)
-    DB-->>System: Return order data
-    System->>System: Calculate subtotal, labor costs, and deduct downpayment
-    System->>DB: Save invoice record linked to the order
-    DB-->>System: Confirm invoice saved
-    System-->>Staff: Display generated invoice with itemized breakdown and total amount due
-
-    Note over Customer, DB: Customer Payment Processing
-    Staff->>System: Open the invoice for the customer's order
-    System-->>Staff: Display invoice with total due and payment options
-    alt Customer Pays Cash (In-Store)
-        Customer->>Staff: Hands over cash payment
-        Staff->>System: Select Cash Payment and enter amount received
-        System->>System: Calculate change if any
-        System->>DB: Record payment and update invoice status to "Paid"
-        System-->>Staff: Show receipt with payment details and change amount
-    else Customer Pays Online (GCash / Credit Card)
-        Staff->>System: Select Online Payment option
-        System->>Gateway: Create payment link for invoice amount
-        Gateway-->>System: Return payment URL
-        System-->>Customer: Send payment link via SMS or Email
-        Customer->>Gateway: Open link and complete payment
-        Gateway->>System: Webhook callback – Payment Successful
-        System->>DB: Record payment and update invoice status to "Paid"
-        System-->>Staff: Show payment confirmed on invoice
-        System-->>Customer: Send digital payment receipt via Email/SMS
+    System->>System: Monitor Stock Levels vs Minimum Thresholds
+    alt Stock Below Threshold
+        System-->>UI: Trigger Real-Time Low-Stock Alert (Fabrics/Threads/Accessories)
+        UI-->>Manager: Display Low-Stock Notification
     end
 
-    Note over Owner, DB: Financial Records Review and Report Export
-    Owner->>System: Go to Finance module
-    System->>DB: Retrieve all payment transactions and invoice records
-    DB-->>System: Return financial data
-    System-->>Owner: Display payment history with filters (Date, Status, Order Type)
-    Owner->>System: Click Export or Print Report
-    System->>System: Generate summary report (total collected, outstanding balances)
-    System-->>Owner: Download or print financial report
+    Manager->>UI: Access Supplier Records & Procurement History
+    UI->>System: Fetch Supplier & Procurement Data
+    System->>DB: Query Supplier Info & PO History
+    DB-->>System: Return Procurement Records
+    System-->>UI: Display Supplier & Inventory Logs
+
+    Manager->>UI: Create Internal Purchase Order (PO)
+    UI->>System: Submit PO Details
+    System->>DB: Save PO & PurchaseOrderItem Records
+    System-->>UI: PO Recorded Successfully
+
+    Manager->>UI: Record Material Arrival (Manual Encoding)
+    UI->>System: Submit Goods Receipt
+    System->>DB: Update Stock Levels & Material Usage Logs
+    System-->>UI: Inventory Updated
 ```
 
 ---
 
-## Objective 6: Analytics Dashboard and Reporting
+## Objective 5: Billing and Financial Tracking System
+**Goal:** To develop a Billing and Financial Tracking System for recording transaction details and deposits to ensure accurate billing and financial transparency.
 
-To develop an analytics dashboard and reporting tool that provides real-time insights into shop operations, inventory trends, and overall supply chain activity for informed decision-making.
-
-### Figure 6: Sequence Diagram – Analytics Dashboard, Report Generation, and Admin Monitoring
+### Figure 5: Invoice Generation and Transaction Recording
 
 ```mermaid
 sequenceDiagram
-    actor Owner as "Shop Owner / Manager"
-    actor Admin as "System Admin"
-    participant System as "System"
-    participant DB as "Database"
+    actor Staff as Staff/Cashier
+    participant UI as User Interface
+    participant System as System
+    participant DB as Database
+    actor Client as Customer
 
-    Note over Owner, DB: Owner Dashboard – Real-Time Operational Insights
-    Owner->>System: Log in and open Owner Dashboard
-    System->>DB: Retrieve KPI data (active orders, pending fittings, low-stock alerts, daily revenue)
-    DB-->>System: Return dashboard metrics
-    System-->>Owner: Display KPI widgets (Orders, Revenue, Appointments, Inventory Alerts)
+    Staff->>UI: Finalize Order & Record Initial Deposit
+    UI->>System: Submit Billing Details
+    System->>DB: Generate Digital Invoice Record (UNPAID)
+    System-->>UI: Display Invoice & Billing Statement
+    UI-->>Client: Present Billing Statement
 
-    Note over Owner, DB: Operational Report Generation
-    Owner->>System: Go to Reports module
-    System-->>Owner: Display report options (Sales Report, Order Summary, Tailor Performance)
-    Owner->>System: Select report type and set date range filter
-    System->>DB: Query aggregated data for selected report and filters
-    DB-->>System: Return report data
-    System-->>Owner: Display report with charts, tables, and KPI summaries
-    Owner->>System: Click Export as PDF / Excel
-    System-->>Owner: Download report file
+    Client->>Staff: Provide Payment (Cash or External Digital)
+    Staff->>UI: Encode Transaction Details, Ref # & Amount
+    UI->>System: Submit Payment Record (Manual)
+    System->>DB: Save Payment Transaction & Update Invoice Status
+    System-->>UI: Confirm Payment Recorded
+    System-->>Client: Issue Receipt / Confirmation
+```
 
-    Note over Owner, DB: Inventory and Supply Chain Report
-    Owner->>System: Go to Reports and select Inventory Report
-    Owner->>System: Set filter (date range, material category)
-    System->>DB: Query stock movements, current levels, and low-stock history
-    DB-->>System: Return inventory report data
-    System-->>Owner: Display stock valuation, usage trends, and reorder summary
-    Owner->>System: Click Export
-    System-->>Owner: Download inventory report
+---
 
-    Note over Admin, DB: Admin Dashboard – Platform-Wide Tenant Monitoring
-    Admin->>System: Log in and open Admin Dashboard
-    System->>DB: Retrieve platform-wide statistics (active shops, new registrations, subscriptions)
-    DB-->>System: Return KPI data
-    System-->>Admin: Display admin dashboard widgets (Active Tenants, Pending Verifications, Revenue)
+## Objective 6: Centralized Analytics Dashboard
+**Goal:** To implement a Centralized Analytics Dashboard for generating real-time reports on sales, inventory trends, and daily shop productivity.
 
-    Admin->>System: Go to Tenants module
-    System->>DB: Retrieve all registered shops and designers
-    DB-->>System: Return tenant records with status (Active, Pending, Suspended)
-    System-->>Admin: Display tenant list with subscription status and action buttons
+### Figure 6: Centralized Operational Analytics and Reporting
 
-    Note over Admin, DB: Audit Log and Supply Chain Activity Monitoring
-    Admin->>System: Go to Audit Log module
-    System->>DB: Retrieve activity logs (logins, data changes, deletions, PO activity)
-    DB-->>System: Return activity records with timestamps and user info
-    System-->>Admin: Display audit trail table with filters (user, date, action type)
-    Admin->>System: Click on a specific log entry for details
-    System->>DB: Retrieve full details of that activity
-    DB-->>System: Return full log entry
-    System-->>Admin: Display details (who acted, what changed, before and after values)
+```mermaid
+sequenceDiagram
+    actor Manager as Shop Owner/Manager
+    participant UI as User Interface
+    participant System as System
+    participant DB as Database
+
+    Manager->>UI: Access Analytics Dashboard
+    UI->>System: Request Real-Time Performance Report
+    System->>DB: Query Sales Transactions & Order History
+    System->>DB: Query Inventory Usage Trends
+    System->>DB: Query Tailor Productivity & Task Logs
+    System->>System: Aggregate Operational Summaries
+    DB-->>System: Return Report Data
+    System-->>UI: Render Interactive Dashboard & Charts
+    UI-->>Manager: Display Real-Time Reports
 ```
