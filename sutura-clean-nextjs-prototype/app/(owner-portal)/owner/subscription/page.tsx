@@ -22,7 +22,7 @@ export default function SubscriptionPage() {
     {
       id: 'basic',
       name: 'BASIC PLAN',
-      price: '1,499',
+      price: '149',
       description: 'Essential toolkit for manual shop management.',
       icon: <Clock className="text-slate-400" size={24} />,
       features: [
@@ -38,7 +38,7 @@ export default function SubscriptionPage() {
     {
       id: 'pro',
       name: 'PRO PLAN',
-      price: '3,299',
+      price: '299',
       description: 'Advanced automation for growing businesses.',
       icon: <Zap className="text-indigo-600" size={24} />,
       features: [
@@ -56,7 +56,7 @@ export default function SubscriptionPage() {
     {
       id: 'premium',
       name: 'PREMIUM PLAN',
-      price: '5,999',
+      price: '499',
       description: 'The ultimate enterprise solution.',
       icon: <Crown className="text-amber-500" size={24} />,
       features: [

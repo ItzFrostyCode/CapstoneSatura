@@ -48,9 +48,9 @@ import { InventoryCommandCenter } from './components/InventoryCommandCenter';
 // Modals
 import { NewItemModal } from './components/InventoryModals/NewItemModal';
 import { BOMModal } from './components/InventoryModals/BOMModal';
-import { StockMovementModal, StockMovementData } from './components/InventoryModals/StockMovementModal';
+import { StockMovementModal, StockMovementData } from '@/components/shared/StockMovementModal';
 import { BatchReleaseModal } from './components/InventoryModals/BatchReleaseModal';
-import { StockTransferModal } from './components/InventoryModals/StockTransferModal';
+import { StockTransferModal } from '@/components/shared/StockTransferModal';
 
 // ── HELPER FUNCTIONS ──
 function getStatus(item: InventoryItem) {

@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { X, ArrowUpRight, ArrowDownLeft, AlertCircle, HelpCircle, CheckCircle2, ChevronRight, ChevronDown, ArrowRight } from 'lucide-react';
 import { InventoryItem, MovementType, MovementReferenceType } from '@/types/erp';
 import { LucideIcon } from 'lucide-react';
+import { useERPStore } from '@/store/useERPStore';
 
 export interface StockMovementData {
   type: MovementType;
@@ -40,6 +41,7 @@ const MOVEMENT_TYPES: { value: MovementType; label: string; icon: LucideIcon; co
 const REF_TYPES = ['PO', 'JO', 'Manual', 'Transfer', 'Damage Report', 'Inventory Count'];
 
 export function StockMovementModal({ isOpen, onClose, inventory, onConfirm, initialItem, mode, renderAvatar }: StockMovementModalProps) {
+  const { currentUser } = useERPStore();
   const [step, setStep] = useState<Step>('form');
   const isFinishedGood = initialItem?.cat === 'Finished Goods' || initialItem?.item_type === 'FINISHED_GOOD';
 
@@ -56,6 +58,21 @@ export function StockMovementModal({ isOpen, onClose, inventory, onConfirm, init
   const selectedItem = useMemo(() => inventory.find(i => i.sku === form.itemSku), [inventory, form.itemSku]);
   const movementTypeInfo = useMemo(() => MOVEMENT_TYPES.find(t => t.value === form.type), [form.type]);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setForm({
+        type: (mode === 'in' ? 'RECEIVE' : 'ISSUE') as MovementType,
+        itemSku: initialItem?.sku || '',
+        qty: 0,
+        unitCost: 0,
+        referenceType: (initialItem?.cat === 'Finished Goods' || initialItem?.item_type === 'FINISHED_GOOD') ? 'JO' : 'Manual',
+        referenceId: '',
+        notes: ''
+      });
+      setStep('form');
+    }
+  }, [isOpen, initialItem, mode]);
+
   if (!isOpen) return null;
 
   const handleNext = () => setStep('preview');
@@ -65,7 +82,7 @@ export function StockMovementModal({ isOpen, onClose, inventory, onConfirm, init
     onConfirm({
       ...form,
       timestamp: new Date().toISOString(),
-      performedBy: 'Joshua (Admin)'
+      performedBy: currentUser?.name || 'Staff Member'
     });
     onClose();
   };
@@ -245,8 +262,10 @@ export function StockMovementModal({ isOpen, onClose, inventory, onConfirm, init
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Performed By</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center text-[10px] text-white font-black">J</div>
-                    <p className="text-[13px] font-black text-slate-900">Joshua (Admin)</p>
+                    <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center text-[10px] text-white font-black">
+                      {(currentUser?.name || 'S').charAt(0)}
+                    </div>
+                    <p className="text-[13px] font-black text-slate-900">{currentUser?.name || 'Staff Member'}</p>
                   </div>
                 </div>
               </div>

@@ -3,9 +3,9 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useERPStore } from '@/store/useERPStore';
-import { Customer, MeasurementProfile, MeasurementStatus, Appointment } from '@/types/erp';
+import { Customer, MeasurementProfile, Appointment } from '@/types/erp';
 
-// Sub-components
+// Shared Components
 import { CustomerDirectory } from '@/components/shared/customers/CustomerDirectory';
 import { CustomerProfile } from '@/components/shared/customers/CustomerProfile';
 import { CustomerModals, CustomerForm, FittingForm } from '@/components/shared/customers/CustomerModals';
@@ -40,10 +40,10 @@ const FULL_BODY_FIELDS = [
 // Utility helpers
 const generateAppointmentId = () => `APP-${Math.floor(Math.random() * 9000) + 1000}`;
 
-export default function CustomersPage() {
+export default function StaffCustomersPage() {
   const { 
     customers, measurementProfiles, fittingSessions, orders, appointments, staff,
-    addCustomer, updateCustomer, addMeasurementProfile, addFittingSession, pushNotification,
+    addCustomer, updateCustomer, addMeasurementProfile, pushNotification,
     updateMeasurementProfile, deleteMeasurementProfile
   } = useERPStore();
   const router = useRouter();
@@ -183,7 +183,6 @@ export default function CustomersPage() {
       if (v) updatedMetrics[k.toLowerCase().replace(/ /g, '_')] = parseFloat(v);
     });
 
-    // Use the new store action for versioned adjustments
     const { recordFittingAdjustment } = useERPStore.getState();
     recordFittingAdjustment(activeProfile, updatedMetrics, fittingForm);
 
@@ -199,7 +198,6 @@ export default function CustomersPage() {
       return;
     }
     
-    // Add logic to save appointment (mock for now)
     const newApt: Appointment = {
       id: generateAppointmentId(),
       customer: selectedCustomer.name,
@@ -216,7 +214,6 @@ export default function CustomersPage() {
       reason: aptForm.reason
     };
 
-    // Use store action if available, or just push to local state for demo
     useERPStore.getState().appointments.push(newApt);
     
     setIsScheduleAppointmentModalOpen(false);
@@ -247,7 +244,7 @@ export default function CustomersPage() {
           onBack={() => setSelectedCustomerId(null)}
           onEditCustomer={setSelectedEditCustomer}
           onNewProfile={() => setIsAddMeasurementModalOpen(true)}
-          onNewOrder={() => router.push(`/owner/orders?customerId=${selectedCustomerId}`)}
+          onNewOrder={() => pushNotification('Only Shop Owners can create new orders directly. Use the Job Order flow.', 'info')}
           onUpdatePosture={(tags) => updateCustomer(selectedCustomer.id, { posture_tags: tags })}
           onUpdateStyle={(style) => updateCustomer(selectedCustomer.id, { style_preferences: style })}
           newPostureTag={newPostureTag}
@@ -272,6 +269,9 @@ export default function CustomersPage() {
           }}
           onNewAppointment={() => setIsScheduleAppointmentModalOpen(true)}
           postureTags={TAILORING_POSTURE_TAGS}
+          hideAppointmentBtn={true}
+          hideAppointmentsTab={true}
+          hideNewOrderBtn={true}
         />
       ) : null}
 

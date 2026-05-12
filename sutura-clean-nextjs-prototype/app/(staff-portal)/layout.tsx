@@ -38,7 +38,7 @@ export default function StaffPortalLayout({
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         
         <Navbar 
-          currentUser={currentUser || { name: 'Staff User', email: 'staff@sutura.ph', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Staff' }}
+          currentUser={currentUser?.name === 'John Clock' ? { ...currentUser, name: 'Bulka Chong' } : currentUser || { name: 'Bulka Chong', email: 'bulka@sutura.ph', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Staff' }}
           mounted={mounted}
           currentTime={currentTime}
           isUserMenuOpen={isUserMenuOpen}

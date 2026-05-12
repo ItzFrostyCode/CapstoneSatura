@@ -31,6 +31,9 @@ interface CustomerProfileProps {
   onDeleteProfile: (profileId: string) => void;
   onNewAppointment: () => void;
   postureTags: string[];
+  hideAppointmentBtn?: boolean;
+  hideAppointmentsTab?: boolean;
+  hideNewOrderBtn?: boolean;
 }
 
 export const CustomerProfile: React.FC<CustomerProfileProps> = ({
@@ -54,7 +57,10 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
   onEditProfile,
   onDeleteProfile,
   onNewAppointment,
-  postureTags
+  postureTags,
+  hideAppointmentBtn = false,
+  hideAppointmentsTab = false,
+  hideNewOrderBtn = false
 }) => {
   const customerOrders = orders.filter(o => o.customer_id === customer.id);
   const ltv = customerOrders.reduce((sum, o) => sum + o.total_amount, 0);
@@ -69,24 +75,28 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Directory
         </button>
         <div className="flex items-center gap-3">
-          <button 
-            onClick={onNewAppointment}
-            className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-[12px] font-black text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center gap-2"
-          >
-            <Calendar size={16} /> Schedule Appointment
-          </button>
+          {!hideAppointmentBtn && (
+            <button 
+              onClick={onNewAppointment}
+              className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-[12px] font-black text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center gap-2"
+            >
+              <Calendar size={16} /> Schedule Appointment
+            </button>
+          )}
           <button 
             onClick={onNewProfile}
             className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-[12px] font-black text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center gap-2"
           >
             <Ruler size={16} /> New Profile
           </button>
-          <button 
-            onClick={onNewOrder}
-            className="h-10 px-4 bg-slate-900 text-white rounded-xl text-[12px] font-black hover:bg-indigo-600 transition-all flex items-center gap-2"
-          >
-            <Plus size={16} /> New Order
-          </button>
+          {!hideNewOrderBtn && (
+            <button 
+              onClick={onNewOrder}
+              className="h-10 px-4 bg-slate-900 text-white rounded-xl text-[12px] font-black hover:bg-indigo-600 transition-all flex items-center gap-2"
+            >
+              <Plus size={16} /> New Order
+            </button>
+          )}
         </div>
       </div>
 
@@ -134,7 +144,9 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2 p-1 bg-slate-50 border border-slate-200 rounded-full w-fit">
-          {(['overview', 'orders', 'measurements', 'appointments', 'history'] as const).map(tab => (
+          {(['overview', 'orders', 'measurements', 'appointments', 'history'] as const)
+            .filter(tab => !(tab === 'appointments' && hideAppointmentsTab))
+            .map(tab => (
             <button
               key={tab}
               onClick={() => setProfileTab(tab)}

@@ -7,7 +7,7 @@ import { HelpCircle, Plus, Search, MessageSquare, Clock, CheckCircle2, AlertCirc
 import { NewTicketModal } from '@/components/shared/support/NewTicketModal';
 import { TicketDetailsModal } from '@/components/shared/support/TicketDetailsModal';
 
-export default function SupportCenterPage() {
+export default function DesignerSupportCenterPage() {
   const { supportTickets } = useERPStore();
   const [activeTab, setActiveTab] = useState<'All' | SupportTicketStatus>('All');
   const [searchQuery, setSearchQuery] = useState('');

@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { 
   Scissors, ShieldCheck, ChevronDown, Cpu, Database, Network, 
-  Check, Star, Users, CheckCircle, X, Store, Palette, Lock
+  Check, Star, Users, CheckCircle, X, Store, Palette, Lock, UserCircle
 } from 'lucide-react';
+
 import Link from 'next/link';
 
 export default function Home() {
@@ -309,6 +310,17 @@ export default function Home() {
                   <div className="text-sm font-medium text-gray-500 leading-tight">Access portfolio and collaborations.</div>
                 </div>
               </Link>
+
+              <Link href="/login?role=customer" className="flex items-center gap-5 p-6 bg-white border-2 border-gray-100 rounded-3xl hover:border-blue-600 hover:bg-blue-50 transition-all group">
+                <div className="w-12 h-12 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <UserCircle className="w-6 h-6" />
+                </div>
+                <div className="text-left">
+                  <div className="font-black text-lg text-gray-900 mb-0.5">Customer Studio</div>
+                  <div className="text-sm font-medium text-gray-500 leading-tight">Track orders and manage measurements.</div>
+                </div>
+              </Link>
+
 
               <Link href="/login?role=admin" className="flex items-center gap-4 p-4 border-2 border-dashed border-gray-200 rounded-2xl hover:border-gray-900 transition-colors group">
                 <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white transition-colors">

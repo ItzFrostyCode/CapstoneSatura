@@ -6,6 +6,8 @@ import {
   Search, MapPin, Star, Filter, ArrowRight, 
   Scissors, Clock, ShieldCheck, Map 
 } from 'lucide-react';
+import { MapModal } from '@/components/shared/MapModal';
+
 
 const SHOPS = [
   {
@@ -60,6 +62,8 @@ const SHOPS = [
 
 export default function ExploreShops() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+
 
   return (
     <main className="min-h-screen bg-white">
@@ -85,12 +89,21 @@ export default function ExploreShops() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <button className="h-16 px-8 bg-white text-slate-900 rounded-2xl font-black text-[16px] flex items-center gap-3 hover:bg-slate-100 transition-all shrink-0 shadow-xl">
+            <button 
+              onClick={() => setIsMapModalOpen(true)}
+              className="h-16 px-8 bg-white text-slate-900 rounded-2xl font-black text-[16px] flex items-center gap-3 hover:bg-slate-100 transition-all shrink-0 shadow-xl"
+            >
               <Map size={20} /> View Map
             </button>
           </div>
         </div>
       </section>
+
+      <MapModal 
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        shops={SHOPS}
+      />
 
       {/* 2. RESULTS GRID */}
       <section className="max-w-7xl mx-auto px-8 py-20">

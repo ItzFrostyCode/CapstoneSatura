@@ -10,9 +10,17 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import Link from 'next/link';
+import { useERPStore } from '@/store/useERPStore';
+import { BookConsultationModal } from '@/components/shared/BookConsultationModal';
 
 export default function DesignerConsultations() {
+  const { customers, pushNotification } = useERPStore();
   const [activeTab, setActiveTab] = useState<'queue' | 'calendar' | 'scheduled'>('queue');
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+
+  const handleOpenBookModal = () => {
+    setIsBookModalOpen(true);
+  };
 
   const pendingRequests = [
     { 
@@ -44,7 +52,10 @@ export default function DesignerConsultations() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-11 px-6 bg-indigo-600 text-white rounded-2xl flex items-center gap-2 text-[13px] font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 active:scale-95 group">
+          <button 
+            onClick={handleOpenBookModal}
+            className="h-11 px-6 bg-indigo-600 text-white rounded-2xl flex items-center gap-2 text-[13px] font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 active:scale-95 group"
+          >
             <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" /> Book Consultation
           </button>
         </div>
@@ -269,6 +280,11 @@ export default function DesignerConsultations() {
            </div>
         </div>
       )}
+
+      <BookConsultationModal 
+        isOpen={isBookModalOpen}
+        onClose={() => setIsBookModalOpen(false)}
+      />
     </div>
   );
 }

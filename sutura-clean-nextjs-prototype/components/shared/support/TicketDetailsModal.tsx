@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
 import { X, Send, Paperclip, FileImage, FileVideo, UserCircle2, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useERPStore } from '@/store/useERPStore';
+import { usePathname } from 'next/navigation';
 
 export function TicketDetailsModal({ ticketId, onClose }: { ticketId: string; onClose: () => void }) {
   const { supportTickets, addTicketMessage, updateTicketStatus, currentUser } = useERPStore();
+  const pathname = usePathname();
   const [replyMessage, setReplyMessage] = useState('');
 
   const ticket = useMemo(() => supportTickets.find(t => t.id === ticketId), [supportTickets, ticketId]);
@@ -13,9 +15,11 @@ export function TicketDetailsModal({ ticketId, onClose }: { ticketId: string; on
   const handleReply = () => {
     if (!replyMessage.trim()) return;
 
+    const portalName = pathname.startsWith('/designer') ? 'Neneng B' : pathname.startsWith('/staff') ? 'Bulka Chong' : currentUser?.name || 'Shop Owner';
+
     addTicketMessage(ticket.id, {
       sender: 'User',
-      senderName: currentUser?.name || 'Shop Owner',
+      senderName: portalName,
       message: replyMessage,
     });
     

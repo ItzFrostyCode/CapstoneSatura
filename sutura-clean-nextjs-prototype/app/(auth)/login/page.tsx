@@ -2,7 +2,8 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Scissors, Eye, EyeOff, Store, Palette, ShieldCheck, Lock } from 'lucide-react';
+import { Scissors, Eye, EyeOff, Store, Palette, ShieldCheck, Lock, UserCircle } from 'lucide-react';
+
 import Link from 'next/link';
 
 function LoginForm() {
@@ -15,6 +16,8 @@ function LoginForm() {
 
   const isDesigner = role === 'designer';
   const isAdmin = role === 'admin';
+  const isCustomer = role === 'customer';
+
   
   let title = 'Shop & Staff Portal';
   let desc = 'Enter your shop credentials to continue.';
@@ -25,7 +28,11 @@ function LoginForm() {
   } else if (isDesigner) {
     title = 'Designer Portal';
     desc = 'Access your portfolio and custom orders.';
+  } else if (isCustomer) {
+    title = 'Customer Studio';
+    desc = 'Track orders, manage measurements, and browse designs.';
   }
+
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +47,12 @@ function LoginForm() {
         router.push('/admin/dashboard');
       } else if (isDesigner) {
         router.push('/designer/dashboard');
+      } else if (isCustomer) {
+        router.push('/customer/dashboard');
       } else {
         router.push('/owner/dashboard'); // Go straight to dashboard for demo
       }
+
     }, 1000);
   };
 
@@ -56,9 +66,10 @@ function LoginForm() {
       </Link>
       
       <div className="mb-10">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${isAdmin ? 'bg-slate-900 text-white' : (isDesigner ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600')}`}>
-          {isAdmin ? <ShieldCheck className="w-7 h-7" /> : (isDesigner ? <Palette className="w-7 h-7" /> : <Store className="w-7 h-7" />)}
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${isAdmin ? 'bg-slate-900 text-white' : (isDesigner ? 'bg-purple-50 text-purple-600' : (isCustomer ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'))}`}>
+          {isAdmin ? <ShieldCheck className="w-7 h-7" /> : (isDesigner ? <Palette className="w-7 h-7" /> : (isCustomer ? <UserCircle className="w-7 h-7" /> : <Store className="w-7 h-7" />))}
         </div>
+
         <h2 className="text-4xl font-extrabold mb-2 tracking-tight text-gray-900">{title}</h2>
         <p className="text-gray-500 text-base font-medium">{desc}</p>
       </div>

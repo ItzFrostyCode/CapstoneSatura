@@ -47,7 +47,7 @@ export default function DesignerLayout({
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         
         <Navbar 
-          currentUser={currentUser || { name: 'Lead Designer', email: 'designer@sutura.ph', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Designer_Marc' }}
+          currentUser={currentUser?.name === 'John Clock' ? { ...currentUser, name: 'Neneng B' } : currentUser || { name: 'Neneng B', email: 'designer@sutura.ph', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Designer_Neneng' }}
           mounted={mounted}
           currentTime={currentTime}
           isUserMenuOpen={isUserMenuOpen}

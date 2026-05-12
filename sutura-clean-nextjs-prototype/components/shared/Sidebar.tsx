@@ -40,6 +40,7 @@ const designerNavItems: NavItem[] = [
   { name: 'Inquiries', path: '/designer/requests', icon: <ShoppingBag size={20} /> },
   { name: 'Consultations', path: '/designer/appointments', icon: <Calendar size={20} /> },
   { name: 'Blueprints', path: '/designer/projects', icon: <Scissors size={20} /> },
+  { name: 'Support', path: '/designer/support', icon: <HelpCircle size={20} /> },
 ];
 
 const ownerNavItems: NavItem[] = [
@@ -59,9 +60,10 @@ const ownerNavItems: NavItem[] = [
 
 const staffNavItems: NavItem[] = [
   { name: 'Production', path: '/staff/tasks', icon: <ListTodo size={20} /> },
-  { name: 'Inventory View', path: '/staff/inventory', icon: <PackageSearch size={20} /> },
-  { name: 'Measurements', path: '/staff/measurements', icon: <Ruler size={20} /> },
+  { name: 'Inventory', path: '/staff/inventory', icon: <PackageSearch size={20} /> },
+  { name: 'Customers', path: '/staff/customers', icon: <Users size={20} /> },
   { name: 'My Schedule', path: '/staff/appointments', icon: <Calendar size={20} /> },
+  { name: 'Support', path: '/staff/support', icon: <HelpCircle size={20} /> },
 ];
 
 export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen, pathname, currentPlan }: SidebarProps) {

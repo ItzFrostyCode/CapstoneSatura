@@ -3,38 +3,41 @@
 import { useState } from 'react';
 import { Scissors, AlertCircle, CheckCircle2, AlertTriangle, ArrowRight, PackageOpen, X, Edit2, Clock, Filter, Search } from 'lucide-react';
 import { AllocateMaterialsModal } from '@/components/shared/AllocateMaterialsModal';
+import { ProductionJobDetailsModal } from '@/components/shared/ProductionJobDetailsModal';
+import { useERPStore } from '@/store/useERPStore';
+import { resolveOrderState, getDisplayLabel } from '@/features/orders/orderEngine';
+import { Order } from '@/types/erp';
 
-interface ProductionOrder {
-  id: string;
-  garment: string;
-  customer: string;
-  type: string;
-  priority: string;
-  stage: string;
-  due: string;
-  action: string;
-}
+// interface ProductionOrder removed as we now use Order type from erp.ts
 
 export default function ProductionQueuePage() {
+  const { getEnrichedOrders, staff, customers } = useERPStore();
+  const enrichedOrders = getEnrichedOrders();
+  
+  // For staff portal, we filter for orders that are actually IN_PRODUCTION or need attention
+  const assignedOrders = enrichedOrders.filter(o => {
+    const { productionStage } = resolveOrderState(o);
+    return productionStage === 'IN_PRODUCTION' || productionStage === 'ALTERATIONS' || productionStage === 'READY_FOR_FITTING';
+  });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<ProductionOrder | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const stats = [
-    { label: "Assigned Jobs", value: "4", sub: "Active tasks", icon: <Scissors size={20} className="text-indigo-600"/>, bg: "bg-indigo-50" },
-    { label: "Due Soon", value: "2", sub: "Next 48 hours", icon: <AlertCircle size={20} className="text-rose-600"/>, bg: "bg-rose-50" },
-    { label: "Completion Rate", value: "92%", sub: "Last 30 days", icon: <CheckCircle2 size={20} className="text-emerald-600"/>, bg: "bg-emerald-50" },
+    { label: "Assigned Jobs", value: assignedOrders.length.toString(), sub: "Active tasks", icon: <Scissors size={20} className="text-indigo-600"/>, bg: "bg-indigo-50" },
+    { label: "Urgent Jobs", value: assignedOrders.filter(o => o.priority === 'High').length.toString(), sub: "High Priority", icon: <AlertCircle size={20} className="text-rose-600"/>, bg: "bg-rose-50" },
+    { label: "Completed Today", value: "3", sub: "Last 24 hours", icon: <CheckCircle2 size={20} className="text-emerald-600"/>, bg: "bg-emerald-50" },
   ];
 
-  const assignedOrders = [
-    { id: "ORD-1006", garment: "Barong Tagalog", customer: "Mr. Reyes", type: "Full Set", priority: "Urgent", stage: "Cutting", due: "Apr 29, 2026", action: "Allocate Materials" },
-    { id: "ORD-1004", garment: "Cocktail Dress", customer: "Ms. Santos", type: "Evening Wear", priority: "High Priority", stage: "Sewing", due: "Apr 28, 2026", action: "Allocate Materials" },
-    { id: "ORD-1002", garment: "Office Uniforms ×4", customer: "Dela Cruz Corp.", type: "Bulk", priority: "Normal", stage: "QC Inspection", due: "May 3, 2026", action: "View Materials" },
-    { id: "ORD-1001", garment: "Wedding Gown", customer: "Ms. Ramos", type: "Custom", priority: "Normal", stage: "Ready for Pickup", due: "May 10, 2026", action: "Mark Delivered" },
-  ];
-
-  const handleOpenModal = (order: ProductionOrder) => {
+  const handleOpenModal = (order: Order) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
+  };
+
+  const handleOpenDetails = (order: Order) => {
+    setSelectedOrder(order);
+    setIsDetailsModalOpen(true);
   };
 
   return (
@@ -97,77 +100,98 @@ export default function ProductionQueuePage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                <th className="px-6 py-4 w-[300px]">Order Details</th>
-                <th className="px-6 py-4 w-[200px]">Customer</th>
+                <th className="px-6 py-4 w-[250px]">Order Details</th>
+                <th className="px-6 py-4 w-[150px]">Customer</th>
+                <th className="px-6 py-4 w-[180px]">Assigned Staff</th>
                 <th className="px-6 py-4 w-[250px]">Tailoring Progress</th>
-                <th className="px-6 py-4 w-[180px]">Deadline</th>
+                <th className="px-6 py-4 w-[150px]">Deadline</th>
                 <th className="px-6 py-4 text-right pr-8">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {assignedOrders.map((order, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-all group">
+              {assignedOrders.map((order) => {
+                const { productionStage, progress } = resolveOrderState(order);
+                const garmentName = order.order_type === 'ALTERATION' 
+                  ? order.alteration_details?.item_description || 'Repair Item'
+                  : order.items?.[0]?.garment_name || 'Custom Garment';
+                const customerName = customers.find(c => c.id === order.customer_id)?.name || 'Unknown';
+                
+                return (
+                <tr key={order.id} className="hover:bg-slate-50/50 transition-all group">
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter ${
-                          order.id === 'ORD-1006' ? 'bg-amber-100 text-amber-700' :
-                          order.id === 'ORD-1004' ? 'bg-rose-100 text-rose-700' :
-                          order.type === 'Bulk' ? 'bg-blue-100 text-blue-700' :
+                          order.priority === 'High' ? 'bg-rose-100 text-rose-700' :
+                          order.order_type === 'BULK' ? 'bg-blue-100 text-blue-700' :
                           'bg-emerald-100 text-emerald-700'
                         }`}>
-                          {order.id === 'ORD-1006' ? 'BESPOKE' : 
-                           order.id === 'ORD-1004' ? 'ALTERATION' :
-                           order.type === 'Bulk' ? 'BULK' : 'READY_MADE'}
+                          {order.order_type}
                         </span>
                         <div className="text-[13px] font-bold text-slate-900 truncate max-w-[200px]">
-                          {order.garment}
+                          {garmentName}
                         </div>
                       </div>
                       <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tight flex items-center gap-1.5 ml-1">
-                        {order.id === 'ORD-1004' ? <Scissors size={10} className="text-rose-400" /> : 
-                         order.type === 'Bulk' ? <PackageOpen size={10} className="text-blue-400" /> : 
+                        {order.order_type === 'ALTERATION' ? <Scissors size={10} className="text-rose-400" /> : 
+                         order.order_type === 'BULK' ? <PackageOpen size={10} className="text-blue-400" /> : 
                          <Clock size={10} className="text-slate-300" />}
-                        {order.type} • ID: {order.id.split('-')[1]}
+                        {order.order_type} • ID: {order.id}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="text-[14px] font-bold text-slate-900">{order.customer}</div>
+                  <td className="px-6 py-4">
+                    <div className="text-[14px] font-bold text-slate-900">{customerName}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center font-black text-[10px] text-slate-500">
+                        {order.assigned_staff_id ? staff.find(s => s.id === order.assigned_staff_id)?.name.charAt(0) : '?'}
+                      </div>
+                      <div className="text-[13px] font-bold text-slate-700">
+                        {order.assigned_staff_id ? staff.find(s => s.id === order.assigned_staff_id)?.name : 'Unassigned'}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center gap-3">
                         <span className="inline-flex items-center px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border border-indigo-100 bg-indigo-50 text-indigo-700">
-                          IN TAILORING
+                          {getDisplayLabel(productionStage)}
                         </span>
                         <span className="text-[10px] font-black text-slate-400">
-                          {order.stage === 'Cutting' ? '15%' : order.stage === 'Sewing' ? '45%' : order.stage === 'QC Inspection' ? '85%' : '100%'}
+                          {progress}%
                         </span>
                       </div>
                       <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-indigo-500" 
-                          style={{ width: order.stage === 'Cutting' ? '15%' : order.stage === 'Sewing' ? '45%' : order.stage === 'QC Inspection' ? '85%' : '100%' }} 
+                          style={{ width: `${progress}%` }} 
                         />
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 text-slate-600">
-                      <Clock size={12} className={order.priority === 'Urgent' ? 'text-rose-500 animate-pulse' : 'text-slate-400'} />
-                      <span className={`text-[12px] font-bold ${order.priority === 'Urgent' ? 'text-rose-600' : 'text-slate-900'}`}>{order.due}</span>
+                      <Clock size={12} className={order.priority === 'High' ? 'text-rose-500 animate-pulse' : 'text-slate-400'} />
+                      <span className={`text-[12px] font-bold ${order.priority === 'High' ? 'text-rose-600' : 'text-slate-900'}`}>
+                        {new Date(order.due_date).toLocaleDateString()}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right pr-8">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="h-8 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 text-[11px] font-black hover:bg-slate-50 transition-all shadow-sm">
+                      <button 
+                        onClick={() => handleOpenDetails(order)}
+                        className="h-8 px-4 rounded-lg bg-white border border-slate-200 text-slate-900 text-[11px] font-black hover:bg-slate-50 transition-all shadow-sm"
+                      >
                         Details
                       </button>
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -177,6 +201,17 @@ export default function ProductionQueuePage() {
       <AllocateMaterialsModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        order={selectedOrder ? {
+          id: selectedOrder.id,
+          garment: (selectedOrder.items?.[0]?.garment_name || 'Garment'),
+          customer: (customers.find(c => c.id === selectedOrder.customer_id)?.name || 'Unknown'),
+          due: new Date(selectedOrder.due_date).toLocaleDateString()
+        } : null}
+      />
+
+      <ProductionJobDetailsModal 
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
         order={selectedOrder}
       />
 
