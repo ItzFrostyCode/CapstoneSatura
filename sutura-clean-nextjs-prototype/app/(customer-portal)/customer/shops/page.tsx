@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Search, MapPin, Star, Filter, ArrowRight, 
   Scissors, Clock, ShieldCheck, Map 
@@ -130,7 +131,12 @@ export default function ExploreShops() {
             <div key={shop.id} className="group relative flex flex-col md:flex-row bg-white rounded-[32px] overflow-hidden border border-slate-100 hover:shadow-2xl transition-all cursor-pointer">
               {/* Image Section */}
               <div className="w-full md:w-[280px] h-[280px] relative shrink-0">
-                <img src={shop.image} alt={shop.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <Image 
+                  src={shop.image} 
+                  alt={shop.name} 
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700" 
+                />
                 {shop.isVerified && (
                   <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">
                     <ShieldCheck size={12} /> Verified
@@ -168,14 +174,35 @@ export default function ExploreShops() {
                   ))}
                 </div>
 
-                <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-6">
-                  <span className="text-[13px] font-bold text-slate-400 uppercase tracking-widest">{shop.reviews} Reviews</span>
-                  <Link 
-                    href="/customer/book"
-                    className="flex items-center gap-2 text-[14px] font-black text-indigo-600 hover:text-indigo-700 group/link"
-                  >
-                    Book Appointment <ArrowRight size={18} className="group-hover/link:translate-x-1 transition-transform" />
-                  </Link>
+                <div className="mt-auto pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex -space-x-2 shrink-0">
+                      {[1,2,3].map(i => (
+                        <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
+                          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${shop.id}${i}`} alt="user" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[14px] font-black text-slate-900 leading-none">{shop.reviews}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Verified Reviews</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Link 
+                      href={`/customer/profile/${shop.id === 'SH-001' ? 'davao-famous' : 'chard'}`}
+                      className="h-10 px-4 rounded-xl text-[11px] font-black text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all flex items-center uppercase tracking-widest border border-transparent hover:border-slate-200"
+                    >
+                      Profile
+                    </Link>
+                    <Link 
+                      href={`/customer/book?provider=${encodeURIComponent(shop.name)}`}
+                      className="h-10 px-5 rounded-xl bg-indigo-600 text-white text-[11px] font-black flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 uppercase tracking-widest"
+                    >
+                      Book <ArrowRight size={14} />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

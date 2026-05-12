@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Star, Heart, SlidersHorizontal, ShoppingBag, Calendar as CalendarIcon } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, Star, Heart, SlidersHorizontal, ShoppingBag, Calendar as CalendarIcon, Map } from 'lucide-react';
+import { MapModal } from '@/components/shared/MapModal';
 
 const DESIGNS = [
   {
@@ -73,7 +75,15 @@ const DESIGNS = [
   }
 ];
 
+const DESIGNERS = [
+  { id: 'D-001', name: 'Edgar Buyan', location: 'Davao City', rating: 5.0, type: 'Couture', reviews: 45, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200', isVerified: true },
+  { id: 'D-002', name: 'Francis Libiran', location: 'Manila (Remote)', rating: 4.9, type: 'Avant Garde', reviews: 120, image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200', isVerified: true },
+  { id: 'D-003', name: 'Michael Cinco', location: 'Dubai / Davao', rating: 5.0, type: 'High Fashion', reviews: 340, image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200', isVerified: true },
+];
+
 export default function PremadeDesigns() {
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-white">
       {/* Premium Header */}
@@ -90,11 +100,18 @@ export default function PremadeDesigns() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setIsMapModalOpen(true)}
+                className="h-12 px-6 rounded-full border-2 border-indigo-600 bg-white text-indigo-600 font-black flex items-center gap-2 hover:bg-indigo-600 hover:text-white transition-all shadow-lg"
+              >
+                <Map size={18} />
+                View Map
+              </button>
               <button className="h-12 px-6 rounded-full border border-slate-200 bg-white text-slate-900 font-bold flex items-center gap-2 hover:bg-slate-50 transition-all">
                 <SlidersHorizontal size={18} />
                 Filters
               </button>
-              <div className="h-12 w-[1px] bg-slate-200 mx-2 hidden md:block"></div>
+              <div className="h-12 w-px bg-slate-200 mx-2 hidden md:block"></div>
               <p className="text-[14px] font-bold text-slate-400">
                 <span className="text-slate-900 font-black">60+</span> Designs Available
               </p>
@@ -103,6 +120,14 @@ export default function PremadeDesigns() {
         </div>
       </section>
 
+      <MapModal 
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        shops={DESIGNERS}
+        title="Designer Studio Network"
+        type="designer"
+      />
+
       {/* Grid Section */}
       <section className="max-w-7xl mx-auto px-8 py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -110,10 +135,11 @@ export default function PremadeDesigns() {
             <div key={design.id} className="group relative">
               {/* Image Container */}
               <div className="relative aspect-[4/5] rounded-[24px] overflow-hidden mb-6 bg-slate-100 shadow-sm border border-slate-50">
-                <img 
+                <Image 
                   src={design.image} 
                   alt={design.name} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 
                 {/* Overlay UI */}
@@ -130,12 +156,20 @@ export default function PremadeDesigns() {
                 </button>
 
                 <div className="absolute bottom-6 left-6 right-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                  <Link 
-                    href="/customer/book"
-                    className="w-full h-12 bg-white text-slate-900 rounded-xl font-black text-[14px] flex items-center justify-center gap-2 hover:bg-indigo-600 hover:text-white transition-all shadow-2xl"
-                  >
-                    <CalendarIcon size={18} /> Book Appointment
-                  </Link>
+                  <div className="flex flex-col gap-3">
+                    <Link 
+                      href="/customer/profile/edgar-buyan"
+                      className="w-full h-12 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl font-black text-[14px] flex items-center justify-center gap-2 hover:bg-white hover:text-slate-900 transition-all"
+                    >
+                      View Portfolio
+                    </Link>
+                    <Link 
+                      href="/customer/book"
+                      className="w-full h-12 bg-white text-slate-900 rounded-xl font-black text-[14px] flex items-center justify-center gap-2 hover:bg-indigo-600 hover:text-white transition-all shadow-2xl"
+                    >
+                      <CalendarIcon size={18} /> Book Appointment
+                    </Link>
+                  </div>
                 </div>
               </div>
 
@@ -158,7 +192,7 @@ export default function PremadeDesigns() {
                     <Star size={14} className="fill-amber-400 text-amber-400" />
                     <span className="text-[12px] font-black text-slate-900">{design.rating}</span>
                   </div>
-                  <div className="w-1 h-1 rounded-full bg-slate-200"></div>
+                  <div className="hidden lg:block w-px h-10 bg-slate-200"></div>
                   <span className="text-[12px] font-bold uppercase tracking-widest">{design.reviews} Reviews</span>
                 </div>
               </div>
@@ -176,7 +210,7 @@ export default function PremadeDesigns() {
           
           <div className="max-w-2xl relative z-10 text-center md:text-left">
             <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-8">
-              Don't see your vision? <br />
+              Dont see your vision? <br />
               <span className="text-slate-400">Commission a designer.</span>
             </h2>
             <p className="text-lg text-slate-400 font-medium mb-12 leading-relaxed">

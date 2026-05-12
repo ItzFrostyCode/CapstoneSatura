@@ -12,28 +12,39 @@ import {
   eachDayOfInterval, isSameDay, isToday, startOfDay,
   addDays, isBefore
 } from 'date-fns';
+import { useSearchParams } from 'next/navigation';
 import { useERPStore } from '@/store/useERPStore';
 
 
 const SERVICES = [
-  { id: 'bespoke', name: 'Full Bespoke', desc: 'Custom pattern & fabric selection', price: 'Starts at ₱15,000' },
-  { id: 'mtm', name: 'Made to Measure', desc: 'Modified standard patterns', price: 'Starts at ₱8,000' },
-  { id: 'alteration', name: 'Alterations', desc: 'Resizing & repairs', price: 'Starts at ₱500' },
-  { id: 'consultation', name: 'Design Consultation', desc: 'Style & fabric advice', price: 'Free' },
+  { id: 'bespoke', name: 'Full Bespoke', desc: 'Custom pattern & fabric selection' },
+  { id: 'mtm', name: 'Made to Measure', desc: 'Modified standard patterns' },
+  { id: 'alteration', name: 'Alterations', desc: 'Resizing & repairs' },
+  { id: 'consultation', name: 'Design Consultation', desc: 'Style & fabric advice' },
 ];
 
-const STEPS = ['Select Service', 'Provider', 'Schedule', 'Confirm'];
+const STEPS = ['Select Service', 'Schedule', 'Confirm'];
+
+const PARTNERS = [
+  { name: 'Davao Famous Tailoring', type: 'Shop', rating: 4.9, loc: 'San Pedro St.', category: 'shops' },
+  { name: "Chard's Tailoring", type: 'Shop', rating: 4.8, loc: 'Ponciano St.', category: 'shops' },
+  { name: 'Edgar Buyan', type: 'Designer', rating: 5.0, loc: 'Davao City', category: 'designers' },
+  { name: 'Francis Libiran', type: 'Designer', rating: 4.9, loc: 'Manila (Remote)', category: 'designers' },
+];
 
 export default function AppointmentBooking() {
+  const searchParams = useSearchParams();
+  const preSelectedProvider = searchParams.get('provider');
+  
   const { appointments, addAppointment } = useERPStore();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(preSelectedProvider ? 1 : 1); // Start at 1 regardless, but pre-fill
   const [selectedService, setSelectedService] = useState('');
-  const [selectedProvider, setSelectedProvider] = useState('');
+  const [selectedProvider, setSelectedProvider] = useState(preSelectedProvider || '');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [time, setTime] = useState('');
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  const nextStep = () => setStep(s => Math.min(s + 1, 4));
+  const nextStep = () => setStep(s => Math.min(s + 1, 3));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
   // Calendar Helpers
@@ -134,54 +145,14 @@ export default function AppointmentBooking() {
                       </div>
                     </div>
                     <p className="text-[14px] text-slate-500 font-medium mb-4">{service.desc}</p>
-                    <p className="text-[12px] font-black text-indigo-600 uppercase tracking-widest">{service.price}</p>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* STEP 2: PROVIDER (Shop/Designer) */}
+          {/* STEP 2: SCHEDULE (Synchronized Calendar) */}
           {step === 2 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                <User className="text-indigo-600" /> Choose Your Partner
-              </h2>
-              <div className="space-y-4">
-                {[
-                  { name: 'Davao Famous Tailoring', type: 'Shop', rating: 4.9, loc: 'San Pedro St.' },
-                  { name: 'Edgar Buyan', type: 'Designer', rating: 5.0, loc: 'Davao City' },
-                  { name: "Chard's Tailoring", type: 'Shop', rating: 4.8, loc: 'Ponciano St.' },
-                ].map((p, i) => (
-                  <button 
-                    key={i}
-                    onClick={() => { setSelectedProvider(p.name); nextStep(); }}
-                    className={`w-full p-5 rounded-2xl border-2 text-left flex items-center gap-6 transition-all ${
-                      selectedProvider === p.name ? 'border-indigo-600 bg-indigo-50/50 shadow-lg' : 'border-slate-100 hover:border-slate-300 bg-white'
-                    }`}
-                  >
-                    <div className="w-16 h-16 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
-                      {p.type === 'Shop' ? <Sparkles className="text-indigo-600" /> : <User className="text-indigo-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-black text-slate-900">{p.name}</h3>
-                        <span className="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-black uppercase text-slate-500 tracking-widest">{p.type}</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-slate-500 text-[13px] font-medium">
-                        <span className="flex items-center gap-1"><MapPin size={14} /> {p.loc}</span>
-                        <span className="flex items-center gap-1"><Star size={14} className="fill-amber-400 text-amber-400" /> {p.rating}</span>
-                      </div>
-                    </div>
-                    <ChevronRight className="text-slate-300" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: SCHEDULE (Synchronized Calendar) */}
-          {step === 3 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex flex-col lg:flex-row gap-10">
                 {/* Calendar View */}
@@ -319,15 +290,15 @@ export default function AppointmentBooking() {
           )}
 
 
-          {/* STEP 4: CONFIRM */}
-          {step === 4 && (
+          {/* STEP 3: CONFIRM */}
+          {step === 3 && (
             <div className="animate-in zoom-in-95 duration-500 text-center">
               <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8">
                 <CheckCircle2 size={40} />
               </div>
               <h2 className="text-3xl font-black text-slate-900 mb-4">Request Ready!</h2>
               <p className="text-slate-500 font-medium mb-12 max-w-md mx-auto">
-                You're about to book a <span className="text-slate-900 font-black">{selectedService}</span> with <span className="text-slate-900 font-black">{selectedProvider}</span> for <span className="text-slate-900 font-black">{selectedDate ? format(selectedDate, 'MMM do, yyyy') : ''}</span> at <span className="text-slate-900 font-black">{time}</span>.
+                Youre about to book a <span className="text-slate-900 font-black">{selectedService}</span> with <span className="text-slate-900 font-black">{selectedProvider}</span> for <span className="text-slate-900 font-black">{selectedDate ? format(selectedDate, 'MMM do, yyyy') : ''}</span> at <span className="text-slate-900 font-black">{time}</span>.
 
               </p>
 
@@ -349,7 +320,7 @@ export default function AppointmentBooking() {
           )}
         </div>
         
-        {step < 4 && (
+        {step < 3 && (
           <div className="mt-8 flex justify-between">
             <button 
               onClick={prevStep}
@@ -358,7 +329,7 @@ export default function AppointmentBooking() {
               Back
             </button>
             <p className="text-[12px] font-black text-slate-400 tracking-widest uppercase">
-              Step {step} of 4
+              Step {step} of 3
             </p>
           </div>
         )}
