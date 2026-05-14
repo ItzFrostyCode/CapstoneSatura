@@ -15,7 +15,7 @@ export default function DesignerProjects() {
       id: 'DS-2026-001', 
       client: 'Maria Clara Santos', 
       garment: 'Modern Filipiniana', 
-      status: 'In Production', 
+      status: 'Awaiting Review', 
       progress: 65, 
       shop: 'Golden Needle Tailoring',
       lastUpdate: '2h ago'
@@ -42,7 +42,7 @@ export default function DesignerProjects() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'In Production': return 'text-emerald-600 bg-emerald-50 border-emerald-100';
+      case 'Awaiting Review': return 'text-emerald-600 bg-emerald-50 border-emerald-100';
       case 'Drafting': return 'text-amber-600 bg-amber-50 border-amber-100';
       case 'Review Required': return 'text-rose-600 bg-rose-50 border-rose-100';
       default: return 'text-slate-600 bg-slate-50 border-slate-100';
@@ -54,7 +54,7 @@ export default function DesignerProjects() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-slate-900">Active Design Projects</h1>
-          <p className="text-slate-500 font-medium mt-1">Track your design blueprints from concept to shop floor.</p>
+          <p className="text-slate-500 font-medium mt-1">Track your design blueprints from concept to client approval.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/designer/blueprints/new">

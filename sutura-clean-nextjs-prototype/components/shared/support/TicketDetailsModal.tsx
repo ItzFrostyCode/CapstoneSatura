@@ -15,7 +15,7 @@ export function TicketDetailsModal({ ticketId, onClose }: { ticketId: string; on
   const handleReply = () => {
     if (!replyMessage.trim()) return;
 
-    const portalName = pathname.startsWith('/designer') ? 'Neneng B' : pathname.startsWith('/staff') ? 'Bulka Chong' : currentUser?.name || 'Shop Owner';
+    const portalName = pathname.startsWith('/staff') ? 'Bulka Chong' : currentUser?.name || 'Shop Owner';
 
     addTicketMessage(ticket.id, {
       sender: 'User',

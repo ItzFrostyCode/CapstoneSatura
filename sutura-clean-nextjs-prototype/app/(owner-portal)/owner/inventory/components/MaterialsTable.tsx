@@ -50,13 +50,13 @@ export function MaterialsTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50/30 border-b border-slate-100">
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Item Specification</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Stock Level</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Health Status</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage Location</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Inventory Value</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-10">Actions</th>
+            <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+              <th className="px-10 py-5">Item Specification</th>
+              <th className="px-10 py-5 text-center">Stock Level</th>
+              <th className="px-10 py-5 text-center">Health Status</th>
+              <th className="px-10 py-5">Storage Location</th>
+              <th className="px-10 py-5 text-right">Inventory Value</th>
+              <th className="px-10 py-5 text-right pr-10">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">

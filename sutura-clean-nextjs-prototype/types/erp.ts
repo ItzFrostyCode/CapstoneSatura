@@ -5,7 +5,7 @@
 
 // ── ENUMS / SCALARS ─────────────────────────────────────────
 
-export type UserRole = 'ADMIN' | 'SHOP_OWNER' | 'STAFF' | 'CUSTOMER' | 'DESIGNER';
+export type UserRole = 'ADMIN' | 'SHOP_OWNER' | 'STAFF' | 'CUSTOMER';
 
 /**
  * PRODUCTION SPECIALIZATIONS — assignment tags for production workflow.
@@ -33,8 +33,14 @@ export type Permission =
   | 'inventory:modify'
   | 'billing:modify';
 export type AccountStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
-export type PlanLevel = 'BASIC' | 'PRO' | 'PREMIUM';
-export type SubscriptionStatus = 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
+/** Shop subscription tiers — maps to pricing strategy */
+export type PlanLevel = 'STARTER' | 'PROFESSIONAL' | 'Workshop';
+
+/** Designer subscription tiers */
+export type DesignerPlanLevel = 'PORTFOLIO' | 'STUDIO' | 'MAISON';
+
+export type SubscriptionStatus = 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'TRIAL';
+export type BillingCycle = 'MONTHLY' | 'ANNUAL';
 export type ShopStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'EXPIRED';
 export type BranchStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
 export type BranchType = 'MAIN' | 'SATELLITE' | 'WAREHOUSE';
@@ -91,16 +97,164 @@ export interface User {
   createdAt: string;
 }
 
+// ── SUBSCRIPTION FEATURE GATES ──────────────────────────────
+
+/** Feature entitlements for a given shop plan tier */
+export interface ShopPlanFeatures {
+  maxCustomers: number | 'UNLIMITED';
+  maxStaffAccounts: number;
+  maxBranches: number;
+  featuredPlacement: boolean;
+  consultationBooking: boolean;
+  designerCollaboration: boolean;
+  advancedAnalytics: boolean;
+  customBranding: boolean;
+  prioritySupport: boolean;
+}
+
+/** Feature entitlements for a given designer plan tier */
+export interface DesignerPlanFeatures {
+  maxPortfolioPieces: number | 'UNLIMITED';
+  monthlyConsultationLimit: number | 'UNLIMITED';
+  blueprintCollaboration: boolean;
+  featuredDiscovery: boolean;
+  maxShopPartnerships: number | 'UNLIMITED';
+  licensingDashboard: boolean;
+  verificationBadge: boolean;
+}
+
+/** Static plan config map — used by Admin portal and pricing page */
+export const SHOP_PLAN_CONFIG: Record<PlanLevel, {
+  name: string;
+  monthlyPrice: number;
+  annualPrice: number;
+  features: ShopPlanFeatures;
+}> = {
+  STARTER: {
+    name: 'Starter',
+    monthlyPrice: 0,
+    annualPrice: 0,
+    features: {
+      maxCustomers: 10,
+      maxStaffAccounts: 1,
+      maxBranches: 1,
+      featuredPlacement: false,
+      consultationBooking: false,
+      designerCollaboration: false,
+      advancedAnalytics: false,
+      customBranding: false,
+      prioritySupport: false,
+    },
+  },
+  PROFESSIONAL: {
+    name: 'Professional',
+    monthlyPrice: 799,
+    annualPrice: 7990,
+    features: {
+      maxCustomers: 'UNLIMITED',
+      maxStaffAccounts: 5,
+      maxBranches: 1,
+      featuredPlacement: true,
+      consultationBooking: true,
+      designerCollaboration: false,
+      advancedAnalytics: false,
+      customBranding: false,
+      prioritySupport: false,
+    },
+  },
+  Workshop: {
+    name: 'Workshop',
+    monthlyPrice: 1999,
+    annualPrice: 19990,
+    features: {
+      maxCustomers: 'UNLIMITED',
+      maxStaffAccounts: 20,
+      maxBranches: 3,
+      featuredPlacement: true,
+      consultationBooking: true,
+      designerCollaboration: true,
+      advancedAnalytics: true,
+      customBranding: true,
+      prioritySupport: true,
+    },
+  },
+} as const;
+
+export const DESIGNER_PLAN_CONFIG: Record<DesignerPlanLevel, {
+  name: string;
+  monthlyPrice: number;
+  annualPrice: number;
+  features: DesignerPlanFeatures;
+}> = {
+  PORTFOLIO: {
+    name: 'Portfolio',
+    monthlyPrice: 0,
+    annualPrice: 0,
+    features: {
+      maxPortfolioPieces: 10,
+      monthlyConsultationLimit: 3,
+      blueprintCollaboration: false,
+      featuredDiscovery: false,
+      maxShopPartnerships: 0,
+      licensingDashboard: false,
+      verificationBadge: false,
+    },
+  },
+  STUDIO: {
+    name: 'Studio',
+    monthlyPrice: 499,
+    annualPrice: 4990,
+    features: {
+      maxPortfolioPieces: 'UNLIMITED',
+      monthlyConsultationLimit: 'UNLIMITED',
+      blueprintCollaboration: true,
+      featuredDiscovery: true,
+      maxShopPartnerships: 3,
+      licensingDashboard: false,
+      verificationBadge: false,
+    },
+  },
+  MAISON: {
+    name: 'Maison',
+    monthlyPrice: 1199,
+    annualPrice: 11990,
+    features: {
+      maxPortfolioPieces: 'UNLIMITED',
+      monthlyConsultationLimit: 'UNLIMITED',
+      blueprintCollaboration: true,
+      featuredDiscovery: true,
+      maxShopPartnerships: 'UNLIMITED',
+      licensingDashboard: true,
+      verificationBadge: true,
+    },
+  },
+} as const;
+
+// ── SUBSCRIPTION RECORDS ──────────────────────────────────────
+
+/**
+ * SUBSCRIPTION — Active subscription record for a shop.
+ * Links a shop to its current plan, billing cycle, and period.
+ */
 export interface Subscription {
   id: string;
+  shop_id: string;
   planName: string;
   planLevel: PlanLevel;
   status: SubscriptionStatus;
+  billing_cycle: BillingCycle;
+  // Feature limits (denormalized from plan config for quick access)
   maxBranches: number;
   maxStaff: number;
-  startDate: string;
-  endDate: string;
-  price: number;
+  // Billing period
+  startDate: string;              // ISO — period start
+  endDate: string;                // ISO — period end (renewal date)
+  price: number;                  // Amount charged for this period
+  payment_method?: string;
+  auto_renew: boolean;
+  // Upgrade tracking
+  upgraded_from?: PlanLevel;
+  upgraded_at?: string;
 }
 
 export interface Shop {
@@ -111,6 +265,12 @@ export interface Shop {
   businessName: string;
   businessType: string;
   status: ShopStatus;
+  themeColor?: string;
+  accentColor?: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  tagline?: string;
+  description?: string;
   createdAt: string;
 }
 
@@ -233,7 +393,7 @@ export interface MeasurementProfile {
   waist?: number; hip?: number; front_length?: number; back_length?: number;
   sleeve_length?: number; armhole?: number; bicep?: number; elbow?: number;
   forearm?: number; cuff?: number; across_chest?: number; across_back?: number;
-  shoulder_slope?: number; jacket_length?: number;
+  shoulder_slope?: number;
   lower_waist?: number; lower_hip?: number; seat?: number; thigh?: number;
   knee?: number; calf?: number; rise?: number; front_rise?: number;
   back_rise?: number; inseam?: number; outseam?: number; leg_opening?: number;
@@ -859,4 +1019,42 @@ export interface SupportTicket {
   createdAt: string;
   updatedAt: string;
   messages: SupportTicketMessage[];
+}
+
+// ── I. DESIGNER SUBSCRIPTION ─────────────────────────────────
+
+/**
+ * DESIGNER SUBSCRIPTION — Active subscription record for a fashion designer.
+ * Controls portfolio limits, consultation caps, and collaboration access.
+ */
+export interface DesignerSubscription {
+  id: string;
+  designer_id: string;
+  planName: string;
+  planLevel: DesignerPlanLevel;
+  status: SubscriptionStatus;
+  billing_cycle: BillingCycle;
+  startDate: string;
+  endDate: string;
+  price: number;
+  payment_method?: string;
+  auto_renew: boolean;
+}
+
+/**
+ * PLATFORM REVENUE SUMMARY — Used by Admin analytics dashboard.
+ * Aggregated from all active subscriptions per billing period.
+ */
+export interface PlatformRevenueSummary {
+  period: string;                 // e.g. 'May 2026'
+  mrr: number;                    // Monthly Recurring Revenue (₱)
+  arr: number;                    // Annualized (MRR × 12)
+  activeShopSubscriptions: number;
+  activeDesignerSubscriptions: number;
+  churnRate: number;              // % cancelled this period
+  trialConversionRate: number;    // % Starter → Professional
+  planBreakdown: Record<PlanLevel, number>;
+  designerPlanBreakdown: Record<DesignerPlanLevel, number>;
+  totalConsultationFees: number;  // Platform transaction fees (7%)
+  totalFeaturedRevenue: number;   // Paid placement revenue
 }

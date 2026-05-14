@@ -85,7 +85,7 @@ export default function DesignerStudio() {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
         <div>
           <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-2">Designer Studio</h1>
-          <p className="text-lg font-medium text-slate-500">The creative layer: concept to blueprint showcase.</p>
+          <p className="text-lg font-medium text-slate-500">The collaborative layer: showcase signature styles and design concepts.</p>
         </div>
 
         <div className="flex items-center gap-4 bg-white p-2 rounded-[28px] border border-slate-100 shadow-sm">

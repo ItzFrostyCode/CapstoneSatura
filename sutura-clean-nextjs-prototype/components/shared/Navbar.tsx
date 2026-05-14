@@ -35,7 +35,7 @@ export function Navbar({
 }: NavbarProps) {
   const pathname = usePathname();
   return (
-    <header className="h-24 bg-slate-50 flex items-center justify-between px-6 md:px-10 shrink-0 z-40">
+    <header className="flex items-center justify-between px-6 md:px-10 py-6 shrink-0 z-40">
       {/* Left: Dynamic Title & Context */}
       <div className="flex items-center gap-4 md:gap-8">
         <button 
@@ -141,11 +141,19 @@ export function Navbar({
                     <Link href="/owner/subscription" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-indigo-600 hover:bg-indigo-50 transition-all">
                       <Crown size={16} /> Subscription
                     </Link>
+                    
+                    <div className="my-1 border-t border-slate-50" />
+                    
+                    <Link href="/" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> 
+                      Marketplace Home
+                    </Link>
+                    
                     <button 
-                      onClick={() => window.location.href = '/'}
+                      onClick={() => window.location.href = '/login'}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-rose-600 hover:bg-rose-50 transition-all"
                     >
-                      <LogOut size={16} /> Sign Out
+                      <LogOut size={16} /> Logout
                     </button>
                   </div>
                 </div>

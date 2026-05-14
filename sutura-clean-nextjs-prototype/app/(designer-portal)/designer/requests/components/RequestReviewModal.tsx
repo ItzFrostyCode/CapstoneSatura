@@ -137,7 +137,7 @@ export function RequestReviewModal({ request, isOpen, onClose, onSchedule }: Req
 
            <div className="pt-6 flex flex-col sm:flex-row gap-3">
               <button className="flex-[2] py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-sm hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/10 flex items-center justify-center gap-2">
-                 Move to Production <ChevronRight size={16} />
+                 Send Design to Customer <ChevronRight size={16} />
               </button>
               <button className="flex-1 py-3.5 bg-rose-50 text-rose-600 rounded-2xl font-black text-sm hover:bg-rose-600 hover:text-white transition-all flex items-center justify-center gap-2 border border-rose-100">
                  <XCircle size={16} /> Decline

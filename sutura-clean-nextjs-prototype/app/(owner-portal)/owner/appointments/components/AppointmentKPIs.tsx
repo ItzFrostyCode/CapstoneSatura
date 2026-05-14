@@ -49,23 +49,12 @@ export function AppointmentKPIs({ appointments }: AppointmentKPIsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 px-2">
+    <div className="grid grid-cols-4 gap-4 mb-8">
       {kpis.map((kpi, i) => (
-        <div 
-          key={i} 
-          className={`p-6 rounded-[32px] border ${kpi.color} shadow-sm bg-white animate-in fade-in slide-in-from-bottom-2 duration-500`}
-          style={{ animationDelay: `${i * 100}ms` }}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className={`p-3 rounded-2xl ${kpi.color.split(' ')[1]} bg-white shadow-inner`}>
-              <kpi.icon size={20} />
-            </div>
-            <span className="text-[32px] font-black tracking-tight leading-none text-slate-900">{kpi.value}</span>
-          </div>
-          <div>
-            <p className="text-[14px] font-black text-slate-900 tracking-tight">{kpi.label}</p>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">{kpi.description}</p>
-          </div>
+        <div key={i} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+          <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{kpi.label}</div>
+          <div className="text-[24px] font-black text-slate-900 tracking-tight">{kpi.value}</div>
+          <div className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-widest">{kpi.description}</div>
         </div>
       ))}
     </div>

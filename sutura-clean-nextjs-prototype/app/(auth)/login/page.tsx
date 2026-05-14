@@ -2,157 +2,208 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Scissors, Eye, EyeOff, Store, Palette, ShieldCheck, Lock, UserCircle } from 'lucide-react';
-
+import { Scissors, Eye, EyeOff, Mail, User } from 'lucide-react';
 import Link from 'next/link';
+import { useERPStore } from '@/store/useERPStore';
 
-function LoginForm() {
-  const searchParams = useSearchParams();
+function LoginForm({ role }: { role: string }) {
   const router = useRouter();
-  const role = searchParams.get('role');
   
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const isDesigner = role === 'designer';
-  const isAdmin = role === 'admin';
-  const isCustomer = role === 'customer';
-
-  
-  let title = 'Shop & Staff Portal';
-  let desc = 'Enter your shop credentials to continue.';
-  
-  if (isAdmin) {
-    title = 'System Administration';
-    desc = 'Enter admin credentials to manage platform operations.';
-  } else if (isDesigner) {
-    title = 'Designer Portal';
-    desc = 'Access your portfolio and custom orders.';
-  } else if (isCustomer) {
-    title = 'Customer Studio';
-    desc = 'Track orders, manage measurements, and browse designs.';
-  }
-
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate login delay
     setTimeout(() => {
-      // Set mock cookie for middleware
-      document.cookie = `auth-role=${role || 'owner'}; path=/`;
+      // Generate mock user based on role
+      const mockUser = role === 'customer' 
+        ? { id: 'CUST-001', name: 'John Clock', email: 'john@sutura.ph', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John&backgroundColor=C9A84C', role: 'CUSTOMER' as const, status: 'ACTIVE' as const, createdAt: new Date().toISOString() }
+        : { id: 'USR-001', name: 'John Clock', email: 'john@sutura.ph', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John&backgroundColor=b6e3f4', role: 'SHOP_OWNER' as const, status: 'ACTIVE' as const, createdAt: new Date().toISOString() };
       
-      if (isAdmin) {
-        router.push('/admin/dashboard');
-      } else if (isDesigner) {
-        router.push('/designer/dashboard');
-      } else if (isCustomer) {
-        router.push('/customer/dashboard');
-      } else {
-        router.push('/owner/dashboard'); // Go straight to dashboard for demo
-      }
+      // Inject into global store
+      useERPStore.getState().setCurrentUser(mockUser);
 
-    }, 1000);
+      document.cookie = `auth-role=${role}; path=/`;
+      document.cookie = `sutura_role=${role}; path=/`;
+      router.push(`/?login=success&role=${role}`);
+    }, 1200);
   };
 
   return (
-    <div className="w-full max-w-[420px] mx-auto font-outfit">
-      <Link href="/" className="flex items-center gap-3 mb-12 text-gray-900 hover:opacity-80 transition-opacity w-fit">
-        <div className="bg-[#1A1A1A] text-white w-11 h-11 flex items-center justify-center rounded-xl shadow-lg shadow-black/10">
-          <Scissors className="w-6 h-6" />
-        </div>
-        <div className="text-[28px] font-bold tracking-tight">Sutura</div>
-      </Link>
+    <div className="bg-white rounded-xl shadow-2xl p-10 w-full max-w-[400px] border border-slate-100">
+      <h2 className="text-2xl font-black text-slate-900 mb-8">
+        {role === 'owner' ? "Log In Shop Owner / Staff" : "Log In"}
+      </h2>
       
-      <div className="mb-10">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${isAdmin ? 'bg-slate-900 text-white' : (isDesigner ? 'bg-purple-50 text-purple-600' : (isCustomer ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'))}`}>
-          {isAdmin ? <ShieldCheck className="w-7 h-7" /> : (isDesigner ? <Palette className="w-7 h-7" /> : (isCustomer ? <UserCircle className="w-7 h-7" /> : <Store className="w-7 h-7" />))}
-        </div>
-
-        <h2 className="text-4xl font-extrabold mb-2 tracking-tight text-gray-900">{title}</h2>
-        <p className="text-gray-500 text-base font-medium">{desc}</p>
-      </div>
-
-      <form onSubmit={handleLogin} className="flex flex-col gap-6">
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Email address</label>
+      <form onSubmit={handleLogin} className="space-y-4">
+        {/* IDENTIFICATION */}
+        <div className="relative">
           <input 
-            type="email" 
-            defaultValue={isAdmin ? "admin@satura.com" : (isDesigner ? "designer@satura.com" : "admin@tailorshop.com")}
-            className="w-full h-[54px] px-4 border-[1.5px] border-gray-200 rounded-xl bg-white text-gray-900 outline-none transition-all focus:border-[#2C6BED] focus:ring-4 focus:ring-[#2C6BED]/5 hover:border-gray-300"
+            type="text" 
+            placeholder="Phone number / Username / Email"
+            defaultValue={`${role}@satura.ph`}
+            className="w-full h-12 px-4 border border-slate-200 rounded-lg text-sm font-medium focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
             required
           />
         </div>
 
+        {/* PASSWORD */}
         <div className="relative">
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Password</label>
           <input 
             type={showPassword ? "text" : "password"}
-            defaultValue="password123"
-            className="w-full h-[54px] px-4 border-[1.5px] border-gray-200 rounded-xl bg-white text-gray-900 outline-none transition-all focus:border-[#2C6BED] focus:ring-4 focus:ring-[#2C6BED]/5 hover:border-gray-300"
+            placeholder="Password"
+            defaultValue="••••••••"
+            className="w-full h-12 px-4 border border-slate-200 rounded-lg text-sm font-medium focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
             required
           />
           <button 
             type="button" 
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-[38px] text-gray-400 hover:text-gray-900 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
           >
-            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
 
-        <div className="flex justify-between items-center -mt-2 mb-2 text-sm">
-          <label className="flex items-center gap-2.5 cursor-pointer text-gray-500 font-bold">
-            <input type="checkbox" defaultChecked className="w-[18px] h-[18px] rounded-md accent-[#1A1A1A] cursor-pointer" />
-            Keep me signed in
-          </label>
-          <Link href="#" className="text-[#2C6BED] font-bold hover:underline">Forgot password?</Link>
-        </div>
-
+        {/* LOG IN BUTTON */}
         <button 
           type="submit" 
           disabled={isLoading}
-          className="w-full h-[56px] bg-[#1A1A1A] text-white rounded-xl text-base font-bold transition-all hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:hover:translate-y-0 active:scale-[0.98]"
+          className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-lg text-[13px] uppercase tracking-widest shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center justify-center disabled:opacity-50"
         >
-          {isLoading ? 'Signing in...' : 'Sign In to Portal'}
+          {isLoading ? (
+            <div className="flex gap-1">
+              <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+          ) : "Log In"}
         </button>
-      </form>
 
-      <div className="mt-10 pt-8 border-t border-gray-100">
-        <div className="text-center text-[15px] font-medium leading-relaxed">
-          <span className="text-gray-500 font-bold">Don&apos;t have an account?</span><br/>
-          <div className="mt-3 flex items-center justify-center gap-4">
-            <Link href="/register" className="text-[#2C6BED] font-bold hover:underline">Shop Owner</Link>
-            <span className="text-gray-200">|</span>
-            <Link href="/register/designer" className="text-[#2C6BED] font-bold hover:underline">Designer</Link>
-          </div>
+        <div className="flex justify-between items-center px-1">
+          <Link href="#" className="text-[12px] text-emerald-700 font-bold hover:underline">Forgot Password</Link>
         </div>
-      </div>
+
+        {/* DIVIDER */}
+        <div className="flex items-center gap-4 my-6">
+          <div className="h-px bg-slate-100 flex-1"/>
+          <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">OR</span>
+          <div className="h-px bg-slate-100 flex-1"/>
+        </div>
+
+        {/* SOCIAL LOGINS */}
+        <div className="grid grid-cols-2 gap-3">
+          <button type="button" className="flex items-center justify-center gap-2 border border-slate-200 h-11 rounded-lg hover:bg-slate-50 transition-all group">
+            <User size={18} className="text-blue-600 group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-bold text-slate-600">Facebook</span>
+          </button>
+          <button type="button" className="flex items-center justify-center gap-2 border border-slate-200 h-11 rounded-lg hover:bg-slate-50 transition-all group">
+            <Mail size={18} className="text-red-500 group-hover:scale-110 transition-transform" />
+            <span className="text-xs font-bold text-slate-600">Google</span>
+          </button>
+        </div>
+
+        <div className="pt-8 border-t border-slate-100 space-y-3">
+          <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest text-center">New to Sutura?</p>
+          {role === 'designer' ? (
+            <Link href="/register?role=designer" className="flex items-center justify-center gap-2 h-12 border-2 border-emerald-500 rounded-xl text-[12px] font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all w-full">
+              🎨 Register as Fashion Designer
+            </Link>
+          ) : role === 'owner' ? (
+            <Link href="/register" className="flex items-center justify-center gap-2 h-12 border-2 border-emerald-500 rounded-xl text-[12px] font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all w-full">
+              🏪 Register as Shop Owner
+            </Link>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <Link href="/register" className="flex items-center justify-center gap-2 h-12 border-2 border-slate-200 rounded-xl text-[12px] font-black text-slate-700 hover:border-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 transition-all">
+                🏪 Shop Owner
+              </Link>
+              <Link href="/register?role=designer" className="flex items-center justify-center gap-2 h-12 border-2 border-slate-200 rounded-xl text-[12px] font-black text-slate-700 hover:border-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 transition-all">
+                🎨 Fashion Designer
+              </Link>
+            </div>
+          )}
+        </div>
+      </form>
     </div>
   );
 }
 
 export default function Login() {
   return (
-    <div className="flex w-full min-h-screen bg-white font-outfit animate-in fade-in duration-500">
-      <div className="hidden lg:block w-1/2 relative bg-[#1A1A1A] overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1598257006458-087169a1f08d?auto=format&fit=crop&q=80&w=1440')] bg-cover bg-center transition-transform duration-[20s] hover:scale-110" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-16 text-white">
-          <div className="relative z-10">
-            <h1 className="text-[56px] font-extrabold leading-[1.1] mb-5 tracking-[-1.5px]">Crafted with Precision.</h1>
-            <p className="text-lg font-light opacity-90 max-w-[500px] leading-relaxed">
-              Elevate your tailoring business with a platform designed for the perfect fit. Manage customers, orders, and your team seamlessly.
-            </p>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-emerald-600">
+         <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role') || 'customer';
+
+  return (
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* HEADER */}
+      <header className="h-20 flex items-center px-6 md:px-12 border-b border-slate-100 bg-white">
+        <div className="max-w-[1400px] mx-auto w-full flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                <Scissors className="text-white" size={20}/>
+              </div>
+              <span className="text-2xl font-black tracking-tighter uppercase text-slate-900">Sutura</span>
+            </Link>
+          </div>
+          <Link href="#" className="text-xs font-bold text-emerald-600 hover:underline">Need help?</Link>
+        </div>
+      </header>
+
+      {/* CONTENT */}
+      <main className="flex-1 relative flex items-center justify-center bg-emerald-600">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/assets/Workshopp-bespoke.png')] bg-cover bg-center opacity-30 mix-blend-overlay blur-[2px] scale-110" />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/90 to-emerald-800/90" />
+        </div>
+
+        <div className="max-w-[1400px] mx-auto w-full px-6 md:px-12 flex flex-col lg:flex-row items-center justify-between relative z-10 py-12">
+          {/* BRAND PANEL */}
+          <div className="hidden lg:flex flex-col items-start max-w-[500px]">
+             <div className="w-48 h-48 bg-white/10 rounded-[60px] flex items-center justify-center backdrop-blur-xl border border-white/20 mb-12 animate-pulse">
+               <Scissors size={80} className="text-white"/>
+             </div>
+             <h1 className="text-5xl font-black text-white leading-tight mb-8 tracking-tighter">
+               The leading ecosystem for <br/>
+               <span className="text-amber-400 italic">Bespoke Tailoring.</span>
+             </h1>
+             <p className="text-emerald-50 text-xl font-medium leading-relaxed opacity-80">
+               Connecting you to the finest Workshopps and visionary designers in the Philippines.
+             </p>
+          </div>
+
+          {/* LOGIN FORM */}
+          <LoginForm role={role} />
+        </div>
+      </main>
+
+      {/* FOOTER */}
+      <footer className="bg-slate-50 py-12 border-t border-slate-200">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+              © 2026 SUTURA PLATFORM · TAILORING ECOSYSTEM
+            </div>
+            <div className="flex gap-8">
+               {["Privacy Policy","Terms of Service","Help Centre"].map(l=><Link key={l} href="#" className="text-slate-500 text-xs font-bold hover:text-emerald-600 transition-colors uppercase tracking-widest">{l}</Link>)}
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-10 bg-white">
-        <Suspense fallback={<div className="text-gray-500 font-bold">Loading secure login...</div>}>
-          <LoginForm />
-        </Suspense>
-      </div>
+      </footer>
     </div>
   );
 }

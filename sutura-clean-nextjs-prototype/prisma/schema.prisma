@@ -36,13 +36,10 @@ model User {
   requestedPurchaseOrders PurchaseOrder[] @relation("OrderRequester")
   supportMessages         SupportTicketMessage[] @relation("TicketMessageSender")
   
-  // New relations
   assignedTasks ProductionTask[]
   inspections   OrderInspection[]
   goodsReceipts GoodsReceipt[]
   stockTransfers StockTransfer[]
-  designerProfile DesignerProfile?
-  convertedProposals ProposalHandoff[]
   supportTickets SupportTicket[]
   appointments   Appointment[]     @relation("StaffAppointment")
   suspensionsPerformed TenantSuspensionLog[] @relation("SuspensionActor")
@@ -54,7 +51,6 @@ enum UserRole {
   OWNER
   STAFF
   CUSTOMER
-  DESIGNER
 }
 
 enum AccountStatus {
@@ -110,15 +106,13 @@ model Shop {
   suppliers       Supplier[]
   purchaseOrders  PurchaseOrder[]
   invoices        Invoice[]
-  
-  // New relations
+
   verification    TenantVerification?
   supportTickets  SupportTicket[]
   suspensionLogs  TenantSuspensionLog[]
   garmentTemplates GarmentTemplate[]
   specializations ProductionSpecialization[]
   appointments    Appointment[]
-  consultationRequests ConsultationRequest[]
 }
 
 
@@ -227,8 +221,6 @@ model Customer {
   measurements CustomerMeasurement[]
   orders       Order[]
   
-  // New relations
-  consultationRequests ConsultationRequest[]
   bulkOrderMembers     BulkOrderMember[]
 }
 
@@ -300,13 +292,11 @@ model Order {
   history         OrderStatusHistory[]
   invoice         Invoice?
   
-  // New relations
   tasks           ProductionTask[]
   inspections     OrderInspection[]
   costSheet       OrderCostSheet?
   alterations     AlterationDetail[]
   bulkMembers     BulkOrderMember[]
-  handoff         ProposalHandoff?
   inventoryReservations InventoryReservation[]
   fittingSessions FittingSession[]
   swatches        OrderSwatch[]
@@ -590,22 +580,6 @@ enum ItemType {
   OTHER
 }
 
-enum ConsultationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  COMPLETED
-  CANCELLED
-}
-
-enum DesignProposalStatus {
-  DRAFT
-  IN_REVIEW
-  APPROVED
-  CONVERTED
-  REJECTED
-}
-
 enum ReservationStatus {
   ACTIVE
   FULFILLED
@@ -763,94 +737,6 @@ model FittingSession {
   revisionNo        Int      @default(1)
   nextFittingDate   DateTime?
   createdAt         DateTime @default(now())
-}
-
-// --- Designer Models ---
-
-model DesignerProfile {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id])
-  bio            String?
-  specialization String?
-  rating         Decimal? @db.Decimal(3, 2)
-  isPublic       Boolean  @default(true)
-
-  portfolioItems DesignerPortfolioItem[]
-  consultations  ConsultationRequest[]
-  proposals      DesignProposal[]
-}
-
-model DesignerPortfolioItem {
-  id          String   @id @default(cuid())
-  designerId  String
-  designer    DesignerProfile @relation(fields: [designerId], references: [id])
-  title       String
-  imageUrl    String
-  category    String?
-  createdAt   DateTime @default(now())
-}
-
-model ConsultationRequest {
-  id          String   @id @default(cuid())
-  customerId  String
-  customer    Customer @relation(fields: [customerId], references: [id])
-  designerId  String
-  designer    DesignerProfile @relation(fields: [designerId], references: [id])
-  shopId      String
-  shop        Shop     @relation(fields: [shopId], references: [id])
-  subject     String?
-  description String?
-  status      ConsultationStatus @default(PENDING)
-  requestedAt DateTime @default(now())
-
-  proposals   DesignProposal[]
-}
-
-model DesignProposal {
-  id              String   @id @default(cuid())
-  consultationId  String?
-  consultation    ConsultationRequest? @relation(fields: [consultationId], references: [id])
-  designerId      String
-  designer        DesignerProfile @relation(fields: [designerId], references: [id])
-  title           String
-  description     String?
-  estimatedCost   Decimal? @db.Decimal(10, 2)
-  status          DesignProposalStatus @default(DRAFT)
-  createdAt       DateTime @default(now())
-
-  assets          DesignBlueprintAsset[]
-  revisions       ProposalRevision[]
-  handoff         ProposalHandoff?
-}
-
-model DesignBlueprintAsset {
-  id          String   @id @default(cuid())
-  proposalId  String
-  proposal    DesignProposal @relation(fields: [proposalId], references: [id])
-  url         String
-  assetType   String   // Sketch, FabricRef, Palette
-  createdAt   DateTime @default(now())
-}
-
-model ProposalRevision {
-  id          String   @id @default(cuid())
-  proposalId  String
-  proposal    DesignProposal @relation(fields: [proposalId], references: [id])
-  notes       String
-  createdAt   DateTime @default(now())
-}
-
-model ProposalHandoff {
-  id                String   @id @default(cuid())
-  proposalId        String   @unique
-  proposal          DesignProposal @relation(fields: [proposalId], references: [id])
-  orderId           String?  @unique
-  order             Order?   @relation(fields: [orderId], references: [id])
-  convertedByUserId String
-  converter         User     @relation(fields: [convertedByUserId], references: [id])
-  convertedAt       DateTime @default(now())
-  notes             String?
 }
 
 // --- Admin Models ---

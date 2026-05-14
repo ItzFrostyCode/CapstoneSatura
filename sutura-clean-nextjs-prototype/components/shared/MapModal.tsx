@@ -19,7 +19,7 @@ interface MapModalProps {
   onClose: () => void;
   shops: Shop[];
   title?: string;
-  type?: 'shop' | 'designer';
+  type?: 'shop';
 }
 
 export const MapModal: React.FC<MapModalProps> = ({ 
@@ -40,7 +40,7 @@ export const MapModal: React.FC<MapModalProps> = ({
         <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white">
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">{title}</h2>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Showing {shops.length} verified {type === 'shop' ? 'locations' : 'professionals'}</p>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Showing {shops.length} verified locations</p>
           </div>
           <button onClick={onClose} className="p-3 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl transition-colors">
             <X size={24} />
@@ -51,7 +51,7 @@ export const MapModal: React.FC<MapModalProps> = ({
           {/* Map Area */}
           <div className="flex-1 bg-slate-100 relative overflow-hidden">
              <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d31643.43574581177!2d125.60155!3d7.0707!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!2stailoring%20shops%20davao!5e0!3m2!1sen!2sph!4v1715560000000!5m2!1sen!2sph" 
+              src="https://maps.google.com/maps?q=Davao+City,+Philippines&t=&z=14&ie=UTF8&iwloc=&output=embed" 
               width="100%" 
               height="100%" 
               style={{ border: 0 }} 
@@ -66,20 +66,20 @@ export const MapModal: React.FC<MapModalProps> = ({
                {/* Mock Shop 1 */}
                <div className="absolute top-[35%] left-[45%] pointer-events-auto group">
                   <div className="w-10 h-10 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-2xl border-4 border-white animate-bounce-slow cursor-pointer">
-                    {type === 'shop' ? <Scissors size={18} strokeWidth={2.5} /> : <User size={18} strokeWidth={2.5} />}
+                    <Scissors size={18} strokeWidth={2.5} />
                   </div>
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-slate-900 text-white px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-all text-[10px] font-black whitespace-nowrap">
-                    {shops[0]?.name || 'Partner'} ({type === 'shop' ? 'Verified Shop' : 'Verified Designer'})
+                    {shops[0]?.name || 'Partner'} (Verified Shop)
                   </div>
                </div>
 
                {/* Mock Shop 2 */}
                <div className="absolute top-[50%] left-[55%] pointer-events-auto group">
                   <div className="w-10 h-10 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-2xl border-4 border-white animate-bounce-slow cursor-pointer">
-                    {type === 'shop' ? <Scissors size={18} strokeWidth={2.5} /> : <User size={18} strokeWidth={2.5} />}
+                    <Scissors size={18} strokeWidth={2.5} />
                   </div>
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 bg-slate-900 text-white px-3 py-1.5 rounded-xl opacity-0 group-hover:opacity-100 transition-all text-[10px] font-black whitespace-nowrap">
-                    {shops[1]?.name || 'Partner'} ({type === 'shop' ? 'Verified Shop' : 'Verified Designer'})
+                    {shops[1]?.name || 'Partner'} (Verified Shop)
                   </div>
                </div>
 
@@ -119,7 +119,7 @@ export const MapModal: React.FC<MapModalProps> = ({
         {/* Footer Info */}
         <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-400">
            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1.5"><div className="w-2 h-2 bg-indigo-600 rounded-full" /> {type === 'shop' ? 'Sutura Verified Shop' : 'Sutura Verified Designer'}</span>
+              <span className="flex items-center gap-1.5"><div className="w-2 h-2 bg-indigo-600 rounded-full" /> Sutura Verified Shop</span>
               <span className="flex items-center gap-1.5"><div className="w-2 h-2 bg-blue-500 rounded-full" /> Your Location</span>
            </div>
            <div className="uppercase tracking-widest">Map Data © 2026 Sutura Systems</div>

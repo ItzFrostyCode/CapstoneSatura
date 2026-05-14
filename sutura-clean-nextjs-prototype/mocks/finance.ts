@@ -344,11 +344,11 @@ export const INITIAL_INVOICES: Invoice[] = [
 ];
 
 export const INITIAL_PAYMENTS: Payment[] = [
-  { "id": "PAY-1070", "job_order_id": "ORD-1070", "received_by_user_id": "STF-001", "amount": 9250, "payment_method": "GCASH", "reference_no": "GCSH-7700", "paid_at": "2026-05-10T11:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-1064", "job_order_id": "ORD-1064", "received_by_user_id": "STF-002", "amount": 950, "payment_method": "CASH", "reference_no": "CSH-950", "paid_at": "2026-05-08T14:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-1058", "job_order_id": "ORD-1058", "received_by_user_id": "STF-004", "amount": 1850, "payment_method": "GCASH", "reference_no": "GCSH-1850", "paid_at": "2026-05-05T09:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-1052", "job_order_id": "ORD-1052", "received_by_user_id": "STF-005", "amount": 6800, "payment_method": "BANK_TRANSFER", "reference_no": "BNK-6800", "paid_at": "2026-05-03T10:00:00Z", "status": "CONFIRMED" },
-  { "id": "PAY-HIST-002", "job_order_id": "ORD-HIST-002", "received_by_user_id": "STF-006", "amount": 12000, "payment_method": "CASH", "reference_no": "CSH-12000", "paid_at": "2025-12-05T12:00:00Z", "status": "CONFIRMED" }
+  { "id": "PAY-1070", "job_order_id": "ORD-1070", "received_by_user_id": "STF-001", "amount": 21000, "payment_method": "GCASH", "reference_no": "GCSH-7700", "paid_at": "2026-05-10T11:00:00Z", "status": "CONFIRMED" },
+  { "id": "PAY-1071", "job_order_id": "ORD-1071", "received_by_user_id": "STF-002", "amount": 17500, "payment_method": "CASH", "reference_no": "CSH-950", "paid_at": "2026-05-11T14:00:00Z", "status": "CONFIRMED" },
+  { "id": "PAY-1072", "job_order_id": "ORD-1072", "received_by_user_id": "STF-004", "amount": 9250, "payment_method": "GCASH", "reference_no": "GCSH-1850", "paid_at": "2026-05-08T09:00:00Z", "status": "CONFIRMED" },
+  { "id": "PAY-1073", "job_order_id": "ORD-1073", "received_by_user_id": "STF-005", "amount": 2500, "payment_method": "BANK_TRANSFER", "reference_no": "BNK-6800", "paid_at": "2026-05-12T10:00:00Z", "status": "CONFIRMED" },
+  { "id": "PAY-1074", "job_order_id": "ORD-1074", "received_by_user_id": "STF-006", "amount": 15000, "payment_method": "CASH", "reference_no": "CSH-12000", "paid_at": "2026-04-01T12:00:00Z", "status": "CONFIRMED" }
 ];
 
 export const INITIAL_SUPPLIER_BILLS: SupplierBill[] = [

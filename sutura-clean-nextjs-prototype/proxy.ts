@@ -4,45 +4,59 @@ import type { NextRequest } from 'next/server';
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Skip static assets and public routes
+  // 1. Skip static assets and Next.js internals
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
-    pathname.includes('/login') ||
-    pathname.includes('/register') ||
-    pathname === '/' ||
-    pathname === '/customer/designs' || // Allow public access to designs showcase
-    pathname === '/customer/shops'    // Allow public access to shops explorer
+    pathname.startsWith('/favicon')
   ) {
     return NextResponse.next();
   }
 
-  // 2. Mock Authentication Check
-  const authRole = request.cookies.get('auth-role')?.value;
-
-  // 3. Role-Based Redirection Logic
-  if (pathname.startsWith('/owner') && authRole !== 'owner' && authRole !== 'admin') {
-    return NextResponse.redirect(new URL('/login?role=owner', request.url));
+  // 2. Public routes — always accessible without auth
+  if (
+    pathname === '/' ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register') ||
+    pathname === '/login-gateway' ||
+    pathname === '/unauthorized' ||
+    pathname === '/customer/shops' ||
+    pathname === '/customer/designs'
+  ) {
+    return NextResponse.next();
   }
 
-  if (pathname.startsWith('/staff') && authRole !== 'staff' && authRole !== 'owner' && authRole !== 'admin') {
-    return NextResponse.redirect(new URL('/login?role=owner', request.url));
+  // 3. Read auth cookie — supports both cookie names for backward compatibility
+  type SessionRole = 'admin' | 'owner' | 'staff' | 'customer';
+  const role =
+    (request.cookies.get('sutura_role')?.value as SessionRole | undefined) ??
+    (request.cookies.get('auth-role')?.value as SessionRole | undefined);
+
+  // 4. Portal access rules
+  const PORTAL_RULES: Array<{ prefix: string; allowedRoles: SessionRole[] }> = [
+    { prefix: '/customer', allowedRoles: ['customer', 'admin'] },
+    { prefix: '/owner',    allowedRoles: ['owner', 'admin'] },
+    { prefix: '/staff',    allowedRoles: ['staff', 'owner', 'admin'] },
+    { prefix: '/admin',    allowedRoles: ['admin'] },
+  ];
+
+  const rule = PORTAL_RULES.find((r) => pathname.startsWith(r.prefix));
+
+  // Not a protected route
+  if (!rule) return NextResponse.next();
+
+  // No session cookie → redirect to login-gateway with return URL
+  if (!role) {
+    const loginUrl = new URL('/login-gateway', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname.startsWith('/customer') && authRole !== 'customer' && authRole !== 'owner' && authRole !== 'admin') {
-    // If they are trying to access protected customer routes like dashboard or book
-    // For now, allow /customer/book for demo if not logged in? No, let's keep it protected.
-    if (pathname === '/customer/book' || pathname === '/customer/dashboard') {
-       return NextResponse.redirect(new URL('/login?role=customer', request.url));
-    }
-  }
-
-  if (pathname.startsWith('/designer') && authRole !== 'designer' && authRole !== 'owner' && authRole !== 'admin') {
-    return NextResponse.redirect(new URL('/login?role=designer', request.url));
-  }
-
-  if (pathname.startsWith('/admin') && authRole !== 'admin') {
-    return NextResponse.redirect(new URL('/login?role=admin', request.url));
+  // Role not allowed for this portal → unauthorized
+  if (!rule.allowedRoles.includes(role)) {
+    const loginUrl = new URL('/login-gateway', request.url);
+    loginUrl.searchParams.set('reason', 'unauthorized');
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();

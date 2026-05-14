@@ -77,7 +77,7 @@ export default function DashboardLayout({
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         
         <Navbar 
-          currentUser={currentUser || { name: 'Owner', email: 'owner@sutura.ph', avatar: '/avatars/default.png' }}
+          currentUser={currentUser || { name: 'John Clock', email: 'owner@sutura.ph', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John%20Clock&backgroundColor=b6e3f4' }}
           mounted={mounted}
           currentTime={currentTime}
           isUserMenuOpen={isUserMenuOpen}

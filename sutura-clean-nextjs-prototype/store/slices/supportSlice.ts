@@ -71,54 +71,7 @@ export const createSupportSlice: StateCreator<ERPStore, [], [], SupportSlice> = 
         },
       ],
     },
-    {
-      id: 'TCK-2605-003',
-      shopId: 'SHOP-001',
-      creatorId: 'USR-DESIGNER-01',
-      subject: 'Blueprint Forward to Shop failing for High-Resolution images',
-      category: 'Technical Issue',
-      status: 'Open',
-      priority: 'High',
-      createdAt: '2026-05-11T14:20:00Z',
-      updatedAt: '2026-05-11T14:20:00Z',
-      messages: [
-        {
-          id: 'MSG-006',
-          sender: 'User',
-          senderName: 'Neneng B',
-          message:
-            'Every time I try to "Confirm & Forward" a blueprint with more than 3 high-res sketches, the system hangs and shows a 413 Payload Too Large error.',
-          timestamp: '2026-05-11T14:20:00Z',
-        },
-      ],
-    },
-    {
-      id: 'TCK-2605-004',
-      shopId: 'SHOP-001',
-      creatorId: 'USR-DESIGNER-01',
-      subject: 'New Embroidery Pattern library access',
-      category: 'Feature Request',
-      status: 'In Progress',
-      priority: 'Medium',
-      createdAt: '2026-05-12T09:30:00Z',
-      updatedAt: '2026-05-12T10:15:00Z',
-      messages: [
-        {
-          id: 'MSG-007',
-          sender: 'User',
-          senderName: 'Neneng B',
-          message: 'Can we add a "Barong Tagalog" embroidery preset section in the design blueprints? It would save a lot of time for custom orders.',
-          timestamp: '2026-05-12T09:30:00Z',
-        },
-        {
-          id: 'MSG-008',
-          sender: 'HQ Admin',
-          senderName: 'Sutura Support',
-          message: 'Great suggestion, Neneng! We are passing this to the product team for the next sprint update.',
-          timestamp: '2026-05-12T10:15:00Z',
-        },
-      ],
-    },
+
   ],
 
   createSupportTicket: (ticketParams: CreateTicketParams) => {

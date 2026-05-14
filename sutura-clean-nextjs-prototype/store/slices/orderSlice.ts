@@ -19,9 +19,9 @@ export interface OrderSlice {
   productionDiscrepancies: ProductionDiscrepancy[];
 
   // Actions
-  createNewOrder: (order: Partial<Order>, items?: Partial<JobOrderItem>[], tasks?: string[]) => void;
+  createNewOrder: (order: Partial<Order>, items?: Partial<JobOrderItem>[], tasks?: string[]) => Promise<void>;
   logProductionDiscrepancy: (discrepancy: Omit<ProductionDiscrepancy, 'id' | 'logged_at'>) => void;
-  updateOrderStatus: (orderId: string, status: OrderStatus, notes?: string) => void;
+  updateOrderStatus: (orderId: string, status: OrderStatus, notes?: string) => Promise<void>;
   recordPayment: (orderId: string, amount: number, receivedBy: string, method?: string, ref?: string, image?: string) => void;
   recordInspection: (orderId: string, failed: boolean, staffId: string, notes?: string) => void;
   addGarmentTemplate: (template: Partial<GarmentTemplate>) => void;
@@ -37,6 +37,9 @@ export interface OrderSlice {
     paid_at?: string; 
     notes?: string; 
   }) => void;
+  
+  // Persistence initialization
+  initializeOrders: () => Promise<void>;
 
   // Selector: returns Order with items/tasks/payments joined (for UI backward compat)
   getEnrichedOrder: (orderId: string) => Order | undefined;
@@ -52,13 +55,13 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
   payments: INITIAL_PAYMENTS,
   orderInspections: [],
   orderStatusLogs: [
-    { id: 'LOG-1', order_id: 'ORD-1070', previous_status: 'PENDING_QUOTE', new_status: 'CONFIRMED', changed_by: 'STF-001', changed_at: '2026-05-10T11:00:00Z', remarks: 'Order confirmed after downpayment.' },
-    { id: 'LOG-2', order_id: 'ORD-1070', previous_status: 'CONFIRMED', new_status: 'IN_PRODUCTION', changed_by: 'STF-002', changed_at: '2026-05-11T09:00:00Z', remarks: 'Materials allocated. Production started.' },
+    { id: 'LOG-1', order_id: 'ORD-1070', previous_status: 'PENDING_QUOTE', new_status: 'READY_FOR_FITTING', changed_by: 'STF-001', changed_at: '2026-05-10T11:00:00Z', remarks: 'Order confirmed after downpayment.' },
+    { id: 'LOG-2', order_id: 'ORD-1070', previous_status: 'READY_FOR_FITTING', new_status: 'IN_PRODUCTION', changed_by: 'STF-002', changed_at: '2026-05-11T09:00:00Z', remarks: 'Materials allocated. Production started.' },
   ],
   garmentTemplates: INITIAL_TEMPLATES,
   invoices: INITIAL_INVOICES,
   productionDiscrepancies: [
-    { id: 'DISC-1', job_order_id: 'ORD-1070', discrepancy_type: 'MATERIAL_WASTE', financial_impact: 150, description: 'Slight fabric misalignment during cutting. Required extra 0.5 yards.', logged_by_user_id: 'STF-003', logged_at: '2026-05-11T14:00:00Z', status: 'RESOLVED' }
+    { id: 'DISC-1', job_order_id: 'ORD-1070', discrepancy_type: 'MATERIAL_WASTE', financial_impact: 150, reason: 'Slight fabric misalignment during cutting. Required extra 0.5 yards.', reported_by_user_id: 'STF-003', logged_at: '2026-05-11T14:00:00Z' }
   ],
 
   // ── Selector: join normalized tables onto Order for UI ──────
@@ -108,53 +111,49 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
       .reduce((s, p) => s + p.amount, 0),
 
   // ── Actions ──────────────────────────────────────────────────
-  createNewOrder: (orderData, itemInputs = [], taskTitles = []) => set((state) => {
-    const newOrderId = `ORD-${Date.now()}`;
+  initializeOrders: async () => {
+    const { getOrders } = await import('@/lib/actions/orders');
+    const result = await getOrders();
+    if (result.success && result.data) {
+      set({ 
+        orders: result.data as Order[],
+        // We might need to map joined fields to the normalized state
+      });
+    }
+  },
 
-    const newOrder: Order = {
-      shop_id: 'SHOP-001',
-      branch_id: 'BRN-001',
-      status: 'PENDING_QUOTE',
-      priority: 'Normal',
-      total_amount: 0,
-      created_at: new Date().toISOString(),
-      ...orderData,
-      id: newOrderId,
-    } as Order;
+  createNewOrder: async (orderData, itemInputs = [], taskTitles = []) => {
+    const { createOrder } = await import('@/lib/actions/orders');
+    
+    // Call Server Action
+    const result = await createOrder({
+      shopId: orderData.shop_id || 'SHOP-001',
+      branchId: orderData.branch_id || 'BRN-001',
+      customerId: orderData.customer_id || '',
+      creatorId: 'STF-001', // Fallback for prototype
+      orderType: orderData.order_type || 'BESPOKE',
+      sourceType: orderData.source_type || 'WALK_IN',
+      items: itemInputs.map(item => ({
+        garmentName: item.garment_name || 'Custom Garment',
+        quantity: item.quantity || 1,
+        unitPrice: item.unit_price || 0,
+      })),
+      dueDate: orderData.due_date || new Date().toISOString(),
+      totalAmount: orderData.total_amount || 0,
+      notes: orderData.notes,
+    });
 
-    const newItems: JobOrderItem[] = itemInputs.map((item, i) => ({
-      id: `JOI-${Date.now()}-${i}`,
-      job_order_id: newOrderId,
-      garment_name: item.garment_name ?? 'Custom Garment',
-      quantity: item.quantity ?? 1,
-      unit_price: item.unit_price ?? 0,
-      line_total: (item.quantity ?? 1) * (item.unit_price ?? 0),
-      ...item,
-    } as JobOrderItem));
-
-    const newTasks: ProductionTask[] = taskTitles.map((title, i) => ({
-      id: `TSK-${Date.now()}-${i}`,
-      job_order_id: newOrderId,
-      title,
-      status: 'Pending' as TaskStatus,
-    }));
-
-    const initialLog: OrderStatusLog = {
-      id: `LOG-${Date.now()}`,
-      order_id: newOrderId,
-      new_status: 'PENDING_QUOTE',
-      changed_by: 'SYSTEM',
-      changed_at: new Date().toISOString(),
-      remarks: 'Order created via Job Order Wizard.',
-    };
-
-    return {
-      orders: [newOrder, ...state.orders],
-      jobOrderItems: [...state.jobOrderItems, ...newItems],
-      productionTasks: [...state.productionTasks, ...newTasks],
-      orderStatusLogs: [initialLog, ...state.orderStatusLogs],
-    };
-  }),
+    if (result.success && result.data) {
+      const newOrder = result.data as Order;
+      set((state) => ({
+        orders: [newOrder, ...state.orders],
+        // Ideally we fetch again or update normalized tables from the result
+      }));
+      get().pushNotification('Order created and saved to database.', 'success');
+    } else {
+      get().pushNotification(`Failed to save order: ${result.error}`, 'error');
+    }
+  },
 
   logProductionDiscrepancy: (discrepancy) => {
     set((state) => {
@@ -190,23 +189,18 @@ export const createOrderSlice: StateCreator<ERPStore, [], [], OrderSlice> = (set
     get().pushNotification(`Production issue logged. Production cost and margin updated.`, 'warning');
   },
 
-  updateOrderStatus: (orderId, status, notes) => {
-    set((state) => {
-      const order = state.orders.find(o => o.id === orderId);
-      const log: OrderStatusLog = {
-        id: `LOG-${Date.now()}`,
-        order_id: orderId,
-        previous_status: order?.status,
-        new_status: status,
-        changed_by: 'SYSTEM',
-        changed_at: new Date().toISOString(),
-        remarks: notes ?? `Status updated to ${status}`,
-      };
-      return {
+  updateOrderStatus: async (orderId, status, notes) => {
+    const { updateOrderStatus } = await import('@/lib/actions/orders');
+    const result = await updateOrderStatus(orderId, status, 'STF-001', notes);
+
+    if (result.success) {
+      set((state) => ({
         orders: state.orders.map(o => o.id === orderId ? { ...o, status } : o),
-        orderStatusLogs: [log, ...state.orderStatusLogs],
-      };
-    });
+      }));
+      get().pushNotification(`Status updated to ${status} in database.`, 'success');
+    } else {
+      get().pushNotification(`Failed to update status: ${result.error}`, 'error');
+    }
   },
 
   recordPayment: (orderId, amount, receivedBy, method = 'CASH', ref, image) => {

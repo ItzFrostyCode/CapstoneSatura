@@ -1,0 +1,228 @@
+FurniCraft Agile Storyboard
+
+The following storyboard presents the user stories associated with each sprint of the FurniCraft development phase. Each story describes a specific system behavior from the perspective of the user role it serves, along with the acceptance criteria that must be satisfied for the story to be considered complete.
+
+Sprint 0 — Environment Setup and Project Scaffolding
+Weeks 1–2
+No.
+User Story
+Acceptance Criteria
+Role
+S01
+As a developer, I want to configure the local development environment so that all team members can run the project consistently.
+XAMPP is installed and running; Laravel and Nuxt.js projects initialize without errors on all team machines.
+Dev Team
+S02
+As a developer, I want to set up the GitHub repository with a branching strategy so that the team can collaborate without code conflicts.
+Repository is initialized with main, develop, and feature branches; branch protection rules are in place.
+Dev Team
+S03
+As a developer, I want to generate the database schema from the finalized ERD so that all tables and relationships are ready before module development begins.
+All 34 tables are created in MySQL with correct data types, primary keys, foreign keys, and constraints.
+Dev Team
+
+Sprint 1 — User Authentication and Role-Based Access
+Weeks 3–4
+No.
+User Story
+Acceptance Criteria
+Role
+S04
+As a Client, I want to register for an account using my email and password so that I can access the platform.
+Registration form validates email format and password strength; duplicate email is rejected; account is created with Client role.
+Client
+S05
+As a registered user, I want to log in using my email and password so that I can access my dashboard.
+Valid credentials grant session access; invalid credentials display an error; session expires after inactivity.
+Client / Staff
+S06
+As the Shop Owner, I want to verify my identity through a one-time password (OTP) after entering my credentials so that my account has an additional layer of security.
+OTP is sent upon credential validation; correct OTP grants Owner session; incorrect OTP prompts retry; expired OTP can be resent.
+Owner
+S07
+As a user, I want to be redirected to a dashboard that matches my role so that I only see the features relevant to my responsibilities.
+Owner, Staff, Client, and Admin each see a distinct dashboard with role-appropriate navigation and modules.
+All Roles
+S08
+As a System Administrator, I want to create, assign roles to, deactivate, and reset passwords for user accounts so that I can manage platform access.
+Admin can create accounts with assigned roles; accounts can be deactivated and reactivated; password reset sends a new credential to the user.
+Admin
+
+Sprint 2 — Product Catalog Management
+Weeks 5–6
+No.
+User Story
+Acceptance Criteria
+Role
+S09
+As the Shop Owner, I want to add new furniture products to the catalog with name, category, base price, and availability status so that clients can browse and order them.
+Product is saved with all required fields; validation rejects incomplete or invalid entries; product appears in the catalog immediately.
+Owner
+S10
+As the Shop Owner, I want to edit existing product details so that the catalog reflects current offerings and pricing.
+Changes are saved and reflected in the catalog; validation prevents invalid data from being saved.
+Owner
+S11
+As the Shop Owner, I want to delete a product from the catalog so that discontinued items are no longer visible to clients.
+Deletion requires confirmation; deleted product no longer appears in the client-facing catalog.
+Owner
+S12
+As the Shop Owner, I want to toggle a customization option per product and define predefined choices such as wood type, color, fabric, and finish so that clients can select customizations when ordering.
+Customization toggle enables the option selector; Owner can add, edit, and remove predefined choices; choices are visible to clients during order placement.
+Owner
+S13
+As a Client, I want to browse the product catalog and view product details so that I can decide what to order.
+Catalog displays all active products with images, descriptions, and pricing; product detail page shows customization options if enabled.
+Client
+
+Sprint 3 — Order Taking and Fulfillment
+Weeks 7–8
+No.
+User Story
+Acceptance Criteria
+Role
+S14
+As a Client, I want to place an order for a premade product directly from the catalog so that I can purchase furniture without customization.
+Order is created with correct product, quantity, and price; order appears in the Client's order history with a Pending status.
+Client
+S15
+As a Client, I want to place a custom order with design references, dimension inputs, and order notes so that I can request furniture tailored to my specifications.
+Custom order is submitted with all provided details; order is routed to the Owner for quotation review before payment is processed.
+Client
+S16
+As the Shop Owner, I want to review custom order requests and prepare a quotation so that the client can decide whether to accept before payment.
+Quotation includes amount, validity date, and notes; client is notified when the quotation is ready; client can accept, negotiate, or decline.
+Owner
+S17
+As a Client, I want to select a down payment or full payment option upon order confirmation so that I can choose the payment structure that suits me.
+Payment options are displayed at checkout; selected payment type is recorded; order proceeds to payment after selection.
+Client
+S18
+As a Client, I want to track my order status through all fulfillment stages so that I know where my order is at any time.
+Order status updates are visible in real time across: Pending, Confirmed, In Production, Quality Check, and Ready for Delivery.
+Client
+S19
+As a Client, I want to submit a cancellation request so that I can cancel my order before production is complete.
+Cancellation request is submitted and routed to the Owner for review; client is notified of the decision; cancellation reason is recorded.
+Client
+S20
+As a Client, I want to modify my order prior to the start of production so that I can make adjustments before fabrication begins.
+Order modification is available only while status is Pending or Confirmed; changes are saved and reflected in the order record.
+Client
+
+Sprint 4 — Material Inventory and Supplier Management
+Weeks 9–10
+No.
+User Story
+Acceptance Criteria
+Role
+S21
+As the Shop Owner, I want to add, edit, and view raw material records by type, quantity, unit cost, and associated supplier so that inventory is accurately tracked.
+Material records are saved with all required fields; stock quantities reflect current inventory levels; validation prevents invalid entries.
+Owner
+S22
+As the Shop Owner, I want to receive a low-stock alert when a material falls below the configured reorder threshold so that I can initiate replenishment before stock runs out.
+Alert is triggered automatically when stock drops below the reorder level; notification is delivered to the Owner in-platform.
+Owner
+S23
+As the Shop Owner or Staff, I want to maintain a supplier directory with contact details and associated materials so that I have a reference for purchasing decisions.
+Supplier records can be added, edited, and deleted; each supplier lists associated materials; directory is accessible to Owner and Staff.
+Owner / Staff
+S24
+As the Shop Owner, I want to record supplier performance data including last quoted price, lead time, date of last interaction, and notes so that I can make informed purchasing decisions.
+Performance fields are saved per supplier-material record; data is accessible when reviewing suppliers for a purchase order.
+Owner
+
+Sprint 5 — Production Material Usage and Damage Tracking
+Weeks 11–12
+No.
+User Story
+Acceptance Criteria
+Role
+S25
+As a Staff member, I want to fill out a material request form tied to an active production order so that the required materials are allocated and deducted from inventory.
+Form is linked to a production order; estimated quantities are saved; inventory is automatically deducted upon form approval.
+Staff
+S26
+As a Staff member, I want to log the actual material quantities used after production so that inventory records reflect true consumption.
+Actual quantities are entered and saved; inventory is adjusted to reflect actual usage; discrepancies between estimated and actual are recorded.
+Staff
+S27
+As a Staff member, I want to submit a damage report for defective or unusable materials so that the Owner is aware of material loss during production.
+Damage report is submitted with material type, quantity, damage type, and discovery date; Owner receives a notification; report status is set to Pending.
+Staff
+S28
+As the Shop Owner, I want to review damage reports and classify affected materials as salvageable or written off so that inventory accurately reflects usable stock.
+Owner can approve and classify damaged materials; inventory is updated accordingly; damage report status changes to Reviewed.
+Owner
+S29
+As the Shop Owner or Staff, I want to monitor finished products awaiting delivery or client pickup so that completed orders are tracked until they leave the shop.
+Finished products are listed with order reference, completion date, and delivery method; status is updated when the order is dispatched.
+Owner / Staff
+
+Sprint 6 — Transaction Management, Payment Integration, and Notifications
+Weeks 13–14
+No.
+User Story
+Acceptance Criteria
+Role
+S30
+As a Client, I want to process my payment through PayMongo using GCash, Maya, credit card, debit card, or bank transfer so that I can complete my order purchase securely.
+Payment gateway loads correctly; all supported methods are available; successful payment generates a digital receipt and updates order status.
+Client
+S31
+As a Client, I want to receive a digital receipt upon successful payment so that I have a record of my transaction.
+Receipt is generated automatically after payment confirmation; receipt includes order reference, amount, payment method, and date.
+Client
+S32
+As a Client who paid via down payment, I want to pay the remaining balance before my order is dispatched so that I can complete the full payment prior to delivery or pickup.
+Remaining balance is displayed on the order detail page; payment is processed through PayMongo; order proceeds to dispatch after balance is confirmed.
+Client
+S33
+As a Client, I want to receive a refund for an approved cancellation request so that I am compensated according to the shop's refund policy.
+Full refund is issued for shop-caused delays; prorated refund is issued for client-initiated cancellations; refund is processed through PayMongo.
+Client
+S34
+As a user, I want to receive in-platform notifications for order status changes, payment confirmations, low-stock alerts, damage report submissions, and quotation availability so that I am always informed of relevant events.
+Notifications are delivered to the correct role upon each trigger event; notifications are marked as read or unread; all notifications are accessible through the notification panel.
+All Roles
+
+Sprint 7 — Financial Reporting, Client Feedback, System Administration, UAT, and Deployment
+Weeks 15–16
+No.
+User Story
+Acceptance Criteria
+Role
+S35
+As the Shop Owner, I want to generate Sales, Collections, Expense, and Cash Flow reports for configurable time periods so that I can monitor the financial health of the business.
+Reports are generated with correct data for the selected period; expense and refund data are incorporated; reports are downloadable or printable.
+Owner
+S36
+As the Shop Owner, I want to view a financial analytics dashboard that summarizes key financial indicators so that I can make informed business decisions at a glance.
+Dashboard displays total sales, collections, expenses, and cash flow; data reflects the most recent reporting period; dashboard updates in real time.
+Owner
+S37
+As a Client, I want to submit a feedback rating and written review upon order completion so that I can share my experience with the shop.
+Feedback form is available after order is marked complete; rating and review are saved and linked to the order; feedback is visible to the Owner.
+Client
+S38
+As the System Administrator, I want to configure PayMongo integration settings and manage notification templates so that the system operates correctly for the shop's context.
+PayMongo API keys can be updated; notification templates can be edited; changes take effect immediately.
+Admin
+S39
+As the System Administrator, I want to access audit logs and manage database backups so that platform data is secure and actions are traceable.
+Audit log displays a chronological list of significant actions; database backup can be triggered manually; backup files are downloadable.
+Admin
+S40
+As the development team, I want to conduct integration testing across all modules so that interactions between system components are verified before deployment.
+All module-to-module interactions are tested; critical flows including order placement, payment, and reporting produce expected results; defects are logged and resolved.
+Dev Team
+S41
+As the shop owner acting as the primary end-user representative, I want to perform User Acceptance Testing on the complete system so that I can confirm it meets my operational requirements before going live.
+UAT scenarios cover all primary workflows; feedback is collected and addressed; sign-off is obtained before deployment proceeds.
+Owner / Dev Team
+S42
+As the development team, I want to deploy the system from the local XAMPP environment to a cloud-based hosting platform so that the system is accessible to real users.
+System is deployed to a cloud host; all modules function correctly in the production environment; domain or access URL is confirmed and shared with the client.
+Dev Team
+

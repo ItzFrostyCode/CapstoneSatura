@@ -475,7 +475,7 @@ SKILLS	Level of Competency	Date Acquired
 		month year
 
 
-TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+TRAININGS, SEMINARS, OR Tailoring Shops ATTENDED
 Inclusive Dates	Title of Training, Seminar, or Workshop
 month year	
 month year	
@@ -530,7 +530,7 @@ SKILLS	Level of Competency	Date Acquired
 		month year
 
 
-TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+TRAININGS, SEMINARS, OR Tailoring Shops ATTENDED
 Inclusive Dates	Title of Training, Seminar, or Workshop
 month year	
 month year	
@@ -575,7 +575,7 @@ SKILLS	Level of Competency	Date Acquired
 		month year
 		month year
 
-TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+TRAININGS, SEMINARS, OR Tailoring Shops ATTENDED
 Inclusive Dates	Title of Training, Seminar, or Workshop
 month year	
 month year	
@@ -626,7 +626,7 @@ SKILLS	Level of Competency	Date Acquired
 		month year
 
 
-TRAININGS, SEMINARS, OR WORKSHOPS ATTENDED
+TRAININGS, SEMINARS, OR Tailoring Shops ATTENDED
 Inclusive Dates	Title of Training, Seminar, or Workshop
 month year	
 month year	

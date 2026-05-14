@@ -382,7 +382,7 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
 
         {/* Progress Bar */}
         <div className="h-1 bg-slate-100 w-full shrink-0">
-          <div className="h-full bg-indigo-600 transition-all duration-500" style={{ width: `${(step / 9) * 100}%` }} />
+          <div className="h-full bg-slate-900 transition-all duration-500" style={{ width: `${(step / 9) * 100}%` }} />
         </div>
 
         {/* Content Area */}
@@ -443,9 +443,9 @@ export default function CreateOrderModal({ isOpen, onClose }: CreateOrderModalPr
           <div className="px-6 md:px-8 py-4 md:py-6 border-t border-slate-100 bg-white shrink-0 flex items-center justify-between">
             <button onClick={prevStep} className="flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-xl text-slate-500 font-black uppercase tracking-widest text-[10px] md:text-[11px] hover:bg-slate-50"><ChevronLeft size={16} /> Back</button>
             {step === 9 ? (
-              <button onClick={handleFinalSubmit} className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] md:text-[12px] shadow-xl hover:bg-indigo-600 transition-all active:scale-95"><Check size={18} /> Confirm Order</button>
+              <button onClick={handleFinalSubmit} className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] md:text-[12px] shadow-xl hover:shadow-slate-900/20 transition-all active:scale-95"><Check size={18} /> Confirm Order</button>
             ) : (
-              <button onClick={nextStep} className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] md:text-[12px] shadow-xl hover:bg-slate-800 transition-all active:scale-95">Next Step <ChevronRight size={16} /></button>
+              <button onClick={nextStep} className="flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] md:text-[12px] shadow-xl hover:shadow-slate-900/20 transition-all active:scale-95">Next Step <ChevronRight size={16} /></button>
             )}
           </div>
         )}

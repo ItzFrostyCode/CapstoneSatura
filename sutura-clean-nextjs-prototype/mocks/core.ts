@@ -5,10 +5,12 @@ export const INITIAL_SHOPS: Shop[] = [
     id: 'SHOP-001',
     ownerUserId: 'USR-001',
     subscriptionId: 'SUB-001',
-    shopName: 'Sutura Master Studio',
+    shopName: 'Davao Tailors PH',
     businessName: 'Sutura Tailoring Inc.',
     businessType: 'Tailoring & Design',
     status: 'ACTIVE',
+    themeColor: '#1e3a8a',
+    accentColor: '#10b981',
     createdAt: new Date('2025-01-01').toISOString()
   }
 ];

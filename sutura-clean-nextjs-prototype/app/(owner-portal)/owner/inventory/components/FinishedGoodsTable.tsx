@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PackageCheck, MoreVertical, Eye, Archive, Package, CheckCircle, AlertTriangle, PackageX, Plus, Minus, History, Box, ChevronRight } from 'lucide-react';
+import { PackageCheck, MoreVertical, Eye, Archive, Package, CheckCircle, AlertTriangle, PackageX, Plus, Minus, History, Box, ChevronRight, Share2, Globe } from 'lucide-react';
 import { InventoryItem } from '@/store/useERPStore';
 
 interface FinishedGoodsTableProps {
@@ -12,6 +12,7 @@ interface FinishedGoodsTableProps {
   onToggleBatchItem: (item: InventoryItem) => void;
   batchCart: InventoryItem[];
   batchCartCount: number;
+  onPostToShop?: (item: InventoryItem) => void;
   activeActionRow: string | null;
   setActiveActionRow: (id: string | null) => void;
 }
@@ -24,6 +25,7 @@ export function FinishedGoodsTable({
   onToggleBatchItem,
   batchCart,
   batchCartCount,
+  onPostToShop,
   activeActionRow,
   setActiveActionRow
 }: FinishedGoodsTableProps) {
@@ -58,22 +60,22 @@ export function FinishedGoodsTable({
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Table Action Header */}
-      <div className="px-10 py-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-50/20">
+      <div className="px-10 py-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-50/50">
         <div>
           <p className="text-[12px] text-slate-500 italic font-medium">Assembled products ready for batch release or immediate customer sale.</p>
         </div>
         <div className="flex items-center gap-3">
           <button 
             onClick={onOpenBatchRelease}
-            className={`h-11 px-6 rounded-2xl text-[12px] font-black shadow-lg transition-all flex items-center gap-2 active:scale-95 relative group ${
+            className={`h-10 px-6 rounded-xl text-[12px] font-black shadow-sm transition-all flex items-center gap-2 active:scale-95 relative group ${
               batchCartCount > 0 
-                ? 'bg-indigo-600 text-white shadow-indigo-600/20 hover:bg-indigo-700' 
+                ? 'bg-slate-900 text-white border border-slate-900' 
                 : 'bg-white border border-slate-200 text-slate-400 hover:bg-slate-50 shadow-none'
             }`}
           >
-            <PackageCheck size={16} /> Batch Release Protocol
+            <PackageCheck size={16} /> <span className="uppercase tracking-widest">Batch Release Protocol</span>
             {batchCartCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-6 h-6 bg-rose-500 text-white text-[11px] font-black rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in duration-300 shadow-sm">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white animate-in zoom-in duration-300 shadow-sm">
                 {batchCartCount}
               </span>
             )}
@@ -81,16 +83,15 @@ export function FinishedGoodsTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50/30 border-b border-slate-100">
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Finished Good Style</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">In-Stock</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Retail Value</th>
-              <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-10">Actions</th>
+            <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+              <th className="px-10 py-5">Finished Good Style</th>
+              <th className="px-10 py-5 text-center">In-Stock</th>
+              <th className="px-10 py-5 text-center">Status</th>
+              <th className="px-10 py-5">Storage</th>
+              <th className="px-10 py-5 text-right">Retail Value</th>
+              <th className="px-10 py-5 text-right pr-10">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
@@ -181,24 +182,30 @@ export function FinishedGoodsTable({
                           {activeActionRow === item.sku && (
                             <>
                               <div className="fixed inset-0 z-[60]" onClick={() => setActiveActionRow(null)}></div>
-                              <div className="absolute bottom-full mb-2 right-0 z-[70] w-52 bg-white border border-slate-200 rounded-2xl shadow-2xl py-2 animate-in fade-in slide-in-from-bottom-2 duration-200 origin-bottom-right text-left">
+                              <div className="absolute top-full mt-2 right-0 z-[100] w-52 bg-white border border-slate-200 rounded-2xl shadow-2xl py-2 animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right text-left">
                                 <button 
                                   onClick={() => { onViewItem(item); setActiveActionRow(null); }}
                                   className="w-full px-5 py-3 text-left text-[12px] font-black text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors uppercase tracking-widest"
                                 >
                                   <Eye size={16} className="text-indigo-500" /> Style Details
                                 </button>
-                                <button 
-                                  onClick={() => { onMovement(item, 'in'); setActiveActionRow(null); }}
-                                  className="w-full px-5 py-3 text-left text-[12px] font-black text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors uppercase tracking-widest"
-                                >
-                                  <History size={16} className="text-slate-400" /> Production Log
-                                </button>
-                                <div className="h-px bg-slate-100 my-2"></div>
-                                <button className="w-full px-5 py-3 text-left text-[12px] font-black text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition-colors uppercase tracking-widest">
-                                  <Archive size={16} /> Mark Defective
-                                </button>
-                              </div>
+                                  <button 
+                                    onClick={() => { onMovement(item, 'in'); setActiveActionRow(null); }}
+                                    className="w-full px-5 py-3 text-left text-[12px] font-black text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors uppercase tracking-widest"
+                                  >
+                                    <History size={16} className="text-slate-400" /> Production Log
+                                  </button>
+                                  <div className="h-px bg-slate-100 my-2"></div>
+                                  <button 
+                                    onClick={() => { onPostToShop?.(item); setActiveActionRow(null); }}
+                                    className="w-full px-5 py-3 text-left text-[12px] font-black text-emerald-600 hover:bg-emerald-50 flex items-center gap-3 transition-colors uppercase tracking-widest"
+                                  >
+                                    <Globe size={16} /> Post to Shop
+                                  </button>
+                                  <button className="w-full px-5 py-3 text-left text-[12px] font-black text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition-colors uppercase tracking-widest">
+                                    <Archive size={16} /> Mark Defective
+                                  </button>
+                                </div>
                             </>
                           )}
                         </div>
@@ -210,7 +217,6 @@ export function FinishedGoodsTable({
             )}
           </tbody>
         </table>
-      </div>
     </div>
   );
 }

@@ -46,17 +46,15 @@ type DetailTab = 'jobs' | 'measurements' | 'tasks' | 'timeline' | 'discrepancies
 function getStatusColor(status: string) {
   switch (status) {
     case 'ON_HOLD':
-      return 'bg-slate-50 text-slate-600 border-slate-200';
+      return 'bg-amber-50 text-amber-700 border-amber-200';
     case 'IN_PRODUCTION':
-      return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      return 'bg-slate-900 text-white border-slate-900';
     case 'QUALITY_CHECK':
-      return 'bg-blue-50 text-blue-700 border-blue-200';
+      return 'bg-[#F0EDE8] text-slate-900 border-[#E2DDD7]';
     case 'REVISION_REQUIRED':
       return 'bg-rose-50 text-rose-700 border-rose-200';
-    case 'Ready': // Legacy support
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    case 'Delivered': // Legacy support
-      return 'bg-slate-100 text-slate-700 border-slate-200';
+    case 'READY_FOR_RELEASE':
+      return 'bg-indigo-600 text-slate-900 border-indigo-600';
     default:
       return 'bg-slate-50 text-slate-600 border-slate-200';
   }
@@ -65,11 +63,11 @@ function getStatusColor(status: string) {
 function getPriorityColor(priority: string) {
   switch (priority) {
     case 'High':
-      return 'bg-rose-50 text-rose-600';
+      return 'bg-rose-50 text-rose-700 border-rose-100';
     case 'Medium':
-      return 'bg-amber-50 text-amber-700';
+      return 'bg-[#F0EDE8] text-[#1C1917] border-[#E2DDD7]';
     case 'Low':
-      return 'bg-emerald-50 text-emerald-700';
+      return 'bg-[#ECFDF5] text-[#059669] border-[#D1FAE5]';
     default:
       return 'bg-slate-50 text-slate-600';
   }
@@ -171,191 +169,157 @@ export default function JobOrdersPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20">
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-        <div>
-          <h1 className="text-[24px] font-black text-slate-900 tracking-tight leading-none">Job Orders</h1>
-          <p className="text-[12px] text-slate-500 font-bold mt-1 uppercase tracking-widest">Manage tailoring cycles and delivery schedules.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm">
-            <button
-              onClick={() => setActiveView('table')}
-              className={`p-1.5 rounded-md transition-all ${
-                activeView === 'table'
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-400 hover:text-slate-900'
-              }`}
-            >
-              <LayoutList size={16} />
-            </button>
-            <button
-              onClick={() => setActiveView('kanban')}
-              className={`p-1.5 rounded-md transition-all ${
-                activeView === 'kanban'
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-400 hover:text-slate-900'
-              }`}
-            >
-              <KanbanSquare size={16} />
-            </button>
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-[1450px] mx-auto pb-20">
+      <main className="max-w-[1450px] mx-auto px-10 pt-8 space-y-8">
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-4">
+          <div>
+            <h1 className="text-[28px] font-black text-slate-900 tracking-tight flex items-center gap-3">
+              Orders
+            </h1>
+            <p className="text-slate-500 mt-1 font-medium">Precision management of bespoke tailoring lifecycles.</p>
           </div>
-
-          <button 
-            onClick={() => setIsCreateModalOpen(true)}
-            className="h-10 px-4 bg-slate-900 text-white rounded-xl flex items-center gap-2 text-[13px] font-black hover:bg-indigo-600 transition-all shadow-lg shadow-slate-900/10 active:scale-95 group"
-          >
-            <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" /> New Order
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: 'Total Orders', val: jobOrders.length, trend: 'Overall' },
-          { label: 'In Tailoring', val: jobOrders.filter(o => { const s = resolveOrderState(o).productionStage; return s === 'IN_PRODUCTION' || s === 'ALTERATIONS'; }).length, trend: 'Active' },
-          { label: 'Ready for Pickup', val: jobOrders.filter(o => resolveOrderState(o).productionStage === 'READY_FOR_RELEASE').length, trend: 'Release' },
-          { label: 'At Risk / Revision', val: jobOrders.filter(o => resolveOrderState(o).isAtRisk).length, trend: 'Needs QC' },
-        ].map((stat, i) => (
-          <div
-            key={i}
-            className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all"
-          >
-            <div className="flex justify-between items-start mb-1.5">
-              <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest leading-none">{stat.label}</span>
-              <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500`}>
-                {stat.trend}
-              </span>
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <div className="text-[24px] font-black text-slate-900 tracking-tight leading-none">{stat.val}</div>
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Real-time</div>
-            </div>
+          
+          <div className="flex items-center gap-3">
+             <div className="flex bg-slate-100 border border-slate-200 rounded-xl p-1 shadow-inner">
+                <button
+                  onClick={() => setActiveView('table')}
+                  className={`p-2 rounded-lg transition-all ${activeView === 'table' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                >
+                  <LayoutList size={18} />
+                </button>
+                <button
+                  onClick={() => setActiveView('kanban')}
+                  className={`p-2 rounded-lg transition-all ${activeView === 'kanban' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                >
+                  <KanbanSquare size={18} />
+                </button>
+             </div>
+             <button 
+               onClick={() => setIsCreateModalOpen(true)}
+               className="h-10 px-5 bg-slate-900 text-white rounded-full flex items-center gap-2 text-[12px] font-bold hover:bg-indigo-600 transition-all shadow-md active:scale-95"
+             >
+               <Plus size={16} /> New Order
+             </button>
           </div>
-        ))}
-      </div>
-
-      {/* MAIN CONTENT */}
-      {/* INTEGRATED TABS & SEARCH (OUTSIDE) */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
-        <div className="flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-full w-fit">
+        </div>
+        
+        {/* KPI STATS GRID */}
+        <div className="grid grid-cols-4 gap-4">
           {[
-            { id: 'All', label: 'All' },
-            { id: 'IN_PRODUCTION', label: 'In Tailoring' },
-            { id: 'READY_FOR_FITTING', label: 'Quality Check' },
-            { id: 'ALTERATIONS', label: 'For Revision' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setStatusFilter(tab.id)}
-              className={`px-6 py-2 text-[12px] font-bold capitalize transition-all rounded-full ${
-                statusFilter === tab.id 
-                  ? 'bg-white text-slate-900 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              {tab.label}
-            </button>
+            { label: 'Total Orders', val: jobOrders.length, status: 'Active Pool', color: '#1E3A1F' },
+            { label: 'In Tailoring', val: jobOrders.filter(o => { const s = resolveOrderState(o).productionStage; return s === 'IN_PRODUCTION' || s === 'ALTERATIONS'; }).length, status: 'Workshop', color: '#C9A84C' },
+            { label: 'Ready for Release', val: jobOrders.filter(o => resolveOrderState(o).productionStage === 'READY_FOR_RELEASE').length, status: 'Storefront', color: '#2D5016' },
+            { label: 'At Risk / Revision', val: jobOrders.filter(o => resolveOrderState(o).isAtRisk).length, status: 'Action Needed', color: '#DC2626' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: stat.color }} />
+              </div>
+              <div className="text-[24px] font-black text-slate-900 tracking-tight">{stat.val}</div>
+              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">{stat.status}</div>
+            </div>
           ))}
         </div>
 
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search by order ID or customer..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-11 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-full text-[13px] font-medium outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 transition-all shadow-sm"
-          />
-        </div>
-      </div>
+        {/* MASTER CONTAINER */}
+        <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden flex flex-col">
+          {/* INTEGRATED HEADER: SEARCH & TABS */}
+          <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between gap-8 shrink-0">
+            {/* SEARCH (LEFT) */}
+            <div className="relative max-w-sm w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search orders, customers..." 
+                className="h-10 w-full pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-slate-900 transition-all shadow-sm"
+              />
+            </div>
 
-      {activeView === 'table' ? (
-        <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden">
-          <div className="fixed-table-container">
-            <table className="fixed-table w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/20 border-b border-slate-100">
-                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
-                    <div className="flex items-center gap-2">Order ID & Date <ChevronDown size={14} className="text-slate-400" /></div>
-                  </th>
-                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
-                    <div className="flex items-center gap-2">Production Type <ChevronDown size={14} className="text-slate-400" /></div>
-                  </th>
-                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
-                    <div className="flex items-center gap-2">Garment / Service <ChevronDown size={14} className="text-slate-400" /></div>
-                  </th>
-                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap">
-                    <div className="flex items-center gap-2">Status <ChevronDown size={14} className="text-slate-400" /></div>
-                  </th>
-                  <th className="py-6 px-8 text-[14px] font-bold text-slate-600 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-2 pr-2">Financials <ChevronDown size={14} className="text-slate-400" /></div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filteredOrders.map((order) => {
-                  const engine = resolveOrderState(order);
-                  const { productionStage, balance } = engine;
-                  return (
-                    <tr 
-                      key={order.id} 
-                      className="hover:bg-slate-50/50 transition-colors cursor-pointer group"
-                      onClick={() => {
-                        setSelectedOrder(order);
-                        setReleaseChecklist({ fitting: false, packaging: false });
-                        setPaymentAmount(resolveOrderState(order).balance);
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      <td className="py-6 px-8">
-                        <div className="text-[14px] font-bold text-slate-900">#{order.id}</div>
-                        <div className="text-[12px] text-slate-400 font-medium mt-1">
-                          {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : '5/10/2026'}
-                        </div>
-                      </td>
-                      <td className="py-6 px-8 text-[14px] font-medium text-slate-600">
-                        {order.order_type === 'READY_MADE' ? 'Ready Made' : order.order_type.charAt(0) + order.order_type.slice(1).toLowerCase()}
-                      </td>
-                      <td className="py-6 px-8 text-[14px] font-medium text-slate-600">
-                        {order.order_type === 'ALTERATION' 
-                          ? order.alteration_details?.item_description || 'Repair Item'
-                          : order.items?.[0]?.garment_name || 'Custom Garment'}
-                      </td>
-                      <td className="py-6 px-8">
-                        <div className="flex flex-col gap-2">
-                          <span className="text-[13px] font-bold text-slate-900 uppercase tracking-wide">
-                            {productionStage.replace('_', ' ')}
-                          </span>
-                          {productionStage === 'ALTERATIONS' && (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const lastInspection = orderInspections.filter(i => i.job_order_id === order.id && !i.passed).at(-1);
-                                setFeedbackContent(lastInspection?.notes || 'No specific feedback provided.');
-                                setIsFeedbackModalOpen(true);
-                              }}
-                              className="w-fit text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 hover:bg-rose-100 transition-all flex items-center gap-1.5"
-                            >
-                              <MessageCircle size={12} /> Check Feedback
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-6 px-8 text-right pr-10">
-                        <div className="text-[15px] font-bold text-slate-900">₱{order.total_amount.toLocaleString()}</div>
-                        <div className={`text-[12px] font-medium mt-1 ${balance > 0 ? 'text-rose-500' : 'text-slate-400'}`}>
-                          {balance > 0 ? `₱${balance.toLocaleString()} Due` : 'Fully Paid'}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            {/* TABS (RIGHT) */}
+            <div className="flex items-center gap-1.5 bg-slate-200/50 p-1 rounded-xl w-fit border border-slate-200/60 shadow-inner">
+              {[
+                { id: 'All', label: 'All Orders' },
+                { id: 'IN_PRODUCTION', label: 'In Workshop' },
+                { id: 'READY_FOR_FITTING', label: 'Quality Control' },
+                { id: 'ALTERATIONS', label: 'Revisions' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setStatusFilter(tab.id)}
+                  className={`px-6 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all duration-300 ${statusFilter === tab.id ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
+
+          <div className={activeView === 'kanban' ? "p-8 overflow-x-auto bg-slate-50/30" : ""}>
+            {activeView === 'table' ? (
+              <>
+                <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 text-[11px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">
+                    <th className="px-10 py-5">Order Reference</th>
+                    <th className="px-10 py-5">Production Track</th>
+                    <th className="px-10 py-5">Garment Description</th>
+                    <th className="px-10 py-5">Current Stage</th>
+                    <th className="px-10 py-5 text-right pr-12">Commercial Value</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {filteredOrders.map((order) => {
+                    const engine = resolveOrderState(order);
+                    const { productionStage, balance } = engine;
+                    return (
+                      <tr 
+                        key={order.id} 
+                        className="hover:bg-slate-50/50 transition-all group cursor-pointer"
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setReleaseChecklist({ fitting: false, packaging: false });
+                          setPaymentAmount(resolveOrderState(order).balance);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        <td className="px-10 py-6">
+                          <div className="text-[14px] font-bold text-slate-900 tracking-tight">#{order.id}</div>
+                          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                            {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'May 10, 2026'}
+                          </div>
+                        </td>
+                        <td className="px-10 py-6">
+                          <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest border border-slate-200 px-3 py-1 rounded-lg bg-slate-50">
+                            {order.order_type === 'BESPOKE' ? 'Bespoke Workshop' : order.order_type === 'BULK' ? 'Bulk Production' : 'Alteration Hub'}
+                          </span>
+                        </td>
+                        <td className="px-10 py-6 text-[15px] font-bold text-slate-900 font-sans">
+                          {order.order_type === 'ALTERATION' 
+                             ? order.alteration_details?.item_description || 'Repair Item'
+                             : order.items?.[0]?.garment_name || 'Custom Garment'}
+                        </td>
+                        <td className="px-10 py-6">
+                          <span className={`w-fit px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border shadow-sm ${getStatusColor(productionStage)}`}>
+                            {getDisplayLabel(productionStage)}
+                          </span>
+                        </td>
+                        <td className="px-10 py-6 text-right pr-12">
+                          <div className="text-[16px] font-black text-slate-900">₱{order.total_amount.toLocaleString()}</div>
+                          <div className={`text-[10px] font-black uppercase tracking-widest mt-1 ${balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                            {balance > 0 ? `₱${balance.toLocaleString()} Due` : 'Paid in Full'}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
           <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
             <div className="text-[12px] font-medium text-slate-500">
@@ -370,7 +334,7 @@ export default function JobOrdersPage() {
               </button>
             </div>
           </div>
-        </div>
+        </>
       ) : (
         <div className="flex gap-6 overflow-x-auto pb-10 custom-scrollbar min-h-[600px]">
           {STATUS_TABS.filter(s => s !== 'All').map((stage, i) => {
@@ -454,12 +418,15 @@ export default function JobOrdersPage() {
           })}
         </div>
       )}
+          </div>
+        </div>
+      </main>
 
       {/* ORDER DETAILS MODAL */}
       {isModalOpen && selectedOrder && (
-        <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-[1200px] h-[90vh] rounded-[24px] shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300 flex">
-            <div className="w-[400px] border-r border-slate-100 flex flex-col bg-slate-50/30">
+        <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-[#1C1917]/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-[1200px] h-[90vh] rounded-[48px] shadow-2xl border border-[#E2DDD7] overflow-hidden animate-in zoom-in-95 duration-500 flex">
+            <div className="w-[420px] border-r border-[#F0EDE8] flex flex-col bg-[#FAF8F5]">
               <div className="p-8 border-b border-slate-100 bg-white">
                 <div className="flex items-center justify-between mb-6">
                   <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -471,33 +438,33 @@ export default function JobOrdersPage() {
                 </div>
 
                 {/* STEPPER UI */}
-                <div className="relative mt-2">
+                <div className="relative mt-4 px-2">
                   {/* Background Line */}
-                  <div className="absolute top-4 left-6 right-6 h-[2px] bg-slate-200 z-0" />
+                  <div className="absolute top-5 left-10 right-10 h-[2px] bg-[#E2DDD7] z-0" />
                   
                   <div className="relative flex items-start justify-between">
                     {(() => {
                       const engine = resolveOrderState(selectedOrder);
                       const steps = [
                         { id: 'pay', label: 'Payment', done: engine.paymentStatus !== 'UNPAID', active: engine.paymentStatus === 'PARTIAL' },
-                        { id: 'prod', label: 'Production', done: engine.progress === 100, active: engine.paymentStatus !== 'UNPAID' && engine.progress < 100 },
-                        { id: 'qual', label: 'Quality', done: !!selectedOrder.inspection_passed, active: engine.canBeInspected && !selectedOrder.inspection_passed && !selectedOrder.inspection_failed },
-                        { id: 'done', label: 'Ready', done: !!selectedOrder.inspection_passed && engine.isFullyPaid, active: !!selectedOrder.inspection_passed && !engine.isFullyPaid }
+                        { id: 'prod', label: 'Workshop', done: engine.progress === 100, active: engine.paymentStatus !== 'UNPAID' && engine.progress < 100 },
+                        { id: 'qual', label: 'QC', done: !!selectedOrder.inspection_passed, active: engine.canBeInspected && !selectedOrder.inspection_passed && !selectedOrder.inspection_failed },
+                        { id: 'done', label: 'Store', done: !!selectedOrder.inspection_passed && engine.isFullyPaid, active: !!selectedOrder.inspection_passed && !engine.isFullyPaid }
                       ];
 
                       return steps.map((step, idx) => (
-                        <div key={step.id} className="relative z-10 flex flex-col items-center gap-2 w-[60px]">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 bg-white ${
-                            step.done ? 'border-emerald-500 bg-emerald-500 text-white shadow-md shadow-emerald-200' :
-                            step.active ? 'border-slate-900 text-slate-900 animate-pulse' :
-                            'border-slate-200 text-slate-300'
+                        <div key={step.id} className="relative z-10 flex flex-col items-center gap-3 w-[64px]">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-500 bg-white ${
+                            step.done ? 'border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-900/20' :
+                            step.active ? 'border-indigo-600 text-slate-900 bg-[#FAF8F5]' :
+                            'border-[#E2DDD7] text-[#78716C]'
                           }`}>
-                            {idx + 1}
+                            {step.done ? <CheckCircle2 size={20} /> : <span className="text-[14px] font-bold">{idx + 1}</span>}
                           </div>
-                          <span className={`text-[9px] font-black uppercase tracking-tight text-center leading-tight ${
-                            step.done ? 'text-emerald-600' :
-                            step.active ? 'text-slate-900' :
-                            'text-slate-300'
+                          <span className={`text-[10px] font-bold uppercase tracking-[0.05em] text-center leading-tight ${
+                            step.done ? 'text-slate-900' :
+                            step.active ? 'text-white' :
+                            'text-[#78716C]'
                           }`}>
                             {step.label}
                           </span>
@@ -508,22 +475,22 @@ export default function JobOrdersPage() {
                 </div>
               </div>
 
-              <div className="p-8 border-b border-slate-100">
-                <h2 className="text-[22px] font-black text-slate-900 leading-tight mb-2">
+              <div className="p-8 border-b border-[#F0EDE8]">
+                <h2 className="text-[26px] font-bold font-sans text-[#1C1917] leading-tight mb-3">
                   {selectedOrder.items?.[0]?.garment_name || 'Custom Garment'}
                 </h2>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest border ${getStatusColor(
+                      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(
                         resolveOrderState(selectedOrder).productionStage
                       )}`}
                     >
                       {getDisplayLabel(resolveOrderState(selectedOrder).productionStage)}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-500 font-bold bg-slate-100 px-3 py-2 rounded-xl border border-slate-200/50">
-                    {getStageExplanation(resolveOrderState(selectedOrder).productionStage)}
+                  <div className="text-[12px] text-[#78716C] font-bold bg-[#FAF8F5] px-4 py-3 rounded-2xl border border-[#E2DDD7]/50 italic">
+                    “{getStageExplanation(resolveOrderState(selectedOrder).productionStage)}”
                   </div>
                 </div>
               </div>
@@ -557,38 +524,38 @@ export default function JobOrdersPage() {
                   })()}
                 </div>
 
-                <div className="space-y-3 pt-2">
-                  <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    Financial Snapshot
+                <div className="space-y-4 pt-2">
+                  <div className="text-[11px] font-bold text-[#78716C] uppercase tracking-[0.1em] ml-1">
+                    Workshopedger Snapshot
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
-                    <div className="flex justify-between text-[13px]">
-                      <span className="text-slate-500 font-medium">Total Contract Value</span>
-                      <span className="text-slate-900 font-black">
+                  <div className="bg-white border border-[#E2DDD7] rounded-[24px] p-6 space-y-4 shadow-sm">
+                    <div className="flex justify-between text-[14px]">
+                      <span className="text-[#78716C] font-medium">Bespoke Contract Value</span>
+                      <span className="text-[#1C1917] font-bold">
                         ₱{selectedOrder.total_amount.toLocaleString()}
                       </span>
                     </div>
-                    <div className="flex justify-between text-[13px]">
-                       <span className="text-slate-500 font-medium">Amount Paid</span>
-                       <span className="text-emerald-600 font-black">
+                    <div className="flex justify-between text-[14px]">
+                       <span className="text-[#78716C] font-medium">Recorded Remittance</span>
+                       <span className="text-slate-900 font-bold">
                          ₱{(selectedOrder.amount_paid ?? 0).toLocaleString()}
                        </span>
                      </div>
-                    <div className="h-px bg-slate-100 mx-1" />
-                    <div className="flex justify-between text-[13px]">
-                      <span className="text-slate-500 font-medium">Remaining Balance</span>
+                    <div className="h-px bg-[#F0EDE8]" />
+                    <div className="flex justify-between text-[15px]">
+                      <span className="text-[#78716C] font-bold">Outstanding Balance</span>
                       <span
                         className={
-                          resolveOrderState(selectedOrder).balance > 0 ? 'text-rose-600 font-black' : 'text-emerald-600 font-black'
+                          resolveOrderState(selectedOrder).balance > 0 ? 'text-rose-600 font-bold' : 'text-slate-900 font-bold'
                         }
                       >
                         ₱{resolveOrderState(selectedOrder).balance.toLocaleString()}
                       </span>
                     </div>
-                    <div className={`text-center py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                    <div className={`text-center py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.1em] border shadow-inner ${
                       resolveOrderState(selectedOrder).paymentStatus === 'PAID_FULL' 
-                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                        : 'bg-amber-50 text-amber-600 border border-amber-100'
+                        ? 'bg-slate-900/5 text-slate-900 border-slate-900/10'
+                        : 'bg-amber-50 text-amber-600 border-amber-100'
                     }`}>
                       {getDisplayLabel(resolveOrderState(selectedOrder).paymentStatus)}
                     </div>
@@ -614,32 +581,33 @@ export default function JobOrdersPage() {
             </div>
 
             <div className="flex-1 flex flex-col bg-white">
-              <div className="h-16 px-8 border-b border-slate-100 flex items-center justify-between">
-                <div className="flex gap-8 h-full">
+              <div className="h-20 px-10 border-b border-[#E2DDD7] flex items-center justify-between">
+                <div className="flex gap-10 h-full">
                   {([
-                    { id: 'jobs', label: 'Tailoring Workflow', icon: <ClipboardList size={14} /> },
-                    { id: 'measurements', label: 'Measurements', icon: <User size={14} /> },
-                    { id: 'timeline', label: 'Timeline', icon: <History size={14} /> },
-                    { id: 'discrepancies', label: 'Production Issues', icon: <AlertTriangle size={14} /> },
+                    { id: 'jobs', label: 'Artisan Workflow', icon: <ClipboardList size={18} /> },
+                    { id: 'measurements', label: 'Bespoke Specs', icon: <User size={18} /> },
+                    { id: 'timeline', label: 'Workshop History', icon: <History size={18} /> },
+                    { id: 'discrepancies', label: 'Resource Variance', icon: <AlertTriangle size={18} /> },
                   ] as { id: DetailTab; label: string; icon: React.ReactNode }[]).map(tab => (
                     <button
                       key={tab.id}
                       onClick={() => setDetailTab(tab.id)}
-                      className={`h-full flex items-center gap-2 text-[13px] font-bold border-b-2 transition-all ${
+                      className={`h-full flex items-center gap-3 text-[14px] font-bold border-b-2 transition-all ${
                         detailTab === tab.id
                           ? 'border-slate-900 text-slate-900'
-                          : 'border-transparent text-slate-400 hover:text-slate-700'
+                          : 'border-transparent text-[#78716C] hover:text-slate-900'
                       }`}
                     >
-                      {tab.icon}{tab.label}
+                      <span className={detailTab === tab.id ? 'text-white' : ''}>{tab.icon}</span>
+                      {tab.label}
                     </button>
                   ))}
                 </div>
                 <button
                   onClick={closeDetailModal}
-                  className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 transition-all"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-[#F0EDE8] rounded-xl text-[#78716C] transition-all"
                 >
-                  <X size={20} />
+                  <X size={24} />
                 </button>
               </div>
 

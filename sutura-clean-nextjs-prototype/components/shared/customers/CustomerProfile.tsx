@@ -66,33 +66,33 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
   const ltv = customerOrders.reduce((sum, o) => sum + o.total_amount, 0);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+    <div className="animate-in fade-in duration-500 space-y-8 font-outfit">
       <div className="flex items-center justify-between">
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 text-[13px] font-black text-slate-400 hover:text-slate-900 transition-colors group"
+          className="flex items-center gap-2 text-[12px] font-black text-slate-400 hover:text-slate-900 transition-colors group uppercase tracking-widest"
         >
-          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Directory
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to Directory
         </button>
         <div className="flex items-center gap-3">
           {!hideAppointmentBtn && (
             <button 
               onClick={onNewAppointment}
-              className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-[12px] font-black text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center gap-2"
+              className="h-10 px-5 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-slate-600 hover:border-[#1E3A1F] hover:text-[#1E3A1F] transition-all flex items-center gap-2 shadow-sm"
             >
-              <Calendar size={16} /> Schedule Appointment
+              <Calendar size={16} /> Schedule Session
             </button>
           )}
           <button 
             onClick={onNewProfile}
-            className="h-10 px-4 bg-white border border-slate-200 rounded-xl text-[12px] font-black text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center gap-2"
+            className="h-10 px-5 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-slate-600 hover:border-[#1E3A1F] hover:text-[#1E3A1F] transition-all flex items-center gap-2 shadow-sm"
           >
             <Ruler size={16} /> New Profile
           </button>
           {!hideNewOrderBtn && (
             <button 
               onClick={onNewOrder}
-              className="h-10 px-4 bg-slate-900 text-white rounded-xl text-[12px] font-black hover:bg-indigo-600 transition-all flex items-center gap-2"
+              className="h-10 px-5 bg-[#1E3A1F] text-[#C9A84C] rounded-xl text-[12px] font-bold shadow-lg hover:shadow-[#1E3A1F]/20 transition-all flex items-center gap-2 active:scale-95"
             >
               <Plus size={16} /> New Order
             </button>
@@ -100,60 +100,55 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-[40px] p-10 shadow-sm flex flex-col md:flex-row items-center justify-between gap-10">
+      <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-10">
         <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className={`w-24 h-24 rounded-[32px] overflow-hidden flex items-center justify-center text-[32px] font-black shadow-inner ${customer.gender === 'Female' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>
+          <div className={`w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-[24px] font-black shadow-inner ${customer.gender === 'Female' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>
             {customer.avatar ? (
               <img src={customer.avatar} alt={customer.name} className="w-full h-full object-cover" />
             ) : (
               customer.name.split(' ').map(n => n[0]).join('')
             )}
           </div>
-          <div className="text-center md:text-left space-y-2">
+          <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4">
-              <div className="flex items-center gap-3">
-                <h2 className="text-[36px] font-black text-slate-900 tracking-tight leading-none">{customer.name}</h2>
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${customer.gender === 'Female' ? 'bg-rose-50 text-rose-500' : 'bg-indigo-50 text-indigo-500'}`}>
-                  {customer.gender === 'Female' ? (
-                    <span className="text-[18px] font-black">♀</span>
-                  ) : (
-                    <span className="text-[18px] font-black">♂</span>
-                  )}
-                </div>
-              </div>
+              <h2 className="text-[32px] font-bold font-serif text-slate-900 tracking-tight leading-none">{customer.name}</h2>
               <button 
                 onClick={() => onEditCustomer(customer)}
-                className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-600 hover:bg-indigo-50 transition-all"
+                className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-[#1E3A1F] hover:border-[#1E3A1F] hover:bg-slate-50 transition-all shadow-sm"
               >
-                <Edit2 size={18} />
+                <Edit2 size={16} />
               </button>
             </div>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-              <span className="flex items-center gap-2 text-[14px] font-bold text-slate-500"><Mail size={16} className="text-indigo-400" /> {customer.email}</span>
-              <span className="flex items-center gap-2 text-[14px] font-bold text-slate-500"><Phone size={16} className="text-emerald-400" /> {customer.phone}</span>
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-3">
+              <span className="flex items-center gap-2 text-[13px] font-bold text-slate-500"><Mail size={14} className="text-slate-300" /> {customer.email}</span>
+              <span className="flex items-center gap-2 text-[13px] font-bold text-slate-500"><Phone size={14} className="text-slate-300" /> {customer.phone}</span>
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-4">
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 text-center min-w-[120px]">
-            <div className="text-[24px] font-black text-slate-900">{customerOrders.length}</div>
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Total Orders</div>
+        <div className="flex items-center gap-6">
+          <div className="bg-slate-50 px-6 py-4 rounded-2xl border border-slate-100 text-center min-w-[120px] shadow-inner">
+            <div className="text-[20px] font-black text-slate-900">{customerOrders.length}</div>
+            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Total Orders</div>
+          </div>
+          <div className="bg-slate-50 px-6 py-4 rounded-2xl border border-slate-100 text-center min-w-[120px] shadow-inner">
+            <div className="text-[20px] font-black text-[#C9A84C]">₱{ltv.toLocaleString()}</div>
+            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Customer LTV</div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 p-1 bg-slate-50 border border-slate-200 rounded-full w-fit">
+      <div className="px-8 py-5 border border-slate-200 rounded-[24px] bg-white flex items-center justify-between gap-8">
+        <div className="flex items-center gap-1.5 bg-slate-200/50 p-1 rounded-xl w-fit border border-slate-200/60 shadow-inner">
           {(['overview', 'orders', 'measurements', 'appointments', 'history'] as const)
             .filter(tab => !(tab === 'appointments' && hideAppointmentsTab))
             .map(tab => (
             <button
               key={tab}
               onClick={() => setProfileTab(tab)}
-              className={`px-6 py-2 text-[13px] font-bold capitalize transition-all rounded-full ${
+              className={`px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all duration-300 ${
                 profileTab === tab 
-                  ? 'bg-white text-slate-900 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600'
+                  ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50' 
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'
               }`}
             >
               {tab}
@@ -162,12 +157,12 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
         </div>
 
         {profileTab === 'orders' && (
-          <div className="relative w-full max-w-[300px] animate-in fade-in slide-in-from-right-4 duration-300">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <div className="relative max-w-sm w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
             <input 
               type="text" 
               placeholder="Search by order ID or garment..." 
-              className="w-full h-11 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-full text-[13px] font-medium outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 transition-all"
+              className="h-10 w-full pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-slate-900 transition-all shadow-sm"
             />
           </div>
         )}

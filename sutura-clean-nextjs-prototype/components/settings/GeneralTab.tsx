@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { User, Building2, Clock, Camera, RefreshCw, Calendar, ShieldCheck } from 'lucide-react';
+import { User, Camera, ShieldCheck, HelpCircle } from 'lucide-react';
 import { User as UserType } from '@/types/erp';
 import { useERPStore } from '@/store/useERPStore';
 
@@ -11,215 +11,162 @@ interface GeneralTabProps {
 }
 
 export function GeneralTab({ currentUser }: GeneralTabProps) {
-  const { currentSubscription, updateUserAvatar } = useERPStore();
-  
-  // Operating Hours State
-  const [hours, setHours] = useState([
-    { day: 'Monday', open: '09:00 AM', close: '06:00 PM', isOpen: true },
-    { day: 'Tuesday', open: '09:00 AM', close: '06:00 PM', isOpen: true },
-    { day: 'Wednesday', open: '09:00 AM', close: '06:00 PM', isOpen: true },
-    { day: 'Thursday', open: '09:00 AM', close: '06:00 PM', isOpen: true },
-    { day: 'Friday', open: '09:00 AM', close: '06:00 PM', isOpen: true },
-    { day: 'Saturday', open: '10:00 AM', close: '04:00 PM', isOpen: true },
-    { day: 'Sunday', open: 'Closed', close: 'Closed', isOpen: false },
-  ]);
-
-  const toggleDay = (idx: number) => {
-    const newHours = [...hours];
-    newHours[idx].isOpen = !newHours[idx].isOpen;
-    setHours(newHours);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  const { updateUserAvatar } = useERPStore();
+  const [gender, setGender] = useState('male');
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Profile Card */}
-      <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
-        <h3 className="text-[18px] font-black text-slate-900 mb-6 flex items-center gap-2">
-          <User size={20} className="text-slate-400" /> Public Profile
-        </h3>
-        <div className="flex flex-col md:flex-row gap-8 items-start">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative group">
-              <div className="w-28 h-28 rounded-3xl bg-indigo-50 flex items-center justify-center text-white overflow-hidden shadow-xl border-4 border-white relative">
-                {currentUser.avatar ? (
-                  <Image 
-                    src={currentUser.avatar} 
-                    alt="Avatar" 
-                    fill 
-                    unoptimized
-                    className="object-contain p-2" 
-                  />
-                ) : (
-                  <User size={32} className="text-slate-300" />
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 w-full">
-            <div className="space-y-2">
-              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Owner Name</label>
-              <input 
-                type="text" 
-                defaultValue={currentUser.name} 
-                className="w-full h-12 px-5 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium focus:bg-white focus:border-slate-900 transition-all outline-none" 
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Role</label>
-              <input 
-                type="text" 
-                value="Shop Owner" 
-                disabled 
-                className="w-full h-12 px-5 bg-slate-100 border border-slate-100 rounded-xl text-[14px] font-black text-slate-400 outline-none" 
-              />
-            </div>
-          </div>
-        </div>
+    <div className="bg-white border border-slate-200 rounded-[8px] shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden">
+      {/* ── HEADER ── */}
+      <div className="p-8 border-b border-slate-100">
+        <h3 className="text-[18px] font-bold text-slate-900 leading-none">My Profile</h3>
+        <p className="text-[14px] text-slate-500 mt-2">Manage and protect your account</p>
       </div>
 
-      {/* Subscription Card */}
-      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 border border-slate-800 rounded-[32px] p-8 shadow-xl text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
-              <ShieldCheck size={28} className="text-indigo-400" />
+      <div className="flex flex-col lg:flex-row p-8 gap-12">
+        {/* ── LEFT COLUMN: FORM ── */}
+        <div className="flex-1 space-y-8">
+          
+          {/* USERNAME */}
+          <div className="grid grid-cols-[140px_1fr] items-start gap-4">
+            <label className="text-[14px] text-slate-500 pt-3 text-right">Username</label>
+            <div className="space-y-2">
+              <input 
+                type="text" 
+                defaultValue="johnclock.master" 
+                className="w-full h-12 px-3 border border-slate-200 rounded-[4px] text-[14px] outline-none focus:border-slate-400 transition-all" 
+              />
+              <p className="text-[12px] text-slate-400">Username can only be changed once.</p>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-[20px] font-black tracking-tight">{currentSubscription?.planName || 'Premium Plan'}</h3>
-                <span className="bg-indigo-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Active</span>
+          </div>
+
+          {/* NAME */}
+          <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+            <label className="text-[14px] text-slate-500 text-right">Name</label>
+            <input 
+              type="text" 
+              defaultValue="John Clock" 
+              className="w-full h-12 px-3 border border-slate-200 rounded-[4px] text-[14px] outline-none focus:border-slate-400 transition-all" 
+            />
+          </div>
+
+          {/* EMAIL */}
+          <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+            <label className="text-[14px] text-slate-500 text-right">Email</label>
+            <div className="text-[14px] text-slate-900 flex items-center gap-2">
+              johncl********@sutura.ph
+              <button className="text-blue-600 hover:underline">Change</button>
+            </div>
+          </div>
+
+          {/* PHONE */}
+          <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+            <label className="text-[14px] text-slate-500 text-right">Phone Number</label>
+            <div className="text-[14px] text-slate-900 flex items-center gap-2">
+              *********88
+              <button className="text-blue-600 hover:underline">Change</button>
+            </div>
+          </div>
+
+          {/* GENDER */}
+          <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+            <div className="flex items-center gap-1 justify-end">
+               <label className="text-[14px] text-slate-500">Gender</label>
+               <HelpCircle size={14} className="text-slate-300 cursor-help" />
+            </div>
+            <div className="flex items-center gap-6">
+              {['male', 'female', 'other'].map((opt) => (
+                <label key={opt} className="flex items-center gap-2 cursor-pointer group">
+                  <div className="relative w-5 h-5 flex items-center justify-center">
+                    <input 
+                      type="radio" 
+                      name="gender" 
+                      value={opt} 
+                      checked={gender === opt}
+                      onChange={() => setGender(opt)}
+                      className="peer sr-only" 
+                    />
+                    <div className="w-5 h-5 border-2 border-slate-200 rounded-full peer-checked:border-[#1e3a8a] transition-all" />
+                    <div className="absolute w-2.5 h-2.5 bg-[#1e3a8a] rounded-full scale-0 peer-checked:scale-100 transition-transform" />
+                  </div>
+                  <span className="text-[14px] text-slate-800 capitalize group-hover:text-slate-900">{opt}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* BIRTHDAY */}
+          <div className="grid grid-cols-[140px_1fr] items-start gap-4 pb-4">
+            <div className="flex items-center gap-1 justify-end pt-3">
+               <label className="text-[14px] text-slate-500">Date of birth</label>
+               <HelpCircle size={14} className="text-slate-300 cursor-help" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-12 flex items-center text-[14px] text-slate-900">
+                **/**/1985
               </div>
-              <p className="text-slate-400 text-[13px] font-medium mt-1">Your subscription is managed monthly.</p>
+              <p className="text-[12px] text-slate-400">You have already done KYC. Changing your birthday is not permitted.</p>
             </div>
+          </div>
+
+          {/* SUBSCRIPTION INFO (Added Back) */}
+          <div className="pt-8 border-t border-slate-50 space-y-8">
+             <div className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-400">Subscription & Plan</div>
+             
+             {/* PLAN LEVEL */}
+             <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+               <label className="text-[14px] text-slate-500 text-right">Current Plan</label>
+               <div className="flex items-center gap-3">
+                  <div className="px-3 py-1 bg-slate-900 text-white text-[11px] font-black uppercase rounded-[2px]">Premium Plan</div>
+                  <div className="text-[14px] text-emerald-600 font-bold flex items-center gap-1">
+                     <ShieldCheck size={16} /> Active
+                  </div>
+               </div>
+             </div>
+
+             {/* BILLING PERIOD */}
+             <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+               <label className="text-[14px] text-slate-500 text-right">Billing Period</label>
+               <div className="flex items-center gap-8 text-[14px]">
+                  <div className="space-y-1">
+                     <div className="text-slate-400 text-[11px] font-bold uppercase">Started</div>
+                     <div className="text-slate-900 font-medium">May 1, 2026</div>
+                  </div>
+                  <div className="space-y-1">
+                     <div className="text-slate-400 text-[11px] font-bold uppercase">Next Renewal</div>
+                     <div className="text-[#1e3a8a] font-bold">June 1, 2026</div>
+                  </div>
+               </div>
+             </div>
+          </div>
+
+          {/* SAVE BUTTON */}
+          <div className="flex items-center gap-4 pt-10 border-t border-slate-50">
+            <button className="w-[100px] h-[48px] bg-[#1e3a8a] hover:bg-[#172554] text-white rounded-[2px] text-[14px] font-medium transition-all shadow-sm active:scale-95">
+              Save
+            </button>
+          </div>
+        </div>
+
+        {/* ── RIGHT COLUMN: IMAGE UPLOAD ── */}
+        <div className="w-full lg:w-[300px] flex flex-col items-center justify-start border-l border-slate-100 pt-8 lg:pl-12">
+          <div className="w-[120px] h-[120px] rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden mb-6 group relative cursor-pointer">
+            <img 
+              src={currentUser.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=John"} 
+              alt="Avatar" 
+              className="w-full h-full object-cover" 
+            />
           </div>
           
-          <div className="grid grid-cols-2 gap-8 bg-white/5 p-5 rounded-2xl border border-white/10 backdrop-blur-md">
-            <div>
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <Calendar size={12} /> Start Date
-              </div>
-              <div className="text-[14px] font-black text-white">
-                {currentSubscription?.startDate ? formatDate(currentSubscription.startDate) : 'May 1, 2026'}
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                <Calendar size={12} /> Renewal Date
-              </div>
-              <div className="text-[14px] font-black text-indigo-300">
-                {currentSubscription?.endDate ? formatDate(currentSubscription.endDate) : 'June 1, 2026'}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Business Info Card */}
-      <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
-        <h3 className="text-[18px] font-black text-slate-900 mb-6 flex items-center gap-2">
-          <Building2 size={20} className="text-slate-400" /> Business Information
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Shop Name</label>
-            <input 
-              type="text" 
-              defaultValue="Sutura Tailoring HQ" 
-              className="w-full h-12 px-5 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium focus:bg-white focus:border-slate-900 transition-all outline-none" 
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Business Type</label>
-            <select className="w-full h-12 px-5 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium focus:bg-white focus:border-slate-900 transition-all outline-none appearance-none">
-              <option>Bespoke Tailoring</option>
-              <option>Ready-to-Wear</option>
-              <option>Uniform Supply</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Number</label>
-            <input 
-              type="text" 
-              defaultValue="+63 912 345 6789" 
-              className="w-full h-12 px-5 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium focus:bg-white focus:border-slate-900 transition-all outline-none" 
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Headquarters Address</label>
-            <input 
-              type="text" 
-              defaultValue="123 Tailor Street, Manila, Philippines" 
-              className="w-full h-12 px-5 bg-slate-50 border border-slate-100 rounded-xl text-[14px] font-medium focus:bg-white focus:border-slate-900 transition-all outline-none" 
-            />
-          </div>
-        </div>
-        <div className="mt-6 flex justify-end">
-          <button className="px-6 py-2 bg-slate-900 text-white rounded-xl text-[12px] font-black hover:bg-indigo-600 transition-all shadow-sm">
-            Save Business Info
+          <button className="px-6 h-[40px] border border-slate-200 rounded-[2px] text-[14px] text-slate-600 hover:bg-slate-50 transition-all mb-4">
+            Select Image
           </button>
+          
+          <div className="space-y-1 text-center">
+            <p className="text-[14px] text-slate-400 leading-tight">File size: maximum 1 MB</p>
+            <p className="text-[14px] text-slate-400 leading-tight">File extension: .JPEG, .PNG</p>
+          </div>
         </div>
-      </div>
 
-      {/* Operating Hours Grid */}
-      <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-[18px] font-black text-slate-900 flex items-center gap-2">
-            <Clock size={20} className="text-slate-400" /> Operating Hours
-          </h3>
-          <span className="text-[12px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Weekly Schedule</span>
-        </div>
-        <div className="space-y-3">
-          {hours.map((item, idx) => (
-            <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 transition-all group">
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-[12px] ${item.isOpen ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-200 text-slate-400'}`}>
-                  {item.day.substring(0, 3)}
-                </div>
-                <span className={`text-[14px] font-bold ${item.isOpen ? 'text-slate-700' : 'text-slate-400'}`}>{item.day}</span>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                {item.isOpen ? (
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="text" 
-                      defaultValue={item.open} 
-                      className="w-24 h-9 px-3 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-center outline-none focus:border-slate-900" 
-                    />
-                    <span className="text-slate-300">—</span>
-                    <input 
-                      type="text" 
-                      defaultValue={item.close} 
-                      className="w-24 h-9 px-3 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-center outline-none focus:border-slate-900" 
-                    />
-                  </div>
-                ) : (
-                  <span className="text-[12px] font-black text-slate-400 uppercase tracking-widest px-4">Closed for Business</span>
-                )}
-                
-                <button 
-                  onClick={() => toggleDay(idx)}
-                  className={`w-12 h-6 rounded-full transition-all relative ${item.isOpen ? 'bg-slate-900' : 'bg-slate-200'}`}
-                >
-                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${item.isOpen ? 'left-7' : 'left-1'}`} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-6 flex justify-end">
-          <button className="px-6 py-2 bg-slate-900 text-white rounded-xl text-[12px] font-black hover:bg-indigo-600 transition-all shadow-sm">
-            Save Schedule
-          </button>
-        </div>
       </div>
     </div>
   );

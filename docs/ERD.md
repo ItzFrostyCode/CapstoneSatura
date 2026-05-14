@@ -74,16 +74,7 @@ erDiagram
     GOODS_RECEIPTS ||--o{ GOODS_RECEIPT_ITEMS : received_lineage
     USERS ||--o{ PURCHASE_ORDERS : requested_by
 
-    %% Designer Ecosystem
-    USERS ||--o| DESIGNER_PROFILES : profile
-    DESIGNER_PROFILES ||--o{ DESIGNER_PORTFOLIO_ITEMS : showcases
-    CUSTOMERS ||--o{ CONSULTATION_REQUESTS : initiates
-    DESIGNER_PROFILES ||--o{ CONSULTATION_REQUESTS : designer_review
-    CONSULTATION_REQUESTS ||--o| DESIGN_PROPOSALS : proposal
-    DESIGN_PROPOSALS ||--o{ DESIGN_BLUEPRINT_ASSETS : contains
-    DESIGN_PROPOSALS ||--o{ PROPOSAL_REVISIONS : history
-    DESIGN_PROPOSALS ||--o| PROPOSAL_HANDOFFS : converted_via
-    PROPOSAL_HANDOFFS ||--o| ORDERS : creates
+
 
     %% Admin Governance
     SHOPS ||--o| TENANT_VERIFICATIONS : verified_by
@@ -496,68 +487,7 @@ CREATE TABLE stock_transfers (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE designer_profiles (
-    id TEXT PRIMARY KEY,
-    user_id TEXT UNIQUE REFERENCES users(id),
-    bio TEXT,
-    specialization TEXT,
-    rating DECIMAL(3,2),
-    is_public BOOLEAN DEFAULT TRUE
-);
 
-CREATE TABLE designer_portfolio_items (
-    id TEXT PRIMARY KEY,
-    designer_id TEXT REFERENCES designer_profiles(id),
-    title TEXT NOT NULL,
-    image_url TEXT NOT NULL,
-    category TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE consultation_requests (
-    id TEXT PRIMARY KEY,
-    customer_id TEXT REFERENCES customers(id),
-    designer_id TEXT REFERENCES designer_profiles(id),
-    subject TEXT,
-    description TEXT,
-    status TEXT DEFAULT 'PENDING',
-    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE design_proposals (
-    id TEXT PRIMARY KEY,
-    consultation_id TEXT REFERENCES consultation_requests(id),
-    designer_id TEXT REFERENCES designer_profiles(id),
-    title TEXT NOT NULL,
-    description TEXT,
-    estimated_cost DECIMAL(10,2),
-    status TEXT DEFAULT 'DRAFT',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE design_blueprint_assets (
-    id TEXT PRIMARY KEY,
-    proposal_id TEXT REFERENCES design_proposals(id),
-    url TEXT NOT NULL,
-    asset_type TEXT NOT NULL, -- Sketch, FabricRef, Palette
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE proposal_revisions (
-    id TEXT PRIMARY KEY,
-    proposal_id TEXT REFERENCES design_proposals(id),
-    notes TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE proposal_handoffs (
-    id TEXT PRIMARY KEY,
-    proposal_id TEXT UNIQUE REFERENCES design_proposals(id),
-    order_id TEXT UNIQUE REFERENCES orders(id),
-    converted_by_user_id TEXT REFERENCES users(id),
-    converted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT
-);
 
 CREATE TABLE tenant_verifications (
     id TEXT PRIMARY KEY,

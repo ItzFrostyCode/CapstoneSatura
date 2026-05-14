@@ -51,6 +51,7 @@ import { BOMModal } from './components/InventoryModals/BOMModal';
 import { StockMovementModal, StockMovementData } from '@/components/shared/StockMovementModal';
 import { BatchReleaseModal } from './components/InventoryModals/BatchReleaseModal';
 import { StockTransferModal } from '@/components/shared/StockTransferModal';
+import { PostToShopModal } from './components/InventoryModals/PostToShopModal';
 
 // ── HELPER FUNCTIONS ──
 function getStatus(item: InventoryItem) {
@@ -87,7 +88,9 @@ const renderAvatar = (name: string, size: number = 40, imageUrl?: string) => {
   );
 };
 
-export default function InventoryPage() {
+import { Suspense } from 'react';
+
+function InventoryPageContent() {
   const {
     inventory, movements, recipes, staff, suppliers, customers,
     orders, jobOrderItems, updateOrderStatus,
@@ -126,6 +129,7 @@ export default function InventoryPage() {
   const [isMovementModalOpen, setIsMovementModalOpen] = useState(false);
   const [isBatchReleaseModalOpen, setIsBatchReleaseModalOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isPostToShopModalOpen, setIsPostToShopModalOpen] = useState(false);
   const [movementMode, setMovementMode] = useState<'in' | 'out'>('in');
   
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
@@ -346,35 +350,32 @@ export default function InventoryPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] animate-in fade-in duration-500 pb-20 font-outfit">
-      {/* HEADER */}
-      <div className="bg-transparent px-10 py-10">
-        <div className="max-w-[1450px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-[1450px] mx-auto pb-20">
+      <main className="max-w-[1450px] mx-auto px-10 pt-8 space-y-8">
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-[10px] font-black tracking-widest uppercase text-indigo-500 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">Stock & Production</span>
-            </div>
-            <h1 className="text-[36px] font-black text-slate-900 tracking-tight leading-none">Inventory Management</h1>
+            <h1 className="text-[28px] font-black text-slate-900 tracking-tight flex items-center gap-3">
+              Inventory
+            </h1>
+            <p className="text-slate-500 mt-1 font-medium">Managing the physical soul of our craftsmanship.</p>
           </div>
           
           <div className="flex items-center gap-3">
              <button 
                onClick={() => setIsNewItemModalOpen(true)}
-               className="h-11 px-6 bg-white border border-slate-200 rounded-2xl text-[12px] font-black text-slate-600 hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center gap-2 shadow-sm active:scale-95"
+               className="h-10 px-5 bg-white border border-slate-200 rounded-full text-[12px] font-bold text-slate-600 hover:border-slate-900 hover:text-slate-900 transition-all flex items-center gap-2 shadow-sm active:scale-95"
              >
-                <Plus size={16} /> New Stock Item
+                <Plus size={16} /> Add Material
              </button>
              <button 
                onClick={() => setIsTransferModalOpen(true)}
-               className="h-11 px-6 bg-indigo-600 text-white rounded-2xl text-[12px] font-black shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all flex items-center gap-2 active:scale-95"
+               className="h-10 px-5 bg-slate-900 text-white rounded-full flex items-center gap-2 text-[12px] font-bold hover:bg-indigo-600 transition-all shadow-md active:scale-95 group"
              >
-                <ArrowRightLeft size={16} /> Internal Transfer
+                <ArrowRightLeft size={16} className="group-hover:rotate-180 transition-transform duration-500" /> Stock Transfer
              </button>
           </div>
         </div>
-      </div>
-
-      <main className="max-w-[1450px] mx-auto px-10 space-y-10">
         {/* Connected Intelligence Bar */}
         <InventoryCommandCenter
           inventory={inventory}
@@ -387,54 +388,62 @@ export default function InventoryPage() {
           onTabChange={(tab) => setActiveTab(tab)}
         />
 
-        {/* Stats Section */}
-        <InventoryStats 
-          stats={[
-            { label: 'Raw Materials', value: materials.length.toString(), color: 'indigo', sub: 'Available SKUs', filter: 'All' },
-            { label: 'Finished Units', value: finishedGoods.reduce((sum, i) => sum + (i.stock || 0), 0).toString(), color: 'emerald', sub: 'Ready for Release', filter: 'All' },
-            { label: 'Low Stock', value: inventory.filter(i => getStatus(i) === 'Low Stock').length.toString(), color: 'amber', sub: 'Watch List', filter: 'Low Stock' },
-            { label: 'Out of Stock', value: inventory.filter(i => getStatus(i) === 'Out of Stock').length.toString(), color: 'rose', sub: 'Critical', filter: 'Out of Stock' },
-          ]}
-        />
+        {/* KPI STATS GRID */}
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { label: 'Raw Materials', val: materials.length, status: 'Available SKUs', color: '#1E3A1F' },
+            { label: 'Finished Units', val: finishedGoods.reduce((sum, i) => sum + (i.stock || 0), 0), status: 'Ready for Release', color: '#C9A84C' },
+            { label: 'Low Stock', val: inventory.filter(i => getStatus(i) === 'Low Stock').length, status: 'Watch List', color: '#2D5016' },
+            { label: 'Out of Stock', val: inventory.filter(i => getStatus(i) === 'Out of Stock').length, status: 'Critical', color: '#DC2626' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: stat.color }} />
+              </div>
+              <div className="text-[24px] font-black text-slate-900 tracking-tight">{stat.val}</div>
+              <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1 opacity-60">{stat.status}</div>
+            </div>
+          ))}
+        </div>
 
-        {/* Main Content Area */}
-        <div className="space-y-6">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-1 p-1 bg-slate-100/50 border border-slate-200/60 rounded-full shadow-sm overflow-x-auto max-w-full">
+        {/* MASTER CONTAINER */}
+        <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden flex flex-col">
+          {/* INTEGRATED HEADER: SEARCH & TABS */}
+          <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between gap-8 shrink-0">
+            {/* SEARCH (LEFT) */}
+            <div className="relative max-w-sm w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search items, SKUs..." 
+                className="h-10 w-full pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-slate-900 transition-all shadow-sm"
+              />
+            </div>
+
+            {/* TABS (RIGHT) */}
+            <div className="flex items-center gap-1.5 bg-slate-200/50 p-1 rounded-xl w-fit border border-slate-200/60 shadow-inner">
               {[
-                { id: 'materials', name: 'Raw Materials', icon: <Database size={14} /> },
-                { id: 'finished', name: 'Finished Goods', icon: <Package size={14} /> },
+                { id: 'materials', name: 'Materials', icon: <Database size={14} /> },
+                { id: 'finished', name: 'Finished', icon: <Package size={14} /> },
                 { id: 'assembly', name: 'Production', icon: <Zap size={14} /> },
-                { id: 'history', name: 'Stock History', icon: <History size={14} /> },
-                { id: 'low_stock', name: 'Low Stock', icon: <TrendingDown size={14} /> },
+                { id: 'history', name: 'History', icon: <History size={14} /> },
+                { id: 'low_stock', name: 'Alerts', icon: <TrendingDown size={14} /> },
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-6 py-2.5 text-[13px] font-bold transition-all rounded-full flex items-center gap-2 whitespace-nowrap ${
-                    activeTab === tab.id 
-                      ? 'bg-white text-slate-900 shadow-sm' 
-                      : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
-                  }`}
+                  className={`px-6 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all duration-300 flex items-center gap-2 ${activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'}`}
                 >
                   {tab.icon} {tab.name}
                 </button>
               ))}
             </div>
-
-            <div className="relative w-full max-w-[340px]">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="Quick search inventory..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-11 pl-11 pr-4 bg-white border border-slate-200 rounded-full text-[13px] font-bold placeholder:text-slate-300 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all shadow-sm"
-              />
-            </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-[40px] shadow-sm overflow-hidden">
+          <div className="bg-white">
             {activeTab === 'materials' && (
               <MaterialsTable 
                 materials={filteredMaterials}
@@ -453,6 +462,10 @@ export default function InventoryPage() {
                 onOpenBatchRelease={() => setIsBatchReleaseModalOpen(true)}
                 onMovement={(item, mode) => { setSelectedItem(item); setMovementMode(mode); setIsMovementModalOpen(true); }}
                 onToggleBatchItem={handleToggleBatchItem}
+                onPostToShop={(item) => {
+                  setSelectedItem(item);
+                  setIsPostToShopModalOpen(true);
+                }}
                 batchCart={batchCart}
                 batchCartCount={batchCart.length}
                 activeActionRow={activeActionRow}
@@ -556,6 +569,15 @@ export default function InventoryPage() {
         renderAvatar={renderAvatar}
       />
 
+      <PostToShopModal 
+        isOpen={isPostToShopModalOpen}
+        onClose={() => setIsPostToShopModalOpen(false)}
+        item={selectedItem}
+        onConfirm={(item) => {
+          // Success feedback already in modal
+        }}
+      />
+
       {viewingItem && (
         <InventoryItemDetail 
           item={viewingItem}
@@ -566,5 +588,13 @@ export default function InventoryPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function InventoryPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InventoryPageContent />
+    </Suspense>
   );
 }

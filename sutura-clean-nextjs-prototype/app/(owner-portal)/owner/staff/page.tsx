@@ -28,7 +28,9 @@ const MODULE_LABELS = {
   reports: 'Reports & Analytics'
 };
 
-export default function StaffPage() {
+import { Suspense } from 'react';
+
+function StaffPageContent() {
   const { staff, orders, branches, addStaff, pushNotification } = useERPStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'All' | StaffRole>('All');
@@ -117,16 +119,16 @@ export default function StaffPage() {
     <div className="space-y-0 animate-in fade-in duration-500 max-w-[1200px] mx-auto pb-20">
       
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 px-2">
         <div>
-          <h1 className="text-[32px] font-black text-slate-900 tracking-tight leading-none">User Accounts</h1>
-          <p className="text-[14px] text-slate-500 font-bold mt-2 uppercase tracking-widest">System Access & User Controls</p>
+          <h1 className="text-[32px] font-bold font-sans text-[#1C1917] tracking-tight leading-none">User Account</h1>
+          <p className="text-[14px] text-[#78716C] mt-2">Managing the skilled hands and creative minds of our Workshop.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="h-12 px-6 bg-slate-900 text-white rounded-[18px] flex items-center gap-2 text-[13px] font-black hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95"
+          className="h-12 px-8 bg-slate-900 text-white rounded-xl flex items-center gap-3 text-[14px] font-bold shadow-lg hover:shadow-slate-900/20 transition-all active:scale-95 group"
         >
-          <Plus size={18} /> Add User Account
+          <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" /> Invite Artisan
         </button>
       </div>
 
@@ -156,5 +158,13 @@ export default function StaffPage() {
       />
 
     </div>
+  );
+}
+
+export default function StaffPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <StaffPageContent />
+    </Suspense>
   );
 }

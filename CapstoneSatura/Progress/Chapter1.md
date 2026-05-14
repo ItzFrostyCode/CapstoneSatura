@@ -84,7 +84,7 @@ The project functions as an all-in-one assistant that automates the administrati
 It allows tailors to store exact body measurements and design preferences digitally, ensuring precision in every order. Simultaneously, the integrated supply chain module
 monitors the stock of fabrics and hardware in real-time. When materials run low, the
 system proactively alerts the owner and facilitates seamless communication with
-registered suppliers. This innovative approach ensures that artisans can focus on their
+registered suppliers. This innovative approach ensures that Staffs can focus on their
 creative craft rather than manual paperwork and inventory struggles. Listed below are the specific purposes of the study:
 Centralized Digital Records: To allow business owners and staff to instantly record and
 retrieve detailed customer measurements and design preferences through a secure

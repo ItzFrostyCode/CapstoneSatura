@@ -1,222 +1,265 @@
 'use client';
+
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, ArrowRight, Camera, Scissors, QrCode, Clock, Star, X } from 'lucide-react';
-import TrackingTimeline from '@/components/customer/TrackingTimeline';
+import { 
+  Scissors, Clock, ChevronRight, Star, Ruler, Calendar, ArrowUpRight, 
+  CheckCircle2, AlertCircle, X, MapPin, Sparkles, MessageSquare,
+  TrendingUp, Award, Zap
+} from "lucide-react";
+import { useERPStore } from "@/store/useERPStore";
 
-export default function CustomerPortal() {
-  const [orderId, setOrderId] = useState('');
-  const [isTracking, setIsTracking] = useState(false);
+// --- BOOKING MODAL ---
+const BookConsultationModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  const { currentShop, addAppointment } = useERPStore();
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("10:00 AM");
+  const [notes, setNotes] = useState("");
 
-  const handleTrack = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (orderId.trim()) {
-      setIsTracking(true);
-    }
+  if (!isOpen) return null;
+
+  const handleBook = () => {
+    if (!date) return alert("Please select a date");
+    addAppointment({
+      branch_id: "BRN-001",
+      customer: "CUST-001",
+      email: "unknown@example.com",
+      phone: "000-000-0000",
+      type: "Consultation",
+      category: "Initial Design",
+      status: "Pending Review",
+      source: "Online",
+      date: date,
+      startTime: time,
+      duration: 45,
+      notes: notes,
+      staff: "Unassigned"
+    });
+    onClose();
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* 1. HERO SECTION (Track Order First) */}
-      <section className="bg-slate-900 text-white pt-24 pb-32 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-        
-        <div className="max-w-3xl mx-auto text-center relative z-10">
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-6">
-            Track Your Bespoke Garment.
-          </h1>
-          <p className="text-lg text-slate-300 font-medium mb-12 max-w-xl mx-auto">
-            Enter your Order ID below to see live updates on your tailoring progress, from pattern drafting to final fitting.
-          </p>
-
-          <form onSubmit={handleTrack} className="flex flex-col sm:flex-row items-center gap-3 max-w-2xl mx-auto">
-            <div className="relative w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-              <input 
-                type="text" 
-                placeholder="e.g. ORD-2026-98X2"
-                className="w-full h-14 pl-12 pr-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-slate-400 focus:bg-white focus:text-slate-900 focus:outline-none transition-all text-lg font-bold"
-                value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
-              />
-            </div>
-            <button 
-              type="submit"
-              className="w-full sm:w-auto h-14 px-8 bg-white text-slate-900 font-black text-[15px] rounded-xl hover:bg-slate-100 transition-colors shrink-0 shadow-xl"
-            >
-              Track Order
-            </button>
-            <button 
-              type="button"
-              className="w-full sm:w-auto h-14 px-5 bg-white/10 text-white border border-white/20 font-bold text-[15px] rounded-xl hover:bg-white/20 transition-colors shrink-0 flex items-center justify-center gap-2"
-              title="Scan QR Code from Receipt"
-            >
-              <QrCode size={20} />
-            </button>
-          </form>
-
-          <div className="mt-8">
-             <span className="text-slate-400 text-sm font-medium">Or</span>
-             <Link href="#book" className="inline-block ml-4 text-white font-bold underline underline-offset-4 hover:text-indigo-300 transition-colors">
-               Book a new consultation
-             </Link>
-          </div>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={onClose} />
+      <div className="relative bg-white w-full max-w-[500px] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Request Consultation</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400"><X size={24} /></button>
         </div>
-      </section>
 
-      {/* TRACKING RESULT SECTION */}
-      {isTracking && (
-        <section className="max-w-4xl mx-auto px-6 -mt-16 relative z-20 mb-20 animate-in slide-in-from-bottom-8 duration-500">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 md:p-12">
-            <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-10 pb-10 border-b border-slate-100">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">Active Order</span>
-                  <span className="text-slate-400 font-bold text-[13px]">Ordered on May 10, 2026</span>
-                </div>
-                <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Order #{orderId || 'ORD-2026-98X2'}</h2>
-                <div className="flex flex-wrap gap-4 text-slate-500 font-medium text-[14px]">
-                  <span className="flex items-center gap-1.5"><Scissors size={14} className="text-indigo-500" /> Bespoke 3-Piece Silk Suit</span>
-                  <span className="flex items-center gap-1.5"><Clock size={14} className="text-indigo-500" /> Est. Delivery: June 15, 2026</span>
-                </div>
-              </div>
-
-              {/* Shop Owner Info Card */}
-              <div className="w-full md:w-[320px] bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shrink-0">
-                    <Scissors size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-slate-900 text-[15px]">SUTURA Flagship</h3>
-                    <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Shop Owner: J. Wayman</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <Star size={12} className="fill-amber-400 text-amber-400" />
-                    <span className="text-[13px] font-black">4.9</span>
-                  </div>
-                  <button className="text-[12px] font-black text-indigo-600 hover:text-indigo-700 transition-colors uppercase tracking-widest">Contact Shop</button>
-                </div>
-              </div>
-
-              <button 
-                onClick={() => setIsTracking(false)}
-                className="absolute top-8 right-8 text-slate-400 hover:text-slate-900 transition-colors"
-                title="Close"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-12">
-              <div className="md:col-span-2">
-                <h3 className="text-xl font-black text-slate-900 mb-8">Production Status</h3>
-                <TrackingTimeline currentStatus="in_production" />
-              </div>
-              <div className="bg-slate-50/50 rounded-2xl p-8 border border-slate-100 h-fit">
-                <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-6">Recent Movement</h4>
-                <div className="space-y-6">
-                  {[
-                    { status: 'In Production', time: 'Today, 10:30 AM', note: 'Fabric cutting completed.' },
-                    { status: 'Materials Sourced', time: 'Yesterday', note: 'Silk blend verified.' },
-                    { status: 'Order Confirmed', time: 'May 10', note: 'Deposit received.' },
-                  ].map((log, i) => (
-                    <div key={i} className="relative pl-4 border-l-2 border-slate-200">
-                      <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-300"></div>
-                      <p className="text-[13px] font-black text-slate-900">{log.status}</p>
-                      <p className="text-[11px] text-slate-400 font-bold uppercase">{log.time}</p>
-                      <p className="text-[12px] text-slate-500 font-medium mt-1">{log.note}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+        <div className="space-y-6">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Date</label>
+            <input 
+              type="date" 
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full h-14 px-5 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all font-bold"
+            />
           </div>
-        </section>
-      )}
 
-      {/* 2. DISCOVERY SECTION (Shops & Designers) */}
-      <section className="max-w-7xl mx-auto px-6 py-24">
-        <div className="grid md:grid-cols-2 gap-16">
-          
-          {/* Explore Shops */}
-          <div>
-            <div className="flex justify-between items-end mb-8">
-              <div>
-                <h2 className="text-2xl font-black text-slate-900 mb-2">Local Tailors</h2>
-                <p className="text-slate-500 font-medium">Find specialized tailoring shops near you.</p>
-              </div>
-              <Link href="/customer/shops" className="text-[14px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 group">
-                View All <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-
-            <div className="grid gap-6">
-              {[
-                { name: 'Davao Famous Tailoring', type: 'Classic Bespoke & Uniforms', loc: 'San Pedro St., Davao City', img: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?auto=format&fit=crop&q=80&w=800' },
-                { name: "Chard's Tailoring", type: 'Modern Tailoring & Formal Wear', loc: 'Ponciano St., Davao City', img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=800' }
-              ].map((shop, i) => (
-                <div key={i} className="flex gap-4 p-4 rounded-2xl bg-white border border-slate-100 hover:shadow-lg transition-all cursor-pointer group">
-                  <img src={shop.img} alt={shop.name} className="w-24 h-24 rounded-xl object-cover" />
-                  <div className="flex flex-col justify-center">
-                    <h3 className="font-bold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{shop.name}</h3>
-                    <span className="text-sm text-slate-500 mb-1">{shop.type}</span>
-                    <span className="text-[12px] font-bold text-slate-400">{shop.loc}</span>
-                  </div>
-                </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Preferred Time</label>
+            <select 
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full h-14 px-5 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all font-bold appearance-none"
+            >
+              {["10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"].map(t => (
+                <option key={t} value={t}>{t}</option>
               ))}
-            </div>
+            </select>
           </div>
 
-          {/* Meet Designers */}
-          <div>
-            <div className="flex justify-between items-end mb-8">
-              <div>
-                <h2 className="text-2xl font-black text-slate-900 mb-2">Featured Designers</h2>
-                <p className="text-slate-500 font-medium">Browse portfolios and request custom blueprints.</p>
-              </div>
-              <Link href="/customer/designs" className="text-[14px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 group">
-                View All <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { name: 'Edgar Buyan', style: 'Contemporary Ethnic', img: '/mockups/designer-edgar.png' },
-                { name: 'Aztec Barba', style: 'Avant-Garde Formal', img: '/mockups/designer-aztec.png' }
-              ].map((designer, i) => (
-                <div key={i} className="relative aspect-[3/4] rounded-2xl overflow-hidden group cursor-pointer shadow-lg">
-                  <img src={designer.img} alt={designer.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
-                  <div className="absolute bottom-0 left-0 p-5">
-                    <h3 className="text-white font-black text-lg mb-1 tracking-tight">{designer.name}</h3>
-                    <p className="text-indigo-300 text-[12px] font-black uppercase tracking-widest">{designer.style}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Design Notes</label>
+            <textarea 
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Describe your vision..."
+              className="w-full h-32 p-5 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all font-medium resize-none"
+            />
           </div>
 
-        </div>
-      </section>
-
-      {/* 3. BOOK CONSULTATION CALLOUT */}
-      <section id="book" className="max-w-5xl mx-auto px-6 pb-24">
-        <div className="bg-slate-900 rounded-[32px] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div>
-            <h2 className="text-3xl font-black text-white mb-4">Ready for something custom?</h2>
-            <p className="text-slate-400 font-medium text-lg max-w-md">
-              Book a walk-in fitting or online consultation with any of our Premium shops and designers.
-            </p>
-          </div>
-          <button className="h-14 px-8 bg-white text-slate-900 font-black text-[15px] rounded-xl hover:bg-slate-100 transition-colors shrink-0 shadow-xl">
-            Book Consultation
+          <button 
+            onClick={handleBook}
+            className="w-full h-16 bg-slate-900 text-emerald-400 rounded-2xl text-[15px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl active:scale-95"
+          >
+            Submit Request
           </button>
         </div>
-      </section>
+      </div>
+    </div>
+  );
+};
 
+export default function CustomerDashboard() {
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const { appointments, getEnrichedOrders } = useERPStore();
+  
+  const activeOrders = getEnrichedOrders().filter(o => !["RELEASED", "CANCELLED"].includes(o.status));
+  const upcomingApts = appointments.filter(a => new Date(a.date) >= new Date()).slice(0, 3);
+
+  return (
+    <div className="max-w-[1200px] mx-auto py-8 font-outfit animate-in fade-in duration-700">
+      <BookConsultationModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
+      
+      {/* WELCOME HEADER */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-md border border-emerald-100">
+              Verified Client
+            </span>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
+              <MapPin size={10} /> Manila Studio
+            </span>
+          </div>
+          <h1 className="text-[42px] font-black text-slate-900 tracking-tight leading-none">
+            Hello, <span className="text-slate-400 italic">Maria.</span>
+          </h1>
+          <p className="text-slate-500 font-medium text-lg mt-2">You have <span className="text-slate-900 font-bold">{activeOrders.length} active orders</span> in production.</p>
+        </div>
+      </div>
+
+      {/* KPI GRID */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {[
+          { label: "Active Orders", value: activeOrders.length, icon: Scissors, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Loyalty Points", value: "850", icon: Award, color: "text-amber-600", bg: "bg-amber-50" },
+          { label: "Saved Specs", value: "04", icon: Ruler, color: "text-indigo-600", bg: "bg-indigo-50" },
+          { label: "Voucher Credits", value: "₱1.2k", icon: Zap, color: "text-rose-600", bg: "bg-rose-50" },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+            <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+              <stat.icon size={22} />
+            </div>
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">{stat.label}</div>
+            <div className="text-3xl font-black text-slate-900">{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        
+        {/* PRODUCTION TRACKING */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h3 className="text-[20px] font-black text-slate-900 tracking-tight flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-emerald-600 rounded-full" />
+              Production Status
+            </h3>
+            <Link href="/customer/orders" className="text-[12px] font-black text-emerald-600 hover:underline uppercase tracking-widest">Archive</Link>
+          </div>
+          
+          <div className="space-y-6">
+            {activeOrders.map((order) => (
+              <div key={order.id} className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden flex flex-col sm:flex-row hover:shadow-xl transition-all group">
+                <div className="w-full sm:w-[220px] h-[220px] relative bg-slate-100">
+                  <img 
+                    src={"https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=400&q=80"}
+                    alt="Garment" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                  />
+                  <div className="absolute inset-0 bg-black/5" />
+                </div>
+                <div className="flex-1 p-8 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{order.id}</div>
+                        <h4 className="text-[22px] font-black text-slate-900 tracking-tight">{order.items?.[0]?.garment_name || "Bespoke Suit"}</h4>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[14px] font-black text-slate-900">Tailoring Shopsatura</div>
+                        <div className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Est: {new Date(order.due_date).toLocaleDateString()}</div>
+                      </div>
+                    </div>
+                    
+                    {/* ENHANCED PROGRESS */}
+                    <div className="mt-8">
+                      <div className="flex justify-between items-end mb-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 size={16} className="text-emerald-500" />
+                          <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">{order.status.replace("_", " ")}</span>
+                        </div>
+                        <span className="text-[14px] font-black text-slate-900 italic">65% Complete</span>
+                      </div>
+                      <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
+                        <div className="h-full w-[65%] bg-emerald-500 rounded-full relative">
+                          <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 mt-8">
+                    <Link href={"/customer/orders/" + order.id} className="flex-1 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center text-[13px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-[0.98]">
+                      Real-time Tracking
+                    </Link>
+                    <button className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-900 transition-all">
+                      <MessageSquare size={18} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT SIDEBAR */}
+        <div className="space-y-8">
+          
+          {/* APPOINTMENTS CARD */}
+          <div className="bg-slate-900 rounded-[40px] p-8 text-white shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:scale-150 transition-transform duration-1000" />
+            <h3 className="text-[20px] font-black mb-8 flex items-center gap-3">
+              <Calendar size={22} className="text-emerald-400" /> Upcoming
+            </h3>
+            <div className="space-y-5">
+              {upcomingApts.map((apt, i) => (
+                <div key={i} className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
+                  <div className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mb-1">{new Date(apt.date).toLocaleDateString()} • {apt.startTime}</div>
+                  <div className="text-[16px] font-black">{apt.type.charAt(0) + apt.type.slice(1).toLowerCase()}</div>
+                  <div className="text-[12px] text-slate-400 font-medium">Main Studio • {apt.status}</div>
+                </div>
+              ))}
+              {upcomingApts.length === 0 && (
+                <div className="text-center py-6 text-slate-500 font-bold text-sm">No scheduled sessions</div>
+              )}
+            </div>
+          </div>
+
+          {/* MEASUREMENT SUMMARY */}
+          <div className="bg-white rounded-[40px] border border-slate-100 p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-lg font-black text-slate-900">Measurement Profiles</h3>
+              <Ruler size={20} className="text-slate-300" />
+            </div>
+            <div className="space-y-6">
+              {[
+                { name: "Bespoke Suit Profile", date: "Updated Apr 12", status: "Verified" },
+                { name: "Traditional Barong", date: "Updated Jan 05", status: "Outdated" },
+              ].map((p, i) => (
+                <div key={i} className="flex items-center justify-between pb-6 border-b border-slate-50 last:border-0 last:pb-0">
+                  <div>
+                    <div className="text-[14px] font-black text-slate-900 mb-0.5">{p.name}</div>
+                    <div className="text-[11px] text-slate-400 font-medium uppercase tracking-widest">{p.date}</div>
+                  </div>
+                  <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${p.status === 'Verified' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                    {p.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <Link href="/customer/measurements" className="w-full h-14 mt-8 bg-slate-50 text-slate-900 rounded-2xl flex items-center justify-center text-[13px] font-black hover:bg-slate-100 transition-all">
+              Manage Measurements
+            </Link>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }
+

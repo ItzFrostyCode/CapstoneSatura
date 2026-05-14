@@ -150,64 +150,66 @@ export default function AppointmentsPage() {
   };
 
   return (
-    <div className="space-y-0 animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-20">
-      {/* HEADER SECTION */}
-      <div className="flex items-center justify-between mb-8 px-2">
-        <div>
-          <h1 className="text-[32px] font-black text-slate-900 tracking-tight leading-none">Appointment Management</h1>
-          <p className="text-[13px] text-slate-500 font-bold mt-2 uppercase tracking-widest flex items-center gap-2">
-            Manage customer appointments, fittings, pickups, and online booking requests.
-          </p>
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-[1450px] mx-auto pb-20">
+      <main className="max-w-[1450px] mx-auto px-10 pt-8 space-y-8">
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-4">
+          <div>
+            <h1 className="text-[28px] font-black text-slate-900 tracking-tight flex items-center gap-3">
+              Consultations
+            </h1>
+            <p className="text-slate-500 mt-1 font-medium">Manage fitting schedules, client meetings, and workflow logistics.</p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <button 
+               onClick={() => setIsCreateModalOpen(true)}
+               className="h-10 px-5 bg-slate-900 text-white rounded-full flex items-center gap-2 text-[12px] font-bold hover:bg-indigo-600 transition-all shadow-md active:scale-95"
+             >
+               <Plus size={16} /> New Appointment
+             </button>
+          </div>
         </div>
-        <button 
-          onClick={() => setIsCreateModalOpen(true)}
-          className="h-12 px-8 bg-slate-900 text-white rounded-[20px] flex items-center gap-3 text-[14px] font-black hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95 group"
-        >
-          <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" /> Schedule Walk In Appointment
-        </button>
-      </div>
+        <AppointmentKPIs appointments={appointments} />
 
-      <AppointmentKPIs appointments={appointments} />
+        {/* MASTER CONTAINER */}
+        <div className="bg-white border border-slate-200 rounded-[32px] shadow-sm overflow-hidden">
+          {/* INTEGRATED HEADER: SEARCH & TABS */}
+          <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between gap-8">
+            {/* SEARCH (LEFT) */}
+            <div className="relative max-w-sm w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search sessions..." 
+                className="h-10 w-full pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-slate-900 transition-all shadow-sm"
+              />
+            </div>
 
-      {/* TABS & SEARCH */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 px-2">
-        <div className="flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-full w-fit">
-          {[
-            { id: 'calendar', label: 'Schedule', icon: Calendar },
-            { id: 'requests', label: 'Online Requests', icon: ClipboardList },
-            { id: 'today', label: 'Today', icon: Clock },
-            { id: 'history', label: 'History', icon: History }
-          ].map(tab => (
-            <button 
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as 'requests' | 'today' | 'calendar' | 'history')}
-              className={`px-6 py-2 text-[12px] font-bold capitalize transition-all rounded-full flex items-center gap-2 ${
-                activeTab === tab.id 
-                  ? 'bg-white text-slate-900 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              <tab.icon size={16} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
+            {/* TABS (RIGHT) */}
+            <div className="flex items-center gap-1.5 bg-slate-200/50 p-1 rounded-xl w-fit border border-slate-200/60 shadow-inner">
+              {[
+                { id: 'calendar', label: 'Master Schedule', icon: <Calendar size={14} /> },
+                { id: 'requests', label: 'Client Requests', icon: <ClipboardList size={14} /> },
+                { id: 'today', label: 'Today', icon: <Clock size={14} /> },
+                { id: 'history', label: 'Archive', icon: <History size={14} /> }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 px-6 py-2 text-[11px] font-black rounded-lg transition-all duration-300 uppercase tracking-widest ${activeTab === tab.id ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'}`}
+                >
+                  {tab.icon}{tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text"
-            placeholder="Search appointments..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-11 pl-12 pr-6 bg-slate-50 border border-slate-200 rounded-full text-[14px] font-medium outline-none focus:bg-white focus:ring-4 focus:ring-slate-900/5 transition-all shadow-sm"
-          />
-        </div>
-      </div>
-
-      {/* TAB CONTENT */}
-      <div className="px-2">
-        {activeTab === 'requests' && (
+          {/* TAB CONTENT */}
+          <div className="px-0">
+            {activeTab === 'requests' && (
           <OnlineRequestsTable 
             requests={onlineRequests}
             onApprove={handleApprove}
@@ -310,7 +312,9 @@ export default function AppointmentsPage() {
             </div>
           </div>
         )}
-      </div>
+          </div>
+        </div>
+      </main>
 
       {/* MODALS */}
       <ConfirmScheduleModal 

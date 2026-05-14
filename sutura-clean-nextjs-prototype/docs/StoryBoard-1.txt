@@ -1,0 +1,26 @@
+Simple Hotel Booking System Storyboard
+Panel
+Visual Description
+User Action / System Response
+1. Home Screen / Search
+A clean homepage featuring a search widget with fields for Location, Check-in Date, Check-out Date, and Guests.
+User enters desired location ("Davao City") and dates, then taps the "Search" button.
+2. Search Results
+A list of available hotels matching the criteria. Each result shows a photo, hotel name, star rating, price per night, and a "View Details" button.
+User scrolls through options and selects "View Details" for a preferred hotel.
+3. Hotel Details
+A dedicated page for the selected hotel with multiple images, amenities list, room types/prices, map location, and a prominent "Book Now" button.
+User reviews details and decides to proceed by tapping "Book Now".
+4. Room Selection
+A screen listing available room types (e.g., Standard, Deluxe, Suite) with specific features and prices.
+User selects the desired room type (e.g., "Deluxe Room") and quantity, then taps "Continue Booking".
+5. Guest Information
+A form requiring the user to fill in personal details: Full Name, Email, Phone Number, and any special requests.
+User fills out the required information and taps "Proceed to Payment".
+6. Payment Details
+A secure form to enter credit card information or select an alternative payment method (e.g., PayPal). A summary of the total cost is visible.
+User enters payment information and taps the final "Confirm Booking" button.
+7. Confirmation Screen
+A success message (e.g., "Booking Confirmed!"), a booking reference number, and a summary of the reservation details. An email confirmation is also triggered.
+User views the confirmation and receives a confirmation email. The journey is complete.
+

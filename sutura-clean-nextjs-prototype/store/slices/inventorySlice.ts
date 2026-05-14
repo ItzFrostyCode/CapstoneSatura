@@ -34,6 +34,9 @@ export interface InventorySlice {
   addMovement: (mov: Partial<InventoryMovement>) => void;
   saveRecipe: (recipe: BOMRecipe) => void;
   executeAssembly: (productId: string, qty: number, performedBy: string) => void;
+  
+  // Persistence initialization
+  initializeInventory: (shopId: string) => Promise<void>;
 
   // Actions
   recordInventoryTransaction: (
@@ -45,7 +48,7 @@ export interface InventorySlice {
     variant_id?: string
   ) => void;
 
-  adjustStock: (branchId: string, itemId: string, qty: number, type: 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT', performedBy: string) => void;
+  adjustStock: (branchId: string, itemId: string, qty: number, type: 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT', performedBy: string) => Promise<void>;
 
   reserveStock: (
     jobOrderId: string, branchId: string, itemId: string, qty: number, performedBy?: string
@@ -53,7 +56,7 @@ export interface InventorySlice {
 
   releaseStock: (reservationId: string, qty: number, performedBy?: string) => void;
 
-  receiveStock: (branchId: string, itemId: string, qty: number, unitCost: number, referenceId: string, supplierId?: string, performedBy?: string) => void;
+  receiveStock: (branchId: string, itemId: string, qty: number, unitCost: number, referenceId: string, supplierId?: string, performedBy?: string) => Promise<void>;
   recordBatchRelease: (customerId: string, jobOrderId: string, items: InventoryItem[], paymentStatus: string) => void;
   transferStock: (transfer: Omit<StockTransfer, "id" | "status" | "created_at">) => void;
 }
@@ -120,32 +123,31 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
 
   // ── Normalized actions ─────────────────────────────────────────
 
-  adjustStock: (branchId, itemId, qty, type, performedBy) => {
-    set((state) => {
-      const movement: InventoryMovement = {
-        id: `MOV-${Date.now()}`,
-        shop_id: 'SHOP-001', branch_id: branchId, inventory_item_id: itemId,
-        movement_type: type, qty,
-        reference_type: 'ADJUSTMENT', reference_id: `ADJ-${Date.now()}`,
-        performed_by_user_id: performedBy ?? 'STF-001',
-        created_at: new Date().toISOString(),
-      };
-      const delta = type === 'ADJUSTMENT_IN' ? qty : -qty;
-      const updatedStock = state.inventoryStock.map(s =>
-        s.branch_id === branchId && s.inventory_item_id === itemId
-          ? { ...s, on_hand_qty: s.on_hand_qty + delta, available_qty: s.available_qty + delta, updated_at: new Date().toISOString() }
-          : s
-      );
-      const newMovements = [...state.inventoryMovements, movement];
-      return { 
-        inventoryMovements: newMovements, 
-        inventoryTransactions: newMovements,
-        movements: newMovements,
-        inventoryStock: updatedStock
-      };
+  initializeInventory: async (shopId) => {
+    const { getInventory } = await import('@/lib/actions/inventory');
+    const result = await getInventory(shopId);
+    if (result.success && result.data) {
+      set({ inventory: result.data as any });
+    }
+  },
+
+  adjustStock: async (branchId, itemId, qty, type, performedBy) => {
+    const { recordStockMovement } = await import('@/lib/actions/inventory');
+    const result = await recordStockMovement({
+      branchId,
+      inventoryItemId: itemId,
+      movementType: type === 'ADJUSTMENT_IN' ? 'ADJUSTMENT_IN' : 'ADJUSTMENT_OUT', // Mapping to DB enum
+      quantity: qty,
+      userId: performedBy || 'STF-001',
+      referenceType: 'ADJUSTMENT',
     });
-    
-    get().pushNotification(`Stock successfully adjusted. Inventory and audit logs updated.`, 'success');
+
+    if (result.success) {
+      // Re-fetch or update local state
+      get().pushNotification(`Stock successfully adjusted in database.`, 'success');
+    } else {
+      get().pushNotification(`Failed to adjust stock: ${result.error}`, 'error');
+    }
   },
 
   // ── Legacy / Page-specific Actions ─────────────────────────────
@@ -319,63 +321,23 @@ export const createInventorySlice: StateCreator<ERPStore, [], [], InventorySlice
     };
   }),
 
-  receiveStock: (branchId, itemId, qty, unitCost, referenceId, supplierId, performedBy) => {
-    set((state) => {
-      const movement: InventoryMovement = {
-        id: `MOV-${Date.now()}`,
-        shop_id: 'SHOP-001',
-        branch_id: branchId,
-        inventory_item_id: itemId,
-        movement_type: 'RECEIVE',
-        qty,
-        unit_cost: unitCost,
-        reference_type: 'PURCHASE_ORDER',
-        reference_id: referenceId,
-        supplier_id: supplierId,
-        performed_by_user_id: performedBy ?? 'STF-001',
-        created_at: new Date().toISOString(),
-        notes: `Stock In-take: ${referenceId}`,
-      };
-
-      const updatedStock = state.inventoryStock.map(s =>
-        s.branch_id === branchId && s.inventory_item_id === itemId
-          ? { ...s, on_hand_qty: s.on_hand_qty + qty, available_qty: s.available_qty + qty, updated_at: new Date().toISOString() }
-          : s
-      );
-
-      const updatedInventory = state.inventory.map(item => {
-        if (item.id === itemId) {
-          const currentQty = item.stock || 0;
-          const currentAvg = item.weighted_average_cost || item.unit_cost || item.cost || 0;
-          
-          const incomingValue = qty * unitCost;
-          const currentTotalValue = currentQty * currentAvg;
-          const newQty = currentQty + qty;
-          const newAvg = newQty > 0 ? (incomingValue + currentTotalValue) / newQty : unitCost;
-          
-          return { 
-            ...item, 
-            stock: newQty, 
-            weighted_average_cost: Number(newAvg.toFixed(2)),
-            last_purchase_price: unitCost,
-            unit_cost: Number(newAvg.toFixed(2)), // Keep legacy synced
-            cost: Number(newAvg.toFixed(2)),      // Keep legacy synced
-            updated_at: new Date().toISOString()
-          };
-        }
-        return item;
-      });
-
-      const newMovements = [movement, ...state.inventoryMovements];
-      return {
-        inventoryMovements: newMovements,
-        inventoryTransactions: newMovements,
-        movements: newMovements,
-        inventoryStock: updatedStock,
-        inventory: updatedInventory,
-      };
+  receiveStock: async (branchId, itemId, qty, unitCost, referenceId, supplierId, performedBy) => {
+    const { recordStockMovement } = await import('@/lib/actions/inventory');
+    const result = await recordStockMovement({
+      branchId,
+      inventoryItemId: itemId,
+      movementType: 'RECEIVE',
+      quantity: qty,
+      userId: performedBy || 'STF-001',
+      referenceType: 'PURCHASE_ORDER',
+      referenceId,
     });
-    get().pushNotification(`Stock Intake Successful: +${qty} units. Average cost updated.`, 'success');
+
+    if (result.success) {
+      get().pushNotification(`Stock Intake Successful: +${qty} units. Average cost updated in database.`, 'success');
+    } else {
+      get().pushNotification(`Failed to receive stock: ${result.error}`, 'error');
+    }
   },
 
   transferStock: (transferData) => {

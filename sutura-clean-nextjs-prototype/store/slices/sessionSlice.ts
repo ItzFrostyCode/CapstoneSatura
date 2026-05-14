@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand';
-import { User, Shop, ShopBranch, ERPNotification, Staff, PlanLevel, AuditLog, Subscription } from '@/types/erp';
-import { INITIAL_SHOPS, INITIAL_BRANCHES, INITIAL_STAFF } from '@/mocks/mockData';
+import { User, Shop, ShopBranch, ERPNotification, Staff, PlanLevel, AuditLog, Subscription, DesignerSubscription, SHOP_PLAN_CONFIG } from '@/types/erp';
+import { INITIAL_SHOPS, INITIAL_BRANCHES, INITIAL_STAFF, INITIAL_SHOP_SUBSCRIPTIONS } from '@/mocks/mockData';
 import { ERPStore } from '../useERPStore';
 
 export interface SessionSlice {
@@ -24,32 +24,29 @@ export interface SessionSlice {
   addStaff: (staff: Omit<Staff, 'id' | 'staffCode'>) => void;
   addBranch: (branch: Omit<ShopBranch, 'id' | 'created_at' | 'updated_at'>) => void;
   pushAuditLog: (log: Omit<AuditLog, 'id' | 'timestamp'>) => void;
+  /** Upgrade or downgrade the current shop subscription */
+  updateSubscription: (plan: PlanLevel, billingCycle: 'MONTHLY' | 'ANNUAL') => void;
+  updateShopBranding: (data: Partial<Shop>) => void;
+  // Persistence initialization
+  initializeSession: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const createSessionSlice: StateCreator<ERPStore, [], [], SessionSlice> = (set, get) => ({
-  currentUser: { 
-    id: 'USR-001', 
-    name: 'John Clock', 
-    email: 'johncloc@gmail.com', 
-    avatar: 'https://api.dicebear.com/7.x/big-smile/svg?seed=Molang&backgroundColor=b6e3f4', 
-    role: 'SHOP_OWNER', 
-    status: 'ACTIVE', 
-    createdAt: new Date().toISOString() 
+  currentUser: {
+    id: 'STF-001',
+    name: 'John Clock',
+    role: 'SHOP_OWNER',
+    email: 'john@sutura.com',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John%20Clock&backgroundColor=b6e3f4',
+    status: 'ACTIVE',
+    createdAt: new Date('2025-01-01').toISOString(),
   },
   currentShop: INITIAL_SHOPS[0],
   currentBranch: INITIAL_BRANCHES[0],
-  currentPlan: 'PREMIUM',
-  currentSubscription: {
-    id: 'SUB-PREM-001',
-    planName: 'Monthly Premium Plan',
-    planLevel: 'PREMIUM',
-    status: 'ACTIVE',
-    maxBranches: 10,
-    maxStaff: 50,
-    startDate: '2026-05-01T00:00:00Z',
-    endDate: '2026-06-01T00:00:00Z',
-    price: 4999
-  },
+  currentPlan: 'Workshop',
+  // Seed from subscriptions mock — SHOP-001 is an annual Workshop subscriber
+  currentSubscription: INITIAL_SHOP_SUBSCRIPTIONS[0],
   branches: INITIAL_BRANCHES,
   auditLogs: [],
   hasUnsavedChanges: false,
@@ -137,4 +134,51 @@ export const createSessionSlice: StateCreator<ERPStore, [], [], SessionSlice> = 
     };
     return { auditLogs: [newLog, ...state.auditLogs] };
   }),
+
+  updateSubscription: (plan, billingCycle) => set((state) => {
+    const config = SHOP_PLAN_CONFIG[plan];
+    const now = new Date();
+    const end = new Date(now);
+    end.setMonth(end.getMonth() + (billingCycle === 'ANNUAL' ? 12 : 1));
+    const price = billingCycle === 'ANNUAL' ? config.annualPrice : config.monthlyPrice;
+    const updated: Subscription = {
+      id: state.currentSubscription?.id || `SUB-${Date.now()}`,
+      shop_id: state.currentShop?.id || 'SHOP-001',
+      planName: config.name,
+      planLevel: plan,
+      status: 'ACTIVE',
+      billing_cycle: billingCycle,
+      maxBranches: config.features.maxBranches,
+      maxStaff: config.features.maxStaffAccounts,
+      startDate: now.toISOString(),
+      endDate: end.toISOString(),
+      price,
+      auto_renew: true,
+      upgraded_from: state.currentPlan !== plan ? state.currentPlan : undefined,
+      upgraded_at: state.currentPlan !== plan ? now.toISOString() : undefined,
+    };
+    return { currentSubscription: updated, currentPlan: plan };
+  }),
+  updateShopBranding: (data) => set((state) => ({
+    currentShop: state.currentShop ? { ...state.currentShop, ...data } : null
+  })),
+
+  initializeSession: async () => {
+    const { getAuthSession } = await import('@/lib/actions/auth');
+    const result = await getAuthSession();
+    if (result.success && result.data) {
+      set({
+        currentUser: result.data.user as any,
+        currentShop: result.data.shop as any,
+        currentBranch: result.data.branch as any,
+      });
+    }
+  },
+
+  logout: async () => {
+    const { logoutUser } = await import('@/lib/actions/auth');
+    await logoutUser();
+    set({ currentUser: null, currentShop: null, currentBranch: null });
+    window.location.href = '/login';
+  }
 });

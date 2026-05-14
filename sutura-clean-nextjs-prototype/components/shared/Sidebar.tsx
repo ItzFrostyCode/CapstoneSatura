@@ -39,7 +39,7 @@ const designerNavItems: NavItem[] = [
   { name: 'Showcase', path: '/designer/portfolio', icon: <Palette size={20} /> },
   { name: 'Inquiries', path: '/designer/requests', icon: <ShoppingBag size={20} /> },
   { name: 'Consultations', path: '/designer/appointments', icon: <Calendar size={20} /> },
-  { name: 'Blueprints', path: '/designer/projects', icon: <Scissors size={20} /> },
+  { name: 'Blueprints', path: '/designer/blueprints', icon: <Scissors size={20} /> },
   { name: 'Support', path: '/designer/support', icon: <HelpCircle size={20} /> },
 ];
 
@@ -48,7 +48,6 @@ const ownerNavItems: NavItem[] = [
   { name: 'Customers', path: '/owner/customers', icon: <UserPlus size={20} /> },
   { name: 'Consultations', path: '/owner/appointments', icon: <Calendar size={20} /> },
   { name: 'Orders', path: '/owner/orders', icon: <ShoppingBag size={20} /> },
-  { name: 'Design Proposals', path: '/owner/design-proposals', icon: <Palette size={20} /> },
   { name: 'Inventory', path: '/owner/inventory', icon: <PackageSearch size={20} /> },
   { name: 'Suppliers', path: '/owner/suppliers', icon: <Building2 size={20} /> },
   { name: 'User Account', path: '/owner/staff', icon: <Users size={20} /> },
