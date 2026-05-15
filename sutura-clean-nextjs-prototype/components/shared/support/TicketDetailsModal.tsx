@@ -71,13 +71,17 @@ export function TicketDetailsModal({ ticketId, onClose }: { ticketId: string; on
         <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50 custom-scrollbar space-y-8">
           
           {ticket.messages.map((msg, index) => {
-            const isHQ = msg.sender === 'HQ Admin';
+            const isStaff = msg.sender === 'HQ Admin';
+            const senderLabel = isStaff 
+              ? (pathname.includes('/customer') ? 'Sutura Support' : 'HQ Admin') 
+              : msg.senderName;
+
             return (
-              <div key={msg.id} className={`flex gap-4 ${isHQ ? '' : 'flex-row-reverse'}`}>
+              <div key={msg.id} className={`flex gap-4 ${isStaff ? '' : 'flex-row-reverse'}`}>
                 
                 {/* Avatar */}
                 <div className="shrink-0 mt-1">
-                  {isHQ ? (
+                  {isStaff ? (
                     <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-md">
                       <ShieldCheck size={20} />
                     </div>
@@ -89,16 +93,16 @@ export function TicketDetailsModal({ ticketId, onClose }: { ticketId: string; on
                 </div>
 
                 {/* Message Bubble */}
-                <div className={`max-w-[75%] ${isHQ ? '' : 'text-right'}`}>
-                  <div className={`flex items-center gap-2 mb-1 ${isHQ ? '' : 'justify-end'}`}>
-                    <span className="text-[13px] font-black text-slate-900">{msg.senderName}</span>
+                <div className={`max-w-[75%] ${isStaff ? '' : 'text-right'}`}>
+                  <div className={`flex items-center gap-2 mb-1 ${isStaff ? '' : 'justify-end'}`}>
+                    <span className="text-[13px] font-black text-slate-900">{senderLabel}</span>
                     <span className="text-[11px] font-bold text-slate-400">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                   
                   <div className={`p-4 text-[15px] leading-relaxed font-medium text-left ${
-                    isHQ 
+                    isStaff 
                       ? 'bg-white border border-slate-200 rounded-2xl rounded-tl-sm text-slate-700 shadow-sm' 
                       : 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm shadow-md'
                   }`}>
@@ -107,7 +111,7 @@ export function TicketDetailsModal({ ticketId, onClose }: { ticketId: string; on
 
                   {/* Attachments */}
                   {msg.attachments && msg.attachments.length > 0 && (
-                    <div className={`flex gap-2 mt-2 ${isHQ ? '' : 'justify-end'}`}>
+                    <div className={`flex gap-2 mt-2 ${isStaff ? '' : 'justify-end'}`}>
                       {msg.attachments.map(att => (
                         <div key={att.id} className="flex items-center gap-2 p-2 bg-white border border-slate-200 rounded-xl shadow-sm cursor-pointer hover:border-indigo-300 transition-colors">
                           <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-500">

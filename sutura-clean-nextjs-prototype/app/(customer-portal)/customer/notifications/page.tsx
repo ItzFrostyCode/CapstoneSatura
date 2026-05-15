@@ -92,32 +92,19 @@ export default function NotificationsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <section className="bg-slate-900 pt-28 pb-16 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-amber-400 via-transparent to-transparent" />
-        <div className="max-w-3xl mx-auto relative z-10">
-          <div className="flex items-center gap-3 mb-3">
-            <Bell size={20} className="text-amber-400" />
-            <span className="text-amber-400 text-[12px] font-black uppercase tracking-widest">Notifications</span>
-          </div>
-          <div className="flex items-end justify-between">
-            <div>
-              <h1 className="text-4xl font-black text-white tracking-tight mb-2">Notifications</h1>
-              <p className="text-slate-400 font-medium">Stay updated on your orders, appointments, and payments.</p>
-            </div>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllRead}
-                className="h-10 px-4 bg-white/10 border border-white/20 text-white text-[12px] font-black uppercase tracking-widest rounded-xl hover:bg-white/20 transition-all"
-              >
-                Mark all read
-              </button>
-            )}
-          </div>
+    <main className="min-h-screen bg-[#FAF8F5] pt-4">
+      <div className="max-w-3xl mx-auto px-6 pb-24">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-[0.2em]">Activity Feed</h2>
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllRead}
+              className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline"
+            >
+              Mark all read
+            </button>
+          )}
         </div>
-      </section>
-
-      <div className="max-w-3xl mx-auto px-6 -mt-6 pb-24">
         {unreadCount > 0 && (
           <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-6 flex items-center gap-3">
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white shrink-0">

@@ -34,7 +34,7 @@ export default function proxy(request: NextRequest) {
 
   // 4. Portal access rules
   const PORTAL_RULES: Array<{ prefix: string; allowedRoles: SessionRole[] }> = [
-    { prefix: '/customer', allowedRoles: ['customer', 'admin'] },
+    { prefix: '/customer', allowedRoles: ['customer', 'owner', 'staff', 'admin'] },
     { prefix: '/owner',    allowedRoles: ['owner', 'admin'] },
     { prefix: '/staff',    allowedRoles: ['staff', 'owner', 'admin'] },
     { prefix: '/admin',    allowedRoles: ['admin'] },

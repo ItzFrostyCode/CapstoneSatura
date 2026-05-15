@@ -67,17 +67,17 @@ export default function ExploreShops() {
 
 
   return (
-    <main className="min-h-screen bg-[#FAF8F5]">
+    <main className="min-h-screen bg-[#FAF8F5] font-poppins">
       {/* 1. SEARCH & FILTER HEADER */}
-      <section className="bg-[#1E3A1F] pt-40 pb-24 px-8 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#C9A84C] via-transparent to-transparent"></div>
+      <section className="bg-slate-900 pt-40 pb-24 px-8 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent"></div>
         <div className="max-w-7xl mx-auto relative z-10 text-center">
           <div className="flex justify-center mb-6">
-             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 rounded-full text-[#C9A84C] text-[12px] font-bold uppercase tracking-widest backdrop-blur-md border border-white/10">
+             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 rounded-full text-blue-400 text-[12px] font-bold uppercase tracking-widest backdrop-blur-md border border-white/10">
                 <Sparkles size={14} /> Discovery Engine
              </div>
           </div>
-          <h1 className="text-4xl md:text-7xl font-bold font-serif text-[#FAF8F5] tracking-tight mb-8">
+          <h1 className="text-4xl md:text-7xl font-bold text-[#FAF8F5] tracking-tight mb-8">
             The Master Artisan Directory
           </h1>
           <p className="text-lg text-[#FAF8F5]/60 font-medium mb-16 max-w-2xl mx-auto">
@@ -86,18 +86,18 @@ export default function ExploreShops() {
 
           <div className="flex flex-col md:flex-row items-center gap-4 max-w-4xl mx-auto">
             <div className="relative flex-1 w-full group">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#FAF8F5]/40 group-focus-within:text-[#C9A84C] transition-colors" size={24} />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#FAF8F5]/40 group-focus-within:text-blue-400 transition-colors" size={24} />
               <input 
                 type="text" 
                 placeholder="Search by name, city, or bespoke service..."
-                className="w-full h-20 pl-16 pr-8 rounded-[24px] bg-white/5 border border-white/10 text-white placeholder:text-[#FAF8F5]/30 focus:bg-white focus:text-[#1C1917] outline-none transition-all text-xl font-medium shadow-2xl backdrop-blur-md"
+                className="w-full h-20 pl-16 pr-8 rounded-[24px] bg-white/5 border border-white/10 text-white placeholder:text-[#FAF8F5]/30 focus:bg-white focus:text-slate-900 outline-none transition-all text-xl font-medium shadow-2xl backdrop-blur-md"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <button 
               onClick={() => setIsMapModalOpen(true)}
-              className="h-20 px-10 bg-[#C9A84C] text-[#1E3A1F] rounded-[24px] font-bold text-[18px] flex items-center gap-3 hover:bg-[#B49540] transition-all shrink-0 shadow-xl"
+              className="h-20 px-10 bg-slate-100 text-slate-900 rounded-[24px] font-bold text-[18px] flex items-center gap-3 hover:bg-white transition-all shrink-0 shadow-xl"
             >
               <Map size={22} /> View WorkshopMap
             </button>
@@ -115,14 +115,14 @@ export default function ExploreShops() {
       <section className="max-w-7xl mx-auto px-8 py-24">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
           <div>
-            <h2 className="text-3xl font-bold font-serif text-[#1C1917] tracking-tight">Verified Workshop</h2>
-            <p className="text-[#78716C] font-bold uppercase tracking-widest text-[12px] mt-2 opacity-60">Showing 14 Houses in Metro Davao</p>
+            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Verified Workshop</h2>
+            <p className="text-slate-500 font-bold uppercase tracking-widest text-[12px] mt-2 opacity-60">Showing 14 Houses in Metro Davao</p>
           </div>
           <div className="flex items-center gap-4">
-             <button className="h-14 px-8 rounded-2xl border border-[#E2DDD7] bg-white text-[#1C1917] font-bold flex items-center gap-3 hover:bg-[#FAF8F5] transition-all shadow-sm">
+             <button className="h-14 px-8 rounded-2xl border border-slate-200 bg-white text-slate-900 font-bold flex items-center gap-3 hover:bg-slate-50 transition-all shadow-sm">
                 <Filter size={18} /> Filters
              </button>
-             <select className="h-14 px-8 rounded-2xl border border-[#E2DDD7] bg-white text-[#1C1917] font-bold outline-none cursor-pointer shadow-sm">
+             <select className="h-14 px-8 rounded-2xl border border-slate-200 bg-white text-slate-900 font-bold outline-none cursor-pointer shadow-sm">
                 <option>Curated Selection</option>
                 <option>Highest Rating</option>
                 <option>Elite Experience</option>
@@ -133,7 +133,7 @@ export default function ExploreShops() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {SHOPS.map((shop) => (
-            <div key={shop.id} className="group relative flex flex-col md:flex-row bg-white rounded-[48px] overflow-hidden border border-[#E2DDD7] hover:shadow-2xl hover:shadow-[#1E3A1F]/5 transition-all duration-500 cursor-pointer">
+            <div key={shop.id} className="group relative flex flex-col md:flex-row bg-white rounded-[48px] overflow-hidden border border-slate-200 hover:shadow-2xl hover:shadow-slate-900/5 transition-all duration-500 cursor-pointer">
               {/* Image Section */}
               <div className="w-full md:w-[320px] h-[320px] relative shrink-0 overflow-hidden">
                 <Image 
@@ -143,11 +143,11 @@ export default function ExploreShops() {
                   className="object-cover group-hover:scale-110 transition-transform duration-1000" 
                 />
                 {shop.isVerified && (
-                  <div className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 bg-[#1E3A1F] text-[#C9A84C] rounded-full text-[10px] font-bold uppercase tracking-widest shadow-xl">
+                  <div className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-full text-[10px] font-bold uppercase tracking-widest shadow-xl">
                     <ShieldCheck size={14} /> Satura Verified
                   </div>
                 )}
-                <div className="absolute bottom-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-[11px] font-bold text-[#1C1917] border border-[#E2DDD7]/50">
+                <div className="absolute bottom-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-[11px] font-bold text-slate-900 border border-slate-200/50">
                   {shop.status}
                 </div>
               </div>
@@ -157,55 +157,55 @@ export default function ExploreShops() {
                 <div>
                   <div className="flex justify-between items-start mb-6">
                     <div>
-                      <h3 className="text-2xl font-bold font-serif text-[#1C1917] tracking-tight group-hover:text-[#1E3A1F] transition-colors">{shop.name}</h3>
-                      <div className="flex items-center gap-2 text-[#78716C] font-bold text-[13px] mt-2">
-                        <MapPin size={14} className="text-[#C9A84C]" /> {shop.location}
+                      <h3 className="text-2xl font-bold text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">{shop.name}</h3>
+                      <div className="flex items-center gap-2 text-slate-500 font-bold text-[13px] mt-2">
+                        <MapPin size={14} className="text-slate-400" /> {shop.location}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-[#FAF8F5] px-4 py-2 rounded-2xl border border-[#E2DDD7]">
-                      <Star size={16} className="fill-[#C9A84C] text-[#C9A84C]" />
-                      <span className="text-[15px] font-bold text-[#1C1917]">{shop.rating}</span>
+                    <div className="flex items-center gap-1.5 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200">
+                      <Star size={16} className="fill-blue-500 text-blue-500" />
+                      <span className="text-[15px] font-bold text-slate-900">{shop.rating}</span>
                     </div>
                   </div>
 
-                  <p className="text-[15px] text-[#78716C] font-medium mb-8 leading-relaxed line-clamp-2">
+                  <p className="text-[15px] text-slate-500 font-medium mb-8 leading-relaxed line-clamp-2">
                     {shop.type} orchestrating {shop.specialties.join(' & ')} for the discerning client.
                   </p>
 
                   <div className="flex flex-wrap gap-2 mb-8">
                     {shop.specialties.map((s, i) => (
-                      <span key={i} className="px-4 py-1.5 bg-[#FAF8F5] text-[#1E3A1F] rounded-xl text-[12px] font-bold border border-[#E2DDD7]">
+                      <span key={i} className="px-4 py-1.5 bg-slate-50 text-slate-900 rounded-xl text-[12px] font-bold border border-slate-200">
                         {s}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="pt-8 border-t border-[#F0EDE8] flex flex-wrap items-center justify-between gap-6">
+                <div className="pt-8 border-t border-slate-100 flex flex-wrap items-center justify-between gap-6">
                   <div className="flex items-center gap-4">
                     <div className="flex -space-x-3 shrink-0">
                       {[1,2,3].map(i => (
-                        <div key={i} className="w-9 h-9 rounded-full border-2 border-white bg-[#F0EDE8] overflow-hidden shadow-sm">
+                        <div key={i} className="w-9 h-9 rounded-full border-2 border-white bg-slate-100 overflow-hidden shadow-sm">
                           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${shop.id}${i}`} alt="user" className="w-full h-full object-cover" />
                         </div>
                       ))}
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[15px] font-bold text-[#1C1917] leading-none">{shop.reviews}</span>
-                      <span className="text-[10px] font-bold text-[#78716C] uppercase tracking-widest mt-1 opacity-60">Verified Reviews</span>
+                      <span className="text-[15px] font-bold text-slate-900 leading-none">{shop.reviews}</span>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1 opacity-60">Verified Reviews</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-3">
                     <Link 
                       href={`/customer/profile/${shop.id === 'SH-001' ? 'davao-famous' : 'chard'}`}
-                      className="h-12 px-6 rounded-xl text-[13px] font-bold text-[#78716C] hover:text-[#1C1917] hover:bg-[#FAF8F5] transition-all uppercase tracking-widest"
+                      className="h-12 px-6 rounded-xl text-[13px] font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all uppercase tracking-widest"
                     >
                       House Profile
                     </Link>
                     <Link 
                       href={`/customer/book?provider=${encodeURIComponent(shop.name)}`}
-                      className="h-12 px-8 rounded-xl bg-[#1E3A1F] text-[#C9A84C] text-[13px] font-bold flex items-center gap-2 hover:bg-[#1C1917] transition-all shadow-lg shadow-[#1E3A1F]/20 uppercase tracking-widest"
+                      className="h-12 px-8 rounded-xl bg-slate-900 text-white text-[13px] font-bold flex items-center gap-2 hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 uppercase tracking-widest"
                     >
                       Book Workshop<ArrowRight size={16} />
                     </Link>
@@ -219,22 +219,22 @@ export default function ExploreShops() {
 
       {/* 3. PARTNERSHIP CALLOUT */}
       <section className="max-w-7xl mx-auto px-8 pb-40">
-        <div className="bg-[#1E3A1F] rounded-[64px] p-16 md:p-24 flex flex-col md:flex-row items-center gap-16 relative overflow-hidden shadow-2xl shadow-[#1E3A1F]/20">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full -mr-40 -mt-40 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full -ml-40 -mb-40 blur-3xl" />
+        <div className="bg-slate-900 rounded-[64px] p-16 md:p-24 flex flex-col md:flex-row items-center gap-16 relative overflow-hidden shadow-2xl shadow-slate-900/20">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full -mr-40 -mt-40 blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full -ml-40 -mb-40 blur-3xl" />
           
-          <div className="w-24 h-24 bg-[#C9A84C] text-[#1E3A1F] rounded-[32px] flex items-center justify-center shrink-0 shadow-xl group-hover:rotate-12 transition-transform">
+          <div className="w-24 h-24 bg-white/10 text-white rounded-[32px] flex items-center justify-center shrink-0 shadow-xl group-hover:rotate-12 transition-transform backdrop-blur-md border border-white/10">
             <Scissors size={48} />
           </div>
           <div className="max-w-2xl text-center md:text-left relative z-10">
-            <h2 className="text-4xl font-bold font-serif text-[#FAF8F5] mb-6">List Your Distinguished House</h2>
+            <h2 className="text-4xl font-bold text-[#FAF8F5] mb-6">List Your Distinguished House</h2>
             <p className="text-xl text-[#FAF8F5]/60 font-medium leading-relaxed">
               Join the SUTURA network to connect with high-discretion clients and orchestrate your workshop with our master ERP suite.
             </p>
           </div>
           <Link 
             href="/register" 
-            className="h-16 px-12 bg-[#C9A84C] text-[#1E3A1F] rounded-2xl font-bold text-[18px] hover:bg-[#B49540] transition-all shadow-xl flex items-center justify-center shrink-0 ml-auto relative z-10"
+            className="h-16 px-12 bg-white text-slate-900 rounded-2xl font-bold text-[18px] hover:bg-slate-100 transition-all shadow-xl flex items-center justify-center shrink-0 ml-auto relative z-10"
           >
             Become a Partner
           </Link>

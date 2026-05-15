@@ -8,6 +8,8 @@ export interface CustomerSlice {
   measurementProfiles: MeasurementProfile[];
   appointments: Appointment[];
   fittingSessions: FittingSession[];
+  followedShops: string[];
+  heartedItems: string[];
   addCustomer: (customer: Partial<Customer>) => Customer;
   updateCustomer: (id: string, updates: Partial<Customer>) => void;
   addMeasurementProfile: (profile: Partial<MeasurementProfile>) => MeasurementProfile;
@@ -16,9 +18,8 @@ export interface CustomerSlice {
   updateAppointment: (id: string, updates: Partial<Appointment>) => void;
   updateAppointmentStatus: (id: string, status: Appointment['status']) => void;
   deleteAppointment: (id: string) => void;
-  updateMeasurementProfile: (id: string, updates: Partial<MeasurementProfile>) => void;
-  deleteMeasurementProfile: (id: string) => void;
-  recordFittingAdjustment: (previousProfile: MeasurementProfile, adjustmentData: Partial<MeasurementProfile>, sessionData: Partial<FittingSession>) => void;
+  toggleFollowShop: (shopId: string) => void;
+  toggleHeartItem: (itemId: string) => void;
 }
 
 export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> = (set, get) => ({
@@ -26,6 +27,8 @@ export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> 
   measurementProfiles: INITIAL_MEASUREMENTS,
   appointments: INITIAL_APPOINTMENTS,
   fittingSessions: [],
+  followedShops: ['SHOP-001'], // Default follow for demo
+  heartedItems: ['ITM-001', 'ITM-002'], // Default hearts for demo
   addCustomer: (customer: Partial<Customer>) => {
     let newObj: Customer | null = null;
     set((state) => {
@@ -41,9 +44,20 @@ export const createCustomerSlice: StateCreator<ERPStore, [], [], CustomerSlice> 
     });
     return newObj as unknown as Customer;
   },
+  toggleFollowShop: (shopId) => set((state) => ({
+    followedShops: state.followedShops.includes(shopId) 
+      ? state.followedShops.filter(id => id !== shopId)
+      : [...state.followedShops, shopId]
+  })),
+  toggleHeartItem: (itemId) => set((state) => ({
+    heartedItems: state.heartedItems.includes(itemId)
+      ? state.heartedItems.filter(id => id !== itemId)
+      : [...state.heartedItems, itemId]
+  })),
   updateCustomer: (id: string, updates: Partial<Customer>) => set((state) => ({
     customers: state.customers.map((c) => (c.id === id ? { ...c, ...updates } : c))
   })),
+  // ... rest of the slice remains the same ...
   addMeasurementProfile: (profile: Partial<MeasurementProfile>) => {
     let newObj: MeasurementProfile | null = null;
     set((state) => {

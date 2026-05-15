@@ -3,15 +3,14 @@
 import { useState } from 'react';
 import {
   CreditCard, CheckCircle, AlertCircle, Clock, TrendingUp,
-  ArrowUpRight, Users, Building2, Sparkles, RotateCcw, X
+  ArrowUpRight, Sparkles, RotateCcw, X
 } from 'lucide-react';
 import {
   INITIAL_SHOP_SUBSCRIPTIONS,
-  INITIAL_DESIGNER_SUBSCRIPTIONS,
   PLATFORM_REVENUE_MAY_2026,
 } from '@/mocks/subscriptions';
-import { SHOP_PLAN_CONFIG, DESIGNER_PLAN_CONFIG } from '@/types/erp';
-import type { Subscription, DesignerSubscription, SubscriptionStatus, PlanLevel, DesignerPlanLevel } from '@/types/erp';
+import { SHOP_PLAN_CONFIG } from '@/types/erp';
+import type { SubscriptionStatus, PlanLevel } from '@/types/erp';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -35,44 +34,26 @@ const SHOP_PLAN_CFG: Record<PlanLevel, { color: string; bg: string; badge: strin
   Workshop:      { color: 'text-amber-700',  bg: 'bg-amber-50',   badge: '👑' },
 };
 
-const DSN_PLAN_CFG: Record<DesignerPlanLevel, { color: string; bg: string; badge: string }> = {
-  PORTFOLIO: { color: 'text-slate-600',   bg: 'bg-slate-50',   badge: '🎨' },
-  STUDIO:    { color: 'text-violet-700',  bg: 'bg-violet-50',  badge: '🖋️' },
-  MAISON:    { color: 'text-rose-700',    bg: 'bg-rose-50',    badge: '💎' },
-};
-
 // Augmented shop demo data (name, owner, email not in Subscription type — overlay for display)
 const SHOP_META: Record<string, { shopName: string; ownerName: string; email: string }> = {
-  'SHOP-001': { shopName: 'Davao Tailors PH',       ownerName: 'John Clock',       email: 'johncloc@sutura.ph'    },
+  'SHOP-001': { shopName: 'SUTURA',       ownerName: 'John Clock',       email: 'johncloc@sutura.ph'    },
   'SHOP-002': { shopName: 'Santos Bridal Gallery',      ownerName: 'Maria Santos',     email: 'msantos@sutura.ph'     },
   'SHOP-003': { shopName: 'Reyes Alterations Corner',   ownerName: 'Pedro Reyes',      email: 'preyes@sutura.ph'      },
   'SHOP-004': { shopName: 'Dela Cruz Bespoke',          ownerName: 'Elena Dela Cruz',  email: 'edelacruz@sutura.ph'   },
   'SHOP-005': { shopName: 'Mariposa Fashion Studio',    ownerName: 'Sofia Mariposa',   email: 'smariposa@sutura.ph'   },
 };
 
-const DSN_META: Record<string, { designerName: string; email: string }> = {
-  'DSN-001': { designerName: 'Isabella de Guzman', email: 'isabelle@sutura.ph'  },
-  'DSN-002': { designerName: 'Miguel Santos',       email: 'miguel@sutura.ph'   },
-  'DSN-003': { designerName: 'Lea Reyes',           email: 'lea@sutura.ph'      },
-};
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
-type ActiveTab = 'shops' | 'designers';
 type StatusFilter = 'all' | SubscriptionStatus;
 
 export default function AdminSubscriptionsPage() {
-  const [tab, setTab] = useState<ActiveTab>('shops');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const rev = PLATFORM_REVENUE_MAY_2026;
 
   const shopSubs = statusFilter === 'all'
     ? INITIAL_SHOP_SUBSCRIPTIONS
     : INITIAL_SHOP_SUBSCRIPTIONS.filter(s => s.status === statusFilter);
-
-  const dsnSubs = statusFilter === 'all'
-    ? INITIAL_DESIGNER_SUBSCRIPTIONS
-    : INITIAL_DESIGNER_SUBSCRIPTIONS.filter(s => s.status === statusFilter);
 
   return (
     <div className="relative min-h-full pb-20 pt-6 space-y-8">
@@ -88,7 +69,7 @@ export default function AdminSubscriptionsPage() {
               Subscription Management
             </h1>
             <p className="text-[13px] text-slate-500 font-medium mt-1">
-              {rev.period} · {rev.activeShopSubscriptions} shops · {rev.activeDesignerSubscriptions} designers
+              {rev.period} · {rev.activeShopSubscriptions} shops
             </p>
           </div>
         </div>
@@ -108,8 +89,8 @@ export default function AdminSubscriptionsPage() {
           },
           {
             label: 'Active Plans',
-            val: rev.activeShopSubscriptions + rev.activeDesignerSubscriptions,
-            sub: `${rev.activeShopSubscriptions} shops · ${rev.activeDesignerSubscriptions} designers`,
+            val: rev.activeShopSubscriptions,
+            sub: `${rev.activeShopSubscriptions} shops active`,
             icon: CheckCircle,
             color: 'text-indigo-600',
             bg: 'bg-indigo-50',
@@ -169,43 +150,10 @@ export default function AdminSubscriptionsPage() {
             </div>
           );
         })}
-        <div className="w-px h-6 bg-slate-200 self-center mx-2" />
-        {(Object.keys(DESIGNER_PLAN_CONFIG) as DesignerPlanLevel[]).map(plan => {
-          const count = rev.designerPlanBreakdown[plan];
-          const cfg = DSN_PLAN_CFG[plan];
-          return (
-            <div
-              key={plan}
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[11px] font-black ${cfg.bg} ${cfg.color} border-current/20`}
-            >
-              <span>{cfg.badge}</span>
-              <span>{DESIGNER_PLAN_CONFIG[plan].name}</span>
-              <span className="opacity-60">({count})</span>
-            </div>
-          );
-        })}
       </div>
 
-      {/* ── Tabs + Filters ── */}
+      {/* ── Filters ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit">
-          {([
-            { id: 'shops',     label: 'Shops',     icon: Building2 },
-            { id: 'designers', label: 'Designers', icon: Users     },
-          ] as { id: ActiveTab; label: string; icon: React.ElementType }[]).map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-[12px] font-black transition-all ${
-                tab === t.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <t.icon size={14} />
-              {t.label}
-            </button>
-          ))}
-        </div>
-
         <div className="flex gap-2 flex-wrap">
           {(['all', 'ACTIVE', 'TRIAL', 'EXPIRED', 'PENDING', 'CANCELLED'] as const).map(f => (
             <button
@@ -224,167 +172,88 @@ export default function AdminSubscriptionsPage() {
       </div>
 
       {/* ── Shops Table ── */}
-      {tab === 'shops' && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-[2.5fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            <span>Shop</span>
-            <span>Plan</span>
-            <span>Status</span>
-            <span>Billing</span>
-            <span>Renews</span>
-            <span>MRR</span>
-          </div>
-
-          {shopSubs.map((sub) => {
-            const meta = SHOP_META[sub.shop_id] ?? { shopName: sub.shop_id, ownerName: '—', email: '—' };
-            const planCfg = SHOP_PLAN_CFG[sub.planLevel];
-            const statusCfg = STATUS_CFG[sub.status];
-            const StatusIcon = statusCfg.icon;
-            const remaining = daysLeft(sub.endDate);
-            const planPrice = sub.billing_cycle === 'ANNUAL'
-              ? SHOP_PLAN_CONFIG[sub.planLevel].annualPrice / 12
-              : SHOP_PLAN_CONFIG[sub.planLevel].monthlyPrice;
-
-            return (
-              <div
-                key={sub.id}
-                className="grid grid-cols-[2.5fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-slate-50 last:border-0 items-center hover:bg-slate-50/40 transition-colors"
-              >
-                <div>
-                  <div className="text-[14px] font-black text-slate-900">{meta.shopName}</div>
-                  <div className="text-[11px] text-slate-400 font-medium">
-                    {meta.ownerName} · {meta.email}
-                  </div>
-                  {sub.upgraded_from && (
-                    <div className="text-[10px] text-indigo-500 font-bold mt-0.5">
-                      ↑ Upgraded from {sub.upgraded_from}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${planCfg.bg} ${planCfg.color}`}>
-                    {SHOP_PLAN_CFG[sub.planLevel].badge} {sub.planName}
-                  </span>
-                </div>
-
-                <div>
-                  <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
-                    <StatusIcon size={10} /> {sub.status}
-                  </span>
-                </div>
-
-                <div className="text-[12px] font-bold text-slate-600 uppercase tracking-wide">
-                  {sub.billing_cycle}
-                </div>
-
-                <div>
-                  <div className="text-[12px] font-bold text-slate-900">
-                    {new Date(sub.endDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </div>
-                  {sub.status === 'ACTIVE' && remaining <= 30 && (
-                    <div className="text-[11px] font-bold text-amber-600">{remaining}d left</div>
-                  )}
-                  {sub.status === 'TRIAL' && (
-                    <div className="text-[11px] font-bold text-indigo-500">{remaining}d trial</div>
-                  )}
-                </div>
-
-                <div className="text-right">
-                  <div className="text-[14px] font-black text-slate-900">
-                    {sub.price === 0 ? 'Free' : formatPHP(planPrice)}
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-medium">/mo equiv</div>
-                </div>
-              </div>
-            );
-          })}
-
-          {shopSubs.length === 0 && (
-            <div className="py-16 text-center">
-              <CreditCard size={32} className="mx-auto text-slate-200 mb-3" />
-              <p className="text-slate-400 font-bold text-[13px] uppercase tracking-widest">No subscriptions</p>
-            </div>
-          )}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="grid grid-cols-[2.5fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          <span>Shop</span>
+          <span>Plan</span>
+          <span>Status</span>
+          <span>Billing</span>
+          <span>Renews</span>
+          <span>MRR</span>
         </div>
-      )}
 
-      {/* ── Designers Table ── */}
-      {tab === 'designers' && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="grid grid-cols-[2.5fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            <span>Designer</span>
-            <span>Plan</span>
-            <span>Status</span>
-            <span>Billing</span>
-            <span>Renews</span>
-            <span>MRR</span>
-          </div>
+        {shopSubs.map((sub) => {
+          const meta = SHOP_META[sub.shop_id] ?? { shopName: sub.shop_id, ownerName: '—', email: '—' };
+          const planCfg = SHOP_PLAN_CFG[sub.planLevel];
+          const statusCfg = STATUS_CFG[sub.status];
+          const StatusIcon = statusCfg.icon;
+          const remaining = daysLeft(sub.endDate);
+          const planPrice = sub.billing_cycle === 'ANNUAL'
+            ? SHOP_PLAN_CONFIG[sub.planLevel].annualPrice / 12
+            : SHOP_PLAN_CONFIG[sub.planLevel].monthlyPrice;
 
-          {dsnSubs.map((sub) => {
-            const meta = DSN_META[sub.designer_id] ?? { designerName: sub.designer_id, email: '—' };
-            const planCfg = DSN_PLAN_CFG[sub.planLevel];
-            const statusCfg = STATUS_CFG[sub.status];
-            const StatusIcon = statusCfg.icon;
-            const remaining = daysLeft(sub.endDate);
-            const planPrice = sub.billing_cycle === 'ANNUAL'
-              ? DESIGNER_PLAN_CONFIG[sub.planLevel].annualPrice / 12
-              : DESIGNER_PLAN_CONFIG[sub.planLevel].monthlyPrice;
-
-            return (
-              <div
-                key={sub.id}
-                className="grid grid-cols-[2.5fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-slate-50 last:border-0 items-center hover:bg-slate-50/40 transition-colors"
-              >
-                <div>
-                  <div className="text-[14px] font-black text-slate-900">{meta.designerName}</div>
-                  <div className="text-[11px] text-slate-400 font-medium">{meta.email}</div>
+          return (
+            <div
+              key={sub.id}
+              className="grid grid-cols-[2.5fr_1fr_1fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-slate-50 last:border-0 items-center hover:bg-slate-50/40 transition-colors"
+            >
+              <div>
+                <div className="text-[14px] font-black text-slate-900">{meta.shopName}</div>
+                <div className="text-[11px] text-slate-400 font-medium">
+                  {meta.ownerName} · {meta.email}
                 </div>
-
-                <div>
-                  <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${planCfg.bg} ${planCfg.color}`}>
-                    {DSN_PLAN_CFG[sub.planLevel].badge} {sub.planName}
-                  </span>
-                </div>
-
-                <div>
-                  <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
-                    <StatusIcon size={10} /> {sub.status}
-                  </span>
-                </div>
-
-                <div className="text-[12px] font-bold text-slate-600 uppercase tracking-wide">
-                  {sub.billing_cycle}
-                </div>
-
-                <div>
-                  <div className="text-[12px] font-bold text-slate-900">
-                    {new Date(sub.endDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {sub.upgraded_from && (
+                  <div className="text-[10px] text-indigo-500 font-bold mt-0.5">
+                    ↑ Upgraded from {sub.upgraded_from}
                   </div>
-                  {sub.status === 'ACTIVE' && remaining <= 30 && (
-                    <div className="text-[11px] font-bold text-amber-600">{remaining}d left</div>
-                  )}
-                </div>
-
-                <div className="text-right">
-                  <div className="text-[14px] font-black text-slate-900">
-                    {sub.price === 0 ? 'Free' : formatPHP(planPrice)}
-                  </div>
-                  <div className="text-[10px] text-slate-400 font-medium">/mo equiv</div>
-                </div>
+                )}
               </div>
-            );
-          })}
 
-          {dsnSubs.length === 0 && (
-            <div className="py-16 text-center">
-              <Users size={32} className="mx-auto text-slate-200 mb-3" />
-              <p className="text-slate-400 font-bold text-[13px] uppercase tracking-widest">No designer subscriptions</p>
+              <div>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${planCfg.bg} ${planCfg.color}`}>
+                  {SHOP_PLAN_CFG[sub.planLevel].badge} {sub.planName}
+                </span>
+              </div>
+
+              <div>
+                <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
+                  <StatusIcon size={10} /> {sub.status}
+                </span>
+              </div>
+
+              <div className="text-[12px] font-bold text-slate-600 uppercase tracking-wide">
+                {sub.billing_cycle}
+              </div>
+
+              <div>
+                <div className="text-[12px] font-bold text-slate-900">
+                  {new Date(sub.endDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </div>
+                {sub.status === 'ACTIVE' && remaining <= 30 && (
+                  <div className="text-[11px] font-bold text-amber-600">{remaining}d left</div>
+                )}
+                {sub.status === 'TRIAL' && (
+                  <div className="text-[11px] font-bold text-indigo-500">{remaining}d trial</div>
+                )}
+              </div>
+
+              <div className="text-right">
+                <div className="text-[14px] font-black text-slate-900">
+                  {sub.price === 0 ? 'Free' : formatPHP(planPrice)}
+                </div>
+                <div className="text-[10px] text-slate-400 font-medium">/mo equiv</div>
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          );
+        })}
 
+        {shopSubs.length === 0 && (
+          <div className="py-16 text-center">
+            <CreditCard size={32} className="mx-auto text-slate-200 mb-3" />
+            <p className="text-slate-400 font-bold text-[13px] uppercase tracking-widest">No subscriptions</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

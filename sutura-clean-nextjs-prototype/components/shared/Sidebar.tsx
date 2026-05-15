@@ -34,27 +34,19 @@ const adminNavItems: NavItem[] = [
   { name: 'Business Support', path: '/admin/support', icon: <HelpCircle size={20} /> },
 ];
 
-const designerNavItems: NavItem[] = [
-  { name: 'Dashboard', path: '/designer/dashboard', icon: <Home size={20} /> },
-  { name: 'Showcase', path: '/designer/portfolio', icon: <Palette size={20} /> },
-  { name: 'Inquiries', path: '/designer/requests', icon: <ShoppingBag size={20} /> },
-  { name: 'Consultations', path: '/designer/appointments', icon: <Calendar size={20} /> },
-  { name: 'Blueprints', path: '/designer/blueprints', icon: <Scissors size={20} /> },
-  { name: 'Support', path: '/designer/support', icon: <HelpCircle size={20} /> },
-];
 
 const ownerNavItems: NavItem[] = [
-  { name: 'Dashboard', path: '/owner/dashboard', icon: <Home size={20} /> },
-  { name: 'Customers', path: '/owner/customers', icon: <UserPlus size={20} /> },
-  { name: 'Consultations', path: '/owner/appointments', icon: <Calendar size={20} /> },
-  { name: 'Orders', path: '/owner/orders', icon: <ShoppingBag size={20} /> },
-  { name: 'Inventory', path: '/owner/inventory', icon: <PackageSearch size={20} /> },
-  { name: 'Suppliers', path: '/owner/suppliers', icon: <Building2 size={20} /> },
-  { name: 'User Account', path: '/owner/staff', icon: <Users size={20} /> },
-  { name: 'Branches', path: '/owner/branches', icon: <Building2 size={20} />, roles: ['SHOP_OWNER', 'ADMIN'] },
-  { name: 'Billing', path: '/owner/billing', icon: <Receipt size={20} /> },
-  { name: 'Reports', path: '/owner/reports', icon: <BarChart3 size={20} /> },
-  { name: 'Support', path: '/owner/support', icon: <HelpCircle size={20} /> },
+  { name: 'Dashboard', path: '/shop-owner/dashboard', icon: <Home size={20} /> },
+  { name: 'Customers', path: '/shop-owner/customers', icon: <UserPlus size={20} /> },
+  { name: 'Appointments', path: '/shop-owner/appointments', icon: <Calendar size={20} /> },
+  { name: 'Orders', path: '/shop-owner/orders', icon: <ShoppingBag size={20} /> },
+  { name: 'Inventory', path: '/shop-owner/inventory', icon: <PackageSearch size={20} /> },
+  { name: 'Suppliers', path: '/shop-owner/suppliers', icon: <Building2 size={20} /> },
+  { name: 'User Account', path: '/shop-owner/staff', icon: <Users size={20} /> },
+  { name: 'Branches', path: '/shop-owner/branches', icon: <Building2 size={20} />, roles: ['SHOP_OWNER', 'ADMIN'] },
+  { name: 'Billing', path: '/shop-owner/billing', icon: <Receipt size={20} /> },
+  { name: 'Reports', path: '/shop-owner/reports', icon: <BarChart3 size={20} /> },
+  { name: 'Support', path: '/shop-owner/support', icon: <HelpCircle size={20} /> },
 ];
 
 const staffNavItems: NavItem[] = [
@@ -87,13 +79,14 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
 
       {/* Branding */}
       <div className={`h-24 flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center' : 'px-8 gap-4'}`}>
-        <div className="w-12 h-12 bg-white border border-slate-200/60 rounded-2xl flex items-center justify-center text-slate-900 shrink-0 shadow-sm">
+        <div className="w-12 h-12 bg-white border border-slate-200/60 rounded-2xl flex items-center justify-center text-[#069668] shrink-0 shadow-sm">
           <Scissors size={24} strokeWidth={2.5} />
         </div>
         {!isCollapsed && (
           <div className="animate-in fade-in slide-in-from-left-2 duration-300">
-            <div className="text-[18px] font-black tracking-tight text-slate-900 flex items-center gap-2">
-               <span className="text-[10px] bg-slate-900 text-white px-1.5 py-0.5 rounded ml-1">{currentPlan}</span>
+            <div className="text-[18px] font-black tracking-tight text-slate-900 flex items-center gap-2 uppercase">
+               SUTURA
+               <span className="text-[10px] bg-[#069668] text-white px-1.5 py-0.5 rounded ml-1">{currentPlan}</span>
             </div>
           </div>
         )}
@@ -108,7 +101,6 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
         {/* Dynamic Selection of Nav Items */}
         {(
           pathname.startsWith('/admin') ? adminNavItems :
-          pathname.startsWith('/designer') ? designerNavItems :
           pathname.startsWith('/staff') ? staffNavItems : 
           ownerNavItems
         ).map((item) => {
@@ -126,8 +118,8 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
                 isCollapsed ? 'justify-center w-12' : 'px-4 gap-4 w-full'
               } ${
                 isActive 
-                  ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20' 
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-[#069668] text-white shadow-xl shadow-emerald-600/20' 
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-[#069668]'
               }`}
             >
               <div className={`shrink-0 transition-transform duration-200 ${isActive ? 'scale-110 text-white' : 'text-slate-400 group-hover:text-slate-600'}`}>
@@ -139,7 +131,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
                 </span>
               )}
               {isCollapsed && (
-                <div className="absolute left-16 px-3 py-1.5 bg-slate-900 text-white text-[12px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[100] shadow-xl">
+                <div className="absolute left-16 px-3 py-1.5 bg-[#069668] text-white text-[12px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[100] shadow-xl">
                   {item.name}
                 </div>
               )}

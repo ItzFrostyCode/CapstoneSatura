@@ -65,11 +65,30 @@ export const createSupportSlice: StateCreator<ERPStore, [], [], SupportSlice> = 
           id: 'MSG-002',
           sender: 'HQ Admin',
           senderName: 'Sutura Support',
-          message:
-            'Hello Joshua, we have received your ticket. We are currently looking into the sync issue on the Main Branch database.',
-          timestamp: '2026-05-07T10:45:00Z',
-        },
-      ],
+          message: 'Hello John! We apologize for the inconvenience. Our technical team has identified a database sync issue affecting the profile module. We are currently deploying a fix. Can you try again in about 30 minutes?',
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+        }
+      ]
+    },
+    {
+      id: 'TCK-2605-002',
+      creatorId: 'STF-001',
+      shopId: 'SYSTEM',
+      subject: 'UI Glitch: Dashboard cards are overlapping on mobile',
+      category: 'Technical Issue',
+      status: 'Open',
+      priority: 'Normal',
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+      updatedAt: new Date(Date.now() - 86400000).toISOString(),
+      messages: [
+        {
+          id: 'MSG-003',
+          sender: 'User',
+          senderName: 'John Clock',
+          message: 'The dashboard looks a bit messy on my iPhone. The "My Tailoring" cards are overlapping each other. Can you look into the responsive layout?',
+          timestamp: new Date(Date.now() - 86400000).toISOString(),
+        }
+      ]
     },
 
   ],

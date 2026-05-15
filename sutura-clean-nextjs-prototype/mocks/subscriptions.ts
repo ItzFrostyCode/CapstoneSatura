@@ -6,7 +6,6 @@
 
 import {
   Subscription,
-  DesignerSubscription,
   PlatformRevenueSummary,
 } from '@/types/erp';
 
@@ -115,66 +114,6 @@ export const INITIAL_SHOP_SUBSCRIPTIONS: Subscription[] = [
   },
 ];
 
-// ── DESIGNER SUBSCRIPTIONS ────────────────────────────────────────────────────
-
-/**
- * Demo designer subscriptions.
- * DSN-001 = Isabella de Guzman (Maison — top tier, annual)
- * DSN-002 = Miguel Santos (Studio — monthly)
- * DSN-003 = Lea Reyes (Portfolio — free, limited)
- */
-export const INITIAL_DESIGNER_SUBSCRIPTIONS: DesignerSubscription[] = [
-  // ── DSN-001 · Isabella de Guzman ─────────────────────────
-  // Annual Maison subscriber. Multiple shop partnerships. Verification badge.
-  // Represents an established fashion designer monetizing blueprints.
-  {
-    id: 'SUB-DSN-001',
-    designer_id: 'DSN-001',
-    planName: 'Maison',
-    planLevel: 'MAISON',
-    status: 'ACTIVE',
-    billing_cycle: 'ANNUAL',
-    startDate: new Date('2026-01-01').toISOString(),
-    endDate: new Date('2026-12-31').toISOString(),
-    price: 11990,
-    payment_method: 'GCASH',
-    auto_renew: true,
-  },
-
-  // ── DSN-002 · Miguel Santos ───────────────────────────────
-  // Monthly Studio subscriber. Active consultation calendar.
-  // Represents a growing designer building shop partnerships.
-  {
-    id: 'SUB-DSN-002',
-    designer_id: 'DSN-002',
-    planName: 'Studio',
-    planLevel: 'STUDIO',
-    status: 'ACTIVE',
-    billing_cycle: 'MONTHLY',
-    startDate: new Date('2026-05-01').toISOString(),
-    endDate: new Date('2026-05-31').toISOString(),
-    price: 499,
-    payment_method: 'MAYA',
-    auto_renew: true,
-  },
-
-  // ── DSN-003 · Lea Reyes ───────────────────────────────────
-  // Free Portfolio plan. Has used 3 of 3 monthly consultation slots.
-  // Upsell target: has hit the free limit.
-  {
-    id: 'SUB-DSN-003',
-    designer_id: 'DSN-003',
-    planName: 'Portfolio',
-    planLevel: 'PORTFOLIO',
-    status: 'ACTIVE',
-    billing_cycle: 'MONTHLY',
-    startDate: new Date('2026-05-01').toISOString(),
-    endDate: new Date('2026-05-31').toISOString(),
-    price: 0,
-    payment_method: 'NONE',
-    auto_renew: false,
-  },
-];
 
 // ── PLATFORM REVENUE SUMMARY (Admin Dashboard) ────────────────────────────────
 
@@ -194,18 +133,12 @@ export const PLATFORM_REVENUE_MAY_2026: PlatformRevenueSummary = {
   mrr: 8113,
   arr: 97356,                       // MRR × 12
   activeShopSubscriptions: 4,       // SHOP-001, 002, 003, 005 (SHOP-004 expired)
-  activeDesignerSubscriptions: 3,
   churnRate: 4.2,                   // SHOP-004 lapsed this period
   trialConversionRate: 18.5,        // Historical: 18.5% of Starter → Professional
   planBreakdown: {
     STARTER: 1,                     // SHOP-003
     PROFESSIONAL: 2,                // SHOP-002 + SHOP-005 (trial)
     Workshop: 1,                     // SHOP-001
-  },
-  designerPlanBreakdown: {
-    PORTFOLIO: 1,                   // DSN-003
-    STUDIO: 1,                      // DSN-002
-    MAISON: 1,                      // DSN-001
   },
   totalConsultationFees: 3150,      // 7% of ₱45,000 in bookings
   totalFeaturedRevenue: 1000,       // 2 × ₱500 featured boost
@@ -224,6 +157,4 @@ export const UPSELL_TRIGGERS = {
   starterCustomerWarningAt: 9,
   /** Show consultation booking upsell if shop has received this many walk-in inquiries */
   consultationUpsellThreshold: 5,
-  /** Show designer collaboration upsell if shop profile has been viewed this many times */
-  designerCollaborationUpsellViews: 100,
 } as const;

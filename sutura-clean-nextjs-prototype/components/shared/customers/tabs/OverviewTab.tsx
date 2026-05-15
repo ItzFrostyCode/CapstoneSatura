@@ -106,7 +106,41 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
       </div>
 
       <div className="space-y-8">
-         <div className="bg-slate-900 rounded-[32px] p-8 text-white space-y-6">
+         <div className="bg-slate-900 rounded-[32px] p-8 text-white space-y-6 shadow-2xl">
+            <h3 className="text-[12px] font-black flex items-center gap-2 uppercase tracking-[0.2em] text-indigo-400">
+               Client Identity & Source
+            </h3>
+            <div className="grid grid-cols-1 gap-6">
+               <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Entry Source</div>
+                  <div className={`px-3 py-1 rounded-lg text-[11px] font-black uppercase tracking-widest ${
+                    customer.source === 'ONLINE' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'
+                  }`}>
+                    {customer.source || 'WALKIN'}
+                  </div>
+               </div>
+               <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Professional Category</div>
+                  <div className="text-[13px] font-black text-white uppercase tracking-wider">
+                    {customer.type?.replace('_', ' ') || 'REGULAR CLIENT'}
+                  </div>
+               </div>
+               <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Account Status</div>
+                  <div className={`text-[12px] font-black uppercase tracking-widest ${customer.is_active ? 'text-emerald-400' : 'text-slate-400'}`}>
+                    {customer.is_active ? '● Active' : '○ Inactive'}
+                  </div>
+               </div>
+               <div className="flex items-center justify-between">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Client Since</div>
+                  <div className="text-[13px] font-black text-slate-300">
+                    {new Date(customer.createdAt).toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })}
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div className="bg-white border border-slate-200 rounded-[32px] p-8 space-y-6 shadow-sm">
             <h3 className="text-[16px] font-black flex items-center gap-2">
               <Clock size={18} className="text-indigo-400" /> Recent Fitting
             </h3>

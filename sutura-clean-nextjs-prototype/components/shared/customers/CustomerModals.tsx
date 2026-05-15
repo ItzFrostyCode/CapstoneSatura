@@ -10,6 +10,8 @@ export interface CustomerForm {
   phone: string;
   address: string;
   gender: 'Male' | 'Female';
+  source: string;
+  type: string;
 }
 
 export interface FittingForm {
@@ -104,7 +106,7 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
         <div className="fixed inset-0 z-500 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-[500px] rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Add Customer</h2>
+              <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Register Walk-In Client</h2>
               <button onClick={() => setIsAddCustomerModalOpen(false)} className="w-10 h-10 rounded-xl hover:bg-white flex items-center justify-center text-slate-400 transition-colors"><X size={20} /></button>
             </div>
             <div className="p-8 space-y-6">
@@ -134,8 +136,34 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
                   <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
                   <input type="email" className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" placeholder="customer@example.com" value={customerForm.email} onChange={e => setCustomerForm({...customerForm, email: e.target.value})} />
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Source</label>
+                    <select 
+                      className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" 
+                      value={customerForm.source} 
+                      onChange={e => setCustomerForm({...customerForm, source: e.target.value})}
+                    >
+                      <option value="WALKIN">Walk-in Client</option>
+                      <option value="ONLINE">Online Request</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Customer Type</label>
+                    <select 
+                      className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" 
+                      value={customerForm.type} 
+                      onChange={e => setCustomerForm({...customerForm, type: e.target.value})}
+                    >
+                      <option value="REGULAR">Regular Client</option>
+                      <option value="GROUP">Group / Team</option>
+                      <option value="CORPORATE">Corporate Partner</option>
+                      <option value="FASHION_DESIGNER">Fashion Designer</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <button onClick={handleCreateCustomer} className="w-full h-14 bg-slate-900 text-white rounded-[24px] font-black text-[15px] hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95">Register Profile</button>
+              <button onClick={handleCreateCustomer} className="w-full h-14 bg-slate-900 text-white rounded-[24px] font-black text-[15px] hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 active:scale-95">Register Walk-In Client</button>
             </div>
           </div>
         </div>
@@ -176,8 +204,34 @@ export const CustomerModals: React.FC<CustomerModalsProps> = ({
                   <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
                   <input type="email" className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" value={selectedEditCustomer.email} onChange={e => setSelectedEditCustomer({...selectedEditCustomer!, email: e.target.value})} />
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Source</label>
+                    <select 
+                      className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" 
+                      value={selectedEditCustomer.source} 
+                      onChange={e => setSelectedEditCustomer({...selectedEditCustomer!, source: e.target.value})}
+                    >
+                      <option value="WALKIN">Walk-in Client</option>
+                      <option value="ONLINE">Online Request</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Customer Type</label>
+                    <select 
+                      className="w-full h-12 px-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-slate-900" 
+                      value={selectedEditCustomer.type} 
+                      onChange={e => setSelectedEditCustomer({...selectedEditCustomer!, type: e.target.value})}
+                    >
+                      <option value="REGULAR">Regular Client</option>
+                      <option value="GROUP">Group / Team</option>
+                      <option value="CORPORATE">Corporate Partner</option>
+                      <option value="FASHION_DESIGNER">Fashion Designer</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <button onClick={handleUpdateCustomer} className="w-full h-14 bg-indigo-600 text-white rounded-[24px] font-black text-[15px] hover:bg-slate-900 transition-all shadow-xl shadow-indigo-100 active:scale-95">Save Changes</button>
+              <button onClick={handleUpdateCustomer} className="w-full h-14 bg-slate-900 text-white rounded-[24px] font-black text-[15px] hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95">Save Changes</button>
             </div>
           </div>
         </div>

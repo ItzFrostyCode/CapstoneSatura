@@ -1,8 +1,28 @@
 import { InventoryItem, GarmentTemplate, InventoryStock, InventoryMovement, InventoryReservation } from '@/types/erp';
 
 export const INITIAL_TEMPLATES: GarmentTemplate[] = [
-  { id: 'TMP-001', name: 'Slim Fit Suit', category: 'Bespoke', base_price: 12000, fabric_sku: 'FAB-WOOL-IT-001', fabric_per_unit: 3.5, requires_measurement: true, default_tasks: ['Pattern Making', 'Cutting', 'Basting', 'Fitting', 'Final Sewing', 'QC'] },
-  { id: 'TMP-002', name: 'Traditional Barong', category: 'Bespoke', base_price: 4500, fabric_sku: 'FAB-PINA-001', fabric_per_unit: 2.5, requires_measurement: true, default_tasks: ['Pattern Making', 'Cutting', 'Embroidery', 'Assembling', 'QC'] },
+  { 
+    id: 'TMP-001', 
+    name: 'Slim Fit Suit', 
+    category: 'Bespoke', 
+    base_price: 12000, 
+    fabric_sku: 'FAB-WOOL-IT-001', 
+    fabric_per_unit: 3.5, 
+    requires_measurement: true, 
+    default_tasks: ['Pattern Making', 'Cutting', 'Basting', 'Fitting', 'Final Sewing', 'QC'],
+    size_additional_charges: { 'XL': 1500, 'XXL': 2500, 'Custom': 3500 }
+  },
+  { 
+    id: 'TMP-002', 
+    name: 'Traditional Barong', 
+    category: 'Bespoke', 
+    base_price: 4500, 
+    fabric_sku: 'FAB-PINA-001', 
+    fabric_per_unit: 2.5, 
+    requires_measurement: true, 
+    default_tasks: ['Pattern Making', 'Cutting', 'Embroidery', 'Assembling', 'QC'],
+    size_additional_charges: { 'XL': 500, 'Custom': 1200 }
+  },
   { id: 'TMP-003', name: 'Italian Double-Breasted Tuxedo', category: 'Bespoke', base_price: 25000, fabric_sku: 'FAB-WOOL-IT-001', fabric_per_unit: 4.0, requires_measurement: true, default_tasks: ['Hand Patterning', 'Precision Cutting', 'Inner Lining', 'Hand Finishing', 'Master QC'] },
   { id: 'TMP-006', name: 'School Uniform Set', category: 'Bulk', base_price: 850, fabric_sku: 'FAB-COTTON-001', fabric_per_unit: 1.5, requires_measurement: false, default_tasks: ['Batch Cutting', 'Mass Assembly', 'Logo Embroidery', 'QC'] },
 ];

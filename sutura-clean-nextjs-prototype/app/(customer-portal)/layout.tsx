@@ -1,43 +1,26 @@
-"use client";
+'use client';
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useERPStore } from "@/store/useERPStore";
 import { 
-  Scissors, Home, Ruler, Calendar, History, Bell, User, LogOut, ChevronRight, Menu, X, Star, UserCircle, Store, HelpCircle, Globe, Check, Search, Map
+  Scissors, Bell, UserCircle, Home, Menu, 
+  HelpCircle, LogIn, LogOut, Store as ShopIcon, X,
+  Search, Package, Calendar, MessageSquare
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { name: "Production Status", path: "/customer/dashboard", icon: Home },
-  { name: "Appointments", path: "/customer/appointments", icon: Calendar },
-  { name: "Measurements", path: "/customer/measurements", icon: Ruler },
-  { name: "Order History", path: "/customer/history", icon: History },
-  { name: "Profile Settings", path: "/customer/profile", icon: UserCircle },
+  { name: "Home", path: "/", icon: Home },
+  { name: "Notification", path: "/customer/notifications", icon: Bell },
+  { name: "Me", path: "/customer/dashboard", icon: UserCircle },
 ];
 
 export default function CustomerPortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { currentUser, currentShop } = useERPStore();
+  const { currentUser } = useERPStore();
   const [scrolled, setScrolled] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const isDiscoveryPage = pathname.includes('/customer/shops/') || 
-                          pathname.includes('/customer/designers/') || 
-                          pathname.includes('/customer/book');
-
-  // Auto-close sidebar on discovery pages
-  useEffect(() => {
-    if (isDiscoveryPage) {
-      setSidebarOpen(false);
-    } else {
-      setSidebarOpen(true);
-    }
-  }, [isDiscoveryPage]);
-
-  // Theme Overrides (matching homepage)
-  const primaryColor = currentShop?.themeColor || '#059669'; // Emerald-600 fallback
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 10);
@@ -45,242 +28,168 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
     return () => window.removeEventListener("scroll", h);
   }, []);
 
+  const isDiscoveryPage = pathname.includes('/customer/shops/') || pathname.includes('/customer/book');
+
   return (
-    <div className="bg-[#FAF8F5] min-h-screen text-slate-900 overflow-x-hidden flex flex-col" style={{fontFamily:"'Inter', sans-serif"}}>
+    <div className="min-h-screen font-poppins overflow-x-hidden selection:bg-slate-100 bg-[#FAF8F5]">
       
-      {/* ===== 3-TIER SHOPEE-STYLE HEADER (From Homepage) ===== */}
-      <header className="fixed top-0 w-full z-[1000]">
-        {/* TIER 1 — UTILITY BAR */}
-        <div className="bg-emerald-800 text-white text-[11px] font-bold transition-colors">
-          <div className="max-w-[1400px] mx-auto px-6 md:px-12 h-9 flex items-center justify-between">
-            <div className="flex items-center gap-6 text-white/70">
-              <Link href="/login?role=owner" className="hover:text-white transition-colors flex items-center gap-1.5"><Store size={12}/> Log In Shop Owner / Staff</Link>
-              <span className="text-white/20">|</span>
-              <Link href="/login?role=designer" className="hover:text-white transition-colors flex items-center gap-1.5"><Scissors size={12}/> For Designers</Link>
-              <span className="text-white/20">|</span>
-              <span className="text-white/50">Follow us:</span>
-              <span className="hover:text-white cursor-pointer">Facebook</span>
-              <span className="hover:text-white cursor-pointer">Instagram</span>
-            </div>
-            <div className="flex items-center gap-6 text-white/70">
-              {/* NOTIFICATIONS */}
-              <div 
-                className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors relative"
-                onClick={() => setShowNotifications(!showNotifications)}
-              >
-                <Bell size={12}/> Notifications
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full border border-emerald-800" />
-                
-                {showNotifications && (
-                  <div className="absolute top-6 right-0 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 text-slate-900 animate-in fade-in slide-in-from-top-2 duration-300 z-[2000]">
-                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-50">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Notifications</span>
-                      <span className="text-[9px] font-bold text-emerald-600 cursor-pointer">Mark all as read</span>
-                    </div>
-                    <div className="flex gap-3 items-start p-2 bg-emerald-50 rounded-xl">
-                      <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
-                        <Check size={14} className="text-white"/>
-                      </div>
-                      <div>
-                        <div className="text-[11px] font-black leading-tight">System Notification</div>
-                        <div className="text-[10px] font-medium text-slate-500 mt-1">Your order #SUT-2024 is now in production.</div>
-                      </div>
-                    </div>
+      {/* MOBILE-FIRST CENTERED CANVAS (480px) */}
+      <div className="max-w-[480px] mx-auto min-h-screen bg-[#FAF8F5] shadow-[0_0_50px_rgba(0,0,0,0.05)] flex flex-col relative border-x border-slate-100/50">
+        
+        {/* SIDEBAR NAVIGATION (Global) */}
+        {isSidebarOpen && (
+          <>
+            <div 
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[6000] animate-in fade-in duration-300"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+            <div className="fixed left-1/2 -translate-x-[240px] top-0 bottom-0 w-[280px] bg-white z-[6001] shadow-2xl flex flex-col animate-in slide-in-from-left duration-300 max-w-[480px]">
+              <div className="p-8 bg-[#069668] text-white">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
+                    <Scissors size={20} className="text-[#069668]" />
                   </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors">
-                <HelpCircle size={12}/> Help
-              </div>
-              <div className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors">
-                <Globe size={12}/> English
-              </div>
-
-              {/* PROFILE DROPDOWN */}
-              {currentUser ? (
-                <div 
-                  className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors pl-4 border-l border-white/20 relative"
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
-                >
-                  <div className="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center overflow-hidden border-2 border-white/50 shadow-sm">
-                      <img src={currentUser.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=John&backgroundColor=ffdfbf"} alt="Avatar" className="w-full h-full object-cover" />
-                  </div>
-                  <span className="tracking-tight text-[11px] font-black">{currentUser.name}</span>
-                  
-                  {showProfileMenu && (
-                    <div className="absolute top-8 right-0 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden text-slate-900 animate-in fade-in slide-in-from-top-2 duration-300 z-[2000]">
-                      <div className="p-2">
-                        <Link 
-                          href="/customer/profile" 
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all group"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-white group-hover:shadow-sm">
-                            <UserCircle size={16} className="text-slate-500" />
-                          </div>
-                          <span className="text-xs font-bold text-slate-700">My Account</span>
-                        </Link>
-                        
-                        <Link 
-                          href="/owner/dashboard" 
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-emerald-50 transition-all group"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-600 transition-all">
-                            <Store size={16} className="text-emerald-600 group-hover:text-white" />
-                          </div>
-                          <span className="text-xs font-bold text-slate-700 group-hover:text-emerald-700">Shop Owner Portal</span>
-                        </Link>
-
-                        <Link 
-                          href="/designer/dashboard" 
-                          className="flex items-center gap-3 p-3 rounded-xl hover:bg-indigo-50 transition-all group"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-600 transition-all">
-                            <Scissors size={16} className="text-indigo-600 group-hover:text-white" />
-                          </div>
-                          <span className="text-xs font-bold text-slate-700 group-hover:text-indigo-700">Fashion Designer Portal</span>
-                        </Link>
-
-                        <div className="h-[1px] bg-slate-50 my-1" />
-                        
-                        <Link href="/login" className="flex items-center gap-3 p-3 rounded-xl hover:bg-rose-50 transition-all group text-rose-600">
-                          <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center group-hover:bg-rose-600 transition-all">
-                            <LogOut size={16} className="text-rose-600 group-hover:text-white" />
-                          </div>
-                          <span className="text-xs font-bold">Logout</span>
-                        </Link>
-                      </div>
-                    </div>
-                  )}
+                  <span className="text-xl font-black tracking-tighter uppercase">SUTURA</span>
                 </div>
-              ) : (
-                <Link href="/login" className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors pl-4 border-l border-white/20">
-                  <span className="uppercase tracking-widest text-[10px] font-black">Login / Register</span>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* TIER 2 — MAIN BRAND BAR */}
-        <div className={`bg-emerald-700 transition-all duration-300 ${scrolled ? "py-3 shadow-xl" : "py-4"}`}>
-          <div className="max-w-[1400px] mx-auto px-6 md:px-12 flex items-center gap-8">
-            {/* LOGO */}
-            <Link href="/" className="flex items-center gap-3 shrink-0">
-              <div className="w-11 h-11 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
-                {currentShop?.logoUrl ? (
-                  <img src={currentShop.logoUrl} alt="Shop Logo" className="w-full h-full object-cover" />
-                ) : (
-                  <Scissors className="w-5 h-5 text-emerald-700" />
-                )}
+                <p className="text-emerald-50 text-[11px] font-bold uppercase tracking-widest opacity-60">Davao Tailoring Hub</p>
               </div>
-              <span className="text-2xl font-black tracking-tighter text-white uppercase">{currentShop?.shopName || 'SUTURA'}</span>
-            </Link>
 
-            {/* SEARCH BAR */}
-            <div className="flex-1 flex max-w-[700px]">
-              <div className="flex-1 flex items-center bg-white rounded-l-2xl overflow-hidden">
-                <div className="px-4 text-slate-300"><Search size={18}/></div>
-                <input
-                  type="text"
-                  placeholder="Search For Shop Owners, designers, or garment types..."
-                  className="flex-1 bg-transparent border-none outline-none text-slate-700 font-semibold py-3.5 pr-4 text-sm placeholder:text-slate-300"
-                />
-              </div>
-              <button className="bg-amber-400 hover:bg-amber-300 text-slate-900 px-6 rounded-r-2xl font-black transition-all active:scale-95">
-                <Search size={20}/>
-              </button>
-            </div>
-
-            {/* MAP BUTTON */}
-            <Link
-              href="/#map"
-              className="flex items-center gap-2 h-12 px-5 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-white rounded-2xl font-bold text-[13px] transition-all active:scale-95 backdrop-blur-sm shrink-0 group"
-            >
-              <Map size={18} className="group-hover:scale-110 transition-transform" />
-              <span className="hidden md:inline text-[12px] font-black uppercase tracking-widest">Map</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* TIER 3 — QUICK LINKS BAR */}
-        <div 
-          className="border-t transition-colors"
-          style={{ backgroundColor: primaryColor, borderTopColor: 'rgba(255,255,255,0.1)' }}
-        >
-          <div className="max-w-[1400px] mx-auto px-6 md:px-12 h-9 flex items-center gap-8 overflow-x-auto scrollbar-hide">
-            {!isDiscoveryPage ? (
-              <>
-                <button 
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="text-white/70 hover:text-white flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider"
-                >
-                  <Menu size={14} /> Menu
-                </button>
-                <div className="h-4 w-[1px] bg-white/10" />
-                {NAV_ITEMS.map((item, i) => (
+              <nav className="flex-1 px-4 py-8 space-y-2">
+                {[
+                  { name: "Home", icon: Home, path: "/" },
+                  { name: "Shops", icon: ShopIcon, path: "/shops" },
+                  { name: "How It Works", icon: HelpCircle, path: "/how-it-works" },
+                ].map((item, i) => (
                   <Link 
                     key={i} 
-                    href={item.path} 
-                    className={`text-white/70 hover:text-white text-[11px] font-bold whitespace-nowrap transition-colors uppercase tracking-wider ${pathname === item.path ? 'text-white' : ''}`}
+                    href={item.path}
+                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all group"
+                    onClick={() => setIsSidebarOpen(false)}
                   >
-                    {item.name}
+                    <item.icon size={20} className="group-hover:scale-110 transition-transform" />
+                    <span className="text-[15px] font-bold">{item.name}</span>
                   </Link>
                 ))}
-              </>
-            ) : (
-              ["🎩 Custom Barong","🕴️ Bespoke Suits","👰 Bridal Couture","👗 Filipiniana","👟 Streetwear","🏢 Corporate Uniforms","✦ PREMIUM Workshops","✦ Featured Designers"].map((item,i) => (
-                <Link key={i} href="/#discover" className="text-white/70 hover:text-white text-[11px] font-bold whitespace-nowrap transition-colors uppercase tracking-wider">
-                  {item}
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
-      </header>
 
-      <div className="flex flex-1 pt-[180px]">
-        {!isDiscoveryPage && (
-          <aside style={{ 
-            width: sidebarOpen ? 280 : 0, 
-            opacity: sidebarOpen ? 1 : 0,
-            background: "transparent", 
-            transition: "all 0.3s ease",
-            display: "flex",
-            flexDirection: "column",
-            position: "sticky",
-            top: 180,
-            height: "calc(100vh - 180px)",
-            zIndex: 100,
-            borderRight: "1px solid rgba(0,0,0,0.05)"
-          }}>
-            <nav className="p-4 flex flex-col gap-2 overflow-y-auto overflow-x-hidden scrollbar-hide flex-1">
-              {NAV_ITEMS.map((item) => {
-                const isActive = item.path === '/customer' 
-                  ? (pathname === '/customer' || pathname === '/customer/' || pathname.startsWith('/customer/profile'))
-                  : pathname.startsWith(item.path);
-                const Icon = item.icon;
-                return (
-                  <Link key={item.path} href={item.path} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive 
-                      ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' 
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}>
-                    <Icon size={18} />
-                    <span className="text-sm font-bold">{item.name}</span>
+                <div className="h-px bg-slate-100 my-4 mx-4" />
+
+                <Link 
+                  href="/login?role=owner"
+                  className="flex items-center gap-4 px-4 py-4 rounded-2xl bg-slate-50 text-slate-900 hover:bg-slate-100 transition-all group"
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  <ShopIcon size={20} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-[11px] font-black uppercase tracking-widest leading-tight">Login Shop/Staff Owner Portal</span>
+                </Link>
+
+                {currentUser ? (
+                  <button 
+                    onClick={() => {
+                      setIsSidebarOpen(false);
+                      window.location.href = '/login';
+                    }}
+                    className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-rose-600 hover:bg-rose-50 transition-all group text-left"
+                  >
+                    <LogOut size={20} className="group-hover:scale-110 transition-transform" />
+                    <span className="text-[15px] font-bold">Logout</span>
+                  </button>
+                ) : (
+                  <Link 
+                    href="/login"
+                    className="flex items-center gap-4 px-4 py-4 rounded-2xl text-slate-600 hover:bg-slate-50 transition-all group"
+                    onClick={() => setIsSidebarOpen(false)}
+                  >
+                    <LogIn size={20} className="group-hover:scale-110 transition-transform" />
+                    <span className="text-[15px] font-bold">Sign In</span>
                   </Link>
-                );
-              })}
-            </nav>
-          </aside>
+                )}
+
+              </nav>
+
+              <div className="p-8 border-t border-slate-50">
+                <div className="text-[11px] font-black text-slate-900 uppercase">SUTURA</div>
+                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">© 2026 SUTURA System</p>
+              </div>
+            </div>
+          </>
         )}
 
-        <main className={`flex-1 p-8 md:p-12 transition-all ${isDiscoveryPage ? 'max-w-[1400px] mx-auto' : ''}`}>
+        {/* HEADER (Two-Row Design to match Home) */}
+        {!pathname.includes('/customer/appointments') && (
+          <header className="sticky top-0 z-[3000] bg-[#069668] pt-6 pb-4 px-4 shadow-xl">
+            {/* TOP ROW: BRANDING ONLY */}
+            <div className="flex items-center mb-5 px-2 gap-4">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="text-white/80 hover:text-white active:scale-90 transition-all"
+              >
+                <Menu size={24} />
+              </button>
+              <Link href="/" className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                  <Scissors size={14} className="text-[#069668]" />
+                </div>
+                <span className="text-lg font-black text-white tracking-tighter uppercase">SUTURA</span>
+              </Link>
+            </div>
+            
+            {/* SECOND ROW: SEARCH + ACTIONS */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative group cursor-pointer">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors">
+                  <Search size={18} />
+                </div>
+                <input 
+                  readOnly
+                  type="text" 
+                  placeholder="Search tailors, shops..." 
+                  className="w-full h-11 pl-11 pr-4 bg-white rounded-2xl text-[14px] font-medium outline-none cursor-pointer shadow-inner border border-white/5"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2.5">
+                <Link href="/customer/appointments" className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 active:scale-90 transition-all">
+                  <MessageSquare size={20} className="text-white" />
+                </Link>
+                <button className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 active:scale-90 transition-all relative">
+                  <Package size={20} className="text-white" />
+                  <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-400 rounded-full border-2 border-[#069668]" />
+                </button>
+              </div>
+            </div>
+          </header>
+        )}
+
+        {/* MAIN CONTENT AREA */}
+        <main className={`flex-1 flex flex-col ${isDiscoveryPage || pathname.includes('/customer/appointments') ? '' : ''} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
           {children}
         </main>
+
+        {/* BOTTOM NAVIGATION (Fixed & Centered) */}
+        {!isDiscoveryPage && (
+          <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white/95 backdrop-blur-xl border-t border-slate-100 flex items-center justify-around py-3 px-4 z-[4000] pb-safe shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+            {NAV_ITEMS.map((item, i) => {
+               const Icon = item.icon;
+               const isActive = pathname === item.path;
+               return (
+                 <Link 
+                  key={i} 
+                  href={item.path} 
+                  className={`flex flex-col items-center gap-1 transition-all ${isActive ? 'text-slate-900' : 'text-slate-400'}`}
+                 >
+                   <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-slate-50 scale-110' : 'hover:bg-slate-50'}`}>
+                    <Icon size={20} />
+                   </div>
+                   <span className={`text-[8px] font-black uppercase tracking-[0.2em] ${isActive ? 'opacity-100' : 'opacity-40'}`}>
+                    {item.name}
+                   </span>
+                 </Link>
+               );
+            })}
+          </nav>
+        )}
       </div>
 
     </div>
   );
 }
-

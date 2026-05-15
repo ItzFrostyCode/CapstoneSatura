@@ -16,7 +16,9 @@ export default function ProductionQueuePage() {
   
   const assignedOrders = enrichedOrders.filter(o => {
     const { productionStage } = resolveOrderState(o);
-    return productionStage === 'IN_PRODUCTION' || productionStage === 'ALTERATIONS' || productionStage === 'READY_FOR_FITTING';
+    // Include all active production stages except initial intake and final released/cancelled/on hold
+    const activeStages = ['MEASUREMENT', 'MATERIAL_PREP', 'CUTTING', 'SEWING', 'FITTING', 'ALTERATIONS', 'FINISHING', 'QUALITY_CHECK', 'READY_FOR_PICKUP'];
+    return activeStages.includes(productionStage);
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);

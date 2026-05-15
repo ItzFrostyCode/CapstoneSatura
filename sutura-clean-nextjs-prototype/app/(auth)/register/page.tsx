@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { Sparkles } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { 
-  Scissors, 
+  Scissors,
   Building2, 
+  ChevronLeft,
   ArrowRight, 
   Check, 
   ShieldCheck, 
@@ -14,22 +14,13 @@ import {
   Clock, 
   Crown, 
   Rocket,
-  ChevronLeft,
   CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
 function RegisterForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const isDesigner = searchParams.get('role') === 'designer';
-
-  const steps = isDesigner ? [
-    { id: 1, title: 'Identity', icon: <UserCircle size={18}/> },
-    { id: 2, title: 'Portfolio', icon: <Scissors size={18}/> },
-    { id: 3, title: 'Plan', icon: <Zap size={18}/> },
-    { id: 4, title: 'Review', icon: <Rocket size={18}/> }
-  ] : [
+  const steps = [
     { id: 1, title: 'Account', icon: <UserCircle size={18}/> },
     { id: 2, title: 'Business', icon: <Building2 size={18}/> },
     { id: 3, title: 'Plan', icon: <Zap size={18}/> },
@@ -40,7 +31,7 @@ function RegisterForm() {
     {
       id: 'basic',
       name: 'Basic Plan',
-      price: '149',
+      price: '249',
       description: 'The smallest usable shop version for core operations.',
       icon: <Clock className="text-stone-500" size={20} />,
       features: [
@@ -56,7 +47,7 @@ function RegisterForm() {
     {
       id: 'pro',
       name: 'Pro Plan',
-      price: '299',
+      price: '799',
       description: 'Operational automation for the growing studio.',
       icon: <Zap className="text-emerald-700" size={20} />,
       features: [
@@ -73,7 +64,7 @@ function RegisterForm() {
     {
       id: 'premium',
       name: 'Premium Plan',
-      price: '499',
+      price: '1299',
       description: 'Full ERP-style shop management for established brands.',
       icon: <Crown className="text-amber-500" size={20} />,
       features: [
@@ -124,350 +115,315 @@ function RegisterForm() {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-white">
-      {/* ── SIMPLE AUTH HEADER ── */}
-      <header className="h-20 flex items-center border-b border-slate-100 bg-white">
-        <div className="max-w-[1400px] mx-auto w-full px-6 md:px-12 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
-              <Scissors className="text-white" size={20}/>
-            </div>
-            <span className="text-2xl font-black tracking-tighter uppercase text-slate-900">Sutura</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8">
+    <div className="min-h-screen font-outfit selection:bg-emerald-100 flex justify-center bg-slate-50">
+      
+      {/* MOBILE CANVAS (480px) */}
+      <div className="w-full max-w-[480px] min-h-screen bg-white shadow-[0_0_50px_rgba(0,0,0,0.1)] flex flex-col relative overflow-x-hidden">
+        
+        {/* TOP DECORATIVE SECTION (Simplified Header) */}
+        <div className="relative h-[180px] bg-emerald-700 flex flex-col items-center justify-center px-8 overflow-hidden shrink-0">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/20 rounded-full -mr-24 -mt-24 blur-3xl animate-pulse" />
+          
+          {/* BACK BUTTON */}
+          <div className="absolute top-6 left-6 z-20">
+            {currentStep > 1 ? (
+              <button onClick={handleBack} className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-all active:scale-95 shadow-lg">
+                <ChevronLeft size={20} />
+              </button>
+            ) : (
+              <Link href="/login" className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/40 transition-all active:scale-95 shadow-lg">
+                <ChevronLeft size={20} />
+              </Link>
+            )}
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center">
+            <Link href="/" className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl mb-4 group active:scale-95 transition-all">
+              <Scissors size={32} className="text-emerald-700 group-hover:rotate-12 transition-transform" />
+            </Link>
+            <h1 className="text-xl font-black text-white tracking-[0.1em] uppercase">SUTURA BUSINESS</h1>
+          </div>
+          
+          {/* CURVE OVERLAY */}
+          <div className="absolute bottom-0 inset-x-0 h-10 bg-white rounded-t-[40px]" />
+        </div>
+
+        {/* STEP INDICATOR (Compact for Mobile) */}
+        <div className="px-8 mb-6">
+          <div className="flex items-center justify-between bg-slate-50 p-4 rounded-[24px] border border-slate-100">
             {steps.map((step) => (
               <div 
                 key={step.id} 
-                className={`flex items-center gap-2 transition-all duration-300 ${
+                className={`relative flex flex-col items-center gap-1 transition-all duration-300 ${
                   currentStep >= step.id ? 'text-emerald-600' : 'text-slate-300'
                 }`}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
-                  currentStep >= step.id ? 'border-emerald-600 bg-emerald-50 shadow-sm' : 'border-slate-100'
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${
+                  currentStep >= step.id ? 'border-emerald-600 bg-white shadow-sm' : 'border-slate-100 bg-slate-50'
                 }`}>
-                  {currentStep > step.id ? <Check size={14} /> : step.icon}
+                  {currentStep > step.id ? <Check size={16} /> : step.icon}
                 </div>
-                <span className="text-xs font-black uppercase tracking-widest">{step.title}</span>
-                {step.id < 4 && <div className={`w-8 h-[2px] ml-2 ${currentStep > step.id ? 'bg-emerald-600' : 'bg-slate-100'}`} />}
+                <span className="text-[8px] font-black uppercase tracking-widest">{step.title}</span>
               </div>
             ))}
           </div>
-          <Link href="#" className="text-sm font-bold text-emerald-600 hover:underline">Need help?</Link>
         </div>
-      </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center py-12 px-6 md:px-12 bg-slate-50/50">
-        <div className={`w-full transition-all duration-700 ease-out ${currentStep === 3 ? 'max-w-6xl' : 'max-w-2xl'}`}>
+        {/* REGISTRATION FORM SECTION */}
+        <div className="flex-1 px-8 pb-12">
           
           {/* ── STEP 1: ACCOUNT ── */}
           {currentStep === 1 && (
-            <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 animate-in fade-in slide-in-from-bottom-8 duration-700">
-              <div className="mb-10 text-center">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">{isDesigner ? 'Designer Identity' : 'Create Account'}</h2>
-                <p className="text-slate-500 mt-2 font-medium">Establish your personal credentials to get started.</p>
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <div className="mb-8">
+                <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Create Account</h2>
+                <p className="text-slate-500 mt-1 text-[13px] font-medium leading-relaxed">Establish your personal credentials to get started.</p>
               </div>
               
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
-                    <input type="text" placeholder="John Clock" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Contact Number</label>
-                    <input type="tel" placeholder="+63 9xx xxx xxxx" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                  </div>
-                </div>
-                
+              <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
-                  <input type="email" placeholder="john@sutura.ph" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Full Name</label>
+                  <input type="text" placeholder="John Clock" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Contact Number</label>
+                  <input type="tel" placeholder="+63 9xx xxx xxxx" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Email Address</label>
+                  <input type="email" placeholder="john@sutura.ph" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Password</label>
+                  <input type="password" placeholder="••••••••" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner" />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
-                  <input type="password" placeholder="••••••••" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                </div>
-
-                <button onClick={handleNext} className="w-full h-16 bg-emerald-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 hover:-translate-y-1 transition-all active:translate-y-0 mt-8 flex items-center justify-center gap-3">
-                  Continue to {isDesigner ? 'Portfolio' : 'Business'} <ArrowRight size={20}/>
+                <button onClick={handleNext} className="w-full h-16 bg-emerald-600 text-white rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 transition-all mt-6 flex items-center justify-center gap-3">
+                  Continue <ArrowRight size={20}/>
                 </button>
               </div>
             </div>
           )}
 
-          {/* ── STEP 2: SHOP / DESIGNER ── */}
+          {/* ── STEP 2: BUSINESS ── */}
           {currentStep === 2 && (
-            isDesigner ? (
-              /* Designer Step 2: Portfolio */
-              <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 animate-in fade-in slide-in-from-right-8 duration-700">
-                <div className="mb-10 text-center">
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tight">Designer Profile & Portfolio</h2>
-                  <p className="text-slate-500 mt-2 font-medium">Submit your creative credibility for portfolio verification.</p>
+            <div className="animate-in fade-in slide-in-from-right-8 duration-700">
+              <div className="mb-8">
+                <h2 className="text-[24px] font-black text-slate-900 tracking-tight">Business Details</h2>
+                <p className="text-slate-500 mt-1 text-[13px] font-medium leading-relaxed">Verify your shop legitimacy to start operations.</p>
+              </div>
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Shop Name</label>
+                  <input type="text" placeholder="SUTURA STUDIO" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner" />
                 </div>
-                <div className="space-y-5">
-                  {/* Row 1: Brand + Specialization */}
-                  <div className="grid grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Designer / Brand Name</label>
-                      <input type="text" placeholder="e.g. Aurelius Couture" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Specialization</label>
-                      <input type="text" placeholder="e.g. Bespoke, Bridal, Streetwear" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                    </div>
-                  </div>
-
-                  {/* Row 2: Bio */}
+                
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Bio</label>
-                    <textarea placeholder="Tell us about your design philosophy and creative background..." className="w-full h-28 p-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold resize-none" />
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Business Email</label>
+                    <input type="email" placeholder="shop@sutura.ph" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner text-xs" />
                   </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Shop Contact</label>
+                    <input type="tel" placeholder="09xx..." className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner text-xs" />
+                  </div>
+                </div>
 
-                  {/* Row 3: Portfolio Images + Sample Designs */}
-                  <div className="grid grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Portfolio Images</label>
-                      <div className="relative group">
-                        <input type="file" multiple accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                        <div className="w-full h-24 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-slate-50 group-hover:border-emerald-500 group-hover:bg-emerald-50 transition-all">
-                          <Sparkles className="text-slate-300 group-hover:text-emerald-500 mb-1" size={20} />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-emerald-600">Upload Photos</span>
-                        </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Business Address</label>
+                  <input type="text" placeholder="Davao City, Philippines" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner" />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Business TIN</label>
+                    <input type="text" placeholder="XXX-XXX-XXX" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold shadow-inner text-xs" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Specialty</label>
+                    <select className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold appearance-none shadow-inner text-xs">
+                      <option>Tailoring</option>
+                      <option>Bridal</option>
+                      <option>Uniforms</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block truncate">BIR 2303</label>
+                    <div className="relative group">
+                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                      <div className="w-full h-16 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-slate-50 group-hover:border-emerald-500 group-hover:bg-emerald-50 transition-all">
+                        <CheckCircle size={14} className="text-slate-300" />
+                        <span className="text-[7px] font-bold text-slate-400 mt-1">PDF</span>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Sample Designs</label>
-                      <div className="relative group">
-                        <input type="file" multiple accept="image/*,.pdf" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                        <div className="w-full h-24 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-slate-50 group-hover:border-emerald-500 group-hover:bg-emerald-50 transition-all">
-                          <Scissors className="text-slate-300 group-hover:text-emerald-500 mb-1" size={20} />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-emerald-600">Upload Designs</span>
-                        </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block truncate">Mayor's Permit</label>
+                    <div className="relative group">
+                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                      <div className="w-full h-16 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-slate-50 group-hover:border-emerald-500 group-hover:bg-emerald-50 transition-all">
+                        <ShieldCheck size={14} className="text-slate-300" />
+                        <span className="text-[7px] font-bold text-slate-400 mt-1">PDF</span>
                       </div>
                     </div>
                   </div>
-
-                  {/* Row 4: Social Links + Experience */}
-                  <div className="grid grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Social Links</label>
-                      <input type="text" placeholder="Instagram / Behance / Website" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Years of Experience</label>
-                      <input type="number" min="0" placeholder="e.g. 5" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block truncate">DTI/SEC</label>
+                    <div className="relative group">
+                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                      <div className="w-full h-16 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-slate-50 group-hover:border-emerald-500 group-hover:bg-emerald-50 transition-all">
+                        <Building2 size={14} className="text-slate-300" />
+                        <span className="text-[7px] font-bold text-slate-400 mt-1">PDF</span>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-5 mt-4">
-                    <button onClick={handleBack} className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all">Go Back</button>
-                    <button onClick={handleNext} className="h-16 bg-emerald-600 text-white rounded-2xl font-bold shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-3">Continue to Plan <ArrowRight size={20}/></button>
-                  </div>
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <button onClick={handleBack} className="h-14 bg-slate-100 text-slate-600 rounded-2xl font-black text-[12px] uppercase tracking-widest hover:bg-slate-200 transition-all">Back</button>
+                  <button onClick={handleNext} className="h-14 bg-emerald-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2">Next <ArrowRight size={18}/></button>
                 </div>
               </div>
-            ) : (
-              /* Shop Owner Step 2: Business */
-              <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 animate-in fade-in slide-in-from-right-8 duration-700">
-                <div className="mb-10 text-center">
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tight">Business Details & Documents</h2>
-                  <p className="text-slate-500 mt-2 font-medium">Verify your shop legitimacy to start operations.</p>
-                </div>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Shop Name</label>
-                    <input type="text" placeholder="Davao Tailors PH" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Business Address</label>
-                    <input type="text" placeholder="G/F SM Megamall, Mandaluyong City" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Specialty</label>
-                      <select className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold appearance-none">
-                        <option>Bespoke Tailoring</option>
-                        <option>Bridal & Gowns</option>
-                        <option>Corporate Uniforms</option>
-                        <option>Alterations</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">BIR / Tax ID (TIN)</label>
-                      <input type="text" placeholder="xxx-xxx-xxx-xxx" className="w-full h-14 px-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white outline-none transition-all font-semibold" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">BIR Form 2303</label>
-                      <div className="relative group">
-                        <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                        <div className="w-full h-24 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-slate-50 group-hover:border-emerald-500 group-hover:bg-emerald-50 transition-all">
-                          <Rocket size={18} className="text-slate-400 mb-1 group-hover:text-emerald-600" />
-                          <span className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-700">Upload PDF</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 ml-1">Mayor's Permit</label>
-                      <div className="relative group">
-                        <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                        <div className="w-full h-24 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-slate-50 group-hover:border-emerald-500 group-hover:bg-emerald-50 transition-all">
-                          <ShieldCheck size={18} className="text-slate-400 mb-1 group-hover:text-emerald-600" />
-                          <span className="text-[10px] font-bold text-slate-500 group-hover:text-emerald-700">Upload PDF</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-6 mt-8">
-                    <button onClick={handleBack} className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all">Go Back</button>
-                    <button onClick={handleNext} className="h-16 bg-emerald-600 text-white rounded-2xl font-bold shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-3">Continue to Plan <ArrowRight size={20}/></button>
-                  </div>
-                </div>
-              </div>
-            )
+            </div>
           )}
 
           {/* ── STEP 3: PLAN ── */}
           {currentStep === 3 && (
-            isDesigner ? (
-              /* Designer Step 3: Pro Plan ₱99 */
-              <div className="animate-in fade-in zoom-in-95 duration-700 text-center">
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Your Subscription</h2>
-                <p className="text-slate-400 font-medium mb-10">All fashion designers are enrolled in the Pro Plan.</p>
-                <div className="flex justify-center">
-                  <div className="relative bg-white rounded-[48px] p-12 shadow-2xl border-4 border-emerald-600 max-w-md w-full">
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">Designer — Included</div>
-                    <div className="flex flex-col items-center space-y-6">
-                      <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600"><Zap size={32} /></div>
-                      <div>
-                        <h3 className="text-2xl font-black text-slate-900">Pro Plan</h3>
-                        <div className="mt-2 flex items-baseline gap-1 justify-center">
-                          <span className="text-4xl font-black text-slate-900">₱99</span>
-                          <span className="text-sm text-slate-400 font-bold">/ month</span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-slate-500 font-medium">Curate your profile, showcase your products, and publish design posts to the Sutura marketplace.</p>
-                      <div className="space-y-3 w-full pt-6 border-t border-slate-100 text-left">
-                        {[
-                          'Curate and manage your designer profile',
-                          'Showcase products to the marketplace',
-                          'Publish and manage design posts',
-                          'Get discovered by local ateliers',
-                          'Portfolio verification badge'
-                        ].map((f, i) => (
-                          <div key={i} className="flex items-center gap-3">
-                            <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><Check size={10} /></div>
-                            <span className="text-xs font-bold text-slate-600">{f}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <button onClick={handleNext} className="w-full h-16 bg-emerald-600 text-white rounded-2xl font-black shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all mt-2">Confirm & Continue <ArrowRight size={18} className="inline ml-1" /></button>
-                    </div>
+            <div className="animate-in fade-in zoom-in-95 duration-700">
+              <div className="mb-6">
+                <h2 className="text-[24px] font-black text-slate-900 tracking-tight text-center">Choose Your Tier</h2>
+                <p className="text-slate-500 mt-1 text-[13px] font-medium text-center">Select your workshop scale.</p>
+              </div>
+
+              {/* PLAN TABS */}
+              <div className="flex p-1.5 bg-slate-100 rounded-2xl mb-10">
+                {plans.map((plan) => (
+                  <button 
+                    key={plan.id}
+                    onClick={() => setSelectedPlan(plan.id)}
+                    className={`flex-1 h-16 flex flex-col items-center justify-center rounded-xl transition-all relative ${selectedPlan === plan.id ? 'bg-white text-emerald-700 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    {plan.id === 'pro' && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[7px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest shadow-md z-10 whitespace-nowrap">Recommended</span>
+                    )}
+                    <span className="text-[10px] font-black uppercase tracking-widest">{plan.name.split(' ')[0]}</span>
+                    <span className="text-[12px] font-black">₱{plan.price}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* UNIFIED FEATURE MATRIX CARD */}
+              <div className="bg-white rounded-[32px] p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm border border-slate-50 overflow-hidden">
+                <div className="mb-6">
+                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1">Comparison Matrix</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Feature Availability</h3>
+                </div>
+
+                <div className="overflow-x-auto -mx-6 px-6 pb-2">
+                  <table className="w-full min-w-[320px]">
+                    <thead>
+                      <tr className="border-b border-slate-50">
+                        <th className="text-left py-3 text-[10px] font-black text-slate-300 uppercase tracking-widest">Feature</th>
+                        <th className={`py-3 text-[10px] font-black uppercase transition-all ${selectedPlan === 'basic' ? 'text-emerald-600' : 'text-slate-300'}`}>B</th>
+                        <th className={`py-3 text-[10px] font-black uppercase transition-all ${selectedPlan === 'pro' ? 'text-emerald-600' : 'text-slate-300'}`}>P</th>
+                        <th className={`py-3 text-[10px] font-black uppercase transition-all ${selectedPlan === 'premium' ? 'text-emerald-600' : 'text-slate-300'}`}>M</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {[
+                        { name: 'Customer Profiles', b: true, p: true, m: true },
+                        { name: 'Job Order Tracking', b: true, p: true, m: true },
+                        { name: 'Admin & Staff Roles', b: false, p: true, m: true },
+                        { name: 'Billing & Payments', b: true, p: true, m: true },
+                        { name: 'Financial Reports', b: false, p: true, m: true },
+                        { name: 'Inventory Mgmt', b: false, p: true, m: true },
+                        { name: 'Auto Notifications', b: false, p: true, m: true },
+                        { name: 'Advanced Analytics', b: false, p: false, m: true },
+                        { name: 'Multi-branch Support', b: false, p: false, m: true },
+                        { name: 'Audit Logs', b: false, p: false, m: true }
+                      ].map((item, i) => (
+                        <tr key={i} className="group">
+                          <td className="py-4 text-[12px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">{item.name}</td>
+                          <td className={`py-4 text-center transition-all ${selectedPlan === 'basic' ? 'bg-emerald-50/30' : ''}`}>
+                            <div className="flex justify-center">{item.b ? <Check size={14} className="text-emerald-600" /> : <div className="w-2 h-[2px] bg-slate-200 rounded-full" />}</div>
+                          </td>
+                          <td className={`py-4 text-center transition-all ${selectedPlan === 'pro' ? 'bg-emerald-50/30' : ''}`}>
+                            <div className="flex justify-center">{item.p ? <Check size={14} className="text-emerald-600" /> : <div className="w-2 h-[2px] bg-slate-200 rounded-full" />}</div>
+                          </td>
+                          <td className={`py-4 text-center transition-all ${selectedPlan === 'premium' ? 'bg-emerald-50/30' : ''}`}>
+                            <div className="flex justify-center">{item.m ? <Check size={14} className="text-emerald-600" /> : <div className="w-2 h-[2px] bg-slate-200 rounded-full" />}</div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Check size={12} className="text-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Included</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-[2px] bg-slate-200" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Not Included</span>
                   </div>
                 </div>
               </div>
-            ) : (
-              /* Shop Owner Step 3: Multi-Plans */
-              <div className="animate-in fade-in zoom-in-95 duration-700">
-                <div className="mb-10 text-center">
-                  <h2 className="text-4xl font-black text-slate-900 tracking-tight">Choose Your Tier</h2>
-                  <p className="text-slate-500 mt-2 font-medium text-lg text-center mx-auto">Select the architecture that fits your Workshop scale.</p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {plans.map((plan) => (
-                    <div 
-                      key={plan.id}
-                      onClick={() => setSelectedPlan(plan.id)}
-                      className={`relative bg-white rounded-[40px] p-8 shadow-2xl border-4 transition-all duration-500 cursor-pointer hover:scale-[1.02] flex flex-col ${
-                        selectedPlan === plan.id ? 'border-emerald-600 shadow-emerald-100' : 'border-transparent hover:border-slate-100'
-                      }`}
-                    >
-                      {plan.popular && (
-                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-700 text-white px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg whitespace-nowrap z-10">Most Popular Choice</div>
-                      )}
-                      <div className="space-y-6 flex-1 text-left">
-                        <div className="flex items-center justify-between">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${plan.id === 'pro' ? 'bg-emerald-50' : plan.id === 'premium' ? 'bg-amber-50' : 'bg-slate-50'}`}>{plan.icon}</div>
-                          {selectedPlan === plan.id && <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center"><Check size={12} className="text-white" /></div>}
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-black text-slate-900">{plan.name}</h3>
-                          <div className="mt-2 flex items-baseline gap-1">
-                            <span className="text-3xl font-black text-slate-900">₱{plan.price}</span>
-                            <span className="text-sm text-slate-400 font-bold">/ month</span>
-                          </div>
-                        </div>
-                        <p className="text-sm text-slate-500 leading-relaxed font-medium">{plan.description}</p>
-                        <div className="space-y-4 pt-6 border-t border-slate-50">
-                          {plan.features.map((feature, i) => (
-                            <div key={i} className="flex items-center gap-3">
-                              <div className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><Check size={10} /></div>
-                              <span className="text-xs font-bold text-slate-600">{feature}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-6 mt-12 max-w-2xl mx-auto">
-                  <button onClick={handleBack} className="h-16 bg-white border-2 border-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-50 transition-all">Previous</button>
-                  <button onClick={handleNext} className="h-16 bg-emerald-600 text-white rounded-2xl font-bold shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-3">Finalize Registration <ArrowRight size={20}/></button>
-                </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-8">
+                <button onClick={handleBack} className="h-14 bg-white border-2 border-slate-100 text-slate-400 rounded-2xl font-black text-[12px] uppercase tracking-widest">Back</button>
+                <button onClick={handleNext} className="h-14 bg-emerald-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2">Finalize <ArrowRight size={18}/></button>
               </div>
-            )
+            </div>
           )}
 
-          {/* ── STEP 4: VERIFICATION / REVIEW ── */}
+          {/* ── STEP 4: LAUNCH ── */}
           {currentStep === 4 && (
-            isDesigner ? (
-              /* Designer Step 4: Review */
-              <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 animate-in zoom-in-95 duration-700 text-center">
-                 <div className="w-32 h-32 bg-indigo-50 text-indigo-600 rounded-[40px] flex items-center justify-center mx-auto mb-10 shadow-inner relative">
-                    <div className="absolute inset-0 bg-indigo-600/10 rounded-[40px] animate-pulse" />
-                    <Clock size={56} className="relative z-10" />
-                 </div>
-                 <h2 className="text-3xl font-black text-slate-900 tracking-tight">Portfolio Under Review</h2>
-                 <p className="text-slate-500 mt-4 font-medium text-lg max-w-md mx-auto leading-relaxed">Our creative directors are currently reviewing your portfolio for authenticity and style.</p>
-                 <div className="mt-12 grid grid-cols-2 gap-4 max-w-sm mx-auto">
-                    <button onClick={() => router.push('/')} className="h-14 bg-slate-100 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Go Home</button>
-                    <button className="h-14 bg-white border-2 border-slate-100 text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all">Support</button>
-                 </div>
-              </div>
-            ) : (
-              /* Shop Owner Step 4: Launch */
-              <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 animate-in zoom-in-95 duration-700 text-center">
-                <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner"><Rocket size={48} /></div>
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Ready to Launch?</h2>
-                <p className="text-slate-500 mt-4 font-medium text-lg max-w-md mx-auto">Digitize your craft today. Your 14-day free trial starts the moment you hit submit.</p>
-                <div className="mt-12 bg-slate-50 rounded-3xl p-8 text-left border border-slate-100 max-w-md mx-auto">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Selected Plan</span>
-                    <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase">Active Trial</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">{plans.find(p => p.id === selectedPlan)?.icon}</div>
-                    <div>
-                      <div className="font-black text-slate-900">{plans.find(p => p.id === selectedPlan)?.name}</div>
-                      <div className="text-sm font-bold text-emerald-600">₱{plans.find(p => p.id === selectedPlan)?.price} / month</div>
-                    </div>
+            <div className="animate-in zoom-in-95 duration-700 text-center">
+              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-[24px] flex items-center justify-center mx-auto mb-6 shadow-inner"><Rocket size={40} /></div>
+              <h2 className="text-[24px] font-black text-slate-900 tracking-tight leading-tight">Ready to Launch?</h2>
+              <p className="text-slate-500 mt-2 text-[13px] font-medium leading-relaxed px-4">Digitize your craft today. Your 14-day free trial starts now.</p>
+              
+              <div className="mt-8 bg-slate-50 rounded-[32px] p-6 text-left border border-slate-100">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Selected Plan</span>
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-black uppercase">Active Trial</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">{plans.find(p => p.id === selectedPlan)?.icon}</div>
+                  <div>
+                    <div className="font-black text-slate-900 text-sm">{plans.find(p => p.id === selectedPlan)?.name}</div>
+                    <div className="text-xs font-bold text-emerald-600">₱{plans.find(p => p.id === selectedPlan)?.price} / month</div>
                   </div>
                 </div>
-                <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6 mt-12 max-w-md mx-auto">
-                  <button type="button" onClick={handleBack} className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all">Back</button>
-                  <button type="submit" disabled={isSubmitting} className="h-16 bg-emerald-600 text-white rounded-2xl font-bold shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center justify-center gap-3 disabled:opacity-70">{isSubmitting ? <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" /> : <>Submit & Join <Rocket size={20}/></>}</button>
-                </form>
               </div>
-            )
+              
+              <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4 mt-10">
+                <button type="button" onClick={handleBack} className="h-16 bg-slate-100 text-slate-600 rounded-[20px] font-black text-[12px] uppercase tracking-widest">Back</button>
+                <button type="submit" disabled={isSubmitting} className="h-16 bg-emerald-600 text-white rounded-[20px] font-black text-[12px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                  {isSubmitting ? <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" /> : <>Launch <Rocket size={18}/></>}
+                </button>
+              </form>
+            </div>
           )}
         </div>
 
-        <div className="max-w-2xl w-full mt-12 flex justify-between items-center text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">
-           <div>© 2026 Sutura Platform</div>
-           <div className="flex gap-8"><span>Privacy</span><span>Terms</span><span>Support</span></div>
+        {/* MOBILE FOOTER */}
+        <div className="px-8 pb-10 mt-auto">
+          <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
+            <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">© 2026 SUTURA System</p>
+            <div className="flex gap-4">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">Support</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase">Privacy</span>
+            </div>
+          </div>
         </div>
-      </main>
+
+      </div>
 
       {/* ── VALIDATION PROGRESS MODAL ── */}
       {showValidationModal && (

@@ -4,33 +4,37 @@ import React, { useState } from 'react';
 import { 
   Calendar as CalendarIcon, Clock, Scissors, User, 
   ChevronRight, CheckCircle2, MapPin, Star, Sparkles,
-  ChevronLeft, AlertCircle
+  ChevronLeft, AlertCircle, Ruler, Box, MessageSquare, UserCheck,
+  HelpCircle, Camera, Upload, Info, X, Plus, Link as LinkIcon
 } from 'lucide-react';
-import Link from 'next/link';
 import { 
   format, addMonths, subMonths, startOfMonth, endOfMonth, 
-  eachDayOfInterval, isSameDay, isToday, startOfDay,
-  addDays, isBefore
+  eachDayOfInterval, isSameDay, startOfDay, isBefore
 } from 'date-fns';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useERPStore } from '@/store/useERPStore';
 
 
-const SERVICES = [
-  { id: 'bespoke', name: 'Full Bespoke', desc: 'Custom pattern & fabric selection' },
-  { id: 'mtm', name: 'Made to Measure', desc: 'Modified standard patterns' },
-  { id: 'alteration', name: 'Alterations', desc: 'Resizing & repairs' },
-  { id: 'consultation', name: 'Design Consultation', desc: 'Style & fabric advice' },
+const APPOINTMENT_TYPES = [
+  { id: 'consultation', name: 'Consultation', desc: 'Discuss designs & fabrics' },
+  { id: 'measurement', name: 'Measurement', desc: 'Professional sizing session' },
+  { id: 'fitting', name: 'Fitting', desc: 'Try on your ongoing order' },
+  { id: 'pickup', name: 'Pickup', desc: 'Collect your finished garment' },
+  { id: 'alteration', name: 'Alteration', desc: 'Resize or repair existing items' },
+  { id: 'rtw_fitting', name: 'RTW Fitting', desc: 'Fit ready-to-wear items' },
 ];
 
-const STEPS = ['Select Service', 'Schedule', 'Confirm'];
-
-const PARTNERS = [
-  { name: 'Davao Famous Tailoring', type: 'Shop', rating: 4.9, loc: 'San Pedro St.', category: 'shops' },
-  { name: "Chard's Tailoring", type: 'Shop', rating: 4.8, loc: 'Ponciano St.', category: 'shops' },
-  { name: 'Edgar Buyan', type: 'Designer', rating: 5.0, loc: 'Davao City', category: 'designers' },
-  { name: 'Francis Libiran', type: 'Designer', rating: 4.9, loc: 'Manila (Remote)', category: 'designers' },
+const PURPOSES = [
+  { id: 'custom', name: 'Custom Tailoring', icon: Scissors },
+  { id: 'rtw', name: 'Ready-to-Wear Fitting', icon: Box },
+  { id: 'alt', name: 'Alteration', icon: Ruler },
+  { id: 'designer', name: 'Designer Consultation', icon: UserCheck },
+  { id: 'bulk', name: 'Bulk Uniform Inquiry', icon: MessageSquare },
+  { id: 'other', name: 'Other', icon: HelpCircle },
 ];
+
+const STEPS = ['Service & Purpose', 'Schedule', 'Confirm'];
 
 import { Suspense } from 'react';
 
@@ -40,8 +44,13 @@ function AppointmentBookingContent() {
   
   const { appointments, addAppointment } = useERPStore();
   const [step, setStep] = useState(1);
-  const [selectedService, setSelectedService] = useState('');
-  const [selectedProvider, setSelectedProvider] = useState(preSelectedProvider || '');
+  const [selectedType, setSelectedType] = useState('');
+  const [selectedPurposes, setSelectedPurposes] = useState<string[]>([]);
+  const [otherPurpose, setOtherPurpose] = useState('');
+  const [notes, setNotes] = useState('');
+  const [inspirationFiles, setInspirationFiles] = useState<File[]>([]);
+  const [inspirationLink, setInspirationLink] = useState('');
+  const [selectedProvider] = useState(preSelectedProvider || '');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [time, setTime] = useState('');
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -74,87 +83,222 @@ function AppointmentBookingContent() {
         customer: 'John Doe',
         email: 'john@example.com',
         phone: '0912-345-6789',
-        type: selectedService,
-        category: 'Consultation',
+        type: selectedType,
+        category: 'Appointment',
         date: format(selectedDate, 'yyyy-MM-dd'),
         startTime: time,
         duration: 60,
         status: 'Pending Review',
         staff: 'Unassigned',
         source: 'Online',
-        reason: `Bespoke booking for ${selectedService}`
+        reason: `${selectedType} - Purposes: ${selectedPurposes.join(', ')} ${otherPurpose ? `(${otherPurpose})` : ''}`,
+        notes: `${notes}${inspirationLink ? `\n\nDesign Link: ${inspirationLink}` : ''}${inspirationFiles.length > 0 ? `\nInspiration Files: ${inspirationFiles.length}` : ''}`
       });
       nextStep();
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newFiles = [...inspirationFiles, ...files].slice(0, 3);
+    
+    const totalSize = newFiles.reduce((acc, f) => acc + f.size, 0);
+    if (totalSize > 10 * 1024 * 1024) {
+      alert("Total file size exceeds 10MB limit.");
+      return;
+    }
+    setInspirationFiles(newFiles);
+  };
+
   return (
-    <main className="min-h-screen bg-[#FAF8F5]">
-      {/* 1. Subtle Header */}
-      <section className="pt-24 pb-16 px-6">
+    <main className="min-h-screen bg-slate-50 font-poppins">
+      {/* 1. COMPRESSED HEADER */}
+      <section className="pt-20 pb-8 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-[42px] font-bold font-serif text-[#1C1917] tracking-tight mb-4">Secure Your Session</h1>
-          <p className="text-[15px] text-[#78716C] font-medium max-w-lg mx-auto">
-            Reserve a dedicated consultation with our master Staffs to begin your bespoke journey.
+          <h1 className="text-[32px] font-black text-slate-900 tracking-tight mb-2 uppercase">Book Appointment</h1>
+          <p className="text-[13px] text-slate-500 font-bold max-w-lg mx-auto uppercase tracking-widest opacity-70">
+            Select your service and schedule.
           </p>
         </div>
       </section>
 
-      {/* 2. Minimalist Stepper */}
-      <div className="max-w-4xl mx-auto px-6 pb-20">
-        <div className="flex items-center justify-center gap-12 mb-16">
+      {/* 2. COMPACT STEPPER */}
+      <div className="max-w-4xl mx-auto px-6 pb-12">
+        <div className="flex items-center justify-center gap-8 mb-10">
           {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-500 border ${
+            <div key={s} className="flex items-center gap-2">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black transition-all border ${
                 step >= i + 1 
-                  ? 'bg-[#1E3A1F] text-[#C9A84C] border-[#1E3A1F]' 
-                  : 'bg-white text-[#78716C] border-[#E2DDD7]'
+                  ? 'bg-[#069668] text-white border-[#069668]' 
+                  : 'bg-white text-slate-300 border-slate-100 shadow-sm'
               }`}>
-                {step > i + 1 ? <CheckCircle2 size={14} /> : i + 1}
+                {step > i + 1 ? <CheckCircle2 size={12} /> : i + 1}
               </div>
-              <span className={`text-[11px] font-bold uppercase tracking-[0.2em] ${step >= i + 1 ? 'text-[#1C1917]' : 'text-[#78716C]'}`}>
+              <span className={`text-[9px] font-black uppercase tracking-widest ${step >= i + 1 ? 'text-[#069668]' : 'text-slate-300'}`}>
                 {s}
               </span>
-              {i < STEPS.length - 1 && <div className="w-12 h-px bg-[#E2DDD7] ml-4" />}
+              {i < STEPS.length - 1 && <div className="w-8 h-px bg-slate-200 ml-2" />}
             </div>
           ))}
         </div>
 
-        {/* 3. Clean Content Container */}
-        <div className="bg-white rounded-[40px] border border-[#E2DDD7] p-10 md:p-14 shadow-sm min-h-[550px]">
+        {/* 3. DENSE CONTENT CONTAINER */}
+        <div className="bg-white rounded-[32px] border border-slate-100 p-8 md:p-10 shadow-sm min-h-[500px]">
           
-          {/* STEP 1: SERVICE SELECTION */}
+          {/* STEP 1: APPOINTMENT DETAILS */}
           {step === 1 && (
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <div className="mb-10">
-                <h2 className="text-[24px] font-bold font-serif text-[#1C1917]">Select Service Type</h2>
-                <p className="text-[14px] text-[#78716C] mt-1">Choose the nature of your bespoke consultation.</p>
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-10">
+              
+              {/* 1. Appointment Type */}
+              <div>
+                <div className="flex items-center gap-3 mb-5 px-2">
+                  <div className="w-8 h-8 bg-[#069668] text-white rounded-xl flex items-center justify-center shadow-md">
+                    <Info size={16} />
+                  </div>
+                  <div>
+                    <h2 className="text-[16px] font-black text-slate-900 tracking-tight uppercase">1. Appointment Type</h2>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {APPOINTMENT_TYPES.map((type) => (
+                    <button 
+                      key={type.id}
+                      onClick={() => setSelectedType(type.id)}
+                      className={`p-5 rounded-2xl border transition-all text-left relative group ${
+                        selectedType === type.id 
+                          ? 'border-[#069668] bg-emerald-50/30 ring-1 ring-[#069668]' 
+                          : 'border-slate-100 hover:border-emerald-600/20 bg-slate-50/30'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className={`p-2 rounded-lg ${selectedType === type.id ? 'bg-[#069668] text-white' : 'bg-white text-[#069668] shadow-sm'}`}>
+                          <CalendarIcon size={14} />
+                        </div>
+                      </div>
+                      <h3 className="text-[13px] font-black text-slate-900 mb-0.5 uppercase tracking-tight">{type.name}</h3>
+                      <p className="text-[10px] text-slate-500 font-bold leading-tight">{type.desc}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {SERVICES.map((service) => (
-                  <button 
-                    key={service.id}
-                    onClick={() => { setSelectedService(service.id); nextStep(); }}
-                    className={`p-8 rounded-[32px] border transition-all text-left group ${
-                      selectedService === service.id 
-                        ? 'border-[#1E3A1F] bg-[#1E3A1F]/5 ring-1 ring-[#1E3A1F]' 
-                        : 'border-[#E2DDD7] hover:border-[#1E3A1F]/30 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className={`p-3 rounded-2xl transition-colors ${selectedService === service.id ? 'bg-[#1E3A1F] text-[#C9A84C]' : 'bg-[#FAF8F5] text-[#1E3A1F]'}`}>
-                        <Scissors size={20} />
-                      </div>
-                      <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-all ${
-                        selectedService === service.id ? 'border-[#1E3A1F] bg-[#1E3A1F] text-[#C9A84C]' : 'border-[#E2DDD7]'
-                      }`}>
-                        {selectedService === service.id && <CheckCircle2 size={14} />}
-                      </div>
+
+              {/* 2. Purpose Checkboxes */}
+              <div>
+                <div className="flex items-center gap-3 mb-5 px-2">
+                  <div className="w-8 h-8 bg-[#069668] text-white rounded-xl flex items-center justify-center shadow-md">
+                    <CheckCircle2 size={16} />
+                  </div>
+                  <div>
+                    <h2 className="text-[16px] font-black text-slate-900 tracking-tight uppercase">2. Appointment Purpose</h2>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {PURPOSES.map((p) => {
+                    const isSelected = selectedPurposes.includes(p.name);
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          setSelectedPurposes(prev => 
+                            prev.includes(p.name) 
+                              ? prev.filter(item => item !== p.name)
+                              : [...prev, p.name]
+                          );
+                        }}
+                        className={`flex items-center gap-3 p-4 rounded-xl border transition-all text-left relative ${
+                          isSelected 
+                            ? 'bg-[#069668] border-[#069668] text-white shadow-lg' 
+                            : 'bg-slate-50/50 border-slate-100 text-slate-500 hover:border-emerald-600/30'
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? 'bg-white/10' : 'bg-white text-[#069668] shadow-sm'}`}>
+                          <p.icon size={16} />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest leading-tight">{p.name}</span>
+                        {isSelected && <div className="absolute top-2 right-2 w-3 h-3 bg-white text-[#069668] rounded-full flex items-center justify-center"><CheckCircle2 size={8} /></div>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {selectedPurposes.includes('Other') && (
+                  <div className="mt-4 animate-in slide-in-from-top-2 duration-300">
+                    <input 
+                      type="text" 
+                      placeholder="Specify purpose..."
+                      value={otherPurpose}
+                      onChange={(e) => setOtherPurpose(e.target.value)}
+                      className="w-full h-10 bg-slate-50 border border-slate-100 rounded-xl px-5 text-[11px] font-black outline-none focus:bg-white focus:border-[#069668] transition-all"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Visual & Notes (Horizontal Grid) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Inspiration Upload */}
+                <div>
+                  <div className="flex items-center gap-3 mb-4 px-1">
+                    <Camera size={14} className="text-[#069668]" />
+                    <h2 className="text-[14px] font-black text-slate-900 uppercase">3. Inspiration</h2>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <label className="relative h-32 border-2 border-dashed border-slate-100 rounded-2xl flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-[#069668] hover:bg-emerald-50/30 transition-all overflow-hidden bg-slate-50/50">
+                      <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} disabled={inspirationFiles.length >= 3} />
+                      {inspirationFiles.length > 0 ? (
+                        <div className="flex gap-2">
+                          {inspirationFiles.map((_, i) => <div key={i} className="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-[10px] font-black">{i+1}</div>)}
+                        </div>
+                      ) : (
+                        <>
+                          <Upload size={18} className="text-slate-300 group-hover:text-[#069668]" />
+                          <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Add Photos</span>
+                        </>
+                      )}
+                    </label>
+
+                    <div className="relative">
+                      <LinkIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <input type="url" placeholder="Inspiration Link..." value={inspirationLink} onChange={(e) => setInspirationLink(e.target.value)}
+                        className="w-full h-10 pl-12 pr-6 bg-slate-50 border border-slate-100 rounded-xl text-[11px] font-bold outline-none focus:border-[#069668] transition-all"
+                      />
                     </div>
-                    <h3 className="text-[18px] font-bold text-[#1C1917] mb-1">{service.name}</h3>
-                    <p className="text-[13px] text-[#78716C] font-medium leading-relaxed">{service.desc}</p>
-                  </button>
-                ))}
+                  </div>
+                </div>
+
+                {/* Additional Notes */}
+                <div>
+                  <div className="flex items-center gap-3 mb-4 px-1">
+                    <MessageSquare size={14} className="text-[#069668]" />
+                    <h2 className="text-[14px] font-black text-slate-900 uppercase">4. Notes</h2>
+                  </div>
+                  <textarea 
+                    rows={4}
+                    placeholder="Tell us more..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="w-full h-[172px] bg-slate-50 border border-slate-100 rounded-2xl p-5 text-[12px] font-bold outline-none focus:bg-white focus:border-[#069668] transition-all resize-none shadow-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div className="pt-8">
+                <button 
+                  disabled={!selectedType || selectedPurposes.length === 0}
+                  onClick={nextStep}
+                  className={`w-full h-16 rounded-[24px] font-black text-[13px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 shadow-xl ${
+                    !selectedType || selectedPurposes.length === 0
+                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      : 'bg-[#069668] text-white shadow-emerald-900/20 hover:bg-[#05855c]'
+                  }`}
+                >
+                  Continue to Schedule
+                  <ChevronRight size={18} />
+                </button>
               </div>
             </div>
           )}
@@ -167,25 +311,25 @@ function AppointmentBookingContent() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-10">
                     <div>
-                      <h2 className="text-[24px] font-bold font-serif text-[#1C1917]">Select Date</h2>
-                      <p className="text-[13px] text-[#78716C] mt-1">Workshop availability for consultations.</p>
+                      <h2 className="text-[24px] font-black text-slate-900 uppercase">Select Date</h2>
+                      <p className="text-[13px] text-slate-500 mt-1 font-medium">Workshop availability for appointments.</p>
                     </div>
                     <div className="flex items-center gap-4">
-                      <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="w-10 h-10 flex items-center justify-center border border-[#E2DDD7] rounded-full hover:bg-[#FAF8F5] transition-all">
-                        <ChevronLeft size={18} className="text-[#1C1917]" />
+                      <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="w-10 h-10 flex items-center justify-center border border-slate-200 rounded-full hover:bg-slate-50 transition-all">
+                        <ChevronLeft size={18} className="text-slate-900" />
                       </button>
-                      <span className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#1C1917] min-w-[120px] text-center">
+                      <span className="text-[13px] font-black uppercase tracking-[0.1em] text-slate-900 min-w-[120px] text-center">
                         {format(currentMonth, 'MMMM yyyy')}
                       </span>
-                      <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="w-10 h-10 flex items-center justify-center border border-[#E2DDD7] rounded-full hover:bg-[#FAF8F5] transition-all">
-                        <ChevronRight size={18} className="text-[#1C1917]" />
+                      <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="w-10 h-10 flex items-center justify-center border border-slate-200 rounded-full hover:bg-slate-50 transition-all">
+                        <ChevronRight size={18} className="text-slate-900" />
                       </button>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-7 gap-3 mb-4">
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                      <div key={d} className="text-center text-[10px] font-bold text-[#78716C] uppercase tracking-[0.2em] py-2">{d}</div>
+                      <div key={d} className="text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] py-2">{d}</div>
                     ))}
                   </div>
 
@@ -205,13 +349,13 @@ function AppointmentBookingContent() {
                           disabled={isPast || full}
                           onClick={() => setSelectedDate(day)}
                           className={`h-14 rounded-2xl flex flex-col items-center justify-center relative transition-all border ${
-                            isSelected ? 'bg-[#1E3A1F] border-[#1E3A1F] text-[#C9A84C] shadow-lg shadow-[#1E3A1F]/10 scale-105 z-10' :
-                            isPast ? 'bg-transparent border-transparent text-[#E2DDD7] cursor-not-allowed' :
+                            isSelected ? 'bg-[#069668] border-[#069668] text-white shadow-lg shadow-emerald-900/10 scale-105 z-10' :
+                            isPast ? 'bg-transparent border-transparent text-slate-200 cursor-not-allowed' :
                             full ? 'bg-transparent border-transparent text-rose-300 cursor-not-allowed line-through' :
-                            'bg-white border-[#F0EDE8] text-[#1C1917] hover:border-[#1E3A1F] hover:bg-[#1E3A1F]/5'
+                            'bg-white border-slate-100 text-slate-900 hover:border-[#069668] hover:bg-emerald-50/50'
                           }`}
                         >
-                          <span className="text-[14px] font-bold">{format(day, 'd')}</span>
+                          <span className="text-[14px] font-black">{format(day, 'd')}</span>
                         </button>
                       );
                     })}
@@ -219,29 +363,44 @@ function AppointmentBookingContent() {
                 </div>
 
                 {/* Time Selection Sidebar */}
-                <div className="w-full lg:w-[380px] bg-[#FAF8F5] rounded-[32px] p-10 border border-[#F0EDE8]">
+                <div className="w-full lg:w-[380px] bg-slate-50 rounded-[32px] p-10 border border-slate-200">
                   {selectedDate ? (
                     <div className="animate-in fade-in duration-500">
                       <div className="mb-10">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C9A84C] mb-2 block">Appointment Details</span>
-                        <h3 className="text-[22px] font-bold font-serif text-[#1C1917]">{format(selectedDate, 'EEEE, MMM do')}</h3>
-                        <p className="text-[13px] text-[#78716C] mt-1">at {selectedProvider || 'Central Workshop'}</p>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#069668] mb-2 block">Appointment Details</span>
+                        <h3 className="text-[22px] font-black text-slate-900 uppercase">{format(selectedDate, 'EEEE, MMM do')}</h3>
+                        <p className="text-[13px] text-slate-500 font-bold mt-1">at {selectedProvider || 'Central Workshop'}</p>
                       </div>
 
                       <div className="space-y-6">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#78716C] block">Available Slots</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 block">Available Slots</label>
                         <div className="grid grid-cols-2 gap-4">
                           {timeSlots.map((t) => {
-                            const isBooked = appointments.some(a => isSameDay(new Date(a.date), selectedDate) && a.startTime === t.replace(' AM', '').replace(' PM', ''));
+                            // Fix: Check if this slot is already booked for this specific date
+                            const isBooked = appointments.some(a => 
+                              isSameDay(new Date(a.date), selectedDate) && 
+                              a.startTime === t
+                            );
+                            
+                            // Also check if time has already passed for TODAY
+                            const [h_m, period] = t.split(' ');
+                            const [h, m] = h_m.split(':').map(Number);
+                            const actualHour = period === 'PM' && h !== 12 ? h + 12 : (period === 'AM' && h === 12 ? 0 : h);
+                            const slotTime = new Date(selectedDate);
+                            slotTime.setHours(actualHour, m, 0, 0);
+                            const isInPast = isBefore(slotTime, new Date());
+
                             return (
                               <button 
                                 key={t}
-                                disabled={isBooked}
+                                disabled={isBooked || isInPast}
                                 onClick={() => setTime(t)}
-                                className={`h-12 rounded-xl text-[12px] font-bold transition-all border flex items-center justify-center gap-2 ${
+                                className={`h-12 rounded-xl text-[12px] font-black transition-all border flex items-center justify-center gap-2 ${
                                   time === t 
-                                    ? 'bg-[#1E3A1F] border-[#1E3A1F] text-[#C9A84C]' 
-                                    : 'bg-white border-[#E2DDD7] text-[#1C1917] hover:border-[#1E3A1F]'
+                                    ? 'bg-[#069668] border-[#069668] text-white' 
+                                    : isBooked || isInPast
+                                      ? 'bg-slate-50 border-transparent text-slate-200 cursor-not-allowed opacity-50'
+                                      : 'bg-white border-slate-200 text-slate-900 hover:border-[#069668]'
                                 }`}
                               >
                                 <Clock size={14} /> {t}
@@ -253,7 +412,7 @@ function AppointmentBookingContent() {
                         {time && (
                           <button 
                             onClick={handleConfirm}
-                            className="w-full h-14 bg-[#1E3A1F] text-[#C9A84C] rounded-2xl font-bold text-[14px] mt-10 hover:bg-[#1C1917] transition-all shadow-xl shadow-[#1E3A1F]/10 flex items-center justify-center gap-3"
+                            className="w-full h-14 bg-[#069668] text-white rounded-2xl font-black text-[14px] mt-10 hover:bg-[#05855c] transition-all shadow-xl shadow-emerald-900/10 flex items-center justify-center gap-3 uppercase tracking-widest"
                           >
                             Review Request <ChevronRight size={18} />
                           </button>
@@ -261,9 +420,9 @@ function AppointmentBookingContent() {
                       </div>
                     </div>
                   ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-[#78716C] py-10">
+                    <div className="h-full flex flex-col items-center justify-center text-slate-400 py-10">
                       <CalendarIcon size={48} strokeWidth={1} className="mb-6 opacity-30" />
-                      <p className="text-[14px] font-medium text-center px-4">Select a date from the workshop calendar to view availability.</p>
+                      <p className="text-[14px] font-black text-center px-4 uppercase tracking-tighter">Select a date from the workshop calendar to view availability.</p>
                     </div>
                   )}
                 </div>
@@ -274,24 +433,28 @@ function AppointmentBookingContent() {
           {/* STEP 3: CONFIRMATION */}
           {step === 3 && (
             <div className="animate-in zoom-in-95 duration-700 text-center py-10">
-              <div className="w-24 h-24 bg-[#1E3A1F]/5 text-[#1E3A1F] rounded-full flex items-center justify-center mx-auto mb-10 border border-[#1E3A1F]/10">
-                <Sparkles size={40} className="text-[#C9A84C]" />
+              <div className="w-24 h-24 bg-emerald-50 text-[#069668] rounded-full flex items-center justify-center mx-auto mb-10 border border-emerald-100">
+                <Sparkles size={40} className="text-amber-400" />
               </div>
-              <h2 className="text-[32px] font-bold font-serif text-[#1C1917] mb-4">Request Prepared</h2>
-              <p className="text-[15px] text-[#78716C] font-medium mb-14 max-w-md mx-auto leading-relaxed">
-                Your <span className="text-[#1C1917] font-bold">{selectedService}</span> consultation is ready for artisan review on <span className="text-[#1C1917] font-bold">{selectedDate ? format(selectedDate, 'MMMM do') : ''}</span> at <span className="text-[#1C1917] font-bold">{time}</span>.
+              <h2 className="text-[32px] font-black text-slate-900 mb-4 uppercase tracking-tighter">Request Received</h2>
+              <p className="text-[15px] text-slate-500 font-medium mb-14 max-w-md mx-auto leading-relaxed">
+                Your <span className="text-slate-900 font-black uppercase">{selectedType.replace('_', ' ')}</span> appointment request has been sent to <span className="text-slate-900 font-black">{selectedProvider || 'the workshop'}</span>.
+                <br /><br />
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                  {selectedDate ? format(selectedDate, 'MMMM do') : ''} @ {time}
+                </span>
               </p>
 
               <div className="flex flex-col gap-4 max-w-sm mx-auto">
                 <Link 
-                  href="/customer/orders"
-                  className="w-full h-16 bg-[#1E3A1F] text-[#C9A84C] rounded-2xl font-bold flex items-center justify-center hover:bg-[#1C1917] transition-all shadow-xl shadow-[#1E3A1F]/20"
+                  href="/customer/dashboard"
+                  className="w-full h-16 bg-[#069668] text-white rounded-2xl font-black flex items-center justify-center hover:bg-[#05855c] transition-all shadow-xl shadow-emerald-900/20 uppercase tracking-widest"
                 >
-                  Finalize Appointment
+                  Return to Dashboard
                 </Link>
                 <button 
                   onClick={prevStep}
-                  className="text-[13px] font-bold text-[#78716C] hover:text-[#1C1917] transition-all py-4"
+                  className="text-[13px] font-black text-slate-400 hover:text-slate-900 transition-all py-4 uppercase tracking-widest"
                 >
                   Adjust Details
                 </button>
@@ -304,16 +467,16 @@ function AppointmentBookingContent() {
           <div className="mt-12 flex justify-between items-center px-4">
             <button 
               onClick={prevStep}
-              className={`text-[13px] font-bold text-[#78716C] hover:text-[#1C1917] transition-colors ${step === 1 ? 'invisible' : ''}`}
+              className={`text-[13px] font-black text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest ${step === 1 ? 'invisible' : ''}`}
             >
               Previous
             </button>
             <div className="flex gap-2">
               {[1, 2, 3].map(s => (
-                <div key={s} className={`h-1.5 rounded-full transition-all duration-500 ${step === s ? 'w-8 bg-[#C9A84C]' : 'w-1.5 bg-[#E2DDD7]'}`} />
+                <div key={s} className={`h-1.5 rounded-full transition-all duration-500 ${step === s ? 'w-8 bg-[#069668]' : 'w-1.5 bg-slate-200'}`} />
               ))}
             </div>
-            <span className="text-[11px] font-bold text-[#78716C] uppercase tracking-[0.2em]">
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
               Phase {step} of 3
             </span>
           </div>

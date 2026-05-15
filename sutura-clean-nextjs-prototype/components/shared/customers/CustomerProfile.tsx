@@ -66,7 +66,7 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
   const ltv = customerOrders.reduce((sum, o) => sum + o.total_amount, 0);
 
   return (
-    <div className="animate-in fade-in duration-500 space-y-8 font-outfit">
+    <div className="animate-in fade-in duration-500 space-y-8 font-poppins">
       <div className="flex items-center justify-between">
         <button 
           onClick={onBack}
@@ -78,21 +78,21 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
           {!hideAppointmentBtn && (
             <button 
               onClick={onNewAppointment}
-              className="h-10 px-5 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-slate-600 hover:border-[#1E3A1F] hover:text-[#1E3A1F] transition-all flex items-center gap-2 shadow-sm"
+              className="h-10 px-5 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-slate-600 hover:border-slate-900 hover:text-slate-900 transition-all flex items-center gap-2 shadow-sm"
             >
               <Calendar size={16} /> Schedule Session
             </button>
           )}
           <button 
             onClick={onNewProfile}
-            className="h-10 px-5 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-slate-600 hover:border-[#1E3A1F] hover:text-[#1E3A1F] transition-all flex items-center gap-2 shadow-sm"
+            className="h-10 px-5 bg-white border border-slate-200 rounded-xl text-[12px] font-bold text-slate-600 hover:border-slate-900 hover:text-slate-900 transition-all flex items-center gap-2 shadow-sm"
           >
             <Ruler size={16} /> New Profile
           </button>
           {!hideNewOrderBtn && (
             <button 
               onClick={onNewOrder}
-              className="h-10 px-5 bg-[#1E3A1F] text-[#C9A84C] rounded-xl text-[12px] font-bold shadow-lg hover:shadow-[#1E3A1F]/20 transition-all flex items-center gap-2 active:scale-95"
+              className="h-10 px-5 bg-slate-900 text-white rounded-xl text-[12px] font-bold shadow-lg hover:shadow-slate-900/20 transition-all flex items-center gap-2 active:scale-95"
             >
               <Plus size={16} /> New Order
             </button>
@@ -102,19 +102,19 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
 
       <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-10">
         <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className={`w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-[24px] font-black shadow-inner ${customer.gender === 'Female' ? 'bg-rose-50 text-rose-600' : 'bg-indigo-50 text-indigo-600'}`}>
+          <div className={`w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center text-[24px] font-black shadow-inner ${customer.gender === 'Female' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'}`}>
             {customer.avatar ? (
               <img src={customer.avatar} alt={customer.name} className="w-full h-full object-cover" />
             ) : (
-              customer.name.split(' ').map(n => n[0]).join('')
+              customer.name.split(' ').map(n => n[0]).join('').toUpperCase()
             )}
           </div>
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4">
-              <h2 className="text-[32px] font-bold font-serif text-slate-900 tracking-tight leading-none">{customer.name}</h2>
+              <h2 className="text-[32px] font-bold text-slate-900 tracking-tight leading-none">{customer.name}</h2>
               <button 
                 onClick={() => onEditCustomer(customer)}
-                className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-[#1E3A1F] hover:border-[#1E3A1F] hover:bg-slate-50 transition-all shadow-sm"
+                className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-900 hover:bg-slate-50 transition-all shadow-sm"
               >
                 <Edit2 size={16} />
               </button>
@@ -131,7 +131,7 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Total Orders</div>
           </div>
           <div className="bg-slate-50 px-6 py-4 rounded-2xl border border-slate-100 text-center min-w-[120px] shadow-inner">
-            <div className="text-[20px] font-black text-[#C9A84C]">₱{ltv.toLocaleString()}</div>
+            <div className="text-[20px] font-black text-slate-900">₱{ltv.toLocaleString()}</div>
             <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Customer LTV</div>
           </div>
         </div>

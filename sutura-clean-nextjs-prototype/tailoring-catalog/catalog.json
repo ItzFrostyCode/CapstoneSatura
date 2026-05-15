@@ -1,0 +1,58 @@
+{
+  "categories": [
+    {
+      "id": "1",
+      "name": "Philippine Traditional Wear",
+      "subcategories": [
+        {
+          "name": "Barong Tagalog",
+          "items": ["Classic Barong", "Modern Barong", "Wedding Barong", "Jusi Barong", "Organza Barong", "Cocoon Barong", "Piña Barong", "Short Sleeve Barong", "Long Sleeve Barong", "Embroidered Barong", "Polo Barong", "Linen Barong"]
+        },
+        {
+          "name": "Filipiniana",
+          "items": ["Maria Clara Dress", "Modern Filipiniana", "Terno Dress", "Butterfly Sleeve Dress", "Filipiniana Gown", "Filipiniana Top", "Filipiniana Skirt", "Filipiniana Couple Set", "Flores de Mayo Dress", "Santacruzan Gown"]
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "name": "Sports Uniforms",
+      "subcategories": [
+        {
+          "name": "Basketball",
+          "items": ["Basketball Jersey", "Reversible Jersey", "Sublimation Jersey", "Basketball Shorts", "Team Uniform Set", "Warm Up Jacket"]
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "name": "Intramurals / School Events",
+      "subcategories": [
+        {
+          "name": "Team Shirts",
+          "items": ["Color Team Shirts", "House Team Uniforms", "Intrams Jersey", "Foundation Day Shirts"]
+        }
+      ]
+    },
+    {
+      "id": "6",
+      "name": "PNP / Police Related",
+      "subcategories": [
+        {
+          "name": "PNP Uniform Types",
+          "items": ["PNP Patrol Uniform", "PNP Tactical Uniform", "PNP Training Uniform", "Police Costume for Kids", "SWAT Costume", "Security Guard Uniform"]
+        }
+      ]
+    },
+    {
+      "id": "9",
+      "name": "School Uniforms",
+      "subcategories": [
+        {
+          "name": "College",
+          "items": ["Medical Uniform", "Engineering Uniform", "HRM Uniform", "Criminology Uniform", "Nursing Uniform"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,19 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
-  title: "Sutura | The Complete Operating System for Tailors & Designers",
+  title: "Sutura | The Complete Operating System for Tailors",
   description: "Digitize measurements, automate production, and grow your tailoring business with 100% verified accuracy.",
 };
 
@@ -23,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
-      <body className="antialiased font-outfit bg-[#F9FAFB] text-[#111827]">
+    <html lang="en" className={`${poppins.variable}`}>
+      <body className="antialiased font-poppins">
         {children}
       </body>
     </html>

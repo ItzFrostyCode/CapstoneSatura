@@ -45,16 +45,16 @@ export function Navbar({
           <Menu size={24} />
         </button>
         <div>
-          <h1 className="text-[28px] font-black text-slate-900 tracking-tight leading-none uppercase">
+          <h1 className="text-[24px] font-black text-slate-900 tracking-tight leading-none uppercase">
             SUTURA
           </h1>
           <div className="flex items-center gap-2 mt-1 md:mt-2">
             <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[11px] tracking-tight bg-slate-100/50 px-2 py-0.5 rounded-lg">
-              <Calendar size={12} className="text-indigo-500" />
+              <Calendar size={12} className="text-[#069668]" />
               <span>{mounted ? currentTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}</span>
             </div>
             <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[11px] tracking-tight bg-slate-100/50 px-2 py-0.5 rounded-lg">
-              <Clock size={12} className="text-emerald-500" />
+              <Clock size={12} className="text-[#069668]" />
               <span className="tabular-nums">
                 {mounted ? currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
               </span>
@@ -91,7 +91,7 @@ export function Navbar({
             className="text-slate-400 hover:text-slate-900 transition-colors relative group"
           >
             <Bell size={20} className="transition-transform group-hover:rotate-[15deg] duration-300" />
-            <span className="absolute -top-1 -right-1 bg-[#FF3B30] text-white text-[6px] font-black w-[16px] h-[16px] rounded-full flex items-center justify-center shadow-[0_2px_4px_rgba(255,59,48,0.2)]">13</span>
+            <span className="absolute -top-1 -right-1 bg-[#069668] text-white text-[6px] font-black w-[16px] h-[16px] rounded-full flex items-center justify-center shadow-[0_2px_4px_rgba(0,0,0,0.2)]">13</span>
           </button>
 
           <div className="relative ml-2">
@@ -101,7 +101,7 @@ export function Navbar({
             >
               <span className="text-[14px] font-black text-slate-900 tracking-tight hidden sm:block">{currentUser.name}</span>
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-emerald-500 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-slate-100 border-2 border-white shadow-sm overflow-hidden flex items-center justify-center">
                   <Image 
                     src={currentUser.avatar} 
                     alt={currentUser.name} 
@@ -111,7 +111,7 @@ export function Navbar({
                     className="w-full h-full object-contain p-1" 
                   />
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-slate-900 text-white w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                <div className="absolute -bottom-1 -right-1 bg-[#069668] text-white w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
                    <ChevronDown size={10} className={`transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </div>
               </div>
@@ -130,7 +130,7 @@ export function Navbar({
                       <Settings size={16} /> Settings
                     </Link>
                     {pathname.startsWith('/staff') ? (
-                      <Link href="/owner/dashboard" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-white bg-slate-900 hover:bg-slate-800 transition-all shadow-sm">
+                      <Link href="/owner/dashboard" onClick={() => setIsUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-black text-white bg-[#069668] hover:bg-emerald-700 transition-all shadow-sm">
                         <Crown size={16} className="text-amber-400" /> Owner Portal
                       </Link>
                     ) : (

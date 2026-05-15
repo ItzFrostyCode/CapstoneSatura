@@ -1,265 +1,150 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { 
-  Scissors, Clock, ChevronRight, Star, Ruler, Calendar, ArrowUpRight, 
-  CheckCircle2, AlertCircle, X, MapPin, Sparkles, MessageSquare,
-  TrendingUp, Award, Zap
-} from "lucide-react";
 import { useERPStore } from "@/store/useERPStore";
+import Link from 'next/link';
+import { useMemo } from 'react';
+import { 
+  Calendar, Ruler, Ticket, Activity, 
+  ChevronRight, Clock, Heart, Package, 
+  Plus, Scissors, TrendingUp, 
+  CreditCard, Shield, Map, ArrowUpRight,
+  User, ShoppingBag
+} from 'lucide-react';
+import { resolveOrderState } from "@/features/orders/orderEngine";
+import { format } from 'date-fns';
 
-// --- BOOKING MODAL ---
-const BookConsultationModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
-  const { currentShop, addAppointment } = useERPStore();
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("10:00 AM");
-  const [notes, setNotes] = useState("");
+export default function NativeAppDashboard() {
+  const { 
+    currentUser, 
+    orders, 
+    appointments 
+  } = useERPStore();
 
-  if (!isOpen) return null;
-
-  const handleBook = () => {
-    if (!date) return alert("Please select a date");
-    addAppointment({
-      branch_id: "BRN-001",
-      customer: "CUST-001",
-      email: "unknown@example.com",
-      phone: "000-000-0000",
-      type: "Consultation",
-      category: "Initial Design",
-      status: "Pending Review",
-      source: "Online",
-      date: date,
-      startTime: time,
-      duration: 45,
-      notes: notes,
-      staff: "Unassigned"
-    });
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={onClose} />
-      <div className="relative bg-white w-full max-w-[500px] rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Request Consultation</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors text-slate-400"><X size={24} /></button>
-        </div>
-
-        <div className="space-y-6">
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Date</label>
-            <input 
-              type="date" 
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full h-14 px-5 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all font-bold"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Preferred Time</label>
-            <select 
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full h-14 px-5 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all font-bold appearance-none"
-            >
-              {["10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"].map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Design Notes</label>
-            <textarea 
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Describe your vision..."
-              className="w-full h-32 p-5 rounded-2xl border border-slate-100 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all font-medium resize-none"
-            />
-          </div>
-
-          <button 
-            onClick={handleBook}
-            className="w-full h-16 bg-slate-900 text-emerald-400 rounded-2xl text-[15px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl active:scale-95"
-          >
-            Submit Request
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default function CustomerDashboard() {
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const { appointments, getEnrichedOrders } = useERPStore();
+  // 1. DATA SUMMARY
+  const activeOrders = useMemo(() => (orders || []).filter(o => o.customer_id === currentUser?.id && o.status !== 'RELEASED'), [orders, currentUser]);
   
-  const activeOrders = getEnrichedOrders().filter(o => !["RELEASED", "CANCELLED"].includes(o.status));
-  const upcomingApts = appointments.filter(a => new Date(a.date) >= new Date()).slice(0, 3);
+  const latestOrderState = useMemo(() => {
+    if (activeOrders.length === 0) return null;
+    return resolveOrderState(activeOrders[0]);
+  }, [activeOrders]);
+
+  const nextAppointment = useMemo(() => (appointments || [])
+    .filter(a => a.email === currentUser?.email && a.status === 'Scheduled')
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0], [appointments, currentUser]);
+  
+  const totalBalance = useMemo(() => activeOrders.reduce((sum, o) => {
+    const { balance } = resolveOrderState(o);
+    return sum + balance;
+  }, 0), [activeOrders]);
+
+  const mainNav = [
+    { label: 'Measurements', icon: User, href: '/customer/profile/sizes' },
+    { label: 'Reservation', icon: ShoppingBag, href: '/customer/profile/reservations' },
+    { label: 'Appointments', icon: Calendar, href: '/customer/profile/appointments' },
+    { label: 'Job Orders', icon: Package, href: '/customer/profile/orders' },
+  ];
 
   return (
-    <div className="max-w-[1200px] mx-auto py-8 font-outfit animate-in fade-in duration-700">
-      <BookConsultationModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
-      
-      {/* WELCOME HEADER */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-md border border-emerald-100">
-              Verified Client
-            </span>
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
-              <MapPin size={10} /> Manila Studio
-            </span>
+    <div className="min-h-screen bg-white pb-32 animate-in fade-in duration-500">
+      {/* ── NATIVE HEADER ── */}
+      <div className="bg-white px-6 pt-12 pb-6 sticky top-0 z-[100]">
+        <div className="max-w-xl mx-auto flex items-center gap-4">
+          <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-[18px] font-black border-2 border-slate-50 overflow-hidden shadow-sm shrink-0">
+             {currentUser?.avatar ? <img src={currentUser.avatar} className="w-full h-full object-cover" /> : currentUser?.name?.charAt(0)}
           </div>
-          <h1 className="text-[42px] font-black text-slate-900 tracking-tight leading-none">
-            Hello, <span className="text-slate-400 italic">Maria.</span>
-          </h1>
-          <p className="text-slate-500 font-medium text-lg mt-2">You have <span className="text-slate-900 font-bold">{activeOrders.length} active orders</span> in production.</p>
+          <div>
+            <h1 className="text-[22px] font-black text-slate-900 tracking-tight leading-none">{currentUser?.name || 'John Clock'}</h1>
+          </div>
         </div>
       </div>
 
-      {/* KPI GRID */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {[
-          { label: "Active Orders", value: activeOrders.length, icon: Scissors, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Loyalty Points", value: "850", icon: Award, color: "text-amber-600", bg: "bg-amber-50" },
-          { label: "Saved Specs", value: "04", icon: Ruler, color: "text-indigo-600", bg: "bg-indigo-50" },
-          { label: "Voucher Credits", value: "₱1.2k", icon: Zap, color: "text-rose-600", bg: "bg-rose-50" },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
-            <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-              <stat.icon size={22} />
-            </div>
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">{stat.label}</div>
-            <div className="text-3xl font-black text-slate-900">{stat.value}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        
-        {/* PRODUCTION TRACKING */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-[20px] font-black text-slate-900 tracking-tight flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-emerald-600 rounded-full" />
-              Production Status
-            </h3>
-            <Link href="/customer/orders" className="text-[12px] font-black text-emerald-600 hover:underline uppercase tracking-widest">Archive</Link>
-          </div>
-          
-          <div className="space-y-6">
-            {activeOrders.map((order) => (
-              <div key={order.id} className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden flex flex-col sm:flex-row hover:shadow-xl transition-all group">
-                <div className="w-full sm:w-[220px] h-[220px] relative bg-slate-100">
-                  <img 
-                    src={"https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=400&q=80"}
-                    alt="Garment" 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                  />
-                  <div className="absolute inset-0 bg-black/5" />
-                </div>
-                <div className="flex-1 p-8 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{order.id}</div>
-                        <h4 className="text-[22px] font-black text-slate-900 tracking-tight">{order.items?.[0]?.garment_name || "Bespoke Suit"}</h4>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[14px] font-black text-slate-900">Tailoring Shopsatura</div>
-                        <div className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Est: {new Date(order.due_date).toLocaleDateString()}</div>
-                      </div>
-                    </div>
-                    
-                    {/* ENHANCED PROGRESS */}
-                    <div className="mt-8">
-                      <div className="flex justify-between items-end mb-3">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 size={16} className="text-emerald-500" />
-                          <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">{order.status.replace("_", " ")}</span>
-                        </div>
-                        <span className="text-[14px] font-black text-slate-900 italic">65% Complete</span>
-                      </div>
-                      <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100">
-                        <div className="h-full w-[65%] bg-emerald-500 rounded-full relative">
-                          <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 mt-8">
-                    <Link href={"/customer/orders/" + order.id} className="flex-1 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center text-[13px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-[0.98]">
-                      Real-time Tracking
-                    </Link>
-                    <button className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-900 transition-all">
-                      <MessageSquare size={18} />
-                    </button>
-                  </div>
-                </div>
+      <div className="max-w-xl mx-auto">
+        {/* ── HIGHLIGHTS (ULTRA-COMPACT) ── */}
+        <div className="px-6 py-4 space-y-2">
+           {/* Active Order (Slim Bar) */}
+           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Order:</span>
+                 <span className="text-[12px] font-black text-slate-900">
+                    {latestOrderState ? latestOrderState.customerMilestone : 'No active orders'}
+                 </span>
               </div>
-            ))}
-          </div>
+              {latestOrderState && (
+                <span className="text-[11px] font-black text-emerald-600">{latestOrderState.progress}%</span>
+              )}
+           </div>
+
+           {/* Next Fitting & Balance (Mini-Grid) */}
+           <div className="grid grid-cols-2 gap-2">
+              <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 flex flex-col gap-0.5">
+                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Next Session</span>
+                 <span className="text-[12px] font-black text-slate-900 leading-none">
+                    {nextAppointment ? format(new Date(nextAppointment.date), 'MMM d') : 'None Set'}
+                 </span>
+              </div>
+              <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 flex flex-col gap-0.5">
+                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">To Pay</span>
+                 <span className="text-[12px] font-black text-emerald-600 leading-none">₱{totalBalance.toLocaleString()}</span>
+              </div>
+           </div>
         </div>
 
-        {/* RIGHT SIDEBAR */}
-        <div className="space-y-8">
-          
-          {/* APPOINTMENTS CARD */}
-          <div className="bg-slate-900 rounded-[40px] p-8 text-white shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:scale-150 transition-transform duration-1000" />
-            <h3 className="text-[20px] font-black mb-8 flex items-center gap-3">
-              <Calendar size={22} className="text-emerald-400" /> Upcoming
-            </h3>
-            <div className="space-y-5">
-              {upcomingApts.map((apt, i) => (
-                <div key={i} className="bg-white/5 border border-white/10 p-5 rounded-2xl backdrop-blur-sm">
-                  <div className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mb-1">{new Date(apt.date).toLocaleDateString()} • {apt.startTime}</div>
-                  <div className="text-[16px] font-black">{apt.type.charAt(0) + apt.type.slice(1).toLowerCase()}</div>
-                  <div className="text-[12px] text-slate-400 font-medium">Main Studio • {apt.status}</div>
-                </div>
+        {/* ── SECTION: MY TAILORING (COMPACT QUICK ACCESS) ── */}
+        <div className="mt-4 pt-4 border-t border-slate-50">
+           <div className="px-6 mb-4">
+              <h3 className="text-[12px] font-black text-slate-900 uppercase tracking-widest">My Tailoring</h3>
+           </div>
+           <div className="flex justify-around items-center px-4 py-4">
+              {mainNav.map(item => (
+                <Link key={item.href} href={item.href} className="flex flex-col items-center gap-2.5 transition-all active:scale-90 px-3">
+                   <div className="text-slate-400 group-hover:text-slate-900 transition-colors">
+                      <item.icon size={22} strokeWidth={2.5} />
+                   </div>
+                   <span className="text-[11px] font-bold text-slate-400 tracking-tight">{item.label}</span>
+                </Link>
               ))}
-              {upcomingApts.length === 0 && (
-                <div className="text-center py-6 text-slate-500 font-bold text-sm">No scheduled sessions</div>
-              )}
-            </div>
-          </div>
+           </div>
+        </div>
 
-          {/* MEASUREMENT SUMMARY */}
-          <div className="bg-white rounded-[40px] border border-slate-100 p-8 shadow-sm">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-lg font-black text-slate-900">Measurement Profiles</h3>
-              <Ruler size={20} className="text-slate-300" />
-            </div>
-            <div className="space-y-6">
-              {[
-                { name: "Bespoke Suit Profile", date: "Updated Apr 12", status: "Verified" },
-                { name: "Traditional Barong", date: "Updated Jan 05", status: "Outdated" },
-              ].map((p, i) => (
-                <div key={i} className="flex items-center justify-between pb-6 border-b border-slate-50 last:border-0 last:pb-0">
-                  <div>
-                    <div className="text-[14px] font-black text-slate-900 mb-0.5">{p.name}</div>
-                    <div className="text-[11px] text-slate-400 font-medium uppercase tracking-widest">{p.date}</div>
-                  </div>
-                  <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${p.status === 'Verified' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                    {p.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <Link href="/customer/measurements" className="w-full h-14 mt-8 bg-slate-50 text-slate-900 rounded-2xl flex items-center justify-center text-[13px] font-black hover:bg-slate-100 transition-all">
-              Manage Measurements
-            </Link>
-          </div>
+        {/* ── SECONDARY LINKS (LIST STYLE) ── */}
+        <div className="mt-8 px-4 space-y-1">
+           <SecondaryNavLink icon={Ticket} label="Support Tickets" href="/customer/profile/support" count={2} />
+           <SecondaryNavLink icon={Scissors} label="Followed Shops" href="/customer/profile/following" />
+           <SecondaryNavLink icon={Activity} label="Activity History" href="/customer/profile/interactions" />
+        </div>
 
+        {/* ── SETTINGS (MINIMALIST) ── */}
+        <div className="mt-4 px-4 pt-4 border-t border-slate-50">
+           <Link href="/customer/profile" className="flex items-center gap-5 p-4 rounded-[24px] hover:bg-slate-50 transition-all group">
+              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-slate-900 transition-colors">
+                 <Shield size={18} />
+              </div>
+              <div className="flex-1">
+                 <p className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Account & Security</p>
+                 <p className="text-[10px] font-bold text-slate-400">Profile, password, and addresses</p>
+              </div>
+              <ChevronRight size={16} className="text-slate-300" />
+           </Link>
         </div>
       </div>
     </div>
   );
 }
 
+function SecondaryNavLink({ icon: Icon, label, href, count }: { icon: any; label: string; href: string; count?: number }) {
+  return (
+    <Link href={href} className="flex items-center justify-between p-5 rounded-[24px] hover:bg-slate-50 transition-all group">
+       <div className="flex items-center gap-5">
+          <div className="text-slate-400 group-hover:text-slate-900 transition-colors">
+             <Icon size={20} />
+          </div>
+          <span className="text-[13px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">{label}</span>
+       </div>
+       <div className="flex items-center gap-3">
+          {count && <span className="w-5 h-5 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">{count}</span>}
+          <ChevronRight size={16} className="text-slate-300" />
+       </div>
+    </Link>
+  );
+}

@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --font-outfit: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-poppins: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --font-inter: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;
 }
 
 :root {
-  --sutura-green:  #1E3A1F;
-  --sutura-gold:   #C9A84C;
+  --sutura-green:  #0F172A; /* Dark Blue Primary */
+  --sutura-gold:   #64748B; /* Neutral Slate Accent */
   --sutura-cream:  #FAF8F5;
   --sutura-surface:#F0EDE8;
   --sutura-border: #E2DDD7;
@@ -21,8 +21,28 @@
 body {
   color: var(--sutura-text);
   background: var(--sutura-cream);
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .scrollbar-premium::-webkit-scrollbar {
+    height: 3px;
+  }
+  .scrollbar-premium::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-premium::-webkit-scrollbar-thumb {
+    background: #0F172A;
+    border-radius: 10px;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @utility custom-scrollbar {

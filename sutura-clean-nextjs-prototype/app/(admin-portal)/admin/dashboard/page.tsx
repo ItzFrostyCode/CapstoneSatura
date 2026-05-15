@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { 
-  Building2, Users, Receipt, 
+  Building2, Receipt, 
   CreditCard, TrendingUp, ShieldCheck, 
   ArrowUpRight, Activity
 } from 'lucide-react';
@@ -12,7 +12,7 @@ export default function AdminDashboard() {
   const stats = [
     { label: 'Monthly Recurring Revenue', value: '₱145,500', icon: <TrendingUp size={20} />, color: 'bg-emerald-50 text-emerald-600', trend: '+12% this month' },
     { label: 'Total Subscriptions', value: '48', icon: <Receipt size={20} />, color: 'bg-indigo-50 text-indigo-600', trend: 'Active plans' },
-    { label: 'Active Tenants', value: '42', icon: <Building2 size={20} />, color: 'bg-amber-50 text-amber-600', trend: 'Shops & Designers' },
+    { label: 'Active Tenants', value: '42', icon: <Building2 size={20} />, color: 'bg-amber-50 text-amber-600', trend: 'Verified Shops' },
     { label: 'Premium Users', value: '18', icon: <CreditCard size={20} />, color: 'bg-slate-900 text-white', trend: 'Pro & Premium' },
   ];
 
@@ -64,7 +64,6 @@ export default function AdminDashboard() {
            <div className="space-y-4">
               {[
                 { name: 'Golden Needle Tailoring', type: 'Shop Owner', date: 'Submitted Today', status: 'Awaiting KYC' },
-                { name: 'Elena Designs', type: 'Fashion Designer', date: 'Submitted Yesterday', status: 'Awaiting Portfolio Review' },
                 { name: 'Luxe Stitch Studio', type: 'Shop Owner', date: '2 days ago', status: 'Awaiting KYC' }
               ].map((tenant, i) => (
                 <div key={i} className="group p-5 bg-slate-50 rounded-[28px] border border-transparent hover:border-slate-100 hover:bg-white transition-all flex items-center justify-between">

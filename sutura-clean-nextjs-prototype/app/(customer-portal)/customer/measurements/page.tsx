@@ -53,8 +53,8 @@ const MOCK_PROFILES: MeasurementProfile[] = [
 ];
 
 const CATEGORY_COLOR: Record<string, string> = {
-  'Upper Wear': 'bg-[#1E3A1F]/5 text-[#1E3A1F]',
-  'Lower Wear': 'bg-emerald-50 text-emerald-600',
+  'Upper Wear': 'bg-slate-50 text-slate-900',
+  'Lower Wear': 'bg-blue-50 text-blue-600',
   'Full Body':  'bg-violet-50 text-violet-600',
 };
 
@@ -64,36 +64,36 @@ export default function MeasurementsPage() {
   const profiles = MOCK_PROFILES.filter((p) => showArchived || p.status !== 'ARCHIVED');
 
   return (
-    <main className="min-h-screen bg-[#FAF8F5]">
+    <main className="min-h-screen bg-[#FAF8F5] font-poppins">
       {/* Header */}
-      <section className="bg-[#1E3A1F] pt-32 pb-20 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-[#C9A84C] via-transparent to-transparent" />
+      <section className="bg-slate-900 pt-32 pb-20 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent" />
         <div className="max-w-5xl mx-auto relative z-10 text-center">
-           <Link href="/customer/dashboard" className="inline-flex items-center gap-2 text-[#C9A84C] text-[12px] font-bold uppercase tracking-widest mb-6 hover:opacity-80 transition-opacity">
+           <Link href="/customer/dashboard" className="inline-flex items-center gap-2 text-blue-400 text-[12px] font-bold uppercase tracking-widest mb-6 hover:opacity-80 transition-opacity">
               <ChevronLeft size={16} /> Back to Dashboard
            </Link>
-           <h1 className="text-5xl font-bold font-serif text-[#FAF8F5] tracking-tight mb-4">Sizing Archives</h1>
+           <h1 className="text-5xl font-bold text-[#FAF8F5] tracking-tight mb-4">Sizing Archives</h1>
            <p className="text-[#FAF8F5]/60 font-medium max-w-xl mx-auto">Your precision metrics, curated and maintained by your master tailors.</p>
         </div>
       </section>
 
       <div className="max-w-5xl mx-auto px-6 -mt-10 pb-24 relative z-10">
         {/* Info Banner */}
-        <div className="bg-white rounded-[40px] border border-[#E2DDD7] shadow-xl p-8 mb-10 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="bg-white rounded-[40px] border border-slate-200 shadow-xl p-8 mb-10 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-[#F0EDE8] rounded-[24px] flex items-center justify-center shrink-0">
-              <User size={28} className="text-[#1E3A1F]" />
+            <div className="w-16 h-16 bg-slate-50 rounded-[24px] flex items-center justify-center shrink-0">
+              <User size={28} className="text-slate-900" />
             </div>
             <div>
-              <div className="text-[20px] font-bold font-serif text-[#1C1917]">Juan dela Cruz</div>
-              <div className="text-[13px] text-[#78716C] font-bold uppercase tracking-widest mt-1">
+              <div className="text-[20px] font-bold text-slate-900">Juan dela Cruz</div>
+              <div className="text-[13px] text-slate-500 font-bold uppercase tracking-widest mt-1">
                 {MOCK_PROFILES.filter(p => p.isCurrent).length} Active Profiles · {MOCK_PROFILES.filter(p => !p.isCurrent).length} Archived
               </div>
             </div>
           </div>
           <button
             onClick={() => setShowArchived(!showArchived)}
-            className="h-12 px-8 bg-[#FAF8F5] border border-[#E2DDD7] rounded-xl text-[13px] font-bold text-[#78716C] hover:border-[#1E3A1F] hover:text-[#1E3A1F] transition-all flex items-center gap-2"
+            className="h-12 px-8 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-bold text-slate-600 hover:border-slate-900 hover:text-slate-900 transition-all flex items-center gap-2 shadow-sm"
           >
             {showArchived ? <CheckCircle2 size={18} /> : <Archive size={18} />}
             {showArchived ? 'Hide Archived' : 'Show Archived'}
@@ -106,13 +106,13 @@ export default function MeasurementsPage() {
             <Link
               key={profile.id}
               href={`/customer/measurements/${profile.id}`}
-              className={`bg-white rounded-[40px] border hover:shadow-2xl hover:shadow-[#1E3A1F]/5 transition-all duration-500 p-8 group relative overflow-hidden ${
-                profile.status === 'ARCHIVED' ? 'border-[#E2DDD7] opacity-60 grayscale' : 'border-[#E2DDD7]'
+              className={`bg-white rounded-[40px] border hover:shadow-2xl hover:shadow-slate-900/5 transition-all duration-500 p-8 group relative overflow-hidden ${
+                profile.status === 'ARCHIVED' ? 'border-slate-200 opacity-60 grayscale' : 'border-slate-200'
               }`}
             >
               {profile.isCurrent && (
                 <div className="absolute top-0 right-0 p-1">
-                   <div className="bg-[#1E3A1F] text-[#C9A84C] text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-2xl">Current</div>
+                   <div className="bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-bl-2xl">Current</div>
                 </div>
               )}
               
@@ -123,21 +123,21 @@ export default function MeasurementsPage() {
                       {profile.garmentCategory}
                     </span>
                     <div>
-                      <h3 className="text-[20px] font-bold font-serif text-[#1C1917] group-hover:text-[#1E3A1F] transition-colors">{profile.profileName}</h3>
-                      <p className="text-[14px] text-[#78716C] font-bold mt-1 uppercase tracking-wider">{profile.garmentType} · {profile.fitPreference} Fit</p>
+                      <h3 className="text-[20px] font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{profile.profileName}</h3>
+                      <p className="text-[14px] text-slate-500 font-bold mt-1 uppercase tracking-wider">{profile.garmentType} · {profile.fitPreference} Fit</p>
                     </div>
                   </div>
-                  <div className="w-10 h-10 bg-[#FAF8F5] rounded-xl flex items-center justify-center text-[#C9A84C] font-black text-[12px] border border-[#E2DDD7]">
+                  <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-900 font-black text-[12px] border border-slate-200">
                     {profile.versionNo}
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between pt-6 border-t border-[#F0EDE8]">
-                  <div className="flex items-center gap-2 text-[12px] text-[#78716C] font-bold uppercase tracking-widest">
-                    <History size={14} className="text-[#C9A84C]" />
+                <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                  <div className="flex items-center gap-2 text-[12px] text-slate-500 font-bold uppercase tracking-widest">
+                    <History size={14} className="text-slate-400" />
                     <span>Updated {new Date(profile.recordedAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-[#FAF8F5] flex items-center justify-center text-[#78716C] group-hover:bg-[#1E3A1F] group-hover:text-[#C9A84C] transition-all">
+                  <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all">
                     <ChevronRight size={18} />
                   </div>
                 </div>
@@ -147,15 +147,15 @@ export default function MeasurementsPage() {
         </div>
 
         {/* Note */}
-        <div className="mt-12 p-8 bg-[#1E3A1F] rounded-[40px] text-[14px] text-[#FAF8F5]/60 font-medium relative overflow-hidden">
-           <div className="absolute top-0 right-0 w-32 h-32 bg-[#C9A84C]/10 rounded-full -mr-16 -mt-16 blur-3xl" />
+        <div className="mt-12 p-8 bg-slate-900 rounded-[40px] text-[14px] text-white/60 font-medium relative overflow-hidden shadow-2xl shadow-slate-900/20">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -mr-16 -mt-16 blur-3xl" />
            <div className="relative z-10 flex items-start gap-4">
               <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
-                 <Ruler size={18} className="text-[#C9A84C]" />
+                <Ruler size={18} className="text-blue-400" />
               </div>
               <p>
-                <span className="font-bold text-[#FAF8F5] block mb-1 uppercase tracking-widest text-[11px]">Precision Guarantee</span>
-                Your measurement profiles are curated by master Staffs during fitting sessions. These records ensure a consistent, perfect fit for every bespoke commission across the SUTURA network.
+                <span className="font-bold text-white block mb-1 uppercase tracking-widest text-[11px]">Precision Guarantee</span>
+                Your measurement profiles are curated by master artisans during fitting sessions. These records ensure a consistent, perfect fit for every bespoke commission across the SUTURA network.
               </p>
            </div>
         </div>

@@ -55,7 +55,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-outfit text-slate-900 relative">
+    <div className="flex h-screen bg-slate-50 overflow-hidden font-poppins text-slate-900 relative">
       
       {/* Mobile Backdrop */}
       {isMobileSidebarOpen && (
@@ -113,14 +113,14 @@ export default function DashboardLayout({
                   <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-2">Quick Actions</div>
                   <div className="grid grid-cols-2 gap-2">
                      <button className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors text-left group">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all"><Plus size={18} /></div>
+                        <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all"><Plus size={18} /></div>
                         <div>
                            <div className="text-[13px] font-black text-slate-900">New Job Order</div>
                            <div className="text-[11px] text-slate-400 font-medium">Create a bespoke order</div>
                         </div>
                      </button>
                      <button className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors text-left group">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all"><UserPlus size={18} /></div>
+                        <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all"><UserPlus size={18} /></div>
                         <div>
                            <div className="text-[13px] font-black text-slate-900">Add Customer</div>
                            <div className="text-[11px] text-slate-400 font-medium">Register a new customer</div>

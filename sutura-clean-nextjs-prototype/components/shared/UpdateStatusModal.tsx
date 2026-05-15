@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, CheckCircle2, Scissors, Clock, AlertTriangle, ArrowRight, ShieldCheck, Package } from 'lucide-react';
+import { X, CheckCircle2, Scissors, Clock, AlertTriangle, ArrowRight, ShieldCheck, Package, Ruler, User } from 'lucide-react';
 import { OrderStatus } from '@/types/erp';
 
 interface UpdateStatusModalProps {
@@ -19,11 +19,17 @@ export function UpdateStatusModal({ isOpen, onClose, orderId, currentStatus, onU
   if (!isOpen) return null;
 
   const statuses: { value: OrderStatus; label: string; icon: React.ReactNode; color: string }[] = [
-    { value: 'IN_PRODUCTION', label: 'In Tailoring', icon: <Scissors size={18} />, color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-    { value: 'READY_FOR_FITTING', label: 'Ready for Fitting', icon: <CheckCircle2 size={18} />, color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    { value: 'ALTERATIONS', label: 'Back for Alterations', icon: <AlertTriangle size={18} />, color: 'bg-rose-50 text-rose-700 border-rose-200' },
-    { value: 'READY_FOR_RELEASE', label: 'Ready for Pickup', icon: <Package size={18} />, color: 'bg-blue-50 text-blue-700 border-blue-200' },
-    { value: 'ON_HOLD', label: 'On Hold', icon: <Clock size={18} />, color: 'bg-slate-50 text-slate-700 border-slate-200' },
+    { value: 'INTAKE',          label: 'Agreement / Intake', icon: <ShieldCheck size={18} />, color: 'bg-slate-50 text-slate-700 border-slate-200' },
+    { value: 'MEASUREMENT',     label: 'Measurement',        icon: <Ruler size={18} />,     color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    { value: 'MATERIAL_PREP',   label: 'Material Prep',      icon: <Package size={18} />,   color: 'bg-amber-50 text-amber-700 border-amber-200' },
+    { value: 'CUTTING',         label: 'Fabric Cutting',     icon: <Scissors size={18} />,  color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    { value: 'SEWING',          label: 'Main Sewing',        icon: <Scissors size={18} />,  color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    { value: 'FITTING',         label: 'Ready for Fitting',  icon: <User size={18} />,      color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    { value: 'ALTERATIONS',     label: 'Alterations',        icon: <AlertTriangle size={18} />, color: 'bg-rose-50 text-rose-700 border-rose-200' },
+    { value: 'FINISHING',       label: 'Finishing',          icon: <Scissors size={18} />,  color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    { value: 'QUALITY_CHECK',   label: 'Quality Check',      icon: <CheckCircle2 size={18} />, color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    { value: 'READY_FOR_PICKUP', label: 'Ready for Pickup',   icon: <Package size={18} />,   color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    { value: 'ON_HOLD',         label: 'On Hold',            icon: <Clock size={18} />,     color: 'bg-slate-50 text-slate-700 border-slate-200' },
   ];
 
   return (

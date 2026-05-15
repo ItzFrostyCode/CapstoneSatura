@@ -8,15 +8,82 @@ import { Payment, ProductionTask, TaskStatus } from '@/types/erp';
 
 export type PaymentStatus = 'UNPAID' | 'PARTIAL' | 'PAID_FULL';
 export type ProductionStage =
-  | 'PENDING_QUOTE'
-  | 'WAITING_FOR_DP'
-  | 'IN_PRODUCTION'
-  | 'READY_FOR_FITTING'
+  | 'INTAKE'
+  | 'MEASUREMENT'
+  | 'MATERIAL_PREP'
+  | 'CUTTING'
+  | 'SEWING'
+  | 'FITTING'
   | 'ALTERATIONS'
-  | 'READY_FOR_RELEASE'
+  | 'FINISHING'
+  | 'QUALITY_CHECK'
+  | 'READY_FOR_PICKUP'
   | 'RELEASED'
   | 'CANCELLED'
-  | 'ON_HOLD';
+  | 'ON_HOLD'
+  // Legacy milestones
+  | 'PENDING_QUOTE' | 'WAITING_FOR_DP' | 'IN_PRODUCTION' | 'READY_FOR_FITTING';
+
+// ── CUSTOMER VISIBILITY LAYER ──────────────────────────────────
+
+export type CustomerMilestone = 
+  | 'Request Sent'
+  | 'Appointment Approved'
+  | 'Measurement Scheduled'
+  | 'In Production'
+  | 'Ready for Fitting'
+  | 'Under Alteration'
+  | 'Ready for Pickup'
+  | 'Released'
+  | 'On Hold'
+  | 'Cancelled';
+
+/**
+ * Maps granular internal stages to simplified customer milestones.
+ */
+export function getCustomerMilestone(stage: ProductionStage | string): CustomerMilestone {
+  const mapping: Record<string, CustomerMilestone> = {
+    INTAKE: 'Request Sent',
+    PENDING_QUOTE: 'Request Sent',
+    WAITING_FOR_DP: 'Appointment Approved',
+    MEASUREMENT: 'Measurement Scheduled',
+    MATERIAL_PREP: 'In Production',
+    CUTTING: 'In Production',
+    SEWING: 'In Production',
+    FINISHING: 'In Production',
+    QUALITY_CHECK: 'In Production',
+    IN_PRODUCTION: 'In Production',
+    FITTING: 'Ready for Fitting',
+    READY_FOR_FITTING: 'Ready for Fitting',
+    ALTERATIONS: 'Under Alteration',
+    READY_FOR_PICKUP: 'Ready for Pickup',
+    RELEASED: 'Released',
+    ON_HOLD: 'On Hold',
+    CANCELLED: 'Cancelled',
+  };
+  return mapping[stage] || 'In Production';
+}
+
+// ── STAFF VISIBILITY LAYER ─────────────────────────────────────
+
+export function getStaffLabel(stage: ProductionStage | string): string {
+  const labels: Record<string, string> = {
+    INTAKE: 'Intake / Agreement',
+    MEASUREMENT: 'Measurement',
+    MATERIAL_PREP: 'Material Prep',
+    CUTTING: 'Cutting',
+    SEWING: 'Sewing',
+    FITTING: 'First Fitting',
+    ALTERATIONS: 'Alteration / Adjustment',
+    FINISHING: 'Finishing',
+    QUALITY_CHECK: 'Quality Check',
+    READY_FOR_PICKUP: 'Ready for Pickup',
+    RELEASED: 'Released',
+    ON_HOLD: 'On Hold',
+    CANCELLED: 'Cancelled',
+  };
+  return labels[stage] ?? stage;
+}
 
 // Re-export so consumers can use from engine or types
 export type { TaskStatus };
@@ -76,42 +143,31 @@ export function computeBalance(input: OrderEngineInput): number {
 
 /**
  * Resolves the production stage.
- * Gate rules (in priority order):
- * 1. UNPAID → ON_HOLD
- * 2. inspection_failed → REVISION_REQUIRED
- * 3. inspection_passed + PAID_FULL → COMPLETED
- * 4. inspection_passed (partial) → QUALITY_CHECK
- * 5. All tasks complete → QUALITY_CHECK
- * 6. Default → IN_PRODUCTION
+ * Maps technical backend status to the ProductionStage type.
  */
 export function getProductionStage(input: OrderEngineInput): ProductionStage {
-  const paymentStatus = getPaymentStatus(input);
+  const status = input.status || 'INTAKE';
   
-  // Manual Status override (from DB)
-  if (input.status === 'ON_HOLD') return 'ON_HOLD';
-  if (input.status === 'CANCELLED') return 'CANCELLED';
-  if (input.status === 'RELEASED') return 'RELEASED';
-
-  const tasks = input.tasks ?? [];
-  const allTasksDone = tasks.length > 0 && tasks.every(t => t.status === 'Completed' || (t.status as string) === 'Completed');
-  const hasActiveTasks = tasks.some(t => t.status === 'Pending' || t.status === 'In Progress' || t.status === 'Assigned' || t.status === 'For Revision' || t.status === 'Delayed');
+  // Direct mapping if it's already a valid ProductionStage
+  const validStages: string[] = [
+    'INTAKE', 'MEASUREMENT', 'MATERIAL_PREP', 'CUTTING', 'SEWING', 
+    'FITTING', 'ALTERATIONS', 'FINISHING', 'QUALITY_CHECK', 
+    'READY_FOR_PICKUP', 'RELEASED', 'CANCELLED', 'ON_HOLD'
+  ];
   
-  const failed = input.inspection_failed || input.inspectionFailed;
-  const passed = input.inspection_passed || input.inspectionPassed;
+  if (validStages.includes(status)) return status as ProductionStage;
 
-  if (paymentStatus === 'UNPAID') return 'WAITING_FOR_DP';
-  
-  // Rework Loop: If there are active tasks, it MUST be in production, even if it failed a past inspection
-  if (hasActiveTasks && failed) return 'IN_PRODUCTION';
+  // Legacy fallback mapping
+  const legacyMapping: Record<string, ProductionStage> = {
+    'PENDING_QUOTE': 'INTAKE',
+    'WAITING_FOR_DOWN_PAYMENT': 'INTAKE',
+    'IN_PRODUCTION': 'SEWING',
+    'READY_FOR_FITTING': 'FITTING',
+    'READY_FOR_RELEASE': 'READY_FOR_PICKUP',
+  };
 
-  if (failed) return 'ALTERATIONS';
-  if (passed) {
-    return paymentStatus === 'PAID_FULL' ? 'READY_FOR_RELEASE' : 'READY_FOR_FITTING';
-  }
-  if (allTasksDone) return 'READY_FOR_FITTING';
-  return 'IN_PRODUCTION';
+  return legacyMapping[status] || 'INTAKE';
 }
-
 
 // ── MASTER RESOLVER ───────────────────────────────────────────
 
@@ -127,12 +183,14 @@ export function resolveOrderState(input: OrderEngineInput) {
 
   const tasks = input.tasks ?? [];
   const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(t => t.status === 'Completed').length;
+  const completedTasks = tasks.filter((t: ProductionTask) => t.status === 'Completed').length;
   const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return {
     paymentStatus,
     productionStage,
+    customerMilestone: getCustomerMilestone(productionStage),
+    staffLabel: getStaffLabel(productionStage),
     amountPaid,
     balance,
     progress,
@@ -145,8 +203,8 @@ export function resolveOrderState(input: OrderEngineInput) {
     isFullyPaid: paymentStatus === 'PAID_FULL',
     isAtRisk:
       !!input.inspection_failed ||
-      tasks.some(t => t.status === 'Delayed' || t.status === 'For Revision'),
-    canBeInspected: totalTasks > 0 && tasks.every(t => t.status === 'Completed'),
+      tasks.some((t: ProductionTask) => t.status === 'Delayed' || t.status === 'For Revision'),
+    canBeInspected: totalTasks > 0 && tasks.every((t: ProductionTask) => t.status === 'Completed'),
   };
 }
 
@@ -154,34 +212,25 @@ export function resolveOrderState(input: OrderEngineInput) {
 // ── DISPLAY HELPERS ───────────────────────────────────────────
 
 export function getStageExplanation(stage: ProductionStage): string {
-  const explanations: Record<ProductionStage, string> = {
-    PENDING_QUOTE: 'Drafting initial measurements and quote.',
-    WAITING_FOR_DP: 'Waiting for initial downpayment to begin tailoring.',
-    IN_PRODUCTION: 'Order is currently in the tailoring phase.',
-    READY_FOR_FITTING: 'Tailoring tasks complete. Ready for fitting.',
-    ALTERATIONS: 'Issues detected during fitting. Order is back for alterations.',
-    READY_FOR_RELEASE: 'Order ready for pickup and release.',
+  const explanations: Record<string, string> = {
+    INTAKE: 'Finalizing design agreement and intake details.',
+    MEASUREMENT: 'Recording client measurements for pattern drafting.',
+    MATERIAL_PREP: 'Preparing fabrics and notions for cutting.',
+    CUTTING: 'Pattern drafting and fabric cutting in progress.',
+    SEWING: 'Main construction and assembly phase.',
+    FITTING: 'Garment is ready for the first fitting session.',
+    ALTERATIONS: 'Adjustments being made based on fitting feedback.',
+    FINISHING: 'Applying final details and detailing.',
+    QUALITY_CHECK: 'Final inspection for quality assurance.',
+    READY_FOR_PICKUP: 'Garment is complete and ready for release.',
     RELEASED: 'Order successfully handed over to customer.',
     CANCELLED: 'Order cancelled.',
     ON_HOLD: 'Order is on hold.',
   };
-  return explanations[stage];
+  return explanations[stage] ?? 'Order is in progress.';
 }
 
-export function getDisplayLabel(state: PaymentStatus | ProductionStage | string): string {
-  const labels: Record<string, string> = {
-    UNPAID: 'Unpaid',
-    PARTIAL: 'Partial Payment',
-    PAID_FULL: 'Paid Full',
-    PENDING_QUOTE: 'Pending Quote',
-    WAITING_FOR_DP: 'Waiting for DP',
-    IN_PRODUCTION: 'In Tailoring',
-    READY_FOR_FITTING: 'Ready for Fitting',
-    ALTERATIONS: 'Alterations',
-    READY_FOR_RELEASE: 'Ready for Release',
-    RELEASED: 'Released',
-    CANCELLED: 'Cancelled',
-    ON_HOLD: 'On Hold',
-  };
-  return labels[state] ?? state;
+export function getDisplayLabel(state: string, mode: 'customer' | 'staff' = 'staff'): string {
+  if (mode === 'customer') return getCustomerMilestone(state);
+  return getStaffLabel(state);
 }

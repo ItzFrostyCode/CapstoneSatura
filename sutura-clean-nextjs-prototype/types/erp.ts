@@ -36,8 +36,6 @@ export type AccountStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 /** Shop subscription tiers — maps to pricing strategy */
 export type PlanLevel = 'STARTER' | 'PROFESSIONAL' | 'Workshop';
 
-/** Designer subscription tiers */
-export type DesignerPlanLevel = 'PORTFOLIO' | 'STUDIO' | 'MAISON';
 
 export type SubscriptionStatus = 'PENDING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'TRIAL';
 export type BillingCycle = 'MONTHLY' | 'ANNUAL';
@@ -46,13 +44,28 @@ export type BranchStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
 export type BranchType = 'MAIN' | 'SATELLITE' | 'WAREHOUSE';
 export type BranchRole = 'SHOP_OWNER' | 'STAFF' | 'HELPER' | 'CASHIER';
 
-export type OrderType = 'BESPOKE' | 'BULK' | 'ALTERATION' | 'READY_MADE';
+export type OrderType = 'CUSTOM_TAILORING' | 'BULK_ORDER' | 'REPAIR_ALTERATIONS' | 'READY_MADE';
+export type CustomerCategory = 'REGULAR' | 'GROUP' | 'CORPORATE' | 'FASHION_DESIGNER';
+export type FabricSource = 'SHOP_PROVIDED' | 'CLIENT_PROVIDED';
 export type BulkSizingStrategy = 'STANDARD' | 'CUSTOM' | 'HYBRID';
 export type SourceType = 'WALK_IN' | 'ONLINE';
 export type OrderStatus =
-  | 'PENDING_QUOTE' | 'WAITING_FOR_DOWN_PAYMENT' | 'IN_PRODUCTION'
-  | 'READY_FOR_FITTING' | 'ALTERATIONS' | 'READY_FOR_RELEASE'
-  | 'RELEASED' | 'CANCELLED' | 'ON_HOLD';
+  // Internal Operational Stages (Master Lifecycle)
+  | 'INTAKE'              // Agreement / Intake
+  | 'MEASUREMENT'         // Measurement phase
+  | 'MATERIAL_PREP'       // Sourcing / Preparation
+  | 'CUTTING'             // Fabric cutting
+  | 'SEWING'              // Assembly
+  | 'FITTING'             // Scheduled for fitting
+  | 'ALTERATIONS'         // Post-fitting adjustments
+  | 'FINISHING'           // Detailing / Final sewing
+  | 'QUALITY_CHECK'       // QC Station
+  | 'READY_FOR_PICKUP'    // Production complete
+  | 'RELEASED'            // Handed over
+  | 'CANCELLED'           // Order voided
+  | 'ON_HOLD'             // Blocked
+  // Legacy / Milestone Aliases (Mapping targets)
+  | 'PENDING_QUOTE' | 'WAITING_FOR_DOWN_PAYMENT' | 'IN_PRODUCTION' | 'READY_FOR_FITTING';
 
 export type TaskStatus = 'Pending' | 'Assigned' | 'In Progress' | 'Completed' | 'Delayed' | 'For Revision';
 
@@ -106,22 +119,11 @@ export interface ShopPlanFeatures {
   maxBranches: number;
   featuredPlacement: boolean;
   consultationBooking: boolean;
-  designerCollaboration: boolean;
   advancedAnalytics: boolean;
   customBranding: boolean;
   prioritySupport: boolean;
 }
 
-/** Feature entitlements for a given designer plan tier */
-export interface DesignerPlanFeatures {
-  maxPortfolioPieces: number | 'UNLIMITED';
-  monthlyConsultationLimit: number | 'UNLIMITED';
-  blueprintCollaboration: boolean;
-  featuredDiscovery: boolean;
-  maxShopPartnerships: number | 'UNLIMITED';
-  licensingDashboard: boolean;
-  verificationBadge: boolean;
-}
 
 /** Static plan config map — used by Admin portal and pricing page */
 export const SHOP_PLAN_CONFIG: Record<PlanLevel, {
@@ -140,7 +142,6 @@ export const SHOP_PLAN_CONFIG: Record<PlanLevel, {
       maxBranches: 1,
       featuredPlacement: false,
       consultationBooking: false,
-      designerCollaboration: false,
       advancedAnalytics: false,
       customBranding: false,
       prioritySupport: false,
@@ -156,7 +157,6 @@ export const SHOP_PLAN_CONFIG: Record<PlanLevel, {
       maxBranches: 1,
       featuredPlacement: true,
       consultationBooking: true,
-      designerCollaboration: false,
       advancedAnalytics: false,
       customBranding: false,
       prioritySupport: false,
@@ -172,7 +172,6 @@ export const SHOP_PLAN_CONFIG: Record<PlanLevel, {
       maxBranches: 3,
       featuredPlacement: true,
       consultationBooking: true,
-      designerCollaboration: true,
       advancedAnalytics: true,
       customBranding: true,
       prioritySupport: true,
@@ -180,55 +179,6 @@ export const SHOP_PLAN_CONFIG: Record<PlanLevel, {
   },
 } as const;
 
-export const DESIGNER_PLAN_CONFIG: Record<DesignerPlanLevel, {
-  name: string;
-  monthlyPrice: number;
-  annualPrice: number;
-  features: DesignerPlanFeatures;
-}> = {
-  PORTFOLIO: {
-    name: 'Portfolio',
-    monthlyPrice: 0,
-    annualPrice: 0,
-    features: {
-      maxPortfolioPieces: 10,
-      monthlyConsultationLimit: 3,
-      blueprintCollaboration: false,
-      featuredDiscovery: false,
-      maxShopPartnerships: 0,
-      licensingDashboard: false,
-      verificationBadge: false,
-    },
-  },
-  STUDIO: {
-    name: 'Studio',
-    monthlyPrice: 499,
-    annualPrice: 4990,
-    features: {
-      maxPortfolioPieces: 'UNLIMITED',
-      monthlyConsultationLimit: 'UNLIMITED',
-      blueprintCollaboration: true,
-      featuredDiscovery: true,
-      maxShopPartnerships: 3,
-      licensingDashboard: false,
-      verificationBadge: false,
-    },
-  },
-  MAISON: {
-    name: 'Maison',
-    monthlyPrice: 1199,
-    annualPrice: 11990,
-    features: {
-      maxPortfolioPieces: 'UNLIMITED',
-      monthlyConsultationLimit: 'UNLIMITED',
-      blueprintCollaboration: true,
-      featuredDiscovery: true,
-      maxShopPartnerships: 'UNLIMITED',
-      licensingDashboard: true,
-      verificationBadge: true,
-    },
-  },
-} as const;
 
 // ── SUBSCRIPTION RECORDS ──────────────────────────────────────
 
@@ -322,12 +272,14 @@ export interface Customer {
   phone: string;
   address?: string;
   gender?: 'Male' | 'Female' | 'Other';
-  type: 'Individual' | 'Corporate';
+  /** 'REGULAR' | 'GROUP' | 'CORPORATE' | 'FASHION_DESIGNER' */
+  type: CustomerCategory | string; 
   is_active: boolean;
   style_preferences?: string;
   posture_tags?: string[];
   avatar?: string;
-  source?: 'Online' | 'Walk-in';
+  /** 'ONLINE' | 'WALKIN' */
+  source?: SourceType | string;
   createdAt: string;
 }
 
@@ -415,12 +367,29 @@ export interface FittingSession {
   created_at: string;
 }
 
+export interface PersonnelMember {
+  name: string;
+  size: string;
+  type: 'Standard' | 'Custom';
+  measurements: {
+    neck?: string;
+    chest?: string;
+    waist?: string;
+    hips?: string;
+    length?: string;
+    shoulder?: string;
+    [key: string]: string | undefined;
+  };
+}
+
 export interface Appointment {
   id: string;
   customer: string;
   email: string;
   phone: string;
   type: string;
+  /** Purpose of the appointment: Consultation, Custom Clothing, Bulk Order, Alterations, Other */
+  purpose?: 'Consultation' | 'Custom Clothing' | 'Bulk Order' | 'Alterations' | 'Other';
   category: string;
   date: string;
   startTime: string;
@@ -431,6 +400,14 @@ export interface Appointment {
   branch_id?: string;
   reason?: string;
   notes?: string;
+  // Bulk Order Specifics
+  estimatedQuantity?: string;
+  orgName?: string;
+  personnel?: PersonnelMember[];
+  inspiration?: {
+    image_url?: string;
+    link?: string;
+  }[];
 }
 
 
@@ -649,6 +626,8 @@ export interface GarmentTemplate {
   fabric_per_unit: number;
   requires_measurement: boolean;
   default_tasks: string[];
+  /** Size-dependent markups (e.g., { 'XL': 150, 'XXL': 300, 'Custom': 500 }). Standard sizes default to 0. */
+  size_additional_charges?: Record<string, number>;
 }
 
 
@@ -987,7 +966,10 @@ export interface AuditLog {
 
 // ── H. SUPPORT SYSTEM ─────────────────────────────────────────
 
-export type SupportTicketCategory = 'Technical Issue' | 'Billing Concern' | 'Inventory Problem' | 'Feature Request' | 'Complaint' | 'Branch Concern';
+export type SupportTicketCategory = 
+  | 'Technical Issue' | 'Billing Concern' | 'Inventory Problem' 
+  | 'Feature Request' | 'Complaint' | 'Branch Concern'
+  | 'Order Inquiry' | 'Fitting Adjustment' | 'Payment Concern' | 'Fabric Question' | 'Other';
 export type SupportTicketStatus = 'Open' | 'In Review' | 'Waiting Reply' | 'Resolved' | 'Closed';
 
 export interface SupportTicketAttachment {
@@ -1021,25 +1003,6 @@ export interface SupportTicket {
   messages: SupportTicketMessage[];
 }
 
-// ── I. DESIGNER SUBSCRIPTION ─────────────────────────────────
-
-/**
- * DESIGNER SUBSCRIPTION — Active subscription record for a fashion designer.
- * Controls portfolio limits, consultation caps, and collaboration access.
- */
-export interface DesignerSubscription {
-  id: string;
-  designer_id: string;
-  planName: string;
-  planLevel: DesignerPlanLevel;
-  status: SubscriptionStatus;
-  billing_cycle: BillingCycle;
-  startDate: string;
-  endDate: string;
-  price: number;
-  payment_method?: string;
-  auto_renew: boolean;
-}
 
 /**
  * PLATFORM REVENUE SUMMARY — Used by Admin analytics dashboard.
@@ -1050,11 +1013,9 @@ export interface PlatformRevenueSummary {
   mrr: number;                    // Monthly Recurring Revenue (₱)
   arr: number;                    // Annualized (MRR × 12)
   activeShopSubscriptions: number;
-  activeDesignerSubscriptions: number;
   churnRate: number;              // % cancelled this period
   trialConversionRate: number;    // % Starter → Professional
   planBreakdown: Record<PlanLevel, number>;
-  designerPlanBreakdown: Record<DesignerPlanLevel, number>;
   totalConsultationFees: number;  // Platform transaction fees (7%)
   totalFeaturedRevenue: number;   // Paid placement revenue
 }

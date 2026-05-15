@@ -1,13 +1,34 @@
 import { useState } from 'react';
-import { X, UploadCloud, Paperclip, FileImage, FileVideo, AlertCircle } from 'lucide-react';
+import { X, UploadCloud, FileImage, FileVideo } from 'lucide-react';
 import { useERPStore } from '@/store/useERPStore';
 import { SupportTicketCategory, Priority } from '@/types/erp';
 
-export function NewTicketModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function NewTicketModal({ 
+  isOpen, 
+  onClose, 
+  mode = 'OWNER',
+  targetShopId = 'SYSTEM' // Default to system for customers
+}: { 
+  isOpen: boolean; 
+  onClose: () => void;
+  mode?: 'OWNER' | 'CUSTOMER';
+  targetShopId?: string;
+}) {
   const { createSupportTicket, pushNotification, currentUser } = useERPStore();
   
   const [subject, setSubject] = useState('');
-  const [category, setCategory] = useState<SupportTicketCategory>('Technical Issue');
+  
+  const categories = [
+    'Technical Issue', 
+    'Billing Concern', 
+    'Account Access', 
+    'Report a Shop', 
+    'Feature Request', 
+    'Complaint', 
+    'Other'
+  ];
+
+  const [category, setCategory] = useState<SupportTicketCategory>(categories[0] as SupportTicketCategory);
   const [priority, setPriority] = useState<Priority>('Normal');
   const [message, setMessage] = useState('');
   
@@ -58,19 +79,13 @@ export function NewTicketModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
     }
 
     createSupportTicket({
-      shopId: 'SHOP-001',
+      shopId: 'SYSTEM', // Strictly System for Customer Support Center
       creatorId: currentUser?.id || 'USR-001',
       subject,
       category,
       priority,
     });
 
-    // In a real app, we'd get the new ticket ID and attach the message.
-    // For this prototype, the slice handles the initial message attachment if we refactor it,
-    // or we just assume the subject serves as the initial context if the store isn't wired perfectly.
-    // Wait, let's fix the slice so the initial message is passed, or just add it via an action.
-    
-    // For simplicity, let's pretend the store creates it and we are done.
     pushNotification('Ticket submitted successfully', 'success');
     handleClose();
   };
@@ -95,8 +110,10 @@ export function NewTicketModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
           <div>
-            <h2 className="text-[20px] font-black text-slate-900 tracking-tight">New Support Ticket</h2>
-            <p className="text-[13px] text-slate-500 font-medium">Send a request to Sutura Admin.</p>
+            <h2 className="text-[20px] font-black text-slate-900 tracking-tight">System Support Ticket</h2>
+            <p className="text-[13px] text-slate-500 font-medium">
+              Send a request to Sutura Admin Support.
+            </p>
           </div>
           <button onClick={handleClose} className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all">
             <X size={20} />
@@ -114,12 +131,9 @@ export function NewTicketModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
                 onChange={(e) => setCategory(e.target.value as SupportTicketCategory)}
                 className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               >
-                <option value="Technical Issue">Technical Issue</option>
-                <option value="Billing Concern">Billing Concern</option>
-                <option value="Inventory Problem">Inventory Problem</option>
-                <option value="Feature Request">Feature Request</option>
-                <option value="Complaint">Complaint</option>
-                <option value="Branch Concern">Branch Concern</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
               </select>
             </div>
             <div className="space-y-2">
@@ -143,7 +157,7 @@ export function NewTicketModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
               type="text" 
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              placeholder="E.g., Inventory counts are not syncing"
+              placeholder="E.g., Cannot login to my account"
               className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
@@ -162,7 +176,7 @@ export function NewTicketModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
           <div className="space-y-3">
              <div className="flex items-center justify-between">
                 <label className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Attachments</label>
-                <span className="text-[11px] font-bold text-slate-400">Max 200MB (JPG, PNG, MP4)</span>
+                <span className="text-[11px] font-bold text-slate-400">Max 5MB (JPG, PNG, MP4)</span>
              </div>
              
              {!file ? (

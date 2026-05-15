@@ -5,15 +5,6 @@ export const FEATURED_SHOPS = [
   { id: 4, name: 'Tela Collective', location: 'Cebu City', specializations: ['Ready-to-Wear', 'Alteration', 'Casual Bespoke'], rating: 4.9, orders: 421, accepting: true, img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=TC&backgroundColor=C9A84C&fontColor=1E3A1F' },
 ];
 
-export const DESIGNERS = [
-  { id: 1, name: 'Reyna Villanueva', style: 'Neo-Filipiniana', works: 24, img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&q=80' },
-  { id: 2, name: 'Marco Salazar', style: 'Bespoke Menswear', works: 18, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80' },
-  { id: 3, name: 'Lara Santos', style: 'Couture & Bridal', works: 31, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80' },
-  { id: 4, name: 'Diego Fuentes', style: 'Streetwear Fusion', works: 15, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&q=80' },
-  { id: 5, name: 'Ana Reyes', style: 'Resort & Casual', works: 22, img: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=500&q=80' },
-  { id: 6, name: 'Felix Tan', style: 'Avant-Garde', works: 9, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&q=80' },
-];
-
 export const SPECIALIZATIONS = [
   'Barong Tagalog', 'Bespoke Suit', 'Wedding Gown', 'Filipiniana',
   'School Uniform', 'Corporate Wear', 'Evening Gown', 'Streetwear',

@@ -1,4 +1,4 @@
-import { OrderType, BulkSizingStrategy, AssetType } from './erp';
+import { OrderType, BulkSizingStrategy, AssetType, CustomerCategory, FabricSource } from './erp';
 
 export interface AlterationMeasurement {
   area: string;
@@ -37,6 +37,8 @@ export interface BulkMember {
   jersey_number?: string;
   measurement_type?: string;
   adjustment_notes: string;
+  isExpanded?: boolean;
+  measurements?: Record<string, string>;
 }
 
 export interface DesignAsset {
@@ -82,4 +84,7 @@ export interface OrderFormData {
   isCustomerProvidedFabric: boolean;
   taskAssignments: Record<string, string>;
   estimatedCompletionDate: string;
+  baseSize?: string;
+  customerCategory: CustomerCategory;
+  fabricSource: FabricSource;
 }
